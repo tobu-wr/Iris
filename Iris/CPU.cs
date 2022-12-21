@@ -13,7 +13,8 @@ namespace Iris
     {
         public delegate UInt16 ReadMemory16(UInt32 address);
         public delegate UInt32 ReadMemory32(UInt32 address);
-        public delegate void WriteMemory(UInt32 address, UInt32 value);
+        public delegate void WriteMemory16(UInt32 address, UInt16 value);
+        public delegate void WriteMemory32(UInt32 address, UInt32 value);
 
         private const UInt32 SP = 13;
         private const UInt32 LR = 14;
@@ -21,16 +22,18 @@ namespace Iris
 
         private readonly ReadMemory16 readMemory16;
         private readonly ReadMemory32 readMemory32;
-        private readonly WriteMemory writeMemory;
+        private readonly WriteMemory16 writeMemory16;
+        private readonly WriteMemory32 writeMemory32;
         private readonly UInt32[] reg = new UInt32[16];
         private UInt32 cpsr;
         private UInt32 nextInstructionAddress;
 
-        public CPU(ReadMemory16 readMemory16, ReadMemory32 readMemory32, WriteMemory writeMemory, UInt32 startAddress)
+        public CPU(ReadMemory16 readMemory16, ReadMemory32 readMemory32, WriteMemory16 writeMemory16, WriteMemory32 writeMemory32, UInt32 startAddress)
         {
             this.readMemory16 = readMemory16;
             this.readMemory32 = readMemory32;
-            this.writeMemory = writeMemory;
+            this.writeMemory16 = writeMemory16;
+            this.writeMemory32 = writeMemory32;
 
             nextInstructionAddress = startAddress;
             reg[PC] = nextInstructionAddress + 4;
@@ -57,8 +60,39 @@ namespace Iris
                         // Multiplies & Extra load/stores
                         if ((instruction & 0x0000_0090) == 0x0000_0090)
                         {
-                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, nextInstructionAddress);
-                            Environment.Exit(1);
+                            if (((instruction >> 6) & 1) == 1)
+                            {
+                                Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, nextInstructionAddress);
+                                Environment.Exit(1);
+                            }
+                            else
+                            {
+                                if (((instruction >> 5) & 1) == 1)
+                                {
+                                    if (((instruction >> 22) & 1) == 1)
+                                    {
+                                        UInt32 l = (instruction >> 20) & 1;
+                                        if (l == 0)
+                                        {
+                                            ARM_StoreRegister_HalfWord_ImmediateOffset(instruction);
+                                        }
+                                        else
+                                        {
+                                            ARM_LoadRegister_HalfWord_ImmediateOffset(instruction);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, nextInstructionAddress);
+                                        Environment.Exit(1);
+                                    }
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, nextInstructionAddress);
+                                    Environment.Exit(1);
+                                }
+                            }
                         }
 
                         // Miscellaneous instructions
@@ -110,6 +144,10 @@ namespace Iris
                             UInt32 opcode = (instruction >> 21) & 0b1111;
                             switch (opcode)
                             {
+                                case 0b0000:
+                                    ARM_LogicalAND_Immediate(instruction);
+                                    break;
+
                                 case 0b0100:
                                     ARM_Add_Immediate(instruction);
                                     break;
@@ -149,6 +187,42 @@ namespace Iris
                             else
                             {
                                 ARM_StoreRegister_ImmediateOffset(instruction);
+                            }
+                            break;
+                        }
+
+                    // Load/store multiple
+                    case 0b100:
+                        {
+                            UInt32 l = (instruction >> 20) & 1;
+                            if (l == 0)
+                            {
+                                UInt32 s = (instruction >> 22) & 1;
+                                if (s == 0)
+                                {
+                                    UInt32 pu = (instruction >> 23) & 0b11;
+                                    switch (pu)
+                                    {
+                                        case 0b10:
+                                            ARM_StoreMultiple_FullDescending(instruction);
+                                            break;
+
+                                        default:
+                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, nextInstructionAddress);
+                                            Environment.Exit(1);
+                                            break;
+                                    }
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, nextInstructionAddress);
+                                    Environment.Exit(1);
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, nextInstructionAddress);
+                                Environment.Exit(1);
                             }
                             break;
                         }
@@ -548,6 +622,64 @@ namespace Iris
         // ********************************************************************
 
         // ==============================
+        // Multiplies & Extra load/stores
+        // ==============================
+
+        // STRH (immediate offset)
+        private void ARM_StoreRegister_HalfWord_ImmediateOffset(UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (ConditionPassed(cond))
+            {
+                UInt32 u = (instruction >> 23) & 1;
+                UInt32 rn = (instruction >> 16) & 0b1111;
+                UInt32 immH = (instruction >> 8) & 0b1111;
+                UInt32 immL = instruction & 0b1111;
+                UInt32 offset = (immH << 4) | immL;
+
+                UInt32 address;
+                if (u == 1)
+                {
+                    address = reg[rn] + offset;
+                }
+                else
+                {
+                    address = reg[rn] - offset;
+                }
+
+                UInt32 rd = (instruction >> 12) & 0b1111;
+                writeMemory16(address, (UInt16)reg[rd]);
+            }
+        }
+
+        // LDRH (immediate offset)
+        private void ARM_LoadRegister_HalfWord_ImmediateOffset(UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (ConditionPassed(cond))
+            {
+                UInt32 u = (instruction >> 23) & 1;
+                UInt32 rn = (instruction >> 16) & 0b1111;
+                UInt32 immH = (instruction >> 8) & 0b1111;
+                UInt32 immL = instruction & 0b1111;
+                UInt32 offset = (immH << 4) | immL;
+
+                UInt32 address;
+                if (u == 1)
+                {
+                    address = reg[rn] + offset;
+                }
+                else
+                {
+                    address = reg[rn] - offset;
+                }
+
+                UInt32 rd = (instruction >> 12) & 0b1111;
+                reg[rd] = readMemory16(address);
+            }
+        }
+
+        // ==============================
         // Miscellaneous instructions
         // ==============================
 
@@ -623,6 +755,39 @@ namespace Iris
         // ==============================
         // Data processing immediate
         // ==============================
+
+        // AND (immediate)
+        private void ARM_LogicalAND_Immediate(UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (ConditionPassed(cond))
+            {
+                UInt32 rn = (instruction >> 16) & 0b1111;
+                UInt32 rd = (instruction >> 12) & 0b1111;
+                UInt32 rotateImm = (instruction >> 8) & 0b1111;
+                UInt32 imm = instruction & 0xff;
+
+                int rotateAmount = 2 * (int)rotateImm;
+                UInt32 shifterOperand = (imm >> rotateAmount) | (imm << (32 - rotateAmount));
+                reg[rd] = reg[rn] & shifterOperand;
+
+                UInt32 s = (instruction >> 20) & 1;
+                if (s == 1)
+                {
+                    if (rd == PC)
+                    {
+                        Console.WriteLine("AND (immediate): S field partially implemented");
+                        Environment.Exit(1);
+                    }
+                    else
+                    {
+                        // TODO: N flag
+                        SetFlag_Z(reg[rd] == 0);
+                        // TODO: C flag
+                    }
+                }
+            }
+        }
 
         // ADD (immediate)
         private void ARM_Add_Immediate(UInt32 instruction)
@@ -793,7 +958,41 @@ namespace Iris
                 }
 
                 UInt32 rd = (instruction >> 12) & 0b1111;
-                writeMemory(address, reg[rd]);
+                writeMemory32(address, reg[rd]);
+            }
+        }
+
+        // ==============================
+        // Load/store multiple
+        // ==============================
+
+        // STMFD
+        private void ARM_StoreMultiple_FullDescending(UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (ConditionPassed(cond))
+            {
+                UInt32 rn = (instruction >> 16) & 0b1111;
+                UInt32 registerList = instruction & 0xffff;
+
+                UInt32 startAddress = reg[rn] - (Number_Of_Set_Bits_In(registerList, 16) * 4);
+                UInt32 endAddress = reg[rn] - 4;
+
+                UInt32 w = (instruction >> 21) & 1;
+                if (w == 1)
+                {
+                    reg[rn] -= (Number_Of_Set_Bits_In(registerList, 16) * 4);
+                }
+
+                UInt32 address = startAddress;
+                for (int i = 0; i <= 15; ++i)
+                {
+                    if (((registerList >> i) & 1) == 1)
+                    {
+                        writeMemory32(address, reg[i]);
+                        address += 4;
+                    }
+                }
             }
         }
 
@@ -804,8 +1003,14 @@ namespace Iris
         // BL
         private void ARM_BranchLink(UInt32 instruction)
         {
-            Console.WriteLine("BL unimplemented");
-            Environment.Exit(1);
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (ConditionPassed(cond))
+            {
+                reg[LR] = nextInstructionAddress;
+
+                UInt32 imm = instruction & 0xff_ffff;
+                reg[PC] += (SignExtend_30(imm, 24) << 2);
+            }
         }
 
         // B
@@ -968,7 +1173,7 @@ namespace Iris
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
             UInt32 address = reg[rn] + ((UInt32)imm * 4);
-            writeMemory(address, reg[rd]);
+            writeMemory32(address, reg[rd]);
         }
 
         // ==============================
@@ -1015,14 +1220,14 @@ namespace Iris
             {
                 if (((registerList >> i) & 1) == 1)
                 {
-                    writeMemory(address, reg[i]);
+                    writeMemory32(address, reg[i]);
                     address += 4;
                 }
             }
 
             if (r == 1)
             {
-                writeMemory(address, reg[LR]);
+                writeMemory32(address, reg[LR]);
             }
 
             reg[SP] -= 4 * (r + Number_Of_Set_Bits_In(registerList, 8));
@@ -1081,7 +1286,7 @@ namespace Iris
             {
                 if (((registerList >> i) & 1) == 1)
                 {
-                    writeMemory(address, reg[i]);
+                    writeMemory32(address, reg[i]);
                     address += 4;
                 }
             }

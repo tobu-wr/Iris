@@ -4,7 +4,6 @@ Game Boy Advance emulator
 
 ## Roadmap
 
-- Get past crt0
 - Display ARMWrestler's menu
 - Implement all missing instructions
 - Pass all ARMWrestler's tests

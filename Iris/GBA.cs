@@ -13,7 +13,7 @@ namespace Iris
 
         public GBA()
         {
-            this.cpu = new CPU(memory.Read16, memory.Read32, memory.Write, 0x0800_0000);
+            this.cpu = new CPU(memory.Read16, memory.Read32, memory.Write16, memory.Write32, 0x0800_0000);
         }
 
         public void LoadROM(string filename)

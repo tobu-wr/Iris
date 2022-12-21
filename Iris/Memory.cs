@@ -11,6 +11,8 @@ namespace Iris
         private Byte[]? rom;
         private Byte[] externalWorkingRAM = new Byte[256 * 1024]; // 256 KB
         private Byte[] internalWorkingRAM = new Byte[32 * 1024]; // 32 KB
+        private Byte[] paletteRAM = new Byte[1 * 1024]; // 1 KB
+        //private Byte[] VRAM = new Byte[96 * 1024]; // 96 KB
 
         public void LoadROM(string filename)
         {
@@ -27,7 +29,25 @@ namespace Iris
 
         public UInt16 Read16(UInt32 address)
         {
-            if (0x0800_0000 <= address && (address + 1) < 0x0A00_0000)
+            if (0x0400_0000 <= address && (address + 1) < 0x0500_0000)
+            {
+                address -= 0x0400_0000;
+
+                switch (address)
+                {
+                    // DISPSTAT
+                    case 0x004:
+                        // TODO
+                        Console.WriteLine("Read from DISPSTAT register (unimplemented)");
+                        return 0;
+
+                    default:
+                        Console.WriteLine("Invalid IO register read");
+                        Environment.Exit(1);
+                        return 0;
+                }
+            }
+            else if (0x0800_0000 <= address && (address + 1) < 0x0A00_0000)
             {
                 if (rom == null)
                 {
@@ -87,7 +107,31 @@ namespace Iris
             return 0;
         }
 
-        public void Write(UInt32 address, UInt32 value)
+        public void Write16(UInt32 address, UInt16 value)
+        {
+            if (0x0500_0000 <= address && (address + 1) < 0x0600_0000)
+            {
+                address -= 0x0500_0000;
+
+                if ((address + 1) < paletteRAM.Length)
+                {
+                    paletteRAM[address + 1] = (Byte)((value >> 8) & 0xff);
+                    paletteRAM[address + 0] = (Byte)((value >> 0) & 0xff);
+                }
+                else
+                {
+                    Console.WriteLine("Invalid write to palette RAM");
+                    Environment.Exit(1);
+                }
+            }
+            else
+            {
+                Console.WriteLine("Invalid write to address 0x{0:x8}", address);
+                Environment.Exit(1);
+            }
+        }
+
+        public void Write32(UInt32 address, UInt32 value)
         {
             if (0x0200_000 <= address && (address + 3) < 0x0300_0000)
             {
@@ -138,7 +182,7 @@ namespace Iris
                     // IME
                     case 0x208:
                         // TODO
-                        Console.WriteLine("Write 0x{0:x8} to IME register (unimplemented)", value);
+                        Console.WriteLine("Write 0x{0:x4} to IME register (unimplemented)", value);
                         break;
 
                     default:
