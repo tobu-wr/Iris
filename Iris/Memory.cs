@@ -129,10 +129,16 @@ namespace Iris
 
                 switch (address)
                 {
+                    // DISPCNT
+                    case 0x000:
+                        // TODO
+                        Console.WriteLine("Write 0x{0:x4} to DISPCNT register (unimplemented)", value);
+                        break;
+
                     // IME
                     case 0x208:
                         // TODO
-                        Console.WriteLine("Write 0x{0:x8} to IME register (unimplemented)", value, address);
+                        Console.WriteLine("Write 0x{0:x8} to IME register (unimplemented)", value);
                         break;
 
                     default:

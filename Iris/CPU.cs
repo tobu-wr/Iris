@@ -296,8 +296,20 @@ namespace Iris
                                     // Special data processing
                                     else
                                     {
-                                        Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, nextInstructionAddress);
-                                        Environment.Exit(1);
+
+                                        UInt16 opcode = (UInt16)((instruction >> 8) & 0b11);
+                                        switch (opcode)
+                                        {
+                                            case 0b10:
+                                                THUMB_Move(instruction);
+                                                break;
+
+                                            default:
+                                                Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, nextInstructionAddress);
+                                                Environment.Exit(1);
+                                                break;
+                                        }
+
                                     }
                                 }
                             }
@@ -349,9 +361,7 @@ namespace Iris
                                         UInt16 l = (UInt16)((instruction >> 11) & 1);
                                         if (l == 1)
                                         {
-                                            // THUMB_PopMultipleRegisters(instruction);
-                                            Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, nextInstructionAddress);
-                                            Environment.Exit(1);
+                                            THUMB_PopMultipleRegisters(instruction);
                                         }
                                         else
                                         {
@@ -927,9 +937,24 @@ namespace Iris
         // BX
         private void THUMB_BranchExchange(UInt16 instruction)
         {
-            UInt16 rm = (UInt16)((instruction >> 3) & 0b1111);
-            cpsr = (cpsr & ~(1u << 5)) | (reg[rm] & 1) << 5;
-            reg[PC] = reg[rm] & 0xffff_fffe;
+            UInt16 h2 = (UInt16)((instruction >> 6) & 1);
+            UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
+            cpsr = (cpsr & ~(1u << 5)) | (reg[(h2 << 3) | rm] & 1) << 5;
+            reg[PC] = reg[(h2 << 3) | rm] & 0xffff_fffe;
+        }
+
+        // ==============================
+        // Special data processing
+        // ==============================
+
+        // MOV
+        private void THUMB_Move(UInt16 instruction)
+        {
+            UInt16 h1 = (UInt16)((instruction >> 7) & 1);
+            UInt16 h2 = (UInt16)((instruction >> 6) & 1);
+            UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
+            UInt16 rd = (UInt16)(instruction & 0b111);
+            reg[(h1 << 3) | rd] = reg[(h2 << 3) | rm];
         }
 
         // ==============================
@@ -951,31 +976,31 @@ namespace Iris
         // ==============================
 
         // POP
-        //private void THUMB_PopMultipleRegisters(UInt16 instruction)
-        //{
-        //    UInt16 r = (UInt16)((instruction >> 8) & 1);
-        //    UInt16 registerList = (UInt16)(instruction & 0xff);
-        //    UInt32 startAddress = reg[SP];
-        //    UInt32 endAddress = reg[SP] + 4 * (r + Number_Of_Set_Bits_In(registerList, 8));
-        //    UInt32 address = startAddress;
+        private void THUMB_PopMultipleRegisters(UInt16 instruction)
+        {
+            UInt16 r = (UInt16)((instruction >> 8) & 1);
+            UInt16 registerList = (UInt16)(instruction & 0xff);
+            UInt32 startAddress = reg[SP];
+            UInt32 endAddress = reg[SP] + 4 * (r + Number_Of_Set_Bits_In(registerList, 8));
+            UInt32 address = startAddress;
 
-        //    for (int i = 0; i <= 7; ++i)
-        //    {
-        //        if (((registerList >> i) & 1) == 1)
-        //        {
-        //            reg[i] = readMemory32(address);
-        //            address += 4;
-        //        }
-        //    }
+            for (int i = 0; i <= 7; ++i)
+            {
+                if (((registerList >> i) & 1) == 1)
+                {
+                    reg[i] = readMemory32(address);
+                    address += 4;
+                }
+            }
 
-        //    if (r == 1)
-        //    {
-        //        UInt32 value = readMemory32(address);
-        //        reg[PC] = value & 0xffff_fffe;
-        //    }
-            
-        //    reg[SP] = endAddress;
-        //}
+            if (r == 1)
+            {
+                UInt32 value = readMemory32(address);
+                reg[PC] = value & 0xffff_fffe;
+            }
+
+            reg[SP] = endAddress;
+        }
 
         // PUSH
         private void THUMB_PushMultipleRegisters(UInt16 instruction)
