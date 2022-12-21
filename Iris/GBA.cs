@@ -10,10 +10,12 @@ namespace Iris
     {
         private readonly Memory memory = new();
         private readonly CPU cpu;
+        private readonly PPU ppu;
 
         public GBA()
         {
             this.cpu = new CPU(memory.Read16, memory.Read32, memory.Write16, memory.Write32, 0x0800_0000);
+            this.ppu = new PPU();
         }
 
         public void LoadROM(string filename)
@@ -26,6 +28,11 @@ namespace Iris
             while (true)
             {
                 cpu.Step();
+                cpu.Step();
+                cpu.Step();
+                cpu.Step();
+
+                ppu.Step();
             }
         }
     }
