@@ -9,6 +9,7 @@ namespace Iris
     public class Memory
     {
         private Byte[]? rom;
+        private Byte[] externalWorkingRAM = new Byte[256 * 1024]; // 256 KB
 
         public void LoadROM(string filename)
         {
@@ -34,7 +35,6 @@ namespace Iris
                 }
 
                 address -= 0x0800_0000;
-
                 if ((address + 1) < rom.Length)
                 {
                     return (UInt16)((rom[address + 1] << 8)
@@ -58,7 +58,6 @@ namespace Iris
                 }
 
                 address -= 0x0800_0000;
-
                 if ((address + 3) < rom.Length)
                 {
                     return (UInt32)((rom[address + 3] << 24)
@@ -75,10 +74,25 @@ namespace Iris
 
         public void Write(UInt32 address, UInt32 value)
         {
-            if (0x0400_0000 <= address && (address + 3) < 0x0500_0000)
+            if (0x0200_000 <= address && (address + 3) < 0x0300_0000)
+            {
+                address -= 0x0200_0000;
+                if ((address + 3) < externalWorkingRAM.Length)
+                {
+                    externalWorkingRAM[address + 3] = (Byte)((value >> 24) & 0xff);
+                    externalWorkingRAM[address + 2] = (Byte)((value >> 16) & 0xff);
+                    externalWorkingRAM[address + 1] = (Byte)((value >> 8) & 0xff);
+                    externalWorkingRAM[address + 0] = (Byte)((value >> 0) & 0xff);
+                }
+                else
+                {
+                    Console.WriteLine("Invalid write to address 0x{0:x8}", address);
+                    Environment.Exit(1);
+                }
+            }
+            else if (0x0400_0000 <= address && (address + 3) < 0x0500_0000)
             {
                 address -= 0x0400_0000;
-
                 switch (address)
                 {
                     // IME

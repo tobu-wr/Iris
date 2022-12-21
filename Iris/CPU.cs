@@ -233,6 +233,10 @@ namespace Iris
                                     THUMB_Move_Immediate(instruction);
                                     break;
 
+                                case 0b11:
+                                    THUMB_Subtract_Immediate(instruction);
+                                    break;
+
                                 default:
                                     Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, nextInstructionAddress);
                                     Environment.Exit(1);
@@ -296,10 +300,20 @@ namespace Iris
                                 Environment.Exit(1);
                             }
                         }
+
+                        // Load/store multiple
                         else
                         {
-                            Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, nextInstructionAddress);
-                            Environment.Exit(1);
+                            UInt16 l = (UInt16)((instruction >> 11) & 1);
+                            if (l == 1)
+                            {
+                                Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, nextInstructionAddress);
+                                Environment.Exit(1);
+                            }
+                            else
+                            {
+                                THUMB_StoreMultipleIncrementAfter(instruction);
+                            }
                         }
                         break;
 
@@ -376,6 +390,10 @@ namespace Iris
                 case 0b0000:
                     return GetFlag_Z();
 
+                // NE / Not equal
+                case 0b0001:
+                    return !GetFlag_Z();
+
                 // CS/HS / Carry set/unsigned higher or same
                 case 0b0010:
                     return GetFlag_C();
@@ -398,6 +416,11 @@ namespace Iris
             }
         }
 
+        private bool InPrivilegedMode()
+        {
+            return (cpsr & 0b1_1111) != 0b1_0000; // mode != user
+        }
+
         private static UInt32 SignExtend(UInt32 value, int size)
         {
             if ((value >> (size - 1)) == 1)
@@ -415,9 +438,14 @@ namespace Iris
             return SignExtend(value, size) & 0x3fff_ffff;
         }
 
-        private bool InPrivilegedMode()
+        private static UInt32 Number_Of_Set_Bits_In(UInt32 value, int size)
         {
-            return (cpsr & 0b1_1111) != 0b1_0000; // mode != user
+            UInt32 count = 0;
+            for (int i = 0; i < size; ++i)
+            {
+                count += ((value >> i) & 1);
+            }
+            return count;
         }
 
         // ********************************************************************
@@ -753,6 +781,18 @@ namespace Iris
             // TODO: Z flag
         }
 
+        // SUB (immediate)
+        private void THUMB_Subtract_Immediate(UInt16 instruction)
+        {
+            UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
+            UInt16 imm = (UInt16)(instruction & 0xff);
+            reg[rd] -= imm;
+            // TODO: N flag
+            SetFlag_Z(reg[rd] == 0);
+            // TODO: C flag
+            // TODO: V flag
+        }
+
         // ==============================
         // Load from literal pool
         // ==============================
@@ -793,6 +833,29 @@ namespace Iris
                 UInt16 imm = (UInt16)(instruction & 0xff);
                 reg[PC] += SignExtend(imm, 8) << 1;
             }
+        }
+
+        // ==============================
+        // Load/store multiple
+        // ==============================
+
+        // STMIA
+        private void THUMB_StoreMultipleIncrementAfter(UInt16 instruction)
+        {
+            UInt16 rn = (UInt16)((instruction >> 8) & 0b111);
+            UInt16 registerList = (UInt16)(instruction & 0xff);
+            UInt32 startAddress = reg[rn];
+            UInt32 endAddress = reg[rn] + (Number_Of_Set_Bits_In(registerList, 8) * 4) - 4;
+            UInt32 address = startAddress;
+            for (int i = 0; i <= 7; ++i)
+            {
+                if (((registerList >> i) & 1) == 1)
+                {
+                    writeMemory(address, reg[i]);
+                    address += 4;
+                }
+            }
+            reg[rn] += (Number_Of_Set_Bits_In(registerList, 8) * 4);
         }
 
         // ==============================
