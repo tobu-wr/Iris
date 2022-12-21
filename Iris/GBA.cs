@@ -41,11 +41,9 @@ namespace Iris
 
                 switch (address)
                 {
-                    // DISPSTAT
                     case 0x004:
-                        // TODO
-                        Console.WriteLine("Read from DISPSTAT register (unimplemented)");
-                        return 0;
+                        Console.WriteLine("Read {0:x4} from DISPSTAT register", ppu.dispstat);
+                        return ppu.dispstat;
 
                     default:
                         Console.WriteLine("Invalid IO register read");
