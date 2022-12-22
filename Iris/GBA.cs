@@ -17,7 +17,7 @@ namespace Iris
 
         public GBA()
         {
-            this.cpu = new CPU(Read8, Read16, Read32, Write16, Write32, 0x0800_0000);
+            this.cpu = new CPU(Read8, Read16, Read32, Write8, Write16, Write32, 0x0800_0000);
         }
 
         public void LoadROM(string filename)
@@ -35,7 +35,16 @@ namespace Iris
 
         public Byte Read8(UInt32 address)
         {
-            if (0x0800_0000 <= address && address < 0x0A00_0000)
+            if (0x0300_0000 <= address && (address + 3) < 0x0400_0000)
+            {
+                address -= 0x0300_0000;
+
+                if (address < internalWorkingRAM.Length)
+                {
+                    return internalWorkingRAM[address];
+                }
+            }
+            else if (0x0800_0000 <= address && address < 0x0A00_0000)
             {
                 if (rom == null)
                 {
@@ -58,7 +67,17 @@ namespace Iris
 
         public UInt16 Read16(UInt32 address)
         {
-            if (0x0400_0000 <= address && (address + 1) < 0x0500_0000)
+            if (0x0300_0000 <= address && (address + 3) < 0x0400_0000)
+            {
+                address -= 0x0300_0000;
+
+                if ((address + 3) < internalWorkingRAM.Length)
+                {
+                    return (UInt16)((internalWorkingRAM[address + 1] << 8)
+                                  | (internalWorkingRAM[address + 0] << 0));
+                }
+            }
+            else if (0x0400_0000 <= address && (address + 1) < 0x0500_0000)
             {
                 address -= 0x0400_0000;
 
@@ -67,6 +86,10 @@ namespace Iris
                     case 0x004:
                         Console.WriteLine("Read {0:x4} from DISPSTAT register", ppu.dispstat);
                         return ppu.dispstat;
+
+                    case 0x130:
+                        Console.WriteLine("Read from KEYINPUT register");
+                        return 0xff;
 
                     default:
                         Console.WriteLine("Invalid IO register read");
@@ -134,9 +157,47 @@ namespace Iris
             return 0;
         }
 
+        public void Write8(UInt32 address, Byte value)
+        {
+            if (0x0300_0000 <= address && (address + 3) < 0x0400_0000)
+            {
+                address -= 0x0300_0000;
+
+                if (address < internalWorkingRAM.Length)
+                {
+                    internalWorkingRAM[address] = value;
+                }
+                else
+                {
+                    Console.WriteLine("Invalid write to internal working RAM");
+                    Environment.Exit(1);
+                }
+            }
+            else
+            {
+                Console.WriteLine("Invalid write to address 0x{0:x8}", address);
+                Environment.Exit(1);
+            }
+        }
+
         public void Write16(UInt32 address, UInt16 value)
         {
-            if (0x0500_0000 <= address && (address + 1) < 0x0600_0000)
+            if (0x0300_0000 <= address && (address + 3) < 0x0400_0000)
+            {
+                address -= 0x0300_0000;
+
+                if ((address + 1) < internalWorkingRAM.Length)
+                {
+                    internalWorkingRAM[address + 1] = (Byte)((value >> 8) & 0xff);
+                    internalWorkingRAM[address + 0] = (Byte)((value >> 0) & 0xff);
+                }
+                else
+                {
+                    Console.WriteLine("Invalid write to internal working RAM");
+                    Environment.Exit(1);
+                }
+            }
+            else if (0x0500_0000 <= address && (address + 1) < 0x0600_0000)
             {
                 address -= 0x0500_0000;
 
