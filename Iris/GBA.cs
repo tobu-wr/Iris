@@ -88,7 +88,7 @@ namespace Iris
                         return ppu.dispstat;
 
                     case 0x130:
-                        Console.WriteLine("Read from KEYINPUT register");
+                        Console.WriteLine("Read from KEYINPUT register (unimplemented)");
                         return 0xff;
 
                     default:
@@ -279,13 +279,13 @@ namespace Iris
                     // DISPCNT
                     case 0x000:
                         // TODO
-                        Console.WriteLine("Write 0x{0:x4} to DISPCNT register (unimplemented)", value);
+                        Console.WriteLine("Write 0x{0:x4} to DISPCNT register (unimplemented)", (UInt16)value);
                         break;
 
                     // IME
                     case 0x208:
                         // TODO
-                        Console.WriteLine("Write 0x{0:x4} to IME register (unimplemented)", value);
+                        Console.WriteLine("Write 0x{0:x4} to IME register (unimplemented)", (UInt16)value);
                         break;
 
                     default:
