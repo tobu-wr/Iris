@@ -77,11 +77,11 @@ namespace Iris
                                         UInt32 l = (instruction >> 20) & 1;
                                         if (l == 0)
                                         {
-                                            ARM_StoreRegister_HalfWord_ImmediateOffset(instruction);
+                                            ARM_StoreRegisterHalfWord_ImmediateOffset(instruction);
                                         }
                                         else
                                         {
-                                            ARM_LoadRegister_HalfWord_ImmediateOffset(instruction);
+                                            ARM_LoadRegisterHalfWord_ImmediateOffset(instruction);
                                         }
                                     }
                                     else
@@ -233,7 +233,29 @@ namespace Iris
                             {
                                 if (l == 1)
                                 {
-                                    ARM_LoadRegisterByte_ImmediateOffset(instruction);
+                                    UInt32 p = (instruction >> 24) & 1;
+                                    UInt32 w = (instruction >> 21) & 1;
+                                    switch ((p << 1) | w)
+                                    {
+                                        case 0b00:
+                                            ARM_LoadRegisterByte_ImmediatePostIndexed(instruction);
+                                            break;
+
+                                        case 0b10:
+                                            ARM_LoadRegisterByte_ImmediateOffset(instruction);
+                                            break;
+
+                                        case 0b11:
+                                            //ARM_LoadRegisterByte_ImmediatePreIndexed(instruction);
+                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, nextInstructionAddress);
+                                            Environment.Exit(1);
+                                            break;
+
+                                        default:
+                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, nextInstructionAddress);
+                                            Environment.Exit(1);
+                                            break;
+                                    }
                                 }
                                 else
                                 {
@@ -709,7 +731,7 @@ namespace Iris
         // ==============================
 
         // STRH (immediate offset)
-        private void ARM_StoreRegister_HalfWord_ImmediateOffset(UInt32 instruction)
+        private void ARM_StoreRegisterHalfWord_ImmediateOffset(UInt32 instruction)
         {
             UInt32 cond = (instruction >> 28) & 0b1111;
             if (ConditionPassed(cond))
@@ -736,7 +758,7 @@ namespace Iris
         }
 
         // LDRH (immediate offset)
-        private void ARM_LoadRegister_HalfWord_ImmediateOffset(UInt32 instruction)
+        private void ARM_LoadRegisterHalfWord_ImmediateOffset(UInt32 instruction)
         {
             UInt32 cond = (instruction >> 28) & 0b1111;
             if (ConditionPassed(cond))
@@ -1036,13 +1058,14 @@ namespace Iris
             UInt32 cond = (instruction >> 28) & 0b1111;
             if (ConditionPassed(cond))
             {
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 rd = (instruction >> 12) & 0b1111;
                 UInt32 rotateImm = (instruction >> 8) & 0b1111;
                 UInt32 imm = instruction & 0xff;
 
                 int rotateAmount = 2 * (int)rotateImm;
                 UInt32 shifterOperand = (imm >> rotateAmount) | (imm << (32 - rotateAmount));
+
+                UInt32 rn = (instruction >> 16) & 0b1111;
+                UInt32 rd = (instruction >> 12) & 0b1111;
                 reg[rd] = reg[rn] & shifterOperand;
 
                 UInt32 s = (instruction >> 20) & 1;
@@ -1069,13 +1092,14 @@ namespace Iris
             UInt32 cond = (instruction >> 28) & 0b1111;
             if (ConditionPassed(cond))
             {
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 rd = (instruction >> 12) & 0b1111;
                 UInt32 rotateImm = (instruction >> 8) & 0b1111;
                 UInt32 imm = instruction & 0xff;
 
                 int rotateAmount = 2 * (int)rotateImm;
                 UInt32 shifterOperand = (imm >> rotateAmount) | (imm << (32 - rotateAmount));
+
+                UInt32 rn = (instruction >> 16) & 0b1111;
+                UInt32 rd = (instruction >> 12) & 0b1111;
                 reg[rd] = reg[rn] - shifterOperand;
 
                 UInt32 s = (instruction >> 20) & 1;
@@ -1103,13 +1127,14 @@ namespace Iris
             UInt32 cond = (instruction >> 28) & 0b1111;
             if (ConditionPassed(cond))
             {
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 rd = (instruction >> 12) & 0b1111;
                 UInt32 rotateImm = (instruction >> 8) & 0b1111;
                 UInt32 imm = instruction & 0xff;
 
                 int rotateAmount = 2 * (int)rotateImm;
                 UInt32 shifterOperand = (imm >> rotateAmount) | (imm << (32 - rotateAmount));
+
+                UInt32 rn = (instruction >> 16) & 0b1111;
+                UInt32 rd = (instruction >> 12) & 0b1111;
                 reg[rd] = reg[rn] + shifterOperand;
 
                 UInt32 s = (instruction >> 20) & 1;
@@ -1127,12 +1152,13 @@ namespace Iris
             UInt32 cond = (instruction >> 28) & 0b1111;
             if (ConditionPassed(cond))
             {
-                UInt32 rn = (instruction >> 16) & 0b1111;
                 UInt32 rotateImm = (instruction >> 8) & 0b1111;
                 UInt32 imm = instruction & 0xff;
 
                 int rotateAmount = 2 * (int)rotateImm;
                 UInt32 shifterOperand = (imm >> rotateAmount) | (imm << (32 - rotateAmount));
+
+                UInt32 rn = (instruction >> 16) & 0b1111;
                 UInt32 aluOut = reg[rn] ^ shifterOperand;
                 // TODO: N flag
                 SetFlag_Z(aluOut == 0);
@@ -1146,12 +1172,13 @@ namespace Iris
             UInt32 cond = (instruction >> 28) & 0b1111;
             if (ConditionPassed(cond))
             {
-                UInt32 rn = (instruction >> 16) & 0b1111;
                 UInt32 rotateImm = (instruction >> 8) & 0b1111;
                 UInt32 imm = instruction & 0xff;
 
                 int rotateAmount = 2 * (int)rotateImm;
                 UInt32 shifterOperand = (imm >> rotateAmount) | (imm << (32 - rotateAmount));
+
+                UInt32 rn = (instruction >> 16) & 0b1111;
                 UInt32 aluOut = reg[rn] - shifterOperand;
                 // TODO: N flag
                 SetFlag_Z(aluOut == 0);
@@ -1166,13 +1193,14 @@ namespace Iris
             UInt32 cond = (instruction >> 28) & 0b1111;
             if (ConditionPassed(cond))
             {
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 rd = (instruction >> 12) & 0b1111;
                 UInt32 rotateImm = (instruction >> 8) & 0b1111;
                 UInt32 imm = instruction & 0xff;
 
                 int rotateAmount = 2 * (int)rotateImm;
                 UInt32 shifterOperand = (imm >> rotateAmount) | (imm << (32 - rotateAmount));
+
+                UInt32 rn = (instruction >> 16) & 0b1111;
+                UInt32 rd = (instruction >> 12) & 0b1111;
                 reg[rd] = reg[rn] | shifterOperand;
 
                 UInt32 s = (instruction >> 20) & 1;
@@ -1190,12 +1218,13 @@ namespace Iris
             UInt32 cond = (instruction >> 28) & 0b1111;
             if (ConditionPassed(cond))
             {
-                UInt32 rd = (instruction >> 12) & 0b1111;
                 UInt32 rotateImm = (instruction >> 8) & 0b1111;
                 UInt32 imm = instruction & 0xff;
 
                 int rotateAmount = 2 * (int)rotateImm;
                 UInt32 shifterOperand = (imm >> rotateAmount) | (imm << (32 - rotateAmount));
+
+                UInt32 rd = (instruction >> 12) & 0b1111;
                 reg[rd] = shifterOperand;
 
                 UInt32 s = (instruction >> 20) & 1;
@@ -1210,6 +1239,31 @@ namespace Iris
         // ==============================
         // Load/store immediate offset
         // ==============================
+
+        // LDRB (immediate post-indexed)
+        private void ARM_LoadRegisterByte_ImmediatePostIndexed(UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (ConditionPassed(cond))
+            {
+                UInt32 u = (instruction >> 23) & 1;
+                UInt32 rn = (instruction >> 16) & 0b1111;
+                UInt32 offset = instruction & 0xfff;
+
+                UInt32 address = reg[rn];
+                if (u == 1)
+                {
+                    reg[rn] += offset;
+                }
+                else
+                {
+                    reg[rn] -= offset;
+                }
+
+                UInt32 rd = (instruction >> 12) & 0b1111;
+                reg[rd] = readMemory8(address);
+            }
+        }
 
         // LDRB (immediate offset)
         private void ARM_LoadRegisterByte_ImmediateOffset(UInt32 instruction)
