@@ -9,7 +9,7 @@ namespace Iris
     public class PPU
     {
         public Byte[] paletteRAM = new Byte[1 * 1024]; // 1 KB
-        //public Byte[] VRAM = new Byte[96 * 1024]; // 96 KB
+        public Byte[] VRAM = new Byte[96 * 1024]; // 96 KB
 
         public UInt16 dispstat = 0;
 

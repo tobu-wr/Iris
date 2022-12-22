@@ -9,15 +9,15 @@ namespace Iris
     public class GBA
     {
         private Byte[]? rom;
-        private Byte[] externalWorkingRAM = new Byte[256 * 1024]; // 256 KB
-        private Byte[] internalWorkingRAM = new Byte[32 * 1024]; // 32 KB
+        private readonly Byte[] externalWorkingRAM = new Byte[256 * 1024]; // 256 KB
+        private readonly Byte[] internalWorkingRAM = new Byte[32 * 1024]; // 32 KB
 
         private readonly CPU cpu;
         private readonly PPU ppu = new();
 
         public GBA()
         {
-            this.cpu = new CPU(Read16, Read32, Write16, Write32, 0x0800_0000);
+            this.cpu = new CPU(Read8, Read16, Read32, Write16, Write32, 0x0800_0000);
         }
 
         public void LoadROM(string filename)
@@ -31,6 +31,29 @@ namespace Iris
                 Console.WriteLine("ROM file not found");
                 Environment.Exit(1);
             }
+        }
+
+        public Byte Read8(UInt32 address)
+        {
+            if (0x0800_0000 <= address && address < 0x0A00_0000)
+            {
+                if (rom == null)
+                {
+                    Console.WriteLine("No ROM loaded");
+                    Environment.Exit(1);
+                }
+
+                address -= 0x0800_0000;
+
+                if ((address + 3) < rom.Length)
+                {
+                    return rom[address];
+                }
+            }
+
+            Console.WriteLine("Invalid read from address 0x{0:x8}", address);
+            Environment.Exit(1);
+            return 0;
         }
 
         public UInt16 Read16(UInt32 address)
@@ -125,6 +148,21 @@ namespace Iris
                 else
                 {
                     Console.WriteLine("Invalid write to palette RAM");
+                    Environment.Exit(1);
+                }
+            }
+            else if (0x0600_0000 <= address && (address + 1) < 0x0700_0000)
+            {
+                address -= 0x0600_0000;
+
+                if ((address + 1) < ppu.VRAM.Length)
+                {
+                    ppu.VRAM[address + 1] = (Byte)((value >> 8) & 0xff);
+                    ppu.VRAM[address + 0] = (Byte)((value >> 0) & 0xff);
+                }
+                else
+                {
+                    Console.WriteLine("Invalid write to VRAM");
                     Environment.Exit(1);
                 }
             }

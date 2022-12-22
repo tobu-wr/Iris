@@ -11,6 +11,7 @@ namespace Iris
 {
     public class CPU
     {
+        public delegate Byte ReadMemory8(UInt32 address);
         public delegate UInt16 ReadMemory16(UInt32 address);
         public delegate UInt32 ReadMemory32(UInt32 address);
         public delegate void WriteMemory16(UInt32 address, UInt16 value);
@@ -20,6 +21,7 @@ namespace Iris
         private const UInt32 LR = 14;
         private const UInt32 PC = 15;
 
+        private readonly ReadMemory8 readMemory8;
         private readonly ReadMemory16 readMemory16;
         private readonly ReadMemory32 readMemory32;
         private readonly WriteMemory16 writeMemory16;
@@ -28,8 +30,9 @@ namespace Iris
         private UInt32 cpsr;
         private UInt32 nextInstructionAddress;
 
-        public CPU(ReadMemory16 readMemory16, ReadMemory32 readMemory32, WriteMemory16 writeMemory16, WriteMemory32 writeMemory32, UInt32 startAddress)
+        public CPU(ReadMemory8 readMemory8, ReadMemory16 readMemory16, ReadMemory32 readMemory32, WriteMemory16 writeMemory16, WriteMemory32 writeMemory32, UInt32 startAddress)
         {
+            this.readMemory8 = readMemory8;
             this.readMemory16 = readMemory16;
             this.readMemory32 = readMemory32;
             this.writeMemory16 = writeMemory16;
@@ -89,8 +92,31 @@ namespace Iris
                                 }
                                 else
                                 {
-                                    Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, nextInstructionAddress);
-                                    Environment.Exit(1);
+                                    if (((instruction >> 24) & 1) == 0)
+                                    {
+                                        if (((instruction >> 23) & 1) == 0)
+                                        {
+                                            if (((instruction >> 22) & 1) == 0)
+                                            {
+                                                ARM_Multiply(instruction);
+                                            }
+                                            else
+                                            {
+                                                Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, nextInstructionAddress);
+                                                Environment.Exit(1);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, nextInstructionAddress);
+                                            Environment.Exit(1);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, nextInstructionAddress);
+                                        Environment.Exit(1);
+                                    }
                                 }
                             }
                         }
@@ -126,8 +152,26 @@ namespace Iris
                         // Data processing immediate shift
                         else if ((instruction & 0x0000_0010) == 0x0000_0000)
                         {
-                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, nextInstructionAddress);
-                            Environment.Exit(1);
+                            UInt32 opcode = (instruction >> 21) & 0b1111;
+                            switch (opcode)
+                            {
+                                case 0b0100:
+                                    ARM_Add_ImmediateShift(instruction);
+                                    break;
+
+                                case 0b1100:
+                                    ARM_LogicalInclusiveOR_ImmediateShift(instruction);
+                                    break;
+
+                                case 0b1101:
+                                    ARM_Move_ImmediateShift(instruction);
+                                    break;
+
+                                default:
+                                    Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, nextInstructionAddress);
+                                    Environment.Exit(1);
+                                    break;
+                            }
                         }
 
                         // Data processing register shift
@@ -146,6 +190,10 @@ namespace Iris
                             {
                                 case 0b0000:
                                     ARM_LogicalAND_Immediate(instruction);
+                                    break;
+
+                                case 0b0010:
+                                    ARM_Subtract_Immediate(instruction);
                                     break;
 
                                 case 0b0100:
@@ -179,14 +227,30 @@ namespace Iris
                     // Load/store immediate offset
                     case 0b010:
                         {
+                            UInt32 b = (instruction >> 22) & 1;
                             UInt32 l = (instruction >> 20) & 1;
-                            if (l == 1)
+                            if (b == 1)
                             {
-                                ARM_LoadRegister_ImmediateOffset(instruction);
+                                if (l == 1)
+                                {
+                                    ARM_LoadRegisterByte_ImmediateOffset(instruction);
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, nextInstructionAddress);
+                                    Environment.Exit(1);
+                                }
                             }
                             else
                             {
-                                ARM_StoreRegister_ImmediateOffset(instruction);
+                                if (l == 1)
+                                {
+                                    ARM_LoadRegister_ImmediateOffset(instruction);
+                                }
+                                else
+                                {
+                                    ARM_StoreRegister_ImmediateOffset(instruction);
+                                }
                             }
                             break;
                         }
@@ -221,8 +285,27 @@ namespace Iris
                             }
                             else
                             {
-                                Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, nextInstructionAddress);
-                                Environment.Exit(1);
+                                UInt32 s = (instruction >> 22) & 1;
+                                if (s == 0)
+                                {
+                                    UInt32 pu = (instruction >> 23) & 0b11;
+                                    switch (pu)
+                                    {
+                                        case 0b01:
+                                            ARM_LoadMultiple_FullDescending(instruction);
+                                            break;
+
+                                        default:
+                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, nextInstructionAddress);
+                                            Environment.Exit(1);
+                                            break;
+                                    }
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, nextInstructionAddress);
+                                    Environment.Exit(1);
+                                }
                             }
                             break;
                         }
@@ -679,6 +762,26 @@ namespace Iris
             }
         }
 
+        // MUL
+        private void ARM_Multiply(UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (ConditionPassed(cond))
+            {
+                UInt32 rd = (instruction >> 16) & 0b1111;
+                UInt32 rs = (instruction >> 8) & 0b1111;
+                UInt32 rm = instruction & 0b1111;
+                reg[rd] = reg[rm] * reg[rs];
+
+                UInt32 s = (instruction >> 20) & 1;
+                if (s == 1)
+                {
+                    Console.WriteLine("MUL: S field unimplemented");
+                    Environment.Exit(1);
+                }
+            }
+        }
+
         // ==============================
         // Miscellaneous instructions
         // ==============================
@@ -753,6 +856,177 @@ namespace Iris
         }
 
         // ==============================
+        // Data processing immediate shift
+        // ==============================
+
+        // ADD (immediate shift)
+        private void ARM_Add_ImmediateShift(UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (ConditionPassed(cond))
+            {
+                UInt32 shiftImm = (instruction >> 7) & 0b1_1111;
+                UInt32 shift = (instruction >> 5) & 0b11;
+                UInt32 rm = instruction & 0b1111;
+
+                UInt32 shifterOperand = 0;
+                switch (shift)
+                {
+                    // Logical shift left
+                    case 0b00:
+                        if (shiftImm == 0)
+                        {
+                            shifterOperand = reg[rm];
+                        }
+                        else
+                        {
+                            shifterOperand = reg[rm] << (int)shiftImm;
+                        }
+                        break;
+
+                    // Logical shift right
+                    case 0b01:
+                        if (shiftImm == 0)
+                        {
+                            shifterOperand = 0;
+                        }
+                        else
+                        {
+                            shifterOperand = reg[rm] >> (int)shiftImm;
+                        }
+                        break;
+
+                    default:
+                        Console.WriteLine("ADD (immediate shift): shift {] unimplemented", shift);
+                        Environment.Exit(1);
+                        break;
+                }
+
+                UInt32 rn = (instruction >> 16) & 0b1111;
+                UInt32 rd = (instruction >> 12) & 0b1111;
+                reg[rd] = reg[rn] + shifterOperand;
+
+                UInt32 s = (instruction >> 20) & 1;
+                if (s == 1)
+                {
+                    Console.WriteLine("ADD (immediate shift): S field unimplemented");
+                    Environment.Exit(1);
+                }
+            }
+        }
+
+        // ORR (immediate shift)
+        private void ARM_LogicalInclusiveOR_ImmediateShift(UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (ConditionPassed(cond))
+            {
+                UInt32 shiftImm = (instruction >> 7) & 0b1_1111;
+                UInt32 shift = (instruction >> 5) & 0b11;
+                UInt32 rm = instruction & 0b1111;
+
+                UInt32 shifterOperand = 0;
+                switch (shift)
+                {
+                    // Logical shift left
+                    case 0b00:
+                        if (shiftImm == 0)
+                        {
+                            shifterOperand = reg[rm];
+                        }
+                        else
+                        {
+                            shifterOperand = reg[rm] << (int)shiftImm;
+                        }
+                        break;
+
+                    // Logical shift right
+                    case 0b01:
+                        if (shiftImm == 0)
+                        {
+                            shifterOperand = 0;
+                        }
+                        else
+                        {
+                            shifterOperand = reg[rm] >> (int)shiftImm;
+                        }
+                        break;
+
+                    default:
+                        Console.WriteLine("ORR (immediate shift): shift {0} unimplemented", shift);
+                        Environment.Exit(1);
+                        break;
+                }
+
+                UInt32 rn = (instruction >> 16) & 0b1111;
+                UInt32 rd = (instruction >> 12) & 0b1111;
+                reg[rd] = reg[rn] | shifterOperand;
+
+                UInt32 s = (instruction >> 20) & 1;
+                if (s == 1)
+                {
+                    Console.WriteLine("ORR (immediate shift): S field unimplemented");
+                    Environment.Exit(1);
+                }
+            }
+        }
+
+        // MOV (immediate shift)
+        private void ARM_Move_ImmediateShift(UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (ConditionPassed(cond))
+            {
+                UInt32 shiftImm = (instruction >> 7) & 0b1_1111;
+                UInt32 shift = (instruction >> 5) & 0b11;
+                UInt32 rm = instruction & 0b1111;
+
+                UInt32 shifterOperand = 0;
+                switch (shift)
+                {
+                    // Logical shift left
+                    case 0b00:
+                        if (shiftImm == 0)
+                        {
+                            shifterOperand = reg[rm];
+                        }
+                        else
+                        {
+                            shifterOperand = reg[rm] << (int)shiftImm;
+                        }
+                        break;
+
+                    // Logical shift right
+                    case 0b01:
+                        if (shiftImm == 0)
+                        {
+                            shifterOperand = 0;
+                        }
+                        else
+                        {
+                            shifterOperand = reg[rm] >> (int)shiftImm;
+                        }
+                        break;
+
+                    default:
+                        Console.WriteLine("MOV (immediate shift): shift {0} unimplemented", shift);
+                        Environment.Exit(1);
+                        break;
+                }
+
+                UInt32 rd = (instruction >> 12) & 0b1111;
+                reg[rd] = shifterOperand;
+
+                UInt32 s = (instruction >> 20) & 1;
+                if (s == 1)
+                {
+                    Console.WriteLine("MOV (immediate shift): S field unimplemented");
+                    Environment.Exit(1);
+                }
+            }
+        }
+
+        // ==============================
         // Data processing immediate
         // ==============================
 
@@ -784,6 +1058,40 @@ namespace Iris
                         // TODO: N flag
                         SetFlag_Z(reg[rd] == 0);
                         // TODO: C flag
+                    }
+                }
+            }
+        }
+
+        // SUB (immediate)
+        private void ARM_Subtract_Immediate(UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (ConditionPassed(cond))
+            {
+                UInt32 rn = (instruction >> 16) & 0b1111;
+                UInt32 rd = (instruction >> 12) & 0b1111;
+                UInt32 rotateImm = (instruction >> 8) & 0b1111;
+                UInt32 imm = instruction & 0xff;
+
+                int rotateAmount = 2 * (int)rotateImm;
+                UInt32 shifterOperand = (imm >> rotateAmount) | (imm << (32 - rotateAmount));
+                reg[rd] = reg[rn] - shifterOperand;
+
+                UInt32 s = (instruction >> 20) & 1;
+                if (s == 1)
+                {
+                    if (rd == PC)
+                    {
+                        Console.WriteLine("SUB (immediate): S field partially implemented");
+                        Environment.Exit(1);
+                    }
+                    else
+                    {
+                        // TODO: N flag
+                        SetFlag_Z(reg[rd] == 0);
+                        // TODO: C flag
+                        // TODO: V flag
                     }
                 }
             }
@@ -903,6 +1211,31 @@ namespace Iris
         // Load/store immediate offset
         // ==============================
 
+        // LDRB (immediate offset)
+        private void ARM_LoadRegisterByte_ImmediateOffset(UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (ConditionPassed(cond))
+            {
+                UInt32 u = (instruction >> 23) & 1;
+                UInt32 rn = (instruction >> 16) & 0b1111;
+                UInt32 offset = instruction & 0xfff;
+
+                UInt32 address;
+                if (u == 1)
+                {
+                    address = reg[rn] + offset;
+                }
+                else
+                {
+                    address = reg[rn] - offset;
+                }
+
+                UInt32 rd = (instruction >> 12) & 0b1111;
+                reg[rd] = readMemory8(address);
+            }
+        }
+
         // LDR (immediate offset)
         private void ARM_LoadRegister_ImmediateOffset(UInt32 instruction)
         {
@@ -992,6 +1325,42 @@ namespace Iris
                         writeMemory32(address, reg[i]);
                         address += 4;
                     }
+                }
+            }
+        }
+
+        // LDMFD
+        private void ARM_LoadMultiple_FullDescending(UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (ConditionPassed(cond))
+            {
+                UInt32 rn = (instruction >> 16) & 0b1111;
+                UInt32 registerList = instruction & 0xffff;
+
+                UInt32 startAddress = reg[rn];
+                UInt32 endAddress = reg[rn] + (Number_Of_Set_Bits_In(registerList, 16) * 4) - 4;
+
+                UInt32 w = (instruction >> 21) & 1;
+                if (w == 1)
+                {
+                    reg[rn] += (Number_Of_Set_Bits_In(registerList, 16) * 4);
+                }
+
+                UInt32 address = startAddress;
+                for (int i = 0; i <= 14; ++i)
+                {
+                    if (((registerList >> i) & 1) == 1)
+                    {
+                        reg[i] = readMemory32(address);
+                        address += 4;
+                    }
+                }
+
+                if (((registerList >> 15) & 1) == 1)
+                {
+                    UInt32 value = readMemory32(address);
+                    reg[PC] = value & 0xffff_fffc;
                 }
             }
         }
