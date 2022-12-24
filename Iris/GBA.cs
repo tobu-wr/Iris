@@ -13,11 +13,12 @@ namespace Iris
         private readonly Byte[] internalWorkingRAM = new Byte[32 * 1024]; // 32 KB
 
         private readonly CPU cpu;
-        private readonly PPU ppu = new();
+        private readonly PPU ppu;
 
         public GBA()
         {
-            this.cpu = new CPU(Read8, Read16, Read32, Write8, Write16, Write32, 0x0800_0000);
+            this.cpu = new(Read8, Read16, Read32, Write8, Write16, Write32, 0x0800_0000);
+            this.ppu = new(DrawFrame);
         }
 
         public void LoadROM(string filename)
@@ -299,6 +300,11 @@ namespace Iris
                 Console.WriteLine("Invalid write to address 0x{0:x8}", address);
                 Environment.Exit(1);
             }
+        }
+
+        void DrawFrame()
+        {
+            // TODO
         }
 
         public void Run()
