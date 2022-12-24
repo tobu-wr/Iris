@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Iris
 {
-    public class GBA
+    public class GBA : CPU.ICallbacks
     {
         private Byte[]? rom;
         private readonly Byte[] externalWorkingRAM = new Byte[256 * 1024]; // 256 KB
@@ -17,7 +17,7 @@ namespace Iris
 
         public GBA()
         {
-            this.cpu = new(Read8, Read16, Read32, Write8, Write16, Write32, 0x0800_0000);
+            this.cpu = new(this, 0x0800_0000);
             this.ppu = new(DrawFrame);
         }
 
@@ -34,7 +34,7 @@ namespace Iris
             }
         }
 
-        public Byte Read8(UInt32 address)
+        public Byte ReadMemory8(UInt32 address)
         {
             if (0x0300_0000 <= address && (address + 3) < 0x0400_0000)
             {
@@ -66,7 +66,7 @@ namespace Iris
             return 0;
         }
 
-        public UInt16 Read16(UInt32 address)
+        public UInt16 ReadMemory16(UInt32 address)
         {
             if (0x0300_0000 <= address && (address + 3) < 0x0400_0000)
             {
@@ -120,7 +120,7 @@ namespace Iris
             return 0;
         }
 
-        public UInt32 Read32(UInt32 address)
+        public UInt32 ReadMemory32(UInt32 address)
         {
             if (0x0300_0000 <= address && (address + 3) < 0x0400_0000)
             {
@@ -158,7 +158,7 @@ namespace Iris
             return 0;
         }
 
-        public void Write8(UInt32 address, Byte value)
+        public void WriteMemory8(UInt32 address, Byte value)
         {
             if (0x0300_0000 <= address && (address + 3) < 0x0400_0000)
             {
@@ -181,7 +181,7 @@ namespace Iris
             }
         }
 
-        public void Write16(UInt32 address, UInt16 value)
+        public void WriteMemory16(UInt32 address, UInt16 value)
         {
             if (0x0300_0000 <= address && (address + 3) < 0x0400_0000)
             {
@@ -235,7 +235,7 @@ namespace Iris
             }
         }
 
-        public void Write32(UInt32 address, UInt32 value)
+        public void WriteMemory32(UInt32 address, UInt32 value)
         {
             if (0x0200_000 <= address && (address + 3) < 0x0300_0000)
             {

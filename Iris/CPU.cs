@@ -11,35 +11,28 @@ namespace Iris
 {
     public class CPU
     {
-        public delegate Byte ReadMemory8(UInt32 address);
-        public delegate UInt16 ReadMemory16(UInt32 address);
-        public delegate UInt32 ReadMemory32(UInt32 address);
-        public delegate void WriteMemory8(UInt32 address, Byte value);
-        public delegate void WriteMemory16(UInt32 address, UInt16 value);
-        public delegate void WriteMemory32(UInt32 address, UInt32 value);
+        public interface ICallbacks
+        {
+            Byte ReadMemory8(UInt32 address);
+            UInt16 ReadMemory16(UInt32 address);
+            UInt32 ReadMemory32(UInt32 address);
+            void WriteMemory8(UInt32 address, Byte value);
+            void WriteMemory16(UInt32 address, UInt16 value);
+            void WriteMemory32(UInt32 address, UInt32 value);
+        }
 
         private const UInt32 SP = 13;
         private const UInt32 LR = 14;
         private const UInt32 PC = 15;
 
-        private readonly ReadMemory8 readMemory8;
-        private readonly ReadMemory16 readMemory16;
-        private readonly ReadMemory32 readMemory32;
-        private readonly WriteMemory8 writeMemory8;
-        private readonly WriteMemory16 writeMemory16;
-        private readonly WriteMemory32 writeMemory32;
+        private readonly ICallbacks callbacks;
         private readonly UInt32[] reg = new UInt32[16];
         private UInt32 cpsr;
         private UInt32 nextInstructionAddress;
 
-        public CPU(ReadMemory8 readMemory8, ReadMemory16 readMemory16, ReadMemory32 readMemory32, WriteMemory8 writeMemory8, WriteMemory16 writeMemory16, WriteMemory32 writeMemory32, UInt32 startAddress)
+        public CPU(ICallbacks callbacks, UInt32 startAddress)
         {
-            this.readMemory8 = readMemory8;
-            this.readMemory16 = readMemory16;
-            this.readMemory32 = readMemory32;
-            this.writeMemory8 = writeMemory8;
-            this.writeMemory16 = writeMemory16;
-            this.writeMemory32 = writeMemory32;
+            this.callbacks = callbacks;
 
             nextInstructionAddress = startAddress;
             reg[PC] = nextInstructionAddress + 4;
@@ -56,7 +49,7 @@ namespace Iris
                     nextInstructionAddress = reg[PC];
                 }
 
-                UInt32 instruction = readMemory32(nextInstructionAddress);
+                UInt32 instruction = callbacks.ReadMemory32(nextInstructionAddress);
                 nextInstructionAddress += 4;
                 reg[PC] = nextInstructionAddress + 4;
 
@@ -435,7 +428,7 @@ namespace Iris
                     nextInstructionAddress = reg[PC];
                 }
 
-                UInt16 instruction = readMemory16(nextInstructionAddress);
+                UInt16 instruction = callbacks.ReadMemory16(nextInstructionAddress);
                 nextInstructionAddress += 2;
                 reg[PC] = nextInstructionAddress + 2;
 
@@ -827,7 +820,7 @@ namespace Iris
                 }
 
                 UInt32 rd = (instruction >> 12) & 0b1111;
-                writeMemory16(address, (UInt16)reg[rd]);
+                callbacks.WriteMemory16(address, (UInt16)reg[rd]);
             }
         }
 
@@ -854,7 +847,7 @@ namespace Iris
                 }
 
                 UInt32 rd = (instruction >> 12) & 0b1111;
-                reg[rd] = readMemory16(address);
+                reg[rd] = callbacks.ReadMemory16(address);
             }
         }
 
@@ -1436,7 +1429,7 @@ namespace Iris
                 }
 
                 UInt32 rd = (instruction >> 12) & 0b1111;
-                reg[rd] = readMemory8(address);
+                reg[rd] = callbacks.ReadMemory8(address);
             }
         }
 
@@ -1461,7 +1454,7 @@ namespace Iris
                 }
 
                 UInt32 rd = (instruction >> 12) & 0b1111;
-                reg[rd] = readMemory8(address);
+                reg[rd] = callbacks.ReadMemory8(address);
             }
         }
 
@@ -1486,7 +1479,7 @@ namespace Iris
                 }
 
                 UInt32 rd = (instruction >> 12) & 0b1111;
-                writeMemory8(address, (Byte)reg[rd]);
+                callbacks.WriteMemory8(address, (Byte)reg[rd]);
             }
         }
 
@@ -1510,7 +1503,7 @@ namespace Iris
                     reg[rn] -= offset;
                 }
 
-                UInt32 data = readMemory32(address);
+                UInt32 data = callbacks.ReadMemory32(address);
                 UInt32 rd = (instruction >> 12) & 0b1111;
 
                 if (rd == PC)
@@ -1544,7 +1537,7 @@ namespace Iris
                     address = reg[rn] - offset;
                 }
 
-                UInt32 data = readMemory32(address);
+                UInt32 data = callbacks.ReadMemory32(address);
                 UInt32 rd = (instruction >> 12) & 0b1111;
 
                 if (rd == PC)
@@ -1579,7 +1572,7 @@ namespace Iris
                 }
 
                 UInt32 rd = (instruction >> 12) & 0b1111;
-                writeMemory32(address, reg[rd]);
+                callbacks.WriteMemory32(address, reg[rd]);
             }
         }
 
@@ -1604,7 +1597,7 @@ namespace Iris
                 }
 
                 UInt32 rd = (instruction >> 12) & 0b1111;
-                writeMemory32(address, reg[rd]);
+                callbacks.WriteMemory32(address, reg[rd]);
             }
         }
 
@@ -1635,7 +1628,7 @@ namespace Iris
                 {
                     if (((registerList >> i) & 1) == 1)
                     {
-                        writeMemory32(address, reg[i]);
+                        callbacks.WriteMemory32(address, reg[i]);
                         address += 4;
                     }
                 }
@@ -1665,14 +1658,14 @@ namespace Iris
                 {
                     if (((registerList >> i) & 1) == 1)
                     {
-                        reg[i] = readMemory32(address);
+                        reg[i] = callbacks.ReadMemory32(address);
                         address += 4;
                     }
                 }
 
                 if (((registerList >> 15) & 1) == 1)
                 {
-                    UInt32 value = readMemory32(address);
+                    UInt32 value = callbacks.ReadMemory32(address);
                     reg[PC] = value & 0xffff_fffc;
                 }
             }
@@ -1800,7 +1793,7 @@ namespace Iris
             UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
             UInt16 imm = (UInt16)(instruction & 0xff);
             UInt32 address = (reg[PC] & 0xffff_fffc) + (UInt32)(imm * 4);
-            reg[rd] = readMemory32(address);
+            reg[rd] = callbacks.ReadMemory32(address);
         }
 
         // ==============================
@@ -1855,7 +1848,7 @@ namespace Iris
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
             UInt32 address = reg[rn] + ((UInt32)imm * 4);
-            writeMemory32(address, reg[rd]);
+            callbacks.WriteMemory32(address, reg[rd]);
         }
 
         // ==============================
@@ -1875,14 +1868,14 @@ namespace Iris
             {
                 if (((registerList >> i) & 1) == 1)
                 {
-                    reg[i] = readMemory32(address);
+                    reg[i] = callbacks.ReadMemory32(address);
                     address += 4;
                 }
             }
 
             if (r == 1)
             {
-                UInt32 value = readMemory32(address);
+                UInt32 value = callbacks.ReadMemory32(address);
                 reg[PC] = value & 0xffff_fffe;
             }
 
@@ -1902,14 +1895,14 @@ namespace Iris
             {
                 if (((registerList >> i) & 1) == 1)
                 {
-                    writeMemory32(address, reg[i]);
+                    callbacks.WriteMemory32(address, reg[i]);
                     address += 4;
                 }
             }
 
             if (r == 1)
             {
-                writeMemory32(address, reg[LR]);
+                callbacks.WriteMemory32(address, reg[LR]);
             }
 
             reg[SP] -= 4 * (r + Number_Of_Set_Bits_In(registerList, 8));
@@ -1947,7 +1940,7 @@ namespace Iris
             {
                 if (((registerList >> i) & 1) == 1)
                 {
-                    reg[i] = readMemory32(address);
+                    reg[i] = callbacks.ReadMemory32(address);
                     address += 4;
                 }
             }
@@ -1968,7 +1961,7 @@ namespace Iris
             {
                 if (((registerList >> i) & 1) == 1)
                 {
-                    writeMemory32(address, reg[i]);
+                    callbacks.WriteMemory32(address, reg[i]);
                     address += 4;
                 }
             }
