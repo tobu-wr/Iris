@@ -43,7 +43,11 @@ namespace Iris
                 return;
             }
 
-            // gba.Run();
+            loadStateToolStripMenuItem.Enabled = true;
+            saveStateToolStripMenuItem.Enabled = true;
+            startToolStripMenuItem.Enabled = true;
+            pauseToolStripMenuItem.Enabled = false;
+            toolStripStatusLabel1.Text = "Paused";
         }
 
         private void LoadROMToolStripMenuItem_Click(object sender, EventArgs e)
@@ -52,6 +56,15 @@ namespace Iris
             if (dialog.ShowDialog() == DialogResult.OK)
             {
                 LoadROM(dialog.FileName);
+            }
+        }
+
+        private void LoadStateToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dialog = new();
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                // TODO
             }
         }
 
@@ -67,6 +80,22 @@ namespace Iris
         private void QuitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Application.Exit();
+        }
+
+        private void StartToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            startToolStripMenuItem.Enabled = false;
+            pauseToolStripMenuItem.Enabled = true;
+            toolStripStatusLabel1.Text = "Running";
+            // TODO
+        }
+
+        private void PauseToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            startToolStripMenuItem.Enabled = true;
+            pauseToolStripMenuItem.Enabled = false;
+            toolStripStatusLabel1.Text = "Paused";
+            // TODO
         }
     }
 }
