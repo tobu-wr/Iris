@@ -18,11 +18,15 @@ namespace Iris
         public MainWindow(string[] args)
         {
             InitializeComponent();
-
             gba = new(this);
-            if (args.Length > 0)
+
+            if (args.Length > 0 && LoadROM(args[0]))
             {
-                LoadROM(args[0]);
+                loadStateToolStripMenuItem.Enabled = true;
+                saveStateToolStripMenuItem.Enabled = true;
+                runToolStripMenuItem.Enabled = true;
+                pauseToolStripMenuItem.Enabled = false;
+                toolStripStatusLabel1.Text = "Paused";
             }
         }
 
@@ -31,50 +35,83 @@ namespace Iris
             // TODO
         }
 
-        private void LoadROM(string fileName)
+        private bool LoadROM(string fileName)
         {
             try
             {
                 gba.LoadROM(fileName);
+                return true;
             }
             catch
             {
                 MessageBox.Show("Could not load ROM", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                return false;
             }
+        }
 
-            loadStateToolStripMenuItem.Enabled = true;
-            saveStateToolStripMenuItem.Enabled = true;
-            startToolStripMenuItem.Enabled = true;
+        private void Run()
+        {
+            runToolStripMenuItem.Enabled = false;
+            pauseToolStripMenuItem.Enabled = true;
+            toolStripStatusLabel1.Text = "Running";
+            gba.Run();
+        }
+
+        private void Pause()
+        {
+            runToolStripMenuItem.Enabled = true;
             pauseToolStripMenuItem.Enabled = false;
             toolStripStatusLabel1.Text = "Paused";
+            gba.Pause();
         }
 
         private void LoadROMToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            bool running = gba.IsRunning();
+            if (running) Pause();
+
             OpenFileDialog dialog = new();
             if (dialog.ShowDialog() == DialogResult.OK)
             {
-                LoadROM(dialog.FileName);
+                if (LoadROM(dialog.FileName) && !running)
+                {
+                    loadStateToolStripMenuItem.Enabled = true;
+                    saveStateToolStripMenuItem.Enabled = true;
+                    runToolStripMenuItem.Enabled = true;
+                    pauseToolStripMenuItem.Enabled = false;
+                    toolStripStatusLabel1.Text = "Paused";
+                }
             }
+
+            if (running) Run();
         }
 
         private void LoadStateToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            bool running = gba.IsRunning();
+            if (running) Pause();
+
             OpenFileDialog dialog = new();
             if (dialog.ShowDialog() == DialogResult.OK)
             {
                 // TODO
             }
+
+            if (running) Run();
         }
 
         private void SaveStateToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            bool running = gba.IsRunning();
+            if (running) Pause();
+
             SaveFileDialog dialog = new();
             if (dialog.ShowDialog(this) == DialogResult.OK)
             {
                 // TODO
             }
+
+            if (running) Run();
         }
 
         private void QuitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -82,20 +119,14 @@ namespace Iris
             Application.Exit();
         }
 
-        private void StartToolStripMenuItem_Click(object sender, EventArgs e)
+        private void RunToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            startToolStripMenuItem.Enabled = false;
-            pauseToolStripMenuItem.Enabled = true;
-            toolStripStatusLabel1.Text = "Running";
-            // TODO
+            Run();
         }
 
         private void PauseToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            startToolStripMenuItem.Enabled = true;
-            pauseToolStripMenuItem.Enabled = false;
-            toolStripStatusLabel1.Text = "Paused";
-            // TODO
+            Pause();
         }
     }
 }

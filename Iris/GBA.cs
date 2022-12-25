@@ -15,16 +15,38 @@ namespace Iris
         private readonly Byte[] internalWorkingRAM = new Byte[32 * KB];
         private readonly CPU cpu;
         private readonly PPU ppu;
+        private bool running;
 
         public GBA(IRenderer renderer)
         {
-            this.cpu = new(this, 0x0800_0000, 0b1_1111); // ARM state & system mode
+            this.cpu = new(this);
             this.ppu = new(renderer);
         }
 
         public void LoadROM(string filename)
         {
             rom = File.ReadAllBytes(filename);
+            cpu.Reset(0x0800_0000, 0b1_1111); // ARM state & system mode
+        }
+
+        public bool IsRunning()
+        {
+            return running;
+        }
+
+        public void Run()
+        {
+            running = true;
+            while (running)
+            {
+                cpu.Step();
+                ppu.Step();
+            }
+        }
+
+        public void Pause()
+        {
+            running = false;
         }
 
         public Byte ReadMemory8(UInt32 address)
@@ -292,15 +314,6 @@ namespace Iris
             {
                 Console.WriteLine("Invalid write to address 0x{0:x8}", address);
                 Environment.Exit(1);
-            }
-        }
-
-        public void Run()
-        {
-            while (true)
-            {
-                cpu.Step();
-                ppu.Step();
             }
         }
     }

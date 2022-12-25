@@ -39,7 +39,7 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.quitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.emulationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.startToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.runToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pauseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
@@ -132,20 +132,20 @@
             // emulationToolStripMenuItem
             // 
             this.emulationToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.startToolStripMenuItem,
+            this.runToolStripMenuItem,
             this.pauseToolStripMenuItem});
             this.emulationToolStripMenuItem.Name = "emulationToolStripMenuItem";
             this.emulationToolStripMenuItem.Size = new System.Drawing.Size(90, 24);
             this.emulationToolStripMenuItem.Text = "&Emulation";
             // 
-            // startToolStripMenuItem
+            // runToolStripMenuItem
             // 
-            this.startToolStripMenuItem.Enabled = false;
-            this.startToolStripMenuItem.Name = "startToolStripMenuItem";
-            this.startToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.startToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.startToolStripMenuItem.Text = "&Start";
-            this.startToolStripMenuItem.Click += new System.EventHandler(this.StartToolStripMenuItem_Click);
+            this.runToolStripMenuItem.Enabled = false;
+            this.runToolStripMenuItem.Name = "runToolStripMenuItem";
+            this.runToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.R)));
+            this.runToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.runToolStripMenuItem.Text = "&Run";
+            this.runToolStripMenuItem.Click += new System.EventHandler(this.RunToolStripMenuItem_Click);
             // 
             // pauseToolStripMenuItem
             // 
@@ -187,7 +187,7 @@
         private ToolStripMenuItem saveStateToolStripMenuItem;
         private ToolStripMenuItem quitToolStripMenuItem;
         private ToolStripMenuItem emulationToolStripMenuItem;
-        private ToolStripMenuItem startToolStripMenuItem;
+        private ToolStripMenuItem runToolStripMenuItem;
         private ToolStripMenuItem pauseToolStripMenuItem;
         private ToolStripMenuItem loadStateToolStripMenuItem;
         private ToolStripStatusLabel toolStripStatusLabel1;
