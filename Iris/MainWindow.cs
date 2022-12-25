@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 namespace Iris
 {
@@ -17,12 +18,32 @@ namespace Iris
         public MainWindow(string[] args)
         {
             InitializeComponent();
+
             gba = new(this);
+            if (args.Length > 0)
+            {
+                LoadROM(args[0]);
+            }
         }
 
         public void DrawFrame()
         {
-            throw new NotImplementedException();
+            // TODO
+        }
+
+        private void LoadROM(string fileName)
+        {
+            try
+            {
+                gba.LoadROM(fileName);
+            }
+            catch
+            {
+                MessageBox.Show("Could not load ROM", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // gba.Run();
         }
 
         private void LoadROMToolStripMenuItem_Click(object sender, EventArgs e)
@@ -30,14 +51,17 @@ namespace Iris
             OpenFileDialog dialog = new();
             if (dialog.ShowDialog() == DialogResult.OK)
             {
-                gba.LoadROM(dialog.FileName);
-                gba.Run();
+                LoadROM(dialog.FileName);
             }
         }
 
         private void SaveStateToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
+            SaveFileDialog dialog = new();
+            if (dialog.ShowDialog(this) == DialogResult.OK)
+            {
+                // TODO
+            }
         }
 
         private void QuitToolStripMenuItem_Click(object sender, EventArgs e)

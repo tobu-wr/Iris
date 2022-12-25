@@ -8,10 +8,11 @@ namespace Iris
 {
     public class GBA : CPU.ICallbacks
     {
-        private Byte[]? rom;
-        private readonly Byte[] externalWorkingRAM = new Byte[256 * 1024]; // 256 KB
-        private readonly Byte[] internalWorkingRAM = new Byte[32 * 1024]; // 32 KB
+        private const int KB = 1024;
 
+        private Byte[]? rom;
+        private readonly Byte[] externalWorkingRAM = new Byte[256 * KB];
+        private readonly Byte[] internalWorkingRAM = new Byte[32 * KB];
         private readonly CPU cpu;
         private readonly PPU ppu;
 
@@ -23,15 +24,7 @@ namespace Iris
 
         public void LoadROM(string filename)
         {
-            try
-            {
-                rom = File.ReadAllBytes(filename);
-            }
-            catch
-            {
-                Console.WriteLine("ROM file not found");
-                Environment.Exit(1);
-            }
+            rom = File.ReadAllBytes(filename);
         }
 
         public Byte ReadMemory8(UInt32 address)

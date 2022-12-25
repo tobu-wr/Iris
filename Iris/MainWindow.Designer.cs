@@ -70,21 +70,21 @@
             // loadROMToolStripMenuItem
             // 
             this.loadROMToolStripMenuItem.Name = "loadROMToolStripMenuItem";
-            this.loadROMToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.loadROMToolStripMenuItem.Size = new System.Drawing.Size(162, 26);
             this.loadROMToolStripMenuItem.Text = "&Load ROM";
             this.loadROMToolStripMenuItem.Click += new System.EventHandler(this.LoadROMToolStripMenuItem_Click);
             // 
             // saveStateToolStripMenuItem
             // 
             this.saveStateToolStripMenuItem.Name = "saveStateToolStripMenuItem";
-            this.saveStateToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.saveStateToolStripMenuItem.Size = new System.Drawing.Size(162, 26);
             this.saveStateToolStripMenuItem.Text = "&Save state";
             this.saveStateToolStripMenuItem.Click += new System.EventHandler(this.SaveStateToolStripMenuItem_Click);
             // 
             // quitToolStripMenuItem
             // 
             this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
-            this.quitToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.quitToolStripMenuItem.Size = new System.Drawing.Size(162, 26);
             this.quitToolStripMenuItem.Text = "&Quit";
             this.quitToolStripMenuItem.Click += new System.EventHandler(this.QuitToolStripMenuItem_Click);
             // 
