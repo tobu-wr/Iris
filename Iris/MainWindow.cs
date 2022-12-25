@@ -54,7 +54,7 @@ namespace Iris
             runToolStripMenuItem.Enabled = false;
             pauseToolStripMenuItem.Enabled = true;
             toolStripStatusLabel1.Text = "Running";
-            gba.Run();
+            Task.Run(() => gba.Run());
         }
 
         private void Pause()
