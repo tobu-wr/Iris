@@ -7,8 +7,8 @@ if (args.Length == 0)
     return 1;
 }
 
-GBA gba = new();
-gba.LoadROM(args[0]);
-gba.Run();
+//GBA gba = new();
+//gba.LoadROM(args[0]);
+//gba.Run();
 
 return 0;

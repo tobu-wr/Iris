@@ -8,8 +8,6 @@ namespace Iris
 {
     public class PPU
     {
-        public delegate void DrawFrame();
-
         public Byte[] paletteRAM = new Byte[1 * 1024]; // 1 KB
         public Byte[] VRAM = new Byte[96 * 1024]; // 96 KB
 
@@ -20,12 +18,12 @@ namespace Iris
         private const UInt32 HORIZONTAL_LINE_WIDTH = 308;
         private const UInt32 HORIZONTAL_LINE_COUNT = 228;
 
+        private readonly IRenderer renderer;
         private UInt32 cycleCounter = 0;
-        private readonly DrawFrame drawFrame;
 
-        public PPU(DrawFrame drawFrame)
+        public PPU(IRenderer renderer)
         {
-            this.drawFrame = drawFrame;
+            this.renderer = renderer;
         }
 
         public void Step()
@@ -33,7 +31,7 @@ namespace Iris
             if (cycleCounter == HORIZONTAL_LINE_WIDTH * SCREEN_HEIGHT)
             {
                 // start of vertical blank
-                drawFrame();
+                renderer.DrawFrame();
                 dispstat |= 1;
                 ++cycleCounter;
             }

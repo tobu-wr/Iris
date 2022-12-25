@@ -15,10 +15,10 @@ namespace Iris
         private readonly CPU cpu;
         private readonly PPU ppu;
 
-        public GBA()
+        public GBA(IRenderer renderer)
         {
-            this.cpu = new(this, 0x0800_0000);
-            this.ppu = new(DrawFrame);
+            this.cpu = new(this, 0x0800_0000, 0b1_1111); // ARM state & system mode
+            this.ppu = new(renderer);
         }
 
         public void LoadROM(string filename)
@@ -302,20 +302,11 @@ namespace Iris
             }
         }
 
-        void DrawFrame()
-        {
-            // TODO
-        }
-
         public void Run()
         {
             while (true)
             {
                 cpu.Step();
-                cpu.Step();
-                cpu.Step();
-                cpu.Step();
-
                 ppu.Step();
             }
         }

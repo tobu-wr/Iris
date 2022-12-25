@@ -30,14 +30,14 @@ namespace Iris
         private UInt32 cpsr;
         private UInt32 nextInstructionAddress;
 
-        public CPU(ICallbacks callbacks, UInt32 startAddress)
+        public CPU(ICallbacks callbacks, UInt32 pc, UInt32 cpsr)
         {
             this.callbacks = callbacks;
 
-            nextInstructionAddress = startAddress;
+            nextInstructionAddress = pc;
             reg[PC] = nextInstructionAddress + 4;
 
-            cpsr = 0b11111; // System mode
+            this.cpsr = cpsr;
         }
 
         public void Step()
