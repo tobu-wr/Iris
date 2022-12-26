@@ -8,6 +8,6 @@ namespace Iris
 {
     public interface IRenderer
     {
-        void DrawFrame();
+        void DrawFrame(UInt16[] frameBuffer);
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,9 +31,28 @@ namespace Iris
             }
         }
 
-        public void DrawFrame()
+        public void DrawFrame(UInt16[] frameBuffer)
         {
-            // TODO
+            const int SCREEN_WIDTH = 240;
+            const int SCREEN_HEIGHT = 160;
+
+            Bitmap bitmap = new(SCREEN_WIDTH, SCREEN_HEIGHT);
+            for (int x = 0; x < SCREEN_WIDTH; ++x)
+            {
+                for (int y = 0; y < SCREEN_HEIGHT; ++y)
+                {
+                    UInt16 gbaColor = frameBuffer[y * SCREEN_WIDTH + x];
+                    Color color = Color.FromArgb(
+                        ((gbaColor >> 0) & 0x1f) << 3,
+                        ((gbaColor >> 5) & 0x1f) << 3,
+                        ((gbaColor >> 10) & 0x1f) << 3
+                    );
+                    bitmap.SetPixel(x, y, color);
+                }
+            }
+
+            pictureBox1.Image = bitmap;
+            pictureBox1.Invalidate();
         }
 
         private bool LoadROM(string fileName)
