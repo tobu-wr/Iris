@@ -17,10 +17,16 @@ namespace Iris
     {
         private readonly GBA gba;
 
+        private UInt32 frameCount = 0;
+        private readonly System.Windows.Forms.Timer performanceUpdateTimer = new();
+
         public MainWindow(string[] args)
         {
             InitializeComponent();
             gba = new(this);
+
+            performanceUpdateTimer.Interval = 1000; // each second
+            performanceUpdateTimer.Tick += new EventHandler(PerformanceUpdateTimer_Tick);
 
             if (args.Length > 0 && LoadROM(args[0]))
             {
@@ -54,6 +60,8 @@ namespace Iris
 
             pictureBox1.Image = bitmap;
             pictureBox1.Invalidate();
+
+            ++frameCount;
         }
 
         private bool LoadROM(string fileName)
@@ -76,6 +84,7 @@ namespace Iris
             pauseToolStripMenuItem.Enabled = true;
             toolStripStatusLabel1.Text = "Running";
             Task.Run(() => gba.Run());
+            performanceUpdateTimer.Start();
         }
 
         private void Pause()
@@ -84,6 +93,9 @@ namespace Iris
             pauseToolStripMenuItem.Enabled = false;
             toolStripStatusLabel1.Text = "Paused";
             gba.Pause();
+            performanceUpdateTimer.Stop();
+            toolStripStatusLabel2.Text = "FPS: 0";
+            frameCount = 0;
         }
 
         private void LoadROMToolStripMenuItem_Click(object sender, EventArgs e)
@@ -148,6 +160,12 @@ namespace Iris
         private void PauseToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Pause();
+        }
+
+        private void PerformanceUpdateTimer_Tick(object? sender, EventArgs e)
+        {
+            toolStripStatusLabel2.Text = "FPS: " + frameCount;
+            frameCount = 0;
         }
     }
 }
