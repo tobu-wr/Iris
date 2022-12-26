@@ -8,6 +8,7 @@ using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
@@ -17,16 +18,15 @@ namespace Iris
     {
         private readonly GBA gba;
 
-        private UInt32 frameCount = 0;
-        private readonly System.Windows.Forms.Timer performanceUpdateTimer = new();
+        private int frameCount = 0;
+        private readonly System.Timers.Timer performanceUpdateTimer = new(1000);
 
         public MainWindow(string[] args)
         {
             InitializeComponent();
             gba = new(this);
 
-            performanceUpdateTimer.Interval = 1000; // each second
-            performanceUpdateTimer.Tick += new EventHandler(PerformanceUpdateTimer_Tick);
+            performanceUpdateTimer.Elapsed += new ElapsedEventHandler(PerformanceUpdateTimer_Elapsed);
 
             if (args.Length > 0 && LoadROM(args[0]))
             {
@@ -161,9 +161,10 @@ namespace Iris
             Pause();
         }
 
-        private void PerformanceUpdateTimer_Tick(object? sender, EventArgs e)
+        private void PerformanceUpdateTimer_Elapsed(object? sender, ElapsedEventArgs e)
         {
-            toolStripStatusLabel2.Text = "FPS: " + frameCount;
+            int fps = (int)((frameCount * 1000) / performanceUpdateTimer.Interval);
+            toolStripStatusLabel2.Text = "FPS: " + fps;
             frameCount = 0;
         }
     }
