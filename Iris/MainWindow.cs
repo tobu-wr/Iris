@@ -42,18 +42,17 @@ namespace Iris
         {
             const int SCREEN_WIDTH = 240;
             const int SCREEN_HEIGHT = 160;
-
             Bitmap bitmap = new(SCREEN_WIDTH, SCREEN_HEIGHT);
+
             for (int x = 0; x < SCREEN_WIDTH; ++x)
             {
                 for (int y = 0; y < SCREEN_HEIGHT; ++y)
                 {
                     UInt16 gbaColor = frameBuffer[y * SCREEN_WIDTH + x];
-                    Color color = Color.FromArgb(
-                        ((gbaColor >> 0) & 0x1f) << 3,
-                        ((gbaColor >> 5) & 0x1f) << 3,
-                        ((gbaColor >> 10) & 0x1f) << 3
-                    );
+                    int red = (((gbaColor >> 0) & 0x1f) * 0xff) / 0x1f;
+                    int green = (((gbaColor >> 5) & 0x1f) * 0xff) / 0x1f;
+                    int blue = (((gbaColor >> 10) & 0x1f) * 0xff) / 0x1f;
+                    Color color = Color.FromArgb(red, green, blue);
                     bitmap.SetPixel(x, y, color);
                 }
             }
