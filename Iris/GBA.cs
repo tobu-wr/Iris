@@ -103,7 +103,7 @@ namespace Iris
                         return ppu.dispstat;
 
                     case 0x130:
-                        //Console.WriteLine("GBA: Read from KEYINPUT register (unimplemented)");
+                        Console.WriteLine("GBA: Read from KEYINPUT register (unimplemented)");
                         return 0xff;
 
                     default:
@@ -203,8 +203,8 @@ namespace Iris
 
                 if ((address + 1) < internalWorkingRAM.Length)
                 {
-                    internalWorkingRAM[address + 1] = (Byte)((value >> 8) & 0xff);
-                    internalWorkingRAM[address + 0] = (Byte)((value >> 0) & 0xff);
+                    internalWorkingRAM[address + 1] = (Byte)(value >> 8);
+                    internalWorkingRAM[address + 0] = (Byte)(value >> 0);
                 }
                 else
                 {
@@ -218,8 +218,8 @@ namespace Iris
 
                 if ((address + 1) < ppu.paletteRAM.Length)
                 {
-                    ppu.paletteRAM[address + 1] = (Byte)((value >> 8) & 0xff);
-                    ppu.paletteRAM[address + 0] = (Byte)((value >> 0) & 0xff);
+                    ppu.paletteRAM[address + 1] = (Byte)(value >> 8);
+                    ppu.paletteRAM[address + 0] = (Byte)(value >> 0);
                 }
                 else
                 {
@@ -233,8 +233,8 @@ namespace Iris
 
                 if ((address + 1) < ppu.VRAM.Length)
                 {
-                    ppu.VRAM[address + 1] = (Byte)((value >> 8) & 0xff);
-                    ppu.VRAM[address + 0] = (Byte)((value >> 0) & 0xff);
+                    ppu.VRAM[address + 1] = (Byte)(value >> 8);
+                    ppu.VRAM[address + 0] = (Byte)(value >> 0);
                 }
                 else
                 {
@@ -257,10 +257,10 @@ namespace Iris
 
                 if ((address + 3) < externalWorkingRAM.Length)
                 {
-                    externalWorkingRAM[address + 3] = (Byte)((value >> 24) & 0xff);
-                    externalWorkingRAM[address + 2] = (Byte)((value >> 16) & 0xff);
-                    externalWorkingRAM[address + 1] = (Byte)((value >> 8) & 0xff);
-                    externalWorkingRAM[address + 0] = (Byte)((value >> 0) & 0xff);
+                    externalWorkingRAM[address + 3] = (Byte)(value >> 24);
+                    externalWorkingRAM[address + 2] = (Byte)(value >> 16);
+                    externalWorkingRAM[address + 1] = (Byte)(value >> 8);
+                    externalWorkingRAM[address + 0] = (Byte)(value >> 0);
                 }
                 else
                 {
@@ -274,10 +274,10 @@ namespace Iris
 
                 if ((address + 3) < internalWorkingRAM.Length)
                 {
-                    internalWorkingRAM[address + 3] = (Byte)((value >> 24) & 0xff);
-                    internalWorkingRAM[address + 2] = (Byte)((value >> 16) & 0xff);
-                    internalWorkingRAM[address + 1] = (Byte)((value >> 8) & 0xff);
-                    internalWorkingRAM[address + 0] = (Byte)((value >> 0) & 0xff);
+                    internalWorkingRAM[address + 3] = (Byte)(value >> 24);
+                    internalWorkingRAM[address + 2] = (Byte)(value >> 16);
+                    internalWorkingRAM[address + 1] = (Byte)(value >> 8);
+                    internalWorkingRAM[address + 0] = (Byte)(value >> 0);
                 }
                 else
                 {
@@ -316,10 +316,10 @@ namespace Iris
 
                 if ((address + 3) < ppu.VRAM.Length)
                 {
-                    ppu.VRAM[address + 3] = (Byte)((value >> 24) & 0xff);
-                    ppu.VRAM[address + 2] = (Byte)((value >> 16) & 0xff);
-                    ppu.VRAM[address + 1] = (Byte)((value >> 8) & 0xff);
-                    ppu.VRAM[address + 0] = (Byte)((value >> 0) & 0xff);
+                    ppu.VRAM[address + 3] = (Byte)(value >> 24);
+                    ppu.VRAM[address + 2] = (Byte)(value >> 16);
+                    ppu.VRAM[address + 1] = (Byte)(value >> 8);
+                    ppu.VRAM[address + 0] = (Byte)(value >> 0);
                 }
                 else
                 {

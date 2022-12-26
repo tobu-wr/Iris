@@ -49,7 +49,8 @@ namespace Iris
                                 for (UInt32 i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; ++i)
                                 {
                                     Byte colorNo = VRAM[frameBufferAddress + i];
-                                    UInt16 color = paletteRAM[colorNo];
+                                    UInt16 color = (UInt16)((paletteRAM[(colorNo * 2) + 1] << 8)
+                                                          | (paletteRAM[(colorNo * 2) + 0] << 0));
                                     rendererFrameBuffer[i] = color;
                                 }
 

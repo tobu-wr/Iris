@@ -4,7 +4,6 @@ Game Boy Advance emulator
 
 ## Roadmap
 
-- Display ARMWrestler's menu
 - Implement all missing instructions
 - Pass all ARMWrestler's tests
 - Boot to menu all games from compatibility list
