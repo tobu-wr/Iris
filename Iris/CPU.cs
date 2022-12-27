@@ -35,7 +35,7 @@ namespace Iris
             this.callbacks = callbacks;
         }
 
-        public void Reset(UInt32 pc, UInt32 cpsr)
+        public void Init(UInt32 pc, UInt32 cpsr)
         {
             nextInstructionAddress = pc;
             reg[PC] = nextInstructionAddress + 4;
