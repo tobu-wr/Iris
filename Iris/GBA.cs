@@ -26,7 +26,7 @@ namespace Iris
         public void LoadROM(string filename)
         {
             rom = File.ReadAllBytes(filename);
-            cpu.Reset(0x0800_0000, 0b1_1111); // ARM state & system mode
+            cpu.Reset(0x0800_0000, 0b1101_1111); // flags cleared + IRQ & FIQ interrupts disabled + ARM state + system mode
         }
 
         public bool IsRunning()
