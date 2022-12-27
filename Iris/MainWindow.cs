@@ -60,10 +60,7 @@ namespace Iris
 
             System.Runtime.InteropServices.Marshal.Copy(buffer, 0, data.Scan0, PIXEL_COUNT);
             bitmap.UnlockBits(data);
-            pictureBox1.Invoke((MethodInvoker)delegate
-            {
-                pictureBox1.Image = bitmap;
-            });
+            pictureBox1.Invoke(() => pictureBox1.Image = bitmap);
             pictureBox1.Invalidate();
 
             ++frameCount;
@@ -108,7 +105,8 @@ namespace Iris
         private void LoadROMToolStripMenuItem_Click(object sender, EventArgs e)
         {
             bool running = gba.IsRunning();
-            if (running) Pause();
+            if (running)
+                Pause();
 
             OpenFileDialog dialog = new();
             if (dialog.ShowDialog() == DialogResult.OK)
@@ -123,13 +121,15 @@ namespace Iris
                 }
             }
 
-            if (running) Run();
+            if (running)
+                Run();
         }
 
         private void LoadStateToolStripMenuItem_Click(object sender, EventArgs e)
         {
             bool running = gba.IsRunning();
-            if (running) Pause();
+            if (running)
+                Pause();
 
             OpenFileDialog dialog = new();
             if (dialog.ShowDialog() == DialogResult.OK)
@@ -137,13 +137,15 @@ namespace Iris
                 // TODO
             }
 
-            if (running) Run();
+            if (running)
+                Run();
         }
 
         private void SaveStateToolStripMenuItem_Click(object sender, EventArgs e)
         {
             bool running = gba.IsRunning();
-            if (running) Pause();
+            if (running)
+                Pause();
 
             SaveFileDialog dialog = new();
             if (dialog.ShowDialog(this) == DialogResult.OK)
@@ -151,7 +153,8 @@ namespace Iris
                 // TODO
             }
 
-            if (running) Run();
+            if (running)
+                Run();
         }
 
         private void QuitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -172,10 +175,7 @@ namespace Iris
         private void PerformanceUpdateTimer_Elapsed(object? sender, ElapsedEventArgs e)
         {
             int fps = (int)(frameCount * 1000 / performanceUpdateTimer.Interval);
-            menuStrip1.Invoke((MethodInvoker)delegate
-            {
-                toolStripStatusLabel2.Text = "FPS: " + fps;
-            });
+            menuStrip1.Invoke(() => toolStripStatusLabel2.Text = "FPS: " + fps);
             frameCount = 0;
         }
     }
