@@ -14,6 +14,16 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 namespace Iris
 {
+    public class CustomPictureBox : PictureBox
+    {
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            e.Graphics.PixelOffsetMode = PixelOffsetMode.Half;
+            e.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+            base.OnPaint(e);
+        }
+    }
+
     public partial class MainWindow : Form, IRenderer
     {
         private readonly GBA gba;
@@ -42,10 +52,10 @@ namespace Iris
         {
             const int SCREEN_WIDTH = 240;
             const int SCREEN_HEIGHT = 160;
-            const PixelFormat FORMAT = PixelFormat.Format16bppRgb555;
+            const PixelFormat PIXEL_FORMAT = PixelFormat.Format16bppRgb555;
 
-            Bitmap bitmap = new(SCREEN_WIDTH, SCREEN_HEIGHT, FORMAT);
-            BitmapData data = bitmap.LockBits(new Rectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT), ImageLockMode.WriteOnly, FORMAT);
+            Bitmap bitmap = new(SCREEN_WIDTH, SCREEN_HEIGHT, PIXEL_FORMAT);
+            BitmapData data = bitmap.LockBits(new Rectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT), ImageLockMode.WriteOnly, PIXEL_FORMAT);
 
             const int PIXEL_COUNT = SCREEN_WIDTH * SCREEN_HEIGHT;
             Int16[] buffer = new Int16[PIXEL_COUNT];
