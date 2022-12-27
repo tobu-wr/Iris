@@ -60,7 +60,10 @@ namespace Iris
 
             System.Runtime.InteropServices.Marshal.Copy(buffer, 0, data.Scan0, bufferSize);
             bitmap.UnlockBits(data);
-            pictureBox1.Image = bitmap;
+            pictureBox1.Invoke((MethodInvoker)delegate
+            {
+                pictureBox1.Image = bitmap;
+            });
             pictureBox1.Invalidate();
 
             ++frameCount;
@@ -86,6 +89,7 @@ namespace Iris
             pauseToolStripMenuItem.Enabled = true;
             toolStripStatusLabel1.Text = "Running";
             Task.Run(() => gba.Run());
+
             performanceUpdateTimer.Start();
         }
 
@@ -95,6 +99,7 @@ namespace Iris
             pauseToolStripMenuItem.Enabled = false;
             toolStripStatusLabel1.Text = "Paused";
             gba.Pause();
+
             performanceUpdateTimer.Stop();
             toolStripStatusLabel2.Text = "FPS: 0";
             frameCount = 0;
@@ -166,8 +171,11 @@ namespace Iris
 
         private void PerformanceUpdateTimer_Elapsed(object? sender, ElapsedEventArgs e)
         {
-            int fps = (int)((frameCount * 1000) / performanceUpdateTimer.Interval);
-            toolStripStatusLabel2.Text = "FPS: " + fps;
+            int fps = (int)(frameCount * 1000 / performanceUpdateTimer.Interval);
+            menuStrip1.Invoke((MethodInvoker)delegate
+            {
+                toolStripStatusLabel2.Text = "FPS: " + fps;
+            });
             frameCount = 0;
         }
     }
