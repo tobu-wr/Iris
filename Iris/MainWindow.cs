@@ -42,23 +42,23 @@ namespace Iris
         {
             const int SCREEN_WIDTH = 240;
             const int SCREEN_HEIGHT = 160;
-            const PixelFormat FORMAT = PixelFormat.Format24bppRgb;
+            const PixelFormat FORMAT = PixelFormat.Format16bppRgb555;
+
             Bitmap bitmap = new(SCREEN_WIDTH, SCREEN_HEIGHT, FORMAT);
             BitmapData data = bitmap.LockBits(new Rectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT), ImageLockMode.WriteOnly, FORMAT);
 
-            const int BPP = 3;
-            const int bufferSize = SCREEN_WIDTH * SCREEN_HEIGHT * BPP;
-            byte[] buffer = new byte[bufferSize];
-
-            for (int i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; ++i)
+            const int PIXEL_COUNT = SCREEN_WIDTH * SCREEN_HEIGHT;
+            Int16[] buffer = new Int16[PIXEL_COUNT];
+            for (int i = 0; i < PIXEL_COUNT; ++i)
             {
-                UInt16 gbaColor = frameBuffer[i];
-                buffer[i * BPP + 2] = (byte)(((gbaColor >> 0) & 0x1f) * 0xff / 0x1f); // red
-                buffer[i * BPP + 1] = (byte)(((gbaColor >> 5) & 0x1f) * 0xff / 0x1f); // green
-                buffer[i * BPP + 0] = (byte)(((gbaColor >> 10) & 0x1f) * 0xff / 0x1f); // blue
+                UInt16 gbaColor = frameBuffer[i]; // BGR format
+                Byte red = (Byte)((gbaColor >> 0) & 0x1f);
+                Byte green = (Byte)((gbaColor >> 5) & 0x1f);
+                Byte blue = (Byte)((gbaColor >> 10) & 0x1f);
+                buffer[i] = (Int16)((red << 10) | (green << 5) | blue);
             }
 
-            System.Runtime.InteropServices.Marshal.Copy(buffer, 0, data.Scan0, bufferSize);
+            System.Runtime.InteropServices.Marshal.Copy(buffer, 0, data.Scan0, PIXEL_COUNT);
             bitmap.UnlockBits(data);
             pictureBox1.Invoke((MethodInvoker)delegate
             {
