@@ -23,10 +23,15 @@ namespace Iris
             this.ppu = new(renderer);
         }
 
+        public void Init()
+        {
+            cpu.Init(0x0800_0000, 0b1101_1111); // flags cleared + IRQ & FIQ interrupts disabled + ARM state + system mode
+        }
+
         public void LoadROM(string filename)
         {
             rom = File.ReadAllBytes(filename);
-            cpu.Init(0x0800_0000, 0b1101_1111); // flags cleared + IRQ & FIQ interrupts disabled + ARM state + system mode
+            Init();
         }
 
         public bool IsRunning()
