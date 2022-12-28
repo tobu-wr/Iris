@@ -11,8 +11,8 @@ namespace Iris
         private const int KB = 1024;
 
         private Byte[]? rom;
-        private readonly Byte[] externalWorkingRAM = new Byte[256 * KB];
-        private readonly Byte[] internalWorkingRAM = new Byte[32 * KB];
+        private readonly Byte[] externalWRAM = new Byte[256 * KB];
+        private readonly Byte[] internalWRAM = new Byte[32 * KB];
         private readonly CPU cpu;
         private readonly PPU ppu;
         private bool running = false;
@@ -58,14 +58,14 @@ namespace Iris
         {
             if (0x0300_0000 <= address && address < 0x0400_0000)
             {
-                UInt32 relativeAddress = address - 0x0300_0000;
-                if (relativeAddress < internalWorkingRAM.Length)
-                    return internalWorkingRAM[relativeAddress];
+                UInt32 offset = address - 0x0300_0000;
+                if (offset < internalWRAM.Length)
+                    return internalWRAM[offset];
             }
             else if (0x0400_0000 <= address && address < 0x0500_0000)
             {
-                UInt32 relativeAddress = address - 0x0400_0000;
-                switch (relativeAddress)
+                UInt32 offset = address - 0x0400_0000;
+                switch (offset)
                 {
                     case 0x004:
                         return (Byte)ppu.dispstat;
@@ -83,9 +83,9 @@ namespace Iris
                 if (rom == null)
                     throw new Exception("GBA: No ROM loaded");
 
-                UInt32 relativeAddress = address - 0x0800_0000;
-                if (relativeAddress < rom.Length)
-                    return rom[relativeAddress];
+                UInt32 offset = address - 0x0800_0000;
+                if (offset < rom.Length)
+                    return rom[offset];
             }
 
             throw new Exception(string.Format("GBA: Invalid read from address 0x{0:x8}", address));
@@ -105,24 +105,24 @@ namespace Iris
         {
             if (0x0200_0000 <= address && address < 0x0300_0000)
             {
-                UInt32 relativeAddress = address - 0x0200_0000;
-                if (relativeAddress < externalWorkingRAM.Length)
-                    externalWorkingRAM[relativeAddress] = value;
+                UInt32 offset = address - 0x0200_0000;
+                if (offset < externalWRAM.Length)
+                    externalWRAM[offset] = value;
                 else
                     throw new Exception(string.Format("GBA: Invalid write to address 0x{0:x8}", address));
             }
             else if (0x0300_0000 <= address && address < 0x0400_0000)
             {
-                UInt32 relativeAddress = address - 0x0300_0000;
-                if (relativeAddress < internalWorkingRAM.Length)
-                    internalWorkingRAM[relativeAddress] = value;
+                UInt32 offset = address - 0x0300_0000;
+                if (offset < internalWRAM.Length)
+                    internalWRAM[offset] = value;
                 else
                     throw new Exception(string.Format("GBA: Invalid write to address 0x{0:x8}", address));
             }
             else if (0x0400_0000 <= address && address < 0x0500_0000)
             {
-                UInt32 relativeAddress = address - 0x0400_0000;
-                switch (relativeAddress)
+                UInt32 offset = address - 0x0400_0000;
+                switch (offset)
                 {
                     case 0x000:
                         ppu.dispcnt = (UInt16)((ppu.dispcnt & 0xff00) | value);
@@ -152,17 +152,17 @@ namespace Iris
             }
             else if (0x0500_0000 <= address && address < 0x0600_0000)
             {
-                UInt32 relativeAddress = address - 0x0500_0000;
-                if (relativeAddress < ppu.paletteRAM.Length)
-                    ppu.paletteRAM[relativeAddress] = value;
+                UInt32 offset = address - 0x0500_0000;
+                if (offset < ppu.paletteRAM.Length)
+                    ppu.paletteRAM[offset] = value;
                 else
                     throw new Exception(string.Format("GBA: Invalid write to address 0x{0:x8}", address));
             }
             else if (0x0600_0000 <= address && address < 0x0700_0000)
             {
-                UInt32 relativeAddress = address - 0x0600_0000;
-                if (relativeAddress < ppu.VRAM.Length)
-                    ppu.VRAM[relativeAddress] = value;
+                UInt32 offset = address - 0x0600_0000;
+                if (offset < ppu.VRAM.Length)
+                    ppu.VRAM[offset] = value;
                 else
                     throw new Exception(string.Format("GBA: Invalid write to address 0x{0:x8}", address));
             }

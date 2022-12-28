@@ -4,8 +4,10 @@ Game Boy Advance emulator
 
 ## Roadmap
 
+- Implement KEYINPUT register
 - Implement all missing instructions
 - Pass all ARMWrestler's tests
+- Pass all FuzzArm's tests
 - Boot to menu all games from compatibility list
 - TBD
 
@@ -20,4 +22,4 @@ Game Boy Advance emulator
 - Dragon Ball Z: The Legacy Of Goku
 - Dragon Ball Z: The Legacy Of Goku 2
 - Dragon Ball Z: Buu's Fury
-- Pokémon Emerald
+- PokÃ©mon Emerald
