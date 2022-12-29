@@ -56,7 +56,6 @@ namespace Iris
                 nextInstructionAddress += 4;
                 reg[PC] = nextInstructionAddress + 4;
 
-
                 // ADC
                 if ((instruction & 0x0fa0_0000) == 0x02a0_0000) // I bit is 1
                 {

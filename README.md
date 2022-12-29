@@ -4,7 +4,7 @@ Game Boy Advance emulator
 
 ## Roadmap
 
-- Implement KEYINPUT register
+- Fix ORR and MOV instructions first
 - Implement all missing instructions
 - Simplify instruction decoding and refact their implementation along the way
 - Pass all ARMWrestler's tests
