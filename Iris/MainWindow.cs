@@ -202,12 +202,14 @@ namespace Iris
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
-            gba.SetKeyStatus(keyMapping[e.KeyCode], true);
+            if (keyMapping.TryGetValue(e.KeyCode, out GBA.Keys value))
+                gba.SetKeyStatus(value, true);
         }
 
         private void MainWindow_KeyUp(object sender, KeyEventArgs e)
         {
-            gba.SetKeyStatus(keyMapping[e.KeyCode], false);
+            if (keyMapping.TryGetValue(e.KeyCode, out GBA.Keys value))
+                gba.SetKeyStatus(value, false);
         }
 
         private void PerformanceUpdateTimer_Elapsed(object? sender, ElapsedEventArgs e)
