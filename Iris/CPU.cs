@@ -56,6 +56,300 @@ namespace Iris
                 nextInstructionAddress += 4;
                 reg[PC] = nextInstructionAddress + 4;
 
+
+                // ADC
+                if ((instruction & 0x0fa0_0000) == 0x02a0_0000) // I bit is 1
+                {
+                    ARM_ADC(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fa0_0090) == 0x00a0_0000) // I bit is 0, bit[7] is 0 and bit[4] is 0
+                {
+                    ARM_ADC(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fa0_0090) == 0x00a0_0080) // I bit is 0, bit[7] is 1 and bit[4] is 0
+                {
+                    ARM_ADC(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fa0_0090) == 0x00a0_0010) // I bit is 0, bit[7] is 0 and bit[4] is 1
+                {
+                    ARM_ADC(instruction);
+                    return;
+                }
+
+                // ADD
+                if ((instruction & 0x0fa0_0000) == 0x0280_0000) // I bit is 1
+                {
+                    ARM_ADD(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fa0_0090) == 0x0080_0000) // I bit is 0, bit[7] is 0 and bit[4] is 0
+                {
+                    ARM_ADD(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fa0_0090) == 0x0080_0080) // I bit is 0, bit[7] is 1 and bit[4] is 0
+                {
+                    ARM_ADD(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fa0_0090) == 0x0080_0010) // I bit is 0, bit[7] is 0 and bit[4] is 1
+                {
+                    ARM_ADD(instruction);
+                    return;
+                }
+
+                // AND
+                else if ((instruction & 0x0fe0_0000) == 0x0200_0000) // I bit is 1
+                {
+                    ARM_AND(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fe0_0090) == 0x0000_0000) // I bit is 0, bit[7] is 0 and bit[4] is 0
+                {
+                    ARM_AND(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fe0_0090) == 0x0000_0080) // I bit is 0, bit[7] is 1 and bit[4] is 0
+                {
+                    ARM_AND(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fe0_0090) == 0x0000_0010) // I bit is 0, bit[7] is 0 and bit[4] is 1
+                {
+                    ARM_AND(instruction);
+                    return;
+                }
+
+                // BIC
+                else if ((instruction & 0x0fe0_0000) == 0x03c0_0000) // I bit is 1
+                {
+                    ARM_BIC(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fe0_0090) == 0x01c0_0000) // I bit is 0, bit[7] is 0 and bit[4] is 0
+                {
+                    ARM_BIC(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fe0_0090) == 0x01c0_0080) // I bit is 0, bit[7] is 1 and bit[4] is 0
+                {
+                    ARM_BIC(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fe0_0090) == 0x01c0_0010) // I bit is 0, bit[7] is 0 and bit[4] is 1
+                {
+                    ARM_BIC(instruction);
+                    return;
+                }
+
+
+                // CMN
+                else if ((instruction & 0x0ff0_0000) == 0x0370_0000) // I bit is 1
+                {
+                    ARM_CMN(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0ff0_0090) == 0x0170_0000) // I bit is 0, bit[7] is 0 and bit[4] is 0
+                {
+                    ARM_CMN(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0ff0_0090) == 0x0170_0080) // I bit is 0, bit[7] is 1 and bit[4] is 0
+                {
+                    ARM_CMN(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0ff0_0090) == 0x0170_0010) // I bit is 0, bit[7] is 0 and bit[4] is 1
+                {
+                    ARM_CMN(instruction);
+                    return;
+                }
+
+                // CMP
+                else if ((instruction & 0x0ff0_0000) == 0x0350_0000) // I bit is 1
+                {
+                    ARM_CMP(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0ff0_0090) == 0x0150_0000) // I bit is 0, bit[7] is 0 and bit[4] is 0
+                {
+                    ARM_CMP(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0ff0_0090) == 0x0150_0080) // I bit is 0, bit[7] is 1 and bit[4] is 0
+                {
+                    ARM_CMP(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0ff0_0090) == 0x0150_0010) // I bit is 0, bit[7] is 0 and bit[4] is 1
+                {
+                    ARM_CMP(instruction);
+                    return;
+                }
+
+                // EOR
+                else if ((instruction & 0x0fe0_0000) == 0x0220_0000) // I bit is 1
+                {
+                    ARM_EOR(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fe0_0090) == 0x0020_0000) // I bit is 0, bit[7] is 0 and bit[4] is 0
+                {
+                    ARM_EOR(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fe0_0090) == 0x0020_0080) // I bit is 0, bit[7] is 1 and bit[4] is 0
+                {
+                    ARM_EOR(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fe0_0090) == 0x0020_0010) // I bit is 0, bit[7] is 0 and bit[4] is 1
+                {
+                    ARM_EOR(instruction);
+                    return;
+                }
+
+                // MLA
+                else if ((instruction & 0x0fe0_00f0) == 0x0020_0090)
+                {
+                    ARM_MLA(instruction);
+                    return;
+                }
+
+                // MOV
+                else if ((instruction & 0x0fe0_0000) == 0x03a0_0000) // I bit is 1
+                {
+                    ARM_MOV(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fe0_0090) == 0x01a0_0000) // I bit is 0, bit[7] is 0 and bit[4] is 0
+                {
+                    ARM_MOV(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fe0_0090) == 0x01a0_0080) // I bit is 0, bit[7] is 1 and bit[4] is 0
+                {
+                    ARM_MOV(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fe0_0090) == 0x01a0_0010) // I bit is 0, bit[7] is 0 and bit[4] is 1
+                {
+                    ARM_MOV(instruction);
+                    return;
+                }
+
+                // MVN
+                else if ((instruction & 0x0fe0_0000) == 0x03e0_0000) // I bit is 1
+                {
+                    ARM_MVN(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fe0_0090) == 0x01e0_0000) // I bit is 0, bit[7] is 0 and bit[4] is 0
+                {
+                    ARM_MVN(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fe0_0090) == 0x01e0_0080) // I bit is 0, bit[7] is 1 and bit[4] is 0
+                {
+                    ARM_MVN(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fe0_0090) == 0x01e0_0010) // I bit is 0, bit[7] is 0 and bit[4] is 1
+                {
+                    ARM_MVN(instruction);
+                    return;
+                }
+
+                // MUL
+                else if ((instruction & 0x0fe0_00f0) == 0x0000_0090)
+                {
+                    ARM_MUL(instruction);
+                    return;
+                }
+
+                // ORR
+                else if ((instruction & 0x0fe0_0000) == 0x0380_0000) // I bit is 1
+                {
+                    ARM_ORR(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fe0_0090) == 0x0180_0000) // I bit is 0, bit[7] is 0 and bit[4] is 0
+                {
+                    ARM_ORR(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fe0_0090) == 0x0180_0080) // I bit is 0, bit[7] is 1 and bit[4] is 0
+                {
+                    ARM_ORR(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fe0_0090) == 0x0180_0010) // I bit is 0, bit[7] is 0 and bit[4] is 1
+                {
+                    ARM_ORR(instruction);
+                    return;
+                }
+
+                // RSC
+                else if ((instruction & 0x0fe0_0000) == 0x02e0_0000) // I bit is 1
+                {
+                    ARM_RSC(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fe0_0090) == 0x00e0_0000) // I bit is 0, bit[7] is 0 and bit[4] is 0
+                {
+                    ARM_RSC(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fe0_0090) == 0x00e0_0080) // I bit is 0, bit[7] is 1 and bit[4] is 0
+                {
+                    ARM_RSC(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fe0_0090) == 0x00e0_0010) // I bit is 0, bit[7] is 0 and bit[4] is 1
+                {
+                    ARM_RSC(instruction);
+                    return;
+                }
+
+                // SBC
+                else if ((instruction & 0x0fe0_0000) == 0x02c0_0000) // I bit is 1
+                {
+                    ARM_SBC(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fe0_0090) == 0x00c0_0000) // I bit is 0, bit[7] is 0 and bit[4] is 0
+                {
+                    ARM_SBC(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fe0_0090) == 0x00c0_0080) // I bit is 0, bit[7] is 1 and bit[4] is 0
+                {
+                    ARM_SBC(instruction);
+                    return;
+                }
+                else if ((instruction & 0x0fe0_0090) == 0x00c0_0010) // I bit is 0, bit[7] is 0 and bit[4] is 1
+                {
+                    ARM_SBC(instruction);
+                    return;
+                }
+
+                // SMULL
+                else if ((instruction & 0x0fe0_00f0) == 0x00c0_0090)
+                {
+                    ARM_SMULL(instruction);
+                    return;
+                }
+
+                // UMULL
+                else if ((instruction & 0x0fe0_00f0) == 0x0080_0090)
+                {
+                    ARM_UMULL(instruction);
+                    return;
+                }
+
                 switch ((instruction >> 25) & 0b111)
                 {
                     case 0b000:
@@ -65,23 +359,8 @@ namespace Iris
                             // Multiplies
                             if (((instruction >> 24) & 1) == 0 && ((instruction >> 5) & 0b11) == 0)
                             {
-                                if (((instruction >> 23) & 1) == 0)
-                                {
-                                    if (((instruction >> 22) & 1) == 0)
-                                    {
-                                        ARM_Multiply(instruction);
-                                    }
-                                    else
-                                    {
-                                        Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, nextInstructionAddress);
-                                        Environment.Exit(1);
-                                    }
-                                }
-                                else
-                                {
-                                    Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, nextInstructionAddress);
-                                    Environment.Exit(1);
-                                }
+                                Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, nextInstructionAddress);
+                                Environment.Exit(1);
                             }
 
                             // Extra load/stores
@@ -181,35 +460,6 @@ namespace Iris
                             }
                         }
 
-                        // Data processing immediate shift
-                        else if ((instruction & 0x0000_0010) == 0x0000_0000)
-                        {
-                            UInt32 opcode = (instruction >> 21) & 0b1111;
-                            switch (opcode)
-                            {
-                                case 0b0001:
-                                    ARM_LogicalExclusiveOR_ImmediateShift(instruction);
-                                    break;
-
-                                case 0b0100:
-                                    ARM_Add_ImmediateShift(instruction);
-                                    break;
-
-                                case 0b1100:
-                                    ARM_LogicalInclusiveOR_ImmediateShift(instruction);
-                                    break;
-
-                                case 0b1101:
-                                    ARM_Move_ImmediateShift(instruction);
-                                    break;
-
-                                default:
-                                    Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, nextInstructionAddress);
-                                    Environment.Exit(1);
-                                    break;
-                            }
-                        }
-
                         // Data processing register shift
                         else if ((instruction & 0x0000_0090) == 0x0000_0010)
                         {
@@ -224,20 +474,8 @@ namespace Iris
                             UInt32 opcode = (instruction >> 21) & 0b1111;
                             switch (opcode)
                             {
-                                case 0b0000:
-                                    ARM_LogicalAND_Immediate(instruction);
-                                    break;
-
-                                case 0b0001:
-                                    ARM_LogicalExclusiveOR_Immediate(instruction);
-                                    break;
-
                                 case 0b0010:
                                     ARM_Subtract_Immediate(instruction);
-                                    break;
-
-                                case 0b0100:
-                                    ARM_Add_Immediate(instruction);
                                     break;
 
                                 case 0b1000:
@@ -246,18 +484,6 @@ namespace Iris
 
                                 case 0b1001:
                                     ARM_TestEquivalence_Immediate(instruction);
-                                    break;
-
-                                case 0b1010:
-                                    ARM_Compare_Immediate(instruction);
-                                    break;
-
-                                case 0b1100:
-                                    ARM_LogicalInclusiveOR_Immediate(instruction);
-                                    break;
-
-                                case 0b1101:
-                                    ARM_Move_Immediate(instruction);
                                     break;
 
                                 default:
@@ -809,13 +1035,25 @@ namespace Iris
                 case 0b0010:
                     return GetFlag_C();
 
+                // CC/LO / Carry clear/unsigned lower
+                case 0b0011:
+                    return !GetFlag_C();
+
                 // MI / Minus/negative
                 case 0b0100:
                     return GetFlag_N();
 
                 // PL / Plus/positive or zero
                 case 0b0101:
-                    return GetFlag_N();
+                    return !GetFlag_N();
+
+                // VS / Overflow
+                case 0b0110:
+                    return GetFlag_V();
+
+                // VC / No overflow
+                case 0b0111:
+                    return !GetFlag_V();
 
                 // GT / Signed greater than
                 case 0b1100:
@@ -831,8 +1069,6 @@ namespace Iris
 
                 // UNPREDICTABLE
                 case 0b1111:
-                    Console.WriteLine("Condition {0} UNPREDICTABLE", 0b1111);
-                    Environment.Exit(1);
                     return false;
 
                 // Unimplemented
@@ -876,8 +1112,618 @@ namespace Iris
         }
 
         // ********************************************************************
-        //                                  ARM
+        //                          ARM instructions
         // ********************************************************************
+
+        private static UInt32 RotateRight(UInt32 value, int rotateAmount)
+        {
+            return (value >> rotateAmount) | (value << (32 - rotateAmount));
+        }
+
+        private static UInt32 LogicalShiftLeft(UInt32 value, int shiftAmount)
+        {
+            return value << shiftAmount;
+        }
+
+        private static UInt32 LogicalShiftRight(UInt32 value, int shiftAmount)
+        {
+            return value >> shiftAmount;
+        }
+
+        private static UInt32 ArithmeticShiftRight(UInt32 value, int shiftAmount)
+        {
+            return (UInt32)((Int32)value >> shiftAmount);
+        }
+
+        private (UInt32 shifterOperand, UInt32 shifterCarryOut) GetShifterOperandAndCarryOut(UInt32 instruction)
+        {
+            UInt32 shifterOperand = 0;
+            UInt32 shifterCarryOut = 0;
+
+            if (((instruction >> 25) & 1) == 1) // 32-bit immediate
+            {
+                UInt32 rotateImm = (instruction >> 8) & 0b1111;
+                UInt32 imm = instruction & 0xff;
+
+                UInt32 rotateAmount = rotateImm * 2;
+                shifterOperand = RotateRight(imm, (int)rotateAmount);
+
+                if (rotateImm == 0)
+                    shifterCarryOut = GetFlag_C() ? 1u : 0u;
+                else
+                    shifterCarryOut = shifterOperand >> 31;
+            }
+            else
+            {
+                UInt32 shift = (instruction >> 5) & 0b11;
+                UInt32 rm = instruction & 0b1111;
+                if (((instruction >> 4) & 1) == 0) // Immediate shifts
+                {
+                    UInt32 shiftImm = (instruction >> 7) & 0b1_1111;
+                    switch (shift)
+                    {
+                        case 0b00: // Logical shift left
+                            if (shiftImm == 0)
+                            {
+                                shifterOperand = reg[rm];
+                                shifterCarryOut = GetFlag_C() ? 1u : 0u;
+                            }
+                            else
+                            {
+                                shifterOperand = LogicalShiftLeft(reg[rm], (int)shiftImm);
+                                shifterCarryOut = (reg[rm] >> (32 - (int)shiftImm)) & 1;
+                            }
+                            break;
+
+                        case 0b01: // Logical shift right
+                            if (shiftImm == 0)
+                            {
+                                shifterOperand = 0;
+                                shifterCarryOut = reg[rm] >> 31;
+                            }
+                            else
+                            {
+                                shifterOperand = LogicalShiftRight(reg[rm], (int)shiftImm);
+                                shifterCarryOut = (reg[rm] >> ((int)shiftImm - 1)) & 1;
+                            }
+                            break;
+
+                        case 0b10: // Arithmetic shift right
+                            if (shiftImm == 0)
+                            {
+                                if ((reg[rm] & 0x8000_0000) == 0)
+                                    shifterOperand = 0;
+                                else
+                                    shifterOperand = 0xffff_ffff;
+
+                                shifterCarryOut = reg[rm] >> 31;
+                            }
+                            else
+                            {
+                                shifterOperand = ArithmeticShiftRight(reg[rm], (int)shiftImm);
+                                shifterCarryOut = (reg[rm] >> ((int)shiftImm - 1)) & 1;
+                            }
+                            break;
+
+                        case 0b11: // Rotate right
+                            if (shiftImm == 0)
+                            {
+                                shifterOperand = LogicalShiftLeft(GetFlag_C() ? 1u : 0u, 31) | LogicalShiftRight(reg[rm], 1);
+                                shifterCarryOut = reg[rm] & 1;
+                            }
+                            else
+                            {
+                                shifterOperand = RotateRight(reg[rm], (int)shiftImm);
+                                shifterCarryOut = (reg[rm] >> ((int)shiftImm - 1)) & 1;
+                            }
+                            break;
+                    }
+                }
+                else if (((instruction >> 7) & 1) == 0) // Register shifts
+                {
+                    UInt32 rs = (instruction >> 8) & 0b1111;
+                    switch (shift)
+                    {
+                        case 0b00: // Logical shift left
+                            if ((reg[rs] & 0xff) == 0)
+                            {
+                                shifterOperand = reg[rm];
+                                shifterCarryOut = GetFlag_C() ? 1u : 0u;
+                            }
+                            else if ((reg[rs] & 0xff) < 32)
+                            {
+                                shifterOperand = LogicalShiftLeft(reg[rm], (int)(reg[rs] & 0xff));
+                                shifterCarryOut = (reg[rm] >> (32 - (int)(reg[rs] & 0xff))) & 1;
+                            }
+                            else if ((reg[rs] & 0xff) == 32)
+                            {
+                                shifterOperand = 0;
+                                shifterCarryOut = reg[rm] & 1;
+                            }
+                            else
+                            {
+                                shifterOperand = 0;
+                                shifterCarryOut = 0;
+                            }
+                            break;
+
+                        case 0b10: // Arithmetic shift right
+                            if ((reg[rs] & 0xff) == 0)
+                            {
+                                shifterOperand = reg[rm];
+                                shifterCarryOut = GetFlag_C() ? 1u : 0u;
+                            }
+                            else if ((reg[rs] & 0xff) < 32)
+                            {
+                                shifterOperand = ArithmeticShiftRight(reg[rm], (int)(reg[rs] & 0xff));
+                                shifterCarryOut = (reg[rm] >> ((int)(reg[rs] & 0xff) - 1)) & 1;
+                            }
+                            else
+                            {
+                                if ((reg[rm] & 0x8000_0000) == 0)
+                                    shifterOperand = 0;
+                                else
+                                    shifterOperand = 0xffff_ffff;
+
+                                shifterCarryOut = reg[rm] >> 31;
+                            }
+                            break;
+
+                        default:
+                            Console.WriteLine("CPU: encoding unimplemented");
+                            Environment.Exit(1);
+                            break;
+                    }
+                }
+                else
+                {
+                    throw new Exception("CPU: Wrong encoding");
+                }
+            }
+
+            return (shifterOperand, shifterCarryOut);
+        }
+
+        private void ARM_ADC(UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (ConditionPassed(cond))
+            {
+                // Addressing mode 1
+                var (shifterOperand, _) = GetShifterOperandAndCarryOut(instruction);
+
+                UInt32 rn = (instruction >> 16) & 0b1111;
+                UInt32 rd = (instruction >> 12) & 0b1111;
+                reg[rd] = reg[rn] + shifterOperand + (GetFlag_C() ? 1u : 0u);
+
+                UInt32 s = (instruction >> 20) & 1;
+                if (s == 1)
+                {
+                    if (rd == PC)
+                    {
+                        Console.WriteLine("ADC: S field partially implemented");
+                        Environment.Exit(1);
+                    }
+                    else
+                    {
+                        SetFlag_N((reg[rd] & 0x8000_0000) != 0);
+                        SetFlag_Z(reg[rd] == 0);
+                        // TODO: C flag
+                        // TODO: V flag
+                    }
+                }
+            }
+        }
+
+        private void ARM_ADD(UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (ConditionPassed(cond))
+            {
+                // Addressing mode 1
+                var (shifterOperand, _) = GetShifterOperandAndCarryOut(instruction);
+
+                UInt32 rn = (instruction >> 16) & 0b1111;
+                UInt32 rd = (instruction >> 12) & 0b1111;
+                reg[rd] = reg[rn] + shifterOperand;
+
+                UInt32 s = (instruction >> 20) & 1;
+                if (s == 1)
+                {
+                    if (rd == PC)
+                    {
+                        Console.WriteLine("ADD: S field partially implemented");
+                        Environment.Exit(1);
+                    }
+                    else
+                    {
+                        SetFlag_N((reg[rd] & 0x8000_0000) != 0);
+                        SetFlag_Z(reg[rd] == 0);
+                        // TODO: C flag
+                        // TODO: V flag
+                    }
+                }
+            }
+        }
+
+        private void ARM_AND(UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (ConditionPassed(cond))
+            {
+                // Addressing mode 1
+                var (shifterOperand, shifterCarryOut) = GetShifterOperandAndCarryOut(instruction);
+
+                UInt32 rn = (instruction >> 16) & 0b1111;
+                UInt32 rd = (instruction >> 12) & 0b1111;
+                reg[rd] = reg[rn] & shifterOperand;
+
+                UInt32 s = (instruction >> 20) & 1;
+                if (s == 1)
+                {
+                    if (rd == PC)
+                    {
+                        Console.WriteLine("AND: S field partially implemented");
+                        Environment.Exit(1);
+                    }
+                    else
+                    {
+                        SetFlag_N((reg[rd] & 0x8000_0000) != 0);
+                        SetFlag_Z(reg[rd] == 0);
+                        SetFlag_C(shifterCarryOut == 1);
+                    }
+                }
+            }
+        }
+
+        private void ARM_BIC(UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (ConditionPassed(cond))
+            {
+                // Addressing mode 1
+                var (shifterOperand, shifterCarryOut) = GetShifterOperandAndCarryOut(instruction);
+
+                UInt32 rn = (instruction >> 16) & 0b1111;
+                UInt32 rd = (instruction >> 12) & 0b1111;
+                reg[rd] = reg[rn] & ~shifterOperand;
+
+                UInt32 s = (instruction >> 20) & 1;
+                if (s == 1)
+                {
+                    if (rd == PC)
+                    {
+                        Console.WriteLine("BIC: S field partially implemented");
+                        Environment.Exit(1);
+                    }
+                    else
+                    {
+                        SetFlag_N((reg[rd] & 0x8000_0000) != 0);
+                        SetFlag_Z(reg[rd] == 0);
+                        SetFlag_C(shifterCarryOut == 1);
+                    }
+                }
+            }
+        }
+
+        private void ARM_CMN(UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (ConditionPassed(cond))
+            {
+                // Addressing mode 1
+                var (shifterOperand, _) = GetShifterOperandAndCarryOut(instruction);
+
+                UInt32 rn = (instruction >> 16) & 0b1111;
+                UInt32 aluOut = reg[rn] + shifterOperand;
+
+                SetFlag_N((aluOut & 0x8000_0000) != 0);
+                SetFlag_Z(aluOut == 0);
+                // TODO: C flag
+                // TODO: V flag
+            }
+        }
+
+        private void ARM_CMP(UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (ConditionPassed(cond))
+            {
+                // Addressing mode 1
+                var (shifterOperand, _) = GetShifterOperandAndCarryOut(instruction);
+
+                UInt32 rn = (instruction >> 16) & 0b1111;
+                UInt32 aluOut = reg[rn] - shifterOperand;
+
+                SetFlag_N((aluOut & 0x8000_0000) != 0);
+                SetFlag_Z(aluOut == 0);
+                // TODO: C flag
+                // TODO: V flag
+            }
+        }
+
+        private void ARM_EOR(UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (ConditionPassed(cond))
+            {
+                // Addressing mode 1
+                var (shifterOperand, shifterCarryOut) = GetShifterOperandAndCarryOut(instruction);
+
+                UInt32 rn = (instruction >> 16) & 0b1111;
+                UInt32 rd = (instruction >> 12) & 0b1111;
+                reg[rd] = reg[rn] ^ shifterOperand;
+
+                UInt32 s = (instruction >> 20) & 1;
+                if (s == 1)
+                {
+                    if (rd == PC)
+                    {
+                        Console.WriteLine("EOR: S field partially implemented");
+                        Environment.Exit(1);
+                    }
+                    else
+                    {
+                        SetFlag_N((reg[rd] & 0x8000_0000) != 0);
+                        SetFlag_Z(reg[rd] == 0);
+                        SetFlag_C(shifterCarryOut == 1);
+                    }
+                }
+            }
+        }
+
+        private void ARM_MLA(UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (ConditionPassed(cond))
+            {
+                UInt32 rd = (instruction >> 16) & 0b1111;
+                UInt32 rn = (instruction >> 12) & 0b1111;
+                UInt32 rs = (instruction >> 8) & 0b1111;
+                UInt32 rm = instruction & 0b1111;
+                reg[rd] = reg[rm] * reg[rs] + reg[rn];
+
+                UInt32 s = (instruction >> 20) & 1;
+                if (s == 1)
+                {
+                    if (rd == PC)
+                    {
+                        Console.WriteLine("MLA: S field partially implemented");
+                        Environment.Exit(1);
+                    }
+                    else
+                    {
+                        SetFlag_N((reg[rd] & 0x8000_0000) != 0);
+                        SetFlag_Z(reg[rd] == 0);
+                        // TODO: C flag
+                    }
+                }
+            }
+        }
+
+        private void ARM_MOV(UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (ConditionPassed(cond))
+            {
+                // Addressing mode 1
+                var (shifterOperand, shifterCarryOut) = GetShifterOperandAndCarryOut(instruction);
+
+                UInt32 rd = (instruction >> 12) & 0b1111;
+                reg[rd] = shifterOperand;
+
+                UInt32 s = (instruction >> 20) & 1;
+                if (s == 1)
+                {
+                    if (rd == PC)
+                    {
+                        Console.WriteLine("MOV: S field partially implemented");
+                        Environment.Exit(1);
+                    }
+                    else
+                    {
+                        SetFlag_N((reg[rd] & 0x8000_0000) != 0);
+                        SetFlag_Z(reg[rd] == 0);
+                        SetFlag_C(shifterCarryOut == 1);
+                    }
+                }
+            }
+        }
+
+        private void ARM_MUL(UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (ConditionPassed(cond))
+            {
+                UInt32 rd = (instruction >> 16) & 0b1111;
+                UInt32 rs = (instruction >> 8) & 0b1111;
+                UInt32 rm = instruction & 0b1111;
+                reg[rd] = reg[rm] * reg[rs];
+
+                UInt32 s = (instruction >> 20) & 1;
+                if (s == 1)
+                {
+                    if (rd == PC)
+                    {
+                        Console.WriteLine("MUL: S field partially implemented");
+                        Environment.Exit(1);
+                    }
+                    else
+                    {
+                        SetFlag_N((reg[rd] & 0x8000_0000) != 0);
+                        SetFlag_Z(reg[rd] == 0);
+                        // TODO: C flag
+                    }
+                }
+            }
+        }
+
+        private void ARM_MVN(UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (ConditionPassed(cond))
+            {
+                // Addressing mode 1
+                var (shifterOperand, shifterCarryOut) = GetShifterOperandAndCarryOut(instruction);
+
+                UInt32 rd = (instruction >> 12) & 0b1111;
+                reg[rd] = ~shifterOperand;
+
+                UInt32 s = (instruction >> 20) & 1;
+                if (s == 1)
+                {
+                    if (rd == PC)
+                    {
+                        Console.WriteLine("MVN: S field partially implemented");
+                        Environment.Exit(1);
+                    }
+                    else
+                    {
+                        SetFlag_N((reg[rd] & 0x8000_0000) != 0);
+                        SetFlag_Z(reg[rd] == 0);
+                        SetFlag_C(shifterCarryOut == 1);
+                    }
+                }
+            }
+        }
+
+        private void ARM_ORR(UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (ConditionPassed(cond))
+            {
+                // Addressing mode 1
+                var (shifterOperand, shifterCarryOut) = GetShifterOperandAndCarryOut(instruction);
+
+                UInt32 rn = (instruction >> 16) & 0b1111;
+                UInt32 rd = (instruction >> 12) & 0b1111;
+                reg[rd] = reg[rn] | shifterOperand;
+
+                UInt32 s = (instruction >> 20) & 1;
+                if (s == 1)
+                {
+                    if (rd == PC)
+                    {
+                        Console.WriteLine("ORR: S field partially implemented");
+                        Environment.Exit(1);
+                    }
+                    else
+                    {
+                        SetFlag_N((reg[rd] & 0x8000_0000) != 0);
+                        SetFlag_Z(reg[rd] == 0);
+                        SetFlag_C(shifterCarryOut == 1);
+                    }
+                }
+            }
+        }
+
+        private void ARM_RSC(UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (ConditionPassed(cond))
+            {
+                // Addressing mode 1
+                var (shifterOperand, _) = GetShifterOperandAndCarryOut(instruction);
+
+                UInt32 rn = (instruction >> 16) & 0b1111;
+                UInt32 rd = (instruction >> 12) & 0b1111;
+                reg[rd] = shifterOperand - reg[rn] - ~(GetFlag_C() ? 1u : 0u);
+
+                UInt32 s = (instruction >> 20) & 1;
+                if (s == 1)
+                {
+                    if (rd == PC)
+                    {
+                        Console.WriteLine("RSC: S field partially implemented");
+                        Environment.Exit(1);
+                    }
+                    else
+                    {
+                        SetFlag_N((reg[rd] & 0x8000_0000) != 0);
+                        SetFlag_Z(reg[rd] == 0);
+                        // TODO: C flag
+                        // TODO: V flag
+                    }
+                }
+            }
+        }
+
+        private void ARM_SBC(UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (ConditionPassed(cond))
+            {
+                // Addressing mode 1
+                var (shifterOperand, _) = GetShifterOperandAndCarryOut(instruction);
+
+                UInt32 rn = (instruction >> 16) & 0b1111;
+                UInt32 rd = (instruction >> 12) & 0b1111;
+                reg[rd] = reg[rn] - shifterOperand - ~(GetFlag_C() ? 1u : 0u);
+
+                UInt32 s = (instruction >> 20) & 1;
+                if (s == 1)
+                {
+                    if (rd == PC)
+                    {
+                        Console.WriteLine("SBC: S field partially implemented");
+                        Environment.Exit(1);
+                    }
+                    else
+                    {
+                        SetFlag_N((reg[rd] & 0x8000_0000) != 0);
+                        SetFlag_Z(reg[rd] == 0);
+                        // TODO: C flag
+                        // TODO: V flag
+                    }
+                }
+            }
+        }
+
+        private void ARM_SMULL(UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (ConditionPassed(cond))
+            {
+                UInt32 rdHi = (instruction >> 16) & 0b1111;
+                UInt32 rdLo = (instruction >> 12) & 0b1111;
+                UInt32 rs = (instruction >> 8) & 0b1111;
+                UInt32 rm = instruction & 0b1111;
+                reg[rdHi] = (reg[rm] * reg[rs]) >> 32;
+                reg[rdLo] = reg[rm] * reg[rs];
+
+                UInt32 s = (instruction >> 20) & 1;
+                if (s == 1)
+                {
+                    SetFlag_N((reg[rdHi] & 0x8000_0000) != 0);
+                    SetFlag_Z(reg[rdHi] == 0 && reg[rdLo] == 0);
+                    // TODO: C flag
+                    // TODO: V flag
+                }
+            }
+        }
+
+        private void ARM_UMULL(UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (ConditionPassed(cond))
+            {
+                UInt32 rdHi = (instruction >> 16) & 0b1111;
+                UInt32 rdLo = (instruction >> 12) & 0b1111;
+                UInt32 rs = (instruction >> 8) & 0b1111;
+                UInt32 rm = instruction & 0b1111;
+                reg[rdHi] = (reg[rm] * reg[rs]) >> 32;
+                reg[rdLo] = reg[rm] * reg[rs];
+
+                UInt32 s = (instruction >> 20) & 1;
+                if (s == 1)
+                {
+                    SetFlag_N((reg[rdHi] & 0x8000_0000) != 0);
+                    SetFlag_Z(reg[rdHi] == 0 && reg[rdLo] == 0);
+                    // TODO: C flag
+                    // TODO: V flag
+                }
+            }
+        }
 
         // ==============================
         // Multiplies & Extra load/stores
@@ -991,26 +1837,6 @@ namespace Iris
             }
         }
 
-        // MUL
-        private void ARM_Multiply(UInt32 instruction)
-        {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
-            {
-                UInt32 rd = (instruction >> 16) & 0b1111;
-                UInt32 rs = (instruction >> 8) & 0b1111;
-                UInt32 rm = instruction & 0b1111;
-                reg[rd] = reg[rm] * reg[rs];
-
-                UInt32 s = (instruction >> 20) & 1;
-                if (s == 1)
-                {
-                    Console.WriteLine("MUL: S field unimplemented");
-                    Environment.Exit(1);
-                }
-            }
-        }
-
         // ==============================
         // Miscellaneous instructions
         // ==============================
@@ -1085,294 +1911,8 @@ namespace Iris
         }
 
         // ==============================
-        // Data processing immediate shift
-        // ==============================
-
-        // EOR (immediate shift)
-        private void ARM_LogicalExclusiveOR_ImmediateShift(UInt32 instruction)
-        {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
-            {
-                UInt32 shiftImm = (instruction >> 7) & 0b1_1111;
-                UInt32 shift = (instruction >> 5) & 0b11;
-                UInt32 rm = instruction & 0b1111;
-
-                UInt32 shifterOperand = 0;
-                switch (shift)
-                {
-                    // Logical shift left
-                    case 0b00:
-                        if (shiftImm == 0)
-                        {
-                            shifterOperand = reg[rm];
-                        }
-                        else
-                        {
-                            shifterOperand = reg[rm] << (int)shiftImm;
-                        }
-                        break;
-
-                    // Logical shift right
-                    case 0b01:
-                        if (shiftImm == 0)
-                        {
-                            shifterOperand = 0;
-                        }
-                        else
-                        {
-                            shifterOperand = reg[rm] >> (int)shiftImm;
-                        }
-                        break;
-
-                    default:
-                        Console.WriteLine("EOR (immediate shift): shift {0} unimplemented", shift);
-                        Environment.Exit(1);
-                        break;
-                }
-
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                reg[rd] = reg[rn] ^ shifterOperand;
-
-                UInt32 s = (instruction >> 20) & 1;
-                if (s == 1)
-                {
-                    Console.WriteLine("EOR (immediate shift): S field unimplemented");
-                    Environment.Exit(1);
-                }
-            }
-        }
-
-        // ADD (immediate shift)
-        private void ARM_Add_ImmediateShift(UInt32 instruction)
-        {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
-            {
-                UInt32 shiftImm = (instruction >> 7) & 0b1_1111;
-                UInt32 shift = (instruction >> 5) & 0b11;
-                UInt32 rm = instruction & 0b1111;
-
-                UInt32 shifterOperand = 0;
-                switch (shift)
-                {
-                    // Logical shift left
-                    case 0b00:
-                        if (shiftImm == 0)
-                        {
-                            shifterOperand = reg[rm];
-                        }
-                        else
-                        {
-                            shifterOperand = reg[rm] << (int)shiftImm;
-                        }
-                        break;
-
-                    // Logical shift right
-                    case 0b01:
-                        if (shiftImm == 0)
-                        {
-                            shifterOperand = 0;
-                        }
-                        else
-                        {
-                            shifterOperand = reg[rm] >> (int)shiftImm;
-                        }
-                        break;
-
-                    default:
-                        Console.WriteLine("ADD (immediate shift): shift {] unimplemented", shift);
-                        Environment.Exit(1);
-                        break;
-                }
-
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                reg[rd] = reg[rn] + shifterOperand;
-
-                UInt32 s = (instruction >> 20) & 1;
-                if (s == 1)
-                {
-                    Console.WriteLine("ADD (immediate shift): S field unimplemented");
-                    Environment.Exit(1);
-                }
-            }
-        }
-
-        // ORR (immediate shift)
-        private void ARM_LogicalInclusiveOR_ImmediateShift(UInt32 instruction)
-        {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
-            {
-                UInt32 shiftImm = (instruction >> 7) & 0b1_1111;
-                UInt32 shift = (instruction >> 5) & 0b11;
-                UInt32 rm = instruction & 0b1111;
-
-                UInt32 shifterOperand = 0;
-                switch (shift)
-                {
-                    // Logical shift left
-                    case 0b00:
-                        if (shiftImm == 0)
-                        {
-                            shifterOperand = reg[rm];
-                        }
-                        else
-                        {
-                            shifterOperand = reg[rm] << (int)shiftImm;
-                        }
-                        break;
-
-                    // Logical shift right
-                    case 0b01:
-                        if (shiftImm == 0)
-                        {
-                            shifterOperand = 0;
-                        }
-                        else
-                        {
-                            shifterOperand = reg[rm] >> (int)shiftImm;
-                        }
-                        break;
-
-                    default:
-                        Console.WriteLine("ORR (immediate shift): shift {0} unimplemented", shift);
-                        Environment.Exit(1);
-                        break;
-                }
-
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                reg[rd] = reg[rn] | shifterOperand;
-
-                UInt32 s = (instruction >> 20) & 1;
-                if (s == 1)
-                {
-                    Console.WriteLine("ORR (immediate shift): S field unimplemented");
-                    Environment.Exit(1);
-                }
-            }
-        }
-
-        // MOV (immediate shift)
-        private void ARM_Move_ImmediateShift(UInt32 instruction)
-        {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
-            {
-                UInt32 shiftImm = (instruction >> 7) & 0b1_1111;
-                UInt32 shift = (instruction >> 5) & 0b11;
-                UInt32 rm = instruction & 0b1111;
-
-                UInt32 shifterOperand = 0;
-                switch (shift)
-                {
-                    // Logical shift left
-                    case 0b00:
-                        if (shiftImm == 0)
-                        {
-                            shifterOperand = reg[rm];
-                        }
-                        else
-                        {
-                            shifterOperand = reg[rm] << (int)shiftImm;
-                        }
-                        break;
-
-                    // Logical shift right
-                    case 0b01:
-                        if (shiftImm == 0)
-                        {
-                            shifterOperand = 0;
-                        }
-                        else
-                        {
-                            shifterOperand = reg[rm] >> (int)shiftImm;
-                        }
-                        break;
-
-                    default:
-                        Console.WriteLine("MOV (immediate shift): shift {0} unimplemented", shift);
-                        Environment.Exit(1);
-                        break;
-                }
-
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                reg[rd] = shifterOperand;
-
-                UInt32 s = (instruction >> 20) & 1;
-                if (s == 1)
-                {
-                    Console.WriteLine("MOV (immediate shift): S field unimplemented");
-                    Environment.Exit(1);
-                }
-            }
-        }
-
-        // ==============================
         // Data processing immediate
         // ==============================
-
-        // AND (immediate)
-        private void ARM_LogicalAND_Immediate(UInt32 instruction)
-        {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
-            {
-                UInt32 rotateImm = (instruction >> 8) & 0b1111;
-                UInt32 imm = instruction & 0xff;
-
-                int rotateAmount = 2 * (int)rotateImm;
-                UInt32 shifterOperand = (imm >> rotateAmount) | (imm << (32 - rotateAmount));
-
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                reg[rd] = reg[rn] & shifterOperand;
-
-                UInt32 s = (instruction >> 20) & 1;
-                if (s == 1)
-                {
-                    if (rd == PC)
-                    {
-                        Console.WriteLine("AND (immediate): S field partially implemented");
-                        Environment.Exit(1);
-                    }
-                    else
-                    {
-                        // TODO: N flag
-                        SetFlag_Z(reg[rd] == 0);
-                        // TODO: C flag
-                    }
-                }
-            }
-        }
-
-        // EOR (immediate)
-        private void ARM_LogicalExclusiveOR_Immediate(UInt32 instruction)
-        {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
-            {
-                UInt32 rotateImm = (instruction >> 8) & 0b1111;
-                UInt32 imm = instruction & 0xff;
-
-                int rotateAmount = 2 * (int)rotateImm;
-                UInt32 shifterOperand = (imm >> rotateAmount) | (imm << (32 - rotateAmount));
-
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                reg[rd] = reg[rn] ^ shifterOperand;
-
-                UInt32 s = (instruction >> 20) & 1;
-                if (s == 1)
-                {
-                    Console.WriteLine("EOR (immediate): S field unimplemented");
-                    Environment.Exit(1);
-                }
-            }
-        }
 
         // SUB (immediate)
         private void ARM_Subtract_Immediate(UInt32 instruction)
@@ -1405,31 +1945,6 @@ namespace Iris
                         // TODO: C flag
                         // TODO: V flag
                     }
-                }
-            }
-        }
-
-        // ADD (immediate)
-        private void ARM_Add_Immediate(UInt32 instruction)
-        {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
-            {
-                UInt32 rotateImm = (instruction >> 8) & 0b1111;
-                UInt32 imm = instruction & 0xff;
-
-                int rotateAmount = 2 * (int)rotateImm;
-                UInt32 shifterOperand = (imm >> rotateAmount) | (imm << (32 - rotateAmount));
-
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                reg[rd] = reg[rn] + shifterOperand;
-
-                UInt32 s = (instruction >> 20) & 1;
-                if (s == 1)
-                {
-                    Console.WriteLine("ADD (immediate): S field unimplemented");
-                    Environment.Exit(1);
                 }
             }
         }
@@ -1471,76 +1986,6 @@ namespace Iris
                 // TODO: N flag
                 SetFlag_Z(aluOut == 0);
                 // TODO: C flag
-            }
-        }
-
-        // CMP (immediate)
-        private void ARM_Compare_Immediate(UInt32 instruction)
-        {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
-            {
-                UInt32 rotateImm = (instruction >> 8) & 0b1111;
-                UInt32 imm = instruction & 0xff;
-
-                int rotateAmount = 2 * (int)rotateImm;
-                UInt32 shifterOperand = (imm >> rotateAmount) | (imm << (32 - rotateAmount));
-
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 aluOut = reg[rn] - shifterOperand;
-                SetFlag_N((aluOut & 0x8000_0000) != 0);
-                SetFlag_Z(aluOut == 0);
-                // TODO: C flag
-                SetFlag_V(reg[rn] < shifterOperand);
-            }
-        }
-
-        // ORR (immediate)
-        private void ARM_LogicalInclusiveOR_Immediate(UInt32 instruction)
-        {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
-            {
-                UInt32 rotateImm = (instruction >> 8) & 0b1111;
-                UInt32 imm = instruction & 0xff;
-
-                int rotateAmount = 2 * (int)rotateImm;
-                UInt32 shifterOperand = (imm >> rotateAmount) | (imm << (32 - rotateAmount));
-
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                reg[rd] = reg[rn] | shifterOperand;
-
-                UInt32 s = (instruction >> 20) & 1;
-                if (s == 1)
-                {
-                    Console.WriteLine("ORR (immediate): S field unimplemented");
-                    Environment.Exit(1);
-                }
-            }
-        }
-
-        // MOV (immediate)
-        private void ARM_Move_Immediate(UInt32 instruction)
-        {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
-            {
-                UInt32 rotateImm = (instruction >> 8) & 0b1111;
-                UInt32 imm = instruction & 0xff;
-
-                int rotateAmount = 2 * (int)rotateImm;
-                UInt32 shifterOperand = (imm >> rotateAmount) | (imm << (32 - rotateAmount));
-
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                reg[rd] = shifterOperand;
-
-                UInt32 s = (instruction >> 20) & 1;
-                if (s == 1)
-                {
-                    Console.WriteLine("MOV (immediate): S field unimplemented");
-                    Environment.Exit(1);
-                }
             }
         }
 
@@ -1840,7 +2285,7 @@ namespace Iris
         }
 
         // ********************************************************************
-        //                                  THUMB
+        //                         THUMB instructions
         // ********************************************************************
 
         // ==============================
