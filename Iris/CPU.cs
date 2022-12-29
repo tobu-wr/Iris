@@ -725,6 +725,23 @@ namespace Iris
             }
         }
 
+        private bool GetFlag_N()
+        {
+            return ((cpsr >> 31) & 1) == 1;
+        }
+
+        private void SetFlag_N(bool flag)
+        {
+            if (flag)
+            {
+                cpsr |= 1u << 31;
+            }
+            else
+            {
+                cpsr &= ~(1u << 31);
+            }
+        }
+
         private bool GetFlag_Z()
         {
             return ((cpsr >> 30) & 1) == 1;
@@ -734,7 +751,7 @@ namespace Iris
         {
             if (flag)
             {
-                cpsr |= 1 << 30;
+                cpsr |= 1u << 30;
             }
             else
             {
@@ -751,11 +768,28 @@ namespace Iris
         {
             if (flag)
             {
-                cpsr |= 1 << 29;
+                cpsr |= 1u << 29;
             }
             else
             {
                 cpsr &= ~(1u << 29);
+            }
+        }
+
+        private bool GetFlag_V()
+        {
+            return ((cpsr >> 28) & 1) == 1;
+        }
+
+        private void SetFlag_V(bool flag)
+        {
+            if (flag)
+            {
+                cpsr |= 1u << 28;
+            }
+            else
+            {
+                cpsr &= ~(1u << 28);
             }
         }
 
@@ -774,6 +808,22 @@ namespace Iris
                 // CS/HS / Carry set/unsigned higher or same
                 case 0b0010:
                     return GetFlag_C();
+
+                // MI / Minus/negative
+                case 0b0100:
+                    return GetFlag_N();
+
+                // PL / Plus/positive or zero
+                case 0b0101:
+                    return GetFlag_N();
+
+                // GT / Signed greater than
+                case 0b1100:
+                    return !GetFlag_Z() && (GetFlag_N() == GetFlag_V());
+
+                // LE / Signed less than or equal
+                case 0b1101:
+                    return GetFlag_Z() || (GetFlag_N() != GetFlag_V());
 
                 // AL / Always (unconditional)
                 case 0b1110:
@@ -1350,7 +1400,7 @@ namespace Iris
                     }
                     else
                     {
-                        // TODO: N flag
+                        SetFlag_N((reg[rd] & 0x8000_0000) != 0);
                         SetFlag_Z(reg[rd] == 0);
                         // TODO: C flag
                         // TODO: V flag
@@ -1438,10 +1488,10 @@ namespace Iris
 
                 UInt32 rn = (instruction >> 16) & 0b1111;
                 UInt32 aluOut = reg[rn] - shifterOperand;
-                // TODO: N flag
+                SetFlag_N((aluOut & 0x8000_0000) != 0);
                 SetFlag_Z(aluOut == 0);
                 // TODO: C flag
-                // TODO: V flag
+                SetFlag_V(reg[rn] < shifterOperand);
             }
         }
 
