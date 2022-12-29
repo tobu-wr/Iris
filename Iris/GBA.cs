@@ -8,13 +8,31 @@ namespace Iris
 {
     public class GBA : CPU.ICallbacks
     {
+        public enum Keys
+        {
+            A = 0,
+            B = 1,
+            Select = 2,
+            Start = 3,
+            Right = 4,
+            Left = 5,
+            Up = 6,
+            Down = 7,
+            R = 8,
+            L = 9,
+        };
+
         private const int KB = 1024;
 
         private Byte[]? rom;
         private readonly Byte[] externalWRAM = new Byte[256 * KB];
         private readonly Byte[] internalWRAM = new Byte[32 * KB];
+
         private readonly CPU cpu;
         private readonly PPU ppu;
+
+        private UInt16 keyinput = 0x03ff;
+
         private bool running = false;
 
         public GBA(IRenderer renderer)
@@ -26,6 +44,7 @@ namespace Iris
         public void Init()
         {
             cpu.Init(0x0800_0000, 0b1101_1111); // flags cleared + IRQ & FIQ interrupts disabled + ARM state + system mode
+            keyinput = 0x03ff;
         }
 
         public void LoadROM(string filename)
@@ -54,6 +73,12 @@ namespace Iris
             running = false;
         }
 
+        public void SetKeyStatus(Keys key, bool pressed)
+        {
+            int mask = 1 << (int)key;
+            keyinput = pressed ? (UInt16)(keyinput & ~mask) : (UInt16)(keyinput | mask);
+        }
+
         public Byte ReadMemory8(UInt32 address)
         {
             if (0x0300_0000 <= address && address < 0x0400_0000)
@@ -73,9 +98,9 @@ namespace Iris
                         return (Byte)(ppu.dispstat >> 8);
 
                     case 0x130:
+                        return (Byte)keyinput;
                     case 0x131:
-                        Console.WriteLine("GBA: Read from KEYINPUT register unimplemented");
-                        return 0xff;
+                        return (Byte)(keyinput >> 8);
                 }
             }
             else if (0x0800_0000 <= address && address < 0x0A00_0000)

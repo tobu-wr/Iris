@@ -123,7 +123,7 @@ namespace Iris
             // 
             this.loadROMToolStripMenuItem.BackColor = System.Drawing.SystemColors.Control;
             this.loadROMToolStripMenuItem.Name = "loadROMToolStripMenuItem";
-            this.loadROMToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.loadROMToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
             this.loadROMToolStripMenuItem.Text = "Load &ROM...";
             this.loadROMToolStripMenuItem.Click += new System.EventHandler(this.LoadROMToolStripMenuItem_Click);
             // 
@@ -136,7 +136,7 @@ namespace Iris
             // 
             this.loadStateToolStripMenuItem.Enabled = false;
             this.loadStateToolStripMenuItem.Name = "loadStateToolStripMenuItem";
-            this.loadStateToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.loadStateToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
             this.loadStateToolStripMenuItem.Text = "&Load state...";
             this.loadStateToolStripMenuItem.Click += new System.EventHandler(this.LoadStateToolStripMenuItem_Click);
             // 
@@ -144,7 +144,7 @@ namespace Iris
             // 
             this.saveStateToolStripMenuItem.Enabled = false;
             this.saveStateToolStripMenuItem.Name = "saveStateToolStripMenuItem";
-            this.saveStateToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveStateToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
             this.saveStateToolStripMenuItem.Text = "&Save state...";
             this.saveStateToolStripMenuItem.Click += new System.EventHandler(this.SaveStateToolStripMenuItem_Click);
             // 
@@ -174,7 +174,7 @@ namespace Iris
             // 
             this.runToolStripMenuItem.Enabled = false;
             this.runToolStripMenuItem.Name = "runToolStripMenuItem";
-            this.runToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.runToolStripMenuItem.Size = new System.Drawing.Size(105, 22);
             this.runToolStripMenuItem.Text = "&Run";
             this.runToolStripMenuItem.Click += new System.EventHandler(this.RunToolStripMenuItem_Click);
             // 
@@ -182,7 +182,7 @@ namespace Iris
             // 
             this.pauseToolStripMenuItem.Enabled = false;
             this.pauseToolStripMenuItem.Name = "pauseToolStripMenuItem";
-            this.pauseToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.pauseToolStripMenuItem.Size = new System.Drawing.Size(105, 22);
             this.pauseToolStripMenuItem.Text = "&Pause";
             this.pauseToolStripMenuItem.Click += new System.EventHandler(this.PauseToolStripMenuItem_Click);
             // 
@@ -209,6 +209,8 @@ namespace Iris
             this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Iris";
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainWindow_KeyDown);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.MainWindow_KeyUp);
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.menuStrip1.ResumeLayout(false);

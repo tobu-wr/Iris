@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -16,6 +17,20 @@ namespace Iris
 {
     public partial class MainWindow : Form, IRenderer
     {
+        private static readonly Dictionary<Keys, GBA.Keys> keyMapping = new()
+        {
+            { Keys.A, GBA.Keys.A },
+            { Keys.Z, GBA.Keys.B},
+            { Keys.Space, GBA.Keys.Select},
+            { Keys.Enter, GBA.Keys.Start},
+            { Keys.Right, GBA.Keys.Right},
+            { Keys.Left, GBA.Keys.Left},
+            { Keys.Up, GBA.Keys.Up},
+            { Keys.Down, GBA.Keys.Down},
+            { Keys.S, GBA.Keys.R},
+            { Keys.Q, GBA.Keys.L},
+        };
+
         private readonly GBA gba;
 
         private int frameCount = 0;
@@ -183,6 +198,16 @@ namespace Iris
         private void PauseToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Pause();
+        }
+
+        private void MainWindow_KeyDown(object sender, KeyEventArgs e)
+        {
+            gba.SetKeyStatus(keyMapping[e.KeyCode], true);
+        }
+
+        private void MainWindow_KeyUp(object sender, KeyEventArgs e)
+        {
+            gba.SetKeyStatus(keyMapping[e.KeyCode], false);
         }
 
         private void PerformanceUpdateTimer_Elapsed(object? sender, ElapsedEventArgs e)
