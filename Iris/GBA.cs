@@ -81,7 +81,13 @@ namespace Iris
 
         public Byte ReadMemory8(UInt32 address)
         {
-            if (0x0300_0000 <= address && address < 0x0400_0000)
+            if (0x0200_0000 <= address && address < 0x0300_0000)
+            {
+                UInt32 offset = address - 0x0200_0000;
+                if (offset < externalWRAM.Length)
+                    return externalWRAM[offset];
+            }
+            else if (0x0300_0000 <= address && address < 0x0400_0000)
             {
                 UInt32 offset = address - 0x0300_0000;
                 if (offset < internalWRAM.Length)
