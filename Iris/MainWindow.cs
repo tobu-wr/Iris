@@ -49,6 +49,7 @@ namespace Iris
                 saveStateToolStripMenuItem.Enabled = true;
                 runToolStripMenuItem.Enabled = true;
                 pauseToolStripMenuItem.Enabled = false;
+                restartToolStripMenuItem.Enabled = true;
                 toolStripStatusLabel1.Text = "Paused";
             }
         }
@@ -145,6 +146,7 @@ namespace Iris
                     saveStateToolStripMenuItem.Enabled = true;
                     runToolStripMenuItem.Enabled = true;
                     pauseToolStripMenuItem.Enabled = false;
+                    restartToolStripMenuItem.Enabled = true;
                     toolStripStatusLabel1.Text = "Paused";
                 }
             }
@@ -198,6 +200,18 @@ namespace Iris
         private void PauseToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Pause();
+        }
+
+        private void RestartToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            bool running = gba.IsRunning();
+            if (running)
+                Pause();
+
+            gba.Init();
+
+            if (running)
+                Run();
         }
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
