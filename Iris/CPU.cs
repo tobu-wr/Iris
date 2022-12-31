@@ -25,6 +25,110 @@ namespace Iris
         private const UInt32 LR = 14;
         private const UInt32 PC = 15;
 
+        private delegate void ARM_InstructionHandler(CPU cpu, UInt32 instruction);
+
+        private readonly struct ARM_InstructionTableEntry
+        {
+            public readonly UInt32 mask;
+            public readonly UInt32 expected;
+            public readonly ARM_InstructionHandler handler;
+
+            public ARM_InstructionTableEntry(UInt32 mask, UInt32 expected, ARM_InstructionHandler handler)
+            {
+                this.mask = mask;
+                this.expected = expected;
+                this.handler = handler;
+            }
+        }
+
+        private static readonly ARM_InstructionTableEntry[] ARM_InstructionTable = new ARM_InstructionTableEntry[]
+        {
+            // ADC
+            new(0x0fa0_0000, 0x02a0_0000, ARM_ADC), // I bit is 1
+            new(0x0fa0_0090, 0x00a0_0000, ARM_ADC), // I bit is 0, bit[7] is 0 and bit[4] is 0
+            new(0x0fa0_0090, 0x00a0_0080, ARM_ADC), // I bit is 0, bit[7] is 1 and bit[4] is 0
+            new(0x0fa0_0090, 0x00a0_0010, ARM_ADC), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
+            // ADD
+            new(0x0fa0_0000, 0x0280_0000, ARM_ADD), // I bit is 1
+            new(0x0fa0_0090, 0x0080_0000, ARM_ADD), // I bit is 0, bit[7] is 0 and bit[4] is 0
+            new(0x0fa0_0090, 0x0080_0080, ARM_ADD), // I bit is 0, bit[7] is 1 and bit[4] is 0
+            new(0x0fa0_0090, 0x0080_0010, ARM_ADD), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
+            // AND
+            new(0x0fe0_0000, 0x0200_0000, ARM_AND), // I bit is 1
+            new(0x0fe0_0090, 0x0000_0000, ARM_AND), // I bit is 0, bit[7] is 0 and bit[4] is 0
+            new(0x0fe0_0090, 0x0000_0080, ARM_AND), // I bit is 0, bit[7] is 1 and bit[4] is 0
+            new(0x0fe0_0090, 0x0000_0010, ARM_AND), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
+            // BIC
+            new(0x0fe0_0000, 0x03c0_0000, ARM_BIC), // I bit is 1
+            new(0x0fe0_0090, 0x01c0_0000, ARM_BIC), // I bit is 0, bit[7] is 0 and bit[4] is 0
+            new(0x0fe0_0090, 0x01c0_0080, ARM_BIC), // I bit is 0, bit[7] is 1 and bit[4] is 0
+            new(0x0fe0_0090, 0x01c0_0010, ARM_BIC), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
+
+            // CMN
+            new(0x0ff0_0000, 0x0370_0000, ARM_CMN), // I bit is 1
+            new(0x0ff0_0090, 0x0170_0000, ARM_CMN), // I bit is 0, bit[7] is 0 and bit[4] is 0
+            new(0x0ff0_0090, 0x0170_0080, ARM_CMN), // I bit is 0, bit[7] is 1 and bit[4] is 0
+            new(0x0ff0_0090, 0x0170_0010, ARM_CMN), //I bit is 0, bit[7] is 0 and bit[4] is 1
+
+            // CMP
+            new(0x0ff0_0000, 0x0350_0000, ARM_CMP), // I bit is 1
+            new(0x0ff0_0090, 0x0150_0000, ARM_CMP), // I bit is 0, bit[7] is 0 and bit[4] is 0
+            new(0x0ff0_0090, 0x0150_0080, ARM_CMP), // I bit is 0, bit[7] is 1 and bit[4] is 0
+            new(0x0ff0_0090, 0x0150_0010, ARM_CMP), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
+            // EOR
+            new(0x0fe0_0000, 0x0220_0000, ARM_EOR), // I bit is 1
+            new(0x0fe0_0090, 0x0020_0000, ARM_EOR), // I bit is 0, bit[7] is 0 and bit[4] is 0
+            new(0x0fe0_0090, 0x0020_0080, ARM_EOR), // I bit is 0, bit[7] is 1 and bit[4] is 0
+            new(0x0fe0_0090, 0x0020_0010, ARM_EOR), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
+            // MLA
+            new(0x0fe0_00f0, 0x0020_0090, ARM_MLA),
+
+            // MOV
+            new(0x0fe0_0000, 0x03a0_0000, ARM_MOV), // I bit is 1
+            new(0x0fe0_0090, 0x01a0_0000, ARM_MOV), // I bit is 0, bit[7] is 0 and bit[4] is 0
+            new(0x0fe0_0090, 0x01a0_0080, ARM_MOV), // I bit is 0, bit[7] is 1 and bit[4] is 0
+            new(0x0fe0_0090, 0x01a0_0010, ARM_MOV), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
+            // MVN
+            new(0x0fe0_0000, 0x03e0_0000, ARM_MVN), // I bit is 1
+            new(0x0fe0_0090, 0x01e0_0000, ARM_MVN), // I bit is 0, bit[7] is 0 and bit[4] is 0
+            new(0x0fe0_0090, 0x01e0_0080, ARM_MVN), // I bit is 0, bit[7] is 1 and bit[4] is 0
+            new(0x0fe0_0090, 0x01e0_0010, ARM_MVN), // I bit is 0, bit[7] is 0 and bit[4] is 1s
+
+            // MUL
+            new(0x0fe0_00f0, 0x0000_0090, ARM_MUL),
+
+            // ORR
+            new(0x0fe0_0000, 0x0380_0000, ARM_ORR), // I bit is 1
+            new(0x0fe0_0090, 0x0180_0000, ARM_ORR), // I bit is 0, bit[7] is 0 and bit[4] is 0
+            new(0x0fe0_0090, 0x0180_0080, ARM_ORR), // I bit is 0, bit[7] is 1 and bit[4] is 0
+            new(0x0fe0_0090, 0x0180_0010, ARM_ORR), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
+            // RSC
+            new(0x0fe0_0000, 0x02e0_0000, ARM_RSC), // I bit is 1
+            new(0x0fe0_0090, 0x00e0_0000, ARM_RSC), // I bit is 0, bit[7] is 0 and bit[4] is 0
+            new(0x0fe0_0090, 0x00e0_0080, ARM_RSC), // I bit is 0, bit[7] is 1 and bit[4] is 0
+            new(0x0fe0_0090, 0x00e0_0010, ARM_RSC), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
+            // SBC
+            new(0x0fe0_0000, 0x02c0_0000, ARM_SBC), // I bit is 1
+            new(0x0fe0_0090, 0x00c0_0000, ARM_SBC), // I bit is 0, bit[7] is 0 and bit[4] is 0
+            new(0x0fe0_0090, 0x00c0_0080, ARM_SBC), // I bit is 0, bit[7] is 1 and bit[4] is 0
+            new(0x0fe0_0090, 0x00c0_0010, ARM_SBC), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
+            // SMULL
+            new(0x0fe0_00f0, 0x00c0_0090, ARM_SMULL),
+
+            // UMULL
+            new(0x0fe0_00f0, 0x0080_0090, ARM_UMULL),
+        };
+
         private readonly ICallbacks callbacks;
         private readonly UInt32[] reg = new UInt32[16];
         private UInt32 cpsr;
@@ -56,297 +160,13 @@ namespace Iris
                 nextInstructionAddress += 4;
                 reg[PC] = nextInstructionAddress + 4;
 
-                // ADC
-                if ((instruction & 0x0fa0_0000) == 0x02a0_0000) // I bit is 1
+                foreach (ARM_InstructionTableEntry entry in ARM_InstructionTable)
                 {
-                    ARM_ADC(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fa0_0090) == 0x00a0_0000) // I bit is 0, bit[7] is 0 and bit[4] is 0
-                {
-                    ARM_ADC(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fa0_0090) == 0x00a0_0080) // I bit is 0, bit[7] is 1 and bit[4] is 0
-                {
-                    ARM_ADC(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fa0_0090) == 0x00a0_0010) // I bit is 0, bit[7] is 0 and bit[4] is 1
-                {
-                    ARM_ADC(instruction);
-                    return;
-                }
-
-                // ADD
-                if ((instruction & 0x0fa0_0000) == 0x0280_0000) // I bit is 1
-                {
-                    ARM_ADD(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fa0_0090) == 0x0080_0000) // I bit is 0, bit[7] is 0 and bit[4] is 0
-                {
-                    ARM_ADD(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fa0_0090) == 0x0080_0080) // I bit is 0, bit[7] is 1 and bit[4] is 0
-                {
-                    ARM_ADD(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fa0_0090) == 0x0080_0010) // I bit is 0, bit[7] is 0 and bit[4] is 1
-                {
-                    ARM_ADD(instruction);
-                    return;
-                }
-
-                // AND
-                else if ((instruction & 0x0fe0_0000) == 0x0200_0000) // I bit is 1
-                {
-                    ARM_AND(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fe0_0090) == 0x0000_0000) // I bit is 0, bit[7] is 0 and bit[4] is 0
-                {
-                    ARM_AND(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fe0_0090) == 0x0000_0080) // I bit is 0, bit[7] is 1 and bit[4] is 0
-                {
-                    ARM_AND(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fe0_0090) == 0x0000_0010) // I bit is 0, bit[7] is 0 and bit[4] is 1
-                {
-                    ARM_AND(instruction);
-                    return;
-                }
-
-                // BIC
-                else if ((instruction & 0x0fe0_0000) == 0x03c0_0000) // I bit is 1
-                {
-                    ARM_BIC(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fe0_0090) == 0x01c0_0000) // I bit is 0, bit[7] is 0 and bit[4] is 0
-                {
-                    ARM_BIC(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fe0_0090) == 0x01c0_0080) // I bit is 0, bit[7] is 1 and bit[4] is 0
-                {
-                    ARM_BIC(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fe0_0090) == 0x01c0_0010) // I bit is 0, bit[7] is 0 and bit[4] is 1
-                {
-                    ARM_BIC(instruction);
-                    return;
-                }
-
-
-                // CMN
-                else if ((instruction & 0x0ff0_0000) == 0x0370_0000) // I bit is 1
-                {
-                    ARM_CMN(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0ff0_0090) == 0x0170_0000) // I bit is 0, bit[7] is 0 and bit[4] is 0
-                {
-                    ARM_CMN(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0ff0_0090) == 0x0170_0080) // I bit is 0, bit[7] is 1 and bit[4] is 0
-                {
-                    ARM_CMN(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0ff0_0090) == 0x0170_0010) // I bit is 0, bit[7] is 0 and bit[4] is 1
-                {
-                    ARM_CMN(instruction);
-                    return;
-                }
-
-                // CMP
-                else if ((instruction & 0x0ff0_0000) == 0x0350_0000) // I bit is 1
-                {
-                    ARM_CMP(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0ff0_0090) == 0x0150_0000) // I bit is 0, bit[7] is 0 and bit[4] is 0
-                {
-                    ARM_CMP(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0ff0_0090) == 0x0150_0080) // I bit is 0, bit[7] is 1 and bit[4] is 0
-                {
-                    ARM_CMP(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0ff0_0090) == 0x0150_0010) // I bit is 0, bit[7] is 0 and bit[4] is 1
-                {
-                    ARM_CMP(instruction);
-                    return;
-                }
-
-                // EOR
-                else if ((instruction & 0x0fe0_0000) == 0x0220_0000) // I bit is 1
-                {
-                    ARM_EOR(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fe0_0090) == 0x0020_0000) // I bit is 0, bit[7] is 0 and bit[4] is 0
-                {
-                    ARM_EOR(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fe0_0090) == 0x0020_0080) // I bit is 0, bit[7] is 1 and bit[4] is 0
-                {
-                    ARM_EOR(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fe0_0090) == 0x0020_0010) // I bit is 0, bit[7] is 0 and bit[4] is 1
-                {
-                    ARM_EOR(instruction);
-                    return;
-                }
-
-                // MLA
-                else if ((instruction & 0x0fe0_00f0) == 0x0020_0090)
-                {
-                    ARM_MLA(instruction);
-                    return;
-                }
-
-                // MOV
-                else if ((instruction & 0x0fe0_0000) == 0x03a0_0000) // I bit is 1
-                {
-                    ARM_MOV(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fe0_0090) == 0x01a0_0000) // I bit is 0, bit[7] is 0 and bit[4] is 0
-                {
-                    ARM_MOV(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fe0_0090) == 0x01a0_0080) // I bit is 0, bit[7] is 1 and bit[4] is 0
-                {
-                    ARM_MOV(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fe0_0090) == 0x01a0_0010) // I bit is 0, bit[7] is 0 and bit[4] is 1
-                {
-                    ARM_MOV(instruction);
-                    return;
-                }
-
-                // MVN
-                else if ((instruction & 0x0fe0_0000) == 0x03e0_0000) // I bit is 1
-                {
-                    ARM_MVN(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fe0_0090) == 0x01e0_0000) // I bit is 0, bit[7] is 0 and bit[4] is 0
-                {
-                    ARM_MVN(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fe0_0090) == 0x01e0_0080) // I bit is 0, bit[7] is 1 and bit[4] is 0
-                {
-                    ARM_MVN(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fe0_0090) == 0x01e0_0010) // I bit is 0, bit[7] is 0 and bit[4] is 1
-                {
-                    ARM_MVN(instruction);
-                    return;
-                }
-
-                // MUL
-                else if ((instruction & 0x0fe0_00f0) == 0x0000_0090)
-                {
-                    ARM_MUL(instruction);
-                    return;
-                }
-
-                // ORR
-                else if ((instruction & 0x0fe0_0000) == 0x0380_0000) // I bit is 1
-                {
-                    ARM_ORR(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fe0_0090) == 0x0180_0000) // I bit is 0, bit[7] is 0 and bit[4] is 0
-                {
-                    ARM_ORR(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fe0_0090) == 0x0180_0080) // I bit is 0, bit[7] is 1 and bit[4] is 0
-                {
-                    ARM_ORR(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fe0_0090) == 0x0180_0010) // I bit is 0, bit[7] is 0 and bit[4] is 1
-                {
-                    ARM_ORR(instruction);
-                    return;
-                }
-
-                // RSC
-                else if ((instruction & 0x0fe0_0000) == 0x02e0_0000) // I bit is 1
-                {
-                    ARM_RSC(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fe0_0090) == 0x00e0_0000) // I bit is 0, bit[7] is 0 and bit[4] is 0
-                {
-                    ARM_RSC(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fe0_0090) == 0x00e0_0080) // I bit is 0, bit[7] is 1 and bit[4] is 0
-                {
-                    ARM_RSC(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fe0_0090) == 0x00e0_0010) // I bit is 0, bit[7] is 0 and bit[4] is 1
-                {
-                    ARM_RSC(instruction);
-                    return;
-                }
-
-                // SBC
-                else if ((instruction & 0x0fe0_0000) == 0x02c0_0000) // I bit is 1
-                {
-                    ARM_SBC(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fe0_0090) == 0x00c0_0000) // I bit is 0, bit[7] is 0 and bit[4] is 0
-                {
-                    ARM_SBC(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fe0_0090) == 0x00c0_0080) // I bit is 0, bit[7] is 1 and bit[4] is 0
-                {
-                    ARM_SBC(instruction);
-                    return;
-                }
-                else if ((instruction & 0x0fe0_0090) == 0x00c0_0010) // I bit is 0, bit[7] is 0 and bit[4] is 1
-                {
-                    ARM_SBC(instruction);
-                    return;
-                }
-
-                // SMULL
-                else if ((instruction & 0x0fe0_00f0) == 0x00c0_0090)
-                {
-                    ARM_SMULL(instruction);
-                    return;
-                }
-
-                // UMULL
-                else if ((instruction & 0x0fe0_00f0) == 0x0080_0090)
-                {
-                    ARM_UMULL(instruction);
-                    return;
+                    if ((instruction & entry.mask) == entry.expected)
+                    {
+                        entry.handler(this, instruction);
+                        return;
+                    }
                 }
 
                 switch ((instruction >> 25) & 0b111)
@@ -1283,17 +1103,17 @@ namespace Iris
             return (shifterOperand, shifterCarryOut);
         }
 
-        private void ARM_ADC(UInt32 instruction)
+        private static void ARM_ADC(CPU cpu, UInt32 instruction)
         {
             UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
+            if (cpu.ConditionPassed(cond))
             {
                 // Addressing mode 1
-                var (shifterOperand, _) = GetShifterOperandAndCarryOut(instruction);
+                var (shifterOperand, _) = cpu.GetShifterOperandAndCarryOut(instruction);
 
                 UInt32 rn = (instruction >> 16) & 0b1111;
                 UInt32 rd = (instruction >> 12) & 0b1111;
-                reg[rd] = reg[rn] + shifterOperand + (GetFlag_C() ? 1u : 0u);
+                cpu.reg[rd] = cpu.reg[rn] + shifterOperand + (cpu.GetFlag_C() ? 1u : 0u);
 
                 UInt32 s = (instruction >> 20) & 1;
                 if (s == 1)
@@ -1305,8 +1125,8 @@ namespace Iris
                     }
                     else
                     {
-                        SetFlag_N((reg[rd] & 0x8000_0000) != 0);
-                        SetFlag_Z(reg[rd] == 0);
+                        cpu.SetFlag_N((cpu.reg[rd] & 0x8000_0000) != 0);
+                        cpu.SetFlag_Z(cpu.reg[rd] == 0);
                         // TODO: C flag
                         // TODO: V flag
                     }
@@ -1314,17 +1134,17 @@ namespace Iris
             }
         }
 
-        private void ARM_ADD(UInt32 instruction)
+        private static void ARM_ADD(CPU cpu, UInt32 instruction)
         {
             UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
+            if (cpu.ConditionPassed(cond))
             {
                 // Addressing mode 1
-                var (shifterOperand, _) = GetShifterOperandAndCarryOut(instruction);
+                var (shifterOperand, _) = cpu.GetShifterOperandAndCarryOut(instruction);
 
                 UInt32 rn = (instruction >> 16) & 0b1111;
                 UInt32 rd = (instruction >> 12) & 0b1111;
-                reg[rd] = reg[rn] + shifterOperand;
+                cpu.reg[rd] = cpu.reg[rn] + shifterOperand;
 
                 UInt32 s = (instruction >> 20) & 1;
                 if (s == 1)
@@ -1336,8 +1156,8 @@ namespace Iris
                     }
                     else
                     {
-                        SetFlag_N((reg[rd] & 0x8000_0000) != 0);
-                        SetFlag_Z(reg[rd] == 0);
+                        cpu.SetFlag_N((cpu.reg[rd] & 0x8000_0000) != 0);
+                        cpu.SetFlag_Z(cpu.reg[rd] == 0);
                         // TODO: C flag
                         // TODO: V flag
                     }
@@ -1345,17 +1165,17 @@ namespace Iris
             }
         }
 
-        private void ARM_AND(UInt32 instruction)
+        private static void ARM_AND(CPU cpu, UInt32 instruction)
         {
             UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
+            if (cpu.ConditionPassed(cond))
             {
                 // Addressing mode 1
-                var (shifterOperand, shifterCarryOut) = GetShifterOperandAndCarryOut(instruction);
+                var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperandAndCarryOut(instruction);
 
                 UInt32 rn = (instruction >> 16) & 0b1111;
                 UInt32 rd = (instruction >> 12) & 0b1111;
-                reg[rd] = reg[rn] & shifterOperand;
+                cpu.reg[rd] = cpu.reg[rn] & shifterOperand;
 
                 UInt32 s = (instruction >> 20) & 1;
                 if (s == 1)
@@ -1367,25 +1187,25 @@ namespace Iris
                     }
                     else
                     {
-                        SetFlag_N((reg[rd] & 0x8000_0000) != 0);
-                        SetFlag_Z(reg[rd] == 0);
-                        SetFlag_C(shifterCarryOut == 1);
+                        cpu.SetFlag_N((cpu.reg[rd] & 0x8000_0000) != 0);
+                        cpu.SetFlag_Z(cpu.reg[rd] == 0);
+                        cpu.SetFlag_C(shifterCarryOut == 1);
                     }
                 }
             }
         }
 
-        private void ARM_BIC(UInt32 instruction)
+        private static void ARM_BIC(CPU cpu, UInt32 instruction)
         {
             UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
+            if (cpu.ConditionPassed(cond))
             {
                 // Addressing mode 1
-                var (shifterOperand, shifterCarryOut) = GetShifterOperandAndCarryOut(instruction);
+                var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperandAndCarryOut(instruction);
 
                 UInt32 rn = (instruction >> 16) & 0b1111;
                 UInt32 rd = (instruction >> 12) & 0b1111;
-                reg[rd] = reg[rn] & ~shifterOperand;
+                cpu.reg[rd] = cpu.reg[rn] & ~shifterOperand;
 
                 UInt32 s = (instruction >> 20) & 1;
                 if (s == 1)
@@ -1397,61 +1217,61 @@ namespace Iris
                     }
                     else
                     {
-                        SetFlag_N((reg[rd] & 0x8000_0000) != 0);
-                        SetFlag_Z(reg[rd] == 0);
-                        SetFlag_C(shifterCarryOut == 1);
+                        cpu.SetFlag_N((cpu.reg[rd] & 0x8000_0000) != 0);
+                        cpu.SetFlag_Z(cpu.reg[rd] == 0);
+                        cpu.SetFlag_C(shifterCarryOut == 1);
                     }
                 }
             }
         }
 
-        private void ARM_CMN(UInt32 instruction)
+        private static void ARM_CMN(CPU cpu, UInt32 instruction)
         {
             UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
+            if (cpu.ConditionPassed(cond))
             {
                 // Addressing mode 1
-                var (shifterOperand, _) = GetShifterOperandAndCarryOut(instruction);
+                var (shifterOperand, _) = cpu.GetShifterOperandAndCarryOut(instruction);
 
                 UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 aluOut = reg[rn] + shifterOperand;
+                UInt32 aluOut = cpu.reg[rn] + shifterOperand;
 
-                SetFlag_N((aluOut & 0x8000_0000) != 0);
-                SetFlag_Z(aluOut == 0);
+                cpu.SetFlag_N((aluOut & 0x8000_0000) != 0);
+                cpu.SetFlag_Z(aluOut == 0);
                 // TODO: C flag
                 // TODO: V flag
             }
         }
 
-        private void ARM_CMP(UInt32 instruction)
+        private static void ARM_CMP(CPU cpu, UInt32 instruction)
         {
             UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
+            if (cpu.ConditionPassed(cond))
             {
                 // Addressing mode 1
-                var (shifterOperand, _) = GetShifterOperandAndCarryOut(instruction);
+                var (shifterOperand, _) = cpu.GetShifterOperandAndCarryOut(instruction);
 
                 UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 aluOut = reg[rn] - shifterOperand;
+                UInt32 aluOut = cpu.reg[rn] - shifterOperand;
 
-                SetFlag_N((aluOut & 0x8000_0000) != 0);
-                SetFlag_Z(aluOut == 0);
+                cpu.SetFlag_N((aluOut & 0x8000_0000) != 0);
+                cpu.SetFlag_Z(aluOut == 0);
                 // TODO: C flag
                 // TODO: V flag
             }
         }
 
-        private void ARM_EOR(UInt32 instruction)
+        private static void ARM_EOR(CPU cpu, UInt32 instruction)
         {
             UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
+            if (cpu.ConditionPassed(cond))
             {
                 // Addressing mode 1
-                var (shifterOperand, shifterCarryOut) = GetShifterOperandAndCarryOut(instruction);
+                var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperandAndCarryOut(instruction);
 
                 UInt32 rn = (instruction >> 16) & 0b1111;
                 UInt32 rd = (instruction >> 12) & 0b1111;
-                reg[rd] = reg[rn] ^ shifterOperand;
+                cpu.reg[rd] = cpu.reg[rn] ^ shifterOperand;
 
                 UInt32 s = (instruction >> 20) & 1;
                 if (s == 1)
@@ -1463,24 +1283,24 @@ namespace Iris
                     }
                     else
                     {
-                        SetFlag_N((reg[rd] & 0x8000_0000) != 0);
-                        SetFlag_Z(reg[rd] == 0);
-                        SetFlag_C(shifterCarryOut == 1);
+                        cpu.SetFlag_N((cpu.reg[rd] & 0x8000_0000) != 0);
+                        cpu.SetFlag_Z(cpu.reg[rd] == 0);
+                        cpu.SetFlag_C(shifterCarryOut == 1);
                     }
                 }
             }
         }
 
-        private void ARM_MLA(UInt32 instruction)
+        private static void ARM_MLA(CPU cpu, UInt32 instruction)
         {
             UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
+            if (cpu.ConditionPassed(cond))
             {
                 UInt32 rd = (instruction >> 16) & 0b1111;
                 UInt32 rn = (instruction >> 12) & 0b1111;
                 UInt32 rs = (instruction >> 8) & 0b1111;
                 UInt32 rm = instruction & 0b1111;
-                reg[rd] = reg[rm] * reg[rs] + reg[rn];
+                cpu.reg[rd] = cpu.reg[rm] * cpu.reg[rs] + cpu.reg[rn];
 
                 UInt32 s = (instruction >> 20) & 1;
                 if (s == 1)
@@ -1492,24 +1312,24 @@ namespace Iris
                     }
                     else
                     {
-                        SetFlag_N((reg[rd] & 0x8000_0000) != 0);
-                        SetFlag_Z(reg[rd] == 0);
+                        cpu.SetFlag_N((cpu.reg[rd] & 0x8000_0000) != 0);
+                        cpu.SetFlag_Z(cpu.reg[rd] == 0);
                         // TODO: C flag
                     }
                 }
             }
         }
 
-        private void ARM_MOV(UInt32 instruction)
+        private static void ARM_MOV(CPU cpu, UInt32 instruction)
         {
             UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
+            if (cpu.ConditionPassed(cond))
             {
                 // Addressing mode 1
-                var (shifterOperand, shifterCarryOut) = GetShifterOperandAndCarryOut(instruction);
+                var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperandAndCarryOut(instruction);
 
                 UInt32 rd = (instruction >> 12) & 0b1111;
-                reg[rd] = shifterOperand;
+                cpu.reg[rd] = shifterOperand;
 
                 UInt32 s = (instruction >> 20) & 1;
                 if (s == 1)
@@ -1521,23 +1341,23 @@ namespace Iris
                     }
                     else
                     {
-                        SetFlag_N((reg[rd] & 0x8000_0000) != 0);
-                        SetFlag_Z(reg[rd] == 0);
-                        SetFlag_C(shifterCarryOut == 1);
+                        cpu.SetFlag_N((cpu.reg[rd] & 0x8000_0000) != 0);
+                        cpu.SetFlag_Z(cpu.reg[rd] == 0);
+                        cpu.SetFlag_C(shifterCarryOut == 1);
                     }
                 }
             }
         }
 
-        private void ARM_MUL(UInt32 instruction)
+        private static void ARM_MUL(CPU cpu, UInt32 instruction)
         {
             UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
+            if (cpu.ConditionPassed(cond))
             {
                 UInt32 rd = (instruction >> 16) & 0b1111;
                 UInt32 rs = (instruction >> 8) & 0b1111;
                 UInt32 rm = instruction & 0b1111;
-                reg[rd] = reg[rm] * reg[rs];
+                cpu.reg[rd] = cpu.reg[rm] * cpu.reg[rs];
 
                 UInt32 s = (instruction >> 20) & 1;
                 if (s == 1)
@@ -1549,24 +1369,24 @@ namespace Iris
                     }
                     else
                     {
-                        SetFlag_N((reg[rd] & 0x8000_0000) != 0);
-                        SetFlag_Z(reg[rd] == 0);
+                        cpu.SetFlag_N((cpu.reg[rd] & 0x8000_0000) != 0);
+                        cpu.SetFlag_Z(cpu.reg[rd] == 0);
                         // TODO: C flag
                     }
                 }
             }
         }
 
-        private void ARM_MVN(UInt32 instruction)
+        private static void ARM_MVN(CPU cpu, UInt32 instruction)
         {
             UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
+            if (cpu.ConditionPassed(cond))
             {
                 // Addressing mode 1
-                var (shifterOperand, shifterCarryOut) = GetShifterOperandAndCarryOut(instruction);
+                var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperandAndCarryOut(instruction);
 
                 UInt32 rd = (instruction >> 12) & 0b1111;
-                reg[rd] = ~shifterOperand;
+                cpu.reg[rd] = ~shifterOperand;
 
                 UInt32 s = (instruction >> 20) & 1;
                 if (s == 1)
@@ -1578,25 +1398,25 @@ namespace Iris
                     }
                     else
                     {
-                        SetFlag_N((reg[rd] & 0x8000_0000) != 0);
-                        SetFlag_Z(reg[rd] == 0);
-                        SetFlag_C(shifterCarryOut == 1);
+                        cpu.SetFlag_N((cpu.reg[rd] & 0x8000_0000) != 0);
+                        cpu.SetFlag_Z(cpu.reg[rd] == 0);
+                        cpu.SetFlag_C(shifterCarryOut == 1);
                     }
                 }
             }
         }
 
-        private void ARM_ORR(UInt32 instruction)
+        private static void ARM_ORR(CPU cpu, UInt32 instruction)
         {
             UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
+            if (cpu.ConditionPassed(cond))
             {
                 // Addressing mode 1
-                var (shifterOperand, shifterCarryOut) = GetShifterOperandAndCarryOut(instruction);
+                var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperandAndCarryOut(instruction);
 
                 UInt32 rn = (instruction >> 16) & 0b1111;
                 UInt32 rd = (instruction >> 12) & 0b1111;
-                reg[rd] = reg[rn] | shifterOperand;
+                cpu.reg[rd] = cpu.reg[rn] | shifterOperand;
 
                 UInt32 s = (instruction >> 20) & 1;
                 if (s == 1)
@@ -1608,25 +1428,25 @@ namespace Iris
                     }
                     else
                     {
-                        SetFlag_N((reg[rd] & 0x8000_0000) != 0);
-                        SetFlag_Z(reg[rd] == 0);
-                        SetFlag_C(shifterCarryOut == 1);
+                        cpu.SetFlag_N((cpu.reg[rd] & 0x8000_0000) != 0);
+                        cpu.SetFlag_Z(cpu.reg[rd] == 0);
+                        cpu.SetFlag_C(shifterCarryOut == 1);
                     }
                 }
             }
         }
 
-        private void ARM_RSC(UInt32 instruction)
+        private static void ARM_RSC(CPU cpu, UInt32 instruction)
         {
             UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
+            if (cpu.ConditionPassed(cond))
             {
                 // Addressing mode 1
-                var (shifterOperand, _) = GetShifterOperandAndCarryOut(instruction);
+                var (shifterOperand, _) = cpu.GetShifterOperandAndCarryOut(instruction);
 
                 UInt32 rn = (instruction >> 16) & 0b1111;
                 UInt32 rd = (instruction >> 12) & 0b1111;
-                reg[rd] = shifterOperand - reg[rn] - ~(GetFlag_C() ? 1u : 0u);
+                cpu.reg[rd] = shifterOperand - cpu.reg[rn] - ~(cpu.GetFlag_C() ? 1u : 0u);
 
                 UInt32 s = (instruction >> 20) & 1;
                 if (s == 1)
@@ -1638,8 +1458,8 @@ namespace Iris
                     }
                     else
                     {
-                        SetFlag_N((reg[rd] & 0x8000_0000) != 0);
-                        SetFlag_Z(reg[rd] == 0);
+                        cpu.SetFlag_N((cpu.reg[rd] & 0x8000_0000) != 0);
+                        cpu.SetFlag_Z(cpu.reg[rd] == 0);
                         // TODO: C flag
                         // TODO: V flag
                     }
@@ -1647,17 +1467,17 @@ namespace Iris
             }
         }
 
-        private void ARM_SBC(UInt32 instruction)
+        private static void ARM_SBC(CPU cpu, UInt32 instruction)
         {
             UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
+            if (cpu.ConditionPassed(cond))
             {
                 // Addressing mode 1
-                var (shifterOperand, _) = GetShifterOperandAndCarryOut(instruction);
+                var (shifterOperand, _) = cpu.GetShifterOperandAndCarryOut(instruction);
 
                 UInt32 rn = (instruction >> 16) & 0b1111;
                 UInt32 rd = (instruction >> 12) & 0b1111;
-                reg[rd] = reg[rn] - shifterOperand - ~(GetFlag_C() ? 1u : 0u);
+                cpu.reg[rd] = cpu.reg[rn] - shifterOperand - ~(cpu.GetFlag_C() ? 1u : 0u);
 
                 UInt32 s = (instruction >> 20) & 1;
                 if (s == 1)
@@ -1669,8 +1489,8 @@ namespace Iris
                     }
                     else
                     {
-                        SetFlag_N((reg[rd] & 0x8000_0000) != 0);
-                        SetFlag_Z(reg[rd] == 0);
+                        cpu.SetFlag_N((cpu.reg[rd] & 0x8000_0000) != 0);
+                        cpu.SetFlag_Z(cpu.reg[rd] == 0);
                         // TODO: C flag
                         // TODO: V flag
                     }
@@ -1678,46 +1498,46 @@ namespace Iris
             }
         }
 
-        private void ARM_SMULL(UInt32 instruction)
+        private static void ARM_SMULL(CPU cpu, UInt32 instruction)
         {
             UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
+            if (cpu.ConditionPassed(cond))
             {
                 UInt32 rdHi = (instruction >> 16) & 0b1111;
                 UInt32 rdLo = (instruction >> 12) & 0b1111;
                 UInt32 rs = (instruction >> 8) & 0b1111;
                 UInt32 rm = instruction & 0b1111;
-                reg[rdHi] = (reg[rm] * reg[rs]) >> 32;
-                reg[rdLo] = reg[rm] * reg[rs];
+                cpu.reg[rdHi] = (cpu.reg[rm] * cpu.reg[rs]) >> 32;
+                cpu.reg[rdLo] = cpu.reg[rm] * cpu.reg[rs];
 
                 UInt32 s = (instruction >> 20) & 1;
                 if (s == 1)
                 {
-                    SetFlag_N((reg[rdHi] & 0x8000_0000) != 0);
-                    SetFlag_Z(reg[rdHi] == 0 && reg[rdLo] == 0);
+                    cpu.SetFlag_N((cpu.reg[rdHi] & 0x8000_0000) != 0);
+                    cpu.SetFlag_Z(cpu.reg[rdHi] == 0 && cpu.reg[rdLo] == 0);
                     // TODO: C flag
                     // TODO: V flag
                 }
             }
         }
 
-        private void ARM_UMULL(UInt32 instruction)
+        private static void ARM_UMULL(CPU cpu, UInt32 instruction)
         {
             UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
+            if (cpu.ConditionPassed(cond))
             {
                 UInt32 rdHi = (instruction >> 16) & 0b1111;
                 UInt32 rdLo = (instruction >> 12) & 0b1111;
                 UInt32 rs = (instruction >> 8) & 0b1111;
                 UInt32 rm = instruction & 0b1111;
-                reg[rdHi] = (reg[rm] * reg[rs]) >> 32;
-                reg[rdLo] = reg[rm] * reg[rs];
+                cpu.reg[rdHi] = (cpu.reg[rm] * cpu.reg[rs]) >> 32;
+                cpu.reg[rdLo] = cpu.reg[rm] * cpu.reg[rs];
 
                 UInt32 s = (instruction >> 20) & 1;
                 if (s == 1)
                 {
-                    SetFlag_N((reg[rdHi] & 0x8000_0000) != 0);
-                    SetFlag_Z(reg[rdHi] == 0 && reg[rdLo] == 0);
+                    cpu.SetFlag_N((cpu.reg[rdHi] & 0x8000_0000) != 0);
+                    cpu.SetFlag_Z(cpu.reg[rdHi] == 0 && cpu.reg[rdLo] == 0);
                     // TODO: C flag
                     // TODO: V flag
                 }

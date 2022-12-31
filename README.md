@@ -1,10 +1,9 @@
 # Iris
 
-Game Boy Advance emulator
+Iris is a GameBoy Advance emulator (and maybe DS in the future).
 
 ## Roadmap
 
-- Fix ORR and MOV instructions first
 - Implement all missing instructions
 - Simplify instruction decoding and refact their implementation along the way
 - Pass all ARMWrestler's tests
