@@ -129,6 +129,14 @@ namespace Iris
             new(0x0fe0_00f0, 0x0080_0090, ARM_UMULL),
         };
 
+        private enum Flags
+        {
+            V = 28,
+            C = 29,
+            Z = 30,
+            N = 31
+        };
+
         private readonly ICallbacks callbacks;
         private readonly UInt32[] reg = new UInt32[16];
         private UInt32 cpsr;
@@ -770,71 +778,20 @@ namespace Iris
             }
         }
 
-        private bool GetFlag_N()
+        private UInt32 GetFlag(Flags flag)
         {
-            return ((cpsr >> 31) & 1) == 1;
+            return (cpsr >> (int)flag) & 1;
         }
 
-        private void SetFlag_N(bool flag)
+        private void SetFlag(Flags flag, UInt32 value)
         {
-            if (flag)
+            if (value == 1)
             {
-                cpsr |= 1u << 31;
+                cpsr |= 1u << (int)flag;
             }
             else
             {
-                cpsr &= ~(1u << 31);
-            }
-        }
-
-        private bool GetFlag_Z()
-        {
-            return ((cpsr >> 30) & 1) == 1;
-        }
-
-        private void SetFlag_Z(bool flag)
-        {
-            if (flag)
-            {
-                cpsr |= 1u << 30;
-            }
-            else
-            {
-                cpsr &= ~(1u << 30);
-            }
-        }
-
-        private bool GetFlag_C()
-        {
-            return ((cpsr >> 29) & 1) == 1;
-        }
-
-        private void SetFlag_C(bool flag)
-        {
-            if (flag)
-            {
-                cpsr |= 1u << 29;
-            }
-            else
-            {
-                cpsr &= ~(1u << 29);
-            }
-        }
-
-        private bool GetFlag_V()
-        {
-            return ((cpsr >> 28) & 1) == 1;
-        }
-
-        private void SetFlag_V(bool flag)
-        {
-            if (flag)
-            {
-                cpsr |= 1u << 28;
-            }
-            else
-            {
-                cpsr &= ~(1u << 28);
+                cpsr &= ~(1u << (int)flag);
             }
         }
 
@@ -844,43 +801,43 @@ namespace Iris
             {
                 // EQ / Equal
                 case 0b0000:
-                    return GetFlag_Z();
+                    return GetFlag(Flags.Z) == 1;
 
                 // NE / Not equal
                 case 0b0001:
-                    return !GetFlag_Z();
+                    return GetFlag(Flags.Z) == 0;
 
                 // CS/HS / Carry set/unsigned higher or same
                 case 0b0010:
-                    return GetFlag_C();
+                    return GetFlag(Flags.C) == 1;
 
                 // CC/LO / Carry clear/unsigned lower
                 case 0b0011:
-                    return !GetFlag_C();
+                    return GetFlag(Flags.C) == 0;
 
                 // MI / Minus/negative
                 case 0b0100:
-                    return GetFlag_N();
+                    return GetFlag(Flags.N) == 1;
 
                 // PL / Plus/positive or zero
                 case 0b0101:
-                    return !GetFlag_N();
+                    return GetFlag(Flags.N) == 0;
 
                 // VS / Overflow
                 case 0b0110:
-                    return GetFlag_V();
+                    return GetFlag(Flags.V) == 1;
 
                 // VC / No overflow
                 case 0b0111:
-                    return !GetFlag_V();
+                    return GetFlag(Flags.V) == 0;
 
                 // GT / Signed greater than
                 case 0b1100:
-                    return !GetFlag_Z() && (GetFlag_N() == GetFlag_V());
+                    return (GetFlag(Flags.Z) == 0) && (GetFlag(Flags.N) == GetFlag(Flags.V));
 
                 // LE / Signed less than or equal
                 case 0b1101:
-                    return GetFlag_Z() || (GetFlag_N() != GetFlag_V());
+                    return (GetFlag(Flags.Z) == 1) || (GetFlag(Flags.N) != GetFlag(Flags.V));
 
                 // AL / Always (unconditional)
                 case 0b1110:
@@ -968,7 +925,7 @@ namespace Iris
                 shifterOperand = RotateRight(imm, (int)rotateAmount);
 
                 if (rotateImm == 0)
-                    shifterCarryOut = GetFlag_C() ? 1u : 0u;
+                    shifterCarryOut = GetFlag(Flags.C);
                 else
                     shifterCarryOut = shifterOperand >> 31;
             }
@@ -985,7 +942,7 @@ namespace Iris
                             if (shiftImm == 0)
                             {
                                 shifterOperand = reg[rm];
-                                shifterCarryOut = GetFlag_C() ? 1u : 0u;
+                                shifterCarryOut = GetFlag(Flags.C);
                             }
                             else
                             {
@@ -1027,7 +984,7 @@ namespace Iris
                         case 0b11: // Rotate right
                             if (shiftImm == 0)
                             {
-                                shifterOperand = LogicalShiftLeft(GetFlag_C() ? 1u : 0u, 31) | LogicalShiftRight(reg[rm], 1);
+                                shifterOperand = LogicalShiftLeft(GetFlag(Flags.C), 31) | LogicalShiftRight(reg[rm], 1);
                                 shifterCarryOut = reg[rm] & 1;
                             }
                             else
@@ -1047,7 +1004,7 @@ namespace Iris
                             if ((reg[rs] & 0xff) == 0)
                             {
                                 shifterOperand = reg[rm];
-                                shifterCarryOut = GetFlag_C() ? 1u : 0u;
+                                shifterCarryOut = GetFlag(Flags.C);
                             }
                             else if ((reg[rs] & 0xff) < 32)
                             {
@@ -1070,7 +1027,7 @@ namespace Iris
                             if ((reg[rs] & 0xff) == 0)
                             {
                                 shifterOperand = reg[rm];
-                                shifterCarryOut = GetFlag_C() ? 1u : 0u;
+                                shifterCarryOut = GetFlag(Flags.C);
                             }
                             else if ((reg[rs] & 0xff) < 32)
                             {
@@ -1113,7 +1070,7 @@ namespace Iris
 
                 UInt32 rn = (instruction >> 16) & 0b1111;
                 UInt32 rd = (instruction >> 12) & 0b1111;
-                cpu.reg[rd] = cpu.reg[rn] + shifterOperand + (cpu.GetFlag_C() ? 1u : 0u);
+                cpu.reg[rd] = cpu.reg[rn] + shifterOperand + cpu.GetFlag(Flags.C);
 
                 UInt32 s = (instruction >> 20) & 1;
                 if (s == 1)
@@ -1125,8 +1082,8 @@ namespace Iris
                     }
                     else
                     {
-                        cpu.SetFlag_N((cpu.reg[rd] & 0x8000_0000) != 0);
-                        cpu.SetFlag_Z(cpu.reg[rd] == 0);
+                        cpu.SetFlag(Flags.N, cpu.reg[rd] >> 31);
+                        cpu.SetFlag(Flags.Z, (cpu.reg[rd] == 0) ? 1u : 0u);
                         // TODO: C flag
                         // TODO: V flag
                     }
@@ -1156,8 +1113,8 @@ namespace Iris
                     }
                     else
                     {
-                        cpu.SetFlag_N((cpu.reg[rd] & 0x8000_0000) != 0);
-                        cpu.SetFlag_Z(cpu.reg[rd] == 0);
+                        cpu.SetFlag(Flags.N, cpu.reg[rd] >> 31);
+                        cpu.SetFlag(Flags.Z, (cpu.reg[rd] == 0) ? 1u : 0u);
                         // TODO: C flag
                         // TODO: V flag
                     }
@@ -1187,9 +1144,9 @@ namespace Iris
                     }
                     else
                     {
-                        cpu.SetFlag_N((cpu.reg[rd] & 0x8000_0000) != 0);
-                        cpu.SetFlag_Z(cpu.reg[rd] == 0);
-                        cpu.SetFlag_C(shifterCarryOut == 1);
+                        cpu.SetFlag(Flags.N, cpu.reg[rd] >> 31);
+                        cpu.SetFlag(Flags.Z, (cpu.reg[rd] == 0) ? 1u : 0u);
+                        cpu.SetFlag(Flags.C, shifterCarryOut);
                     }
                 }
             }
@@ -1217,9 +1174,9 @@ namespace Iris
                     }
                     else
                     {
-                        cpu.SetFlag_N((cpu.reg[rd] & 0x8000_0000) != 0);
-                        cpu.SetFlag_Z(cpu.reg[rd] == 0);
-                        cpu.SetFlag_C(shifterCarryOut == 1);
+                        cpu.SetFlag(Flags.N, cpu.reg[rd] >> 31);
+                        cpu.SetFlag(Flags.Z, (cpu.reg[rd] == 0) ? 1u : 0u);
+                        cpu.SetFlag(Flags.C, shifterCarryOut);
                     }
                 }
             }
@@ -1236,8 +1193,8 @@ namespace Iris
                 UInt32 rn = (instruction >> 16) & 0b1111;
                 UInt32 aluOut = cpu.reg[rn] + shifterOperand;
 
-                cpu.SetFlag_N((aluOut & 0x8000_0000) != 0);
-                cpu.SetFlag_Z(aluOut == 0);
+                cpu.SetFlag(Flags.N, aluOut >> 31);
+                cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
                 // TODO: C flag
                 // TODO: V flag
             }
@@ -1254,8 +1211,8 @@ namespace Iris
                 UInt32 rn = (instruction >> 16) & 0b1111;
                 UInt32 aluOut = cpu.reg[rn] - shifterOperand;
 
-                cpu.SetFlag_N((aluOut & 0x8000_0000) != 0);
-                cpu.SetFlag_Z(aluOut == 0);
+                cpu.SetFlag(Flags.N, aluOut >> 31);
+                cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
                 // TODO: C flag
                 // TODO: V flag
             }
@@ -1283,9 +1240,9 @@ namespace Iris
                     }
                     else
                     {
-                        cpu.SetFlag_N((cpu.reg[rd] & 0x8000_0000) != 0);
-                        cpu.SetFlag_Z(cpu.reg[rd] == 0);
-                        cpu.SetFlag_C(shifterCarryOut == 1);
+                        cpu.SetFlag(Flags.N, cpu.reg[rd] >> 31);
+                        cpu.SetFlag(Flags.Z, (cpu.reg[rd] == 0) ? 1u : 0u);
+                        cpu.SetFlag(Flags.C, shifterCarryOut);
                     }
                 }
             }
@@ -1312,8 +1269,8 @@ namespace Iris
                     }
                     else
                     {
-                        cpu.SetFlag_N((cpu.reg[rd] & 0x8000_0000) != 0);
-                        cpu.SetFlag_Z(cpu.reg[rd] == 0);
+                        cpu.SetFlag(Flags.N, cpu.reg[rd] >> 31);
+                        cpu.SetFlag(Flags.Z, (cpu.reg[rd] == 0) ? 1u : 0u);
                         // TODO: C flag
                     }
                 }
@@ -1341,9 +1298,9 @@ namespace Iris
                     }
                     else
                     {
-                        cpu.SetFlag_N((cpu.reg[rd] & 0x8000_0000) != 0);
-                        cpu.SetFlag_Z(cpu.reg[rd] == 0);
-                        cpu.SetFlag_C(shifterCarryOut == 1);
+                        cpu.SetFlag(Flags.N, cpu.reg[rd] >> 31);
+                        cpu.SetFlag(Flags.Z, (cpu.reg[rd] == 0) ? 1u : 0u);
+                        cpu.SetFlag(Flags.C, shifterCarryOut);
                     }
                 }
             }
@@ -1369,8 +1326,8 @@ namespace Iris
                     }
                     else
                     {
-                        cpu.SetFlag_N((cpu.reg[rd] & 0x8000_0000) != 0);
-                        cpu.SetFlag_Z(cpu.reg[rd] == 0);
+                        cpu.SetFlag(Flags.N, cpu.reg[rd] >> 31);
+                        cpu.SetFlag(Flags.Z, (cpu.reg[rd] == 0) ? 1u : 0u);
                         // TODO: C flag
                     }
                 }
@@ -1398,9 +1355,9 @@ namespace Iris
                     }
                     else
                     {
-                        cpu.SetFlag_N((cpu.reg[rd] & 0x8000_0000) != 0);
-                        cpu.SetFlag_Z(cpu.reg[rd] == 0);
-                        cpu.SetFlag_C(shifterCarryOut == 1);
+                        cpu.SetFlag(Flags.N, cpu.reg[rd] >> 31);
+                        cpu.SetFlag(Flags.Z, (cpu.reg[rd] == 0) ? 1u : 0u);
+                        cpu.SetFlag(Flags.C, shifterCarryOut);
                     }
                 }
             }
@@ -1428,9 +1385,9 @@ namespace Iris
                     }
                     else
                     {
-                        cpu.SetFlag_N((cpu.reg[rd] & 0x8000_0000) != 0);
-                        cpu.SetFlag_Z(cpu.reg[rd] == 0);
-                        cpu.SetFlag_C(shifterCarryOut == 1);
+                        cpu.SetFlag(Flags.N, cpu.reg[rd] >> 31);
+                        cpu.SetFlag(Flags.Z, (cpu.reg[rd] == 0) ? 1u : 0u);
+                        cpu.SetFlag(Flags.C, shifterCarryOut);
                     }
                 }
             }
@@ -1446,7 +1403,7 @@ namespace Iris
 
                 UInt32 rn = (instruction >> 16) & 0b1111;
                 UInt32 rd = (instruction >> 12) & 0b1111;
-                cpu.reg[rd] = shifterOperand - cpu.reg[rn] - ~(cpu.GetFlag_C() ? 1u : 0u);
+                cpu.reg[rd] = shifterOperand - cpu.reg[rn] - ~cpu.GetFlag(Flags.C);
 
                 UInt32 s = (instruction >> 20) & 1;
                 if (s == 1)
@@ -1458,8 +1415,8 @@ namespace Iris
                     }
                     else
                     {
-                        cpu.SetFlag_N((cpu.reg[rd] & 0x8000_0000) != 0);
-                        cpu.SetFlag_Z(cpu.reg[rd] == 0);
+                        cpu.SetFlag(Flags.N, cpu.reg[rd] >> 31);
+                        cpu.SetFlag(Flags.Z, (cpu.reg[rd] == 0) ? 1u : 0u);
                         // TODO: C flag
                         // TODO: V flag
                     }
@@ -1477,7 +1434,7 @@ namespace Iris
 
                 UInt32 rn = (instruction >> 16) & 0b1111;
                 UInt32 rd = (instruction >> 12) & 0b1111;
-                cpu.reg[rd] = cpu.reg[rn] - shifterOperand - ~(cpu.GetFlag_C() ? 1u : 0u);
+                cpu.reg[rd] = cpu.reg[rn] - shifterOperand - ~cpu.GetFlag(Flags.C);
 
                 UInt32 s = (instruction >> 20) & 1;
                 if (s == 1)
@@ -1489,8 +1446,8 @@ namespace Iris
                     }
                     else
                     {
-                        cpu.SetFlag_N((cpu.reg[rd] & 0x8000_0000) != 0);
-                        cpu.SetFlag_Z(cpu.reg[rd] == 0);
+                        cpu.SetFlag(Flags.N, cpu.reg[rd] >> 31);
+                        cpu.SetFlag(Flags.Z, (cpu.reg[rd] == 0) ? 1u : 0u);
                         // TODO: C flag
                         // TODO: V flag
                     }
@@ -1513,8 +1470,8 @@ namespace Iris
                 UInt32 s = (instruction >> 20) & 1;
                 if (s == 1)
                 {
-                    cpu.SetFlag_N((cpu.reg[rdHi] & 0x8000_0000) != 0);
-                    cpu.SetFlag_Z(cpu.reg[rdHi] == 0 && cpu.reg[rdLo] == 0);
+                    cpu.SetFlag(Flags.N, cpu.reg[rdHi] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu.reg[rdHi] == 0 && cpu.reg[rdLo] == 0) ? 1u : 0u);
                     // TODO: C flag
                     // TODO: V flag
                 }
@@ -1536,8 +1493,8 @@ namespace Iris
                 UInt32 s = (instruction >> 20) & 1;
                 if (s == 1)
                 {
-                    cpu.SetFlag_N((cpu.reg[rdHi] & 0x8000_0000) != 0);
-                    cpu.SetFlag_Z(cpu.reg[rdHi] == 0 && cpu.reg[rdLo] == 0);
+                    cpu.SetFlag(Flags.N, cpu.reg[rdHi] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu.reg[rdHi] == 0 && cpu.reg[rdLo] == 0) ? 1u : 0u);
                     // TODO: C flag
                     // TODO: V flag
                 }
@@ -1759,8 +1716,8 @@ namespace Iris
                     }
                     else
                     {
-                        SetFlag_N((reg[rd] & 0x8000_0000) != 0);
-                        SetFlag_Z(reg[rd] == 0);
+                        SetFlag(Flags.N, reg[rd] >> 31);
+                        SetFlag(Flags.Z, (reg[rd] == 0) ? 1u : 0u);
                         // TODO: C flag
                         // TODO: V flag
                     }
@@ -1783,7 +1740,7 @@ namespace Iris
                 UInt32 rn = (instruction >> 16) & 0b1111;
                 UInt32 aluOut = reg[rn] & shifterOperand;
                 // TODO: N flag
-                SetFlag_Z(aluOut == 0);
+                SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
                 // TODO: C flag
             }
         }
@@ -1803,7 +1760,7 @@ namespace Iris
                 UInt32 rn = (instruction >> 16) & 0b1111;
                 UInt32 aluOut = reg[rn] ^ shifterOperand;
                 // TODO: N flag
-                SetFlag_Z(aluOut == 0);
+                SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
                 // TODO: C flag
             }
         }
@@ -2123,7 +2080,7 @@ namespace Iris
             }
             else
             {
-                SetFlag_C(((reg[rm] >> (32 - imm)) & 1) == 1);
+                SetFlag(Flags.C, (reg[rm] >> (32 - imm)) & 1);
                 reg[rd] = reg[rm] << imm;
             }
 
@@ -2182,7 +2139,7 @@ namespace Iris
             UInt16 imm = (UInt16)(instruction & 0xff);
             reg[rd] -= imm;
             // TODO: N flag
-            SetFlag_Z(reg[rd] == 0);
+            SetFlag(Flags.Z, (reg[rd] == 0) ? 1u : 0u);
             // TODO: C flag
             // TODO: V flag
         }
@@ -2211,7 +2168,7 @@ namespace Iris
             UInt16 rd = (UInt16)(instruction & 0b111);
             reg[rd] &= ~reg[rm];
             // TODO: N flag
-            SetFlag_Z(reg[rd] == 0);
+            SetFlag(Flags.Z, (reg[rd] == 0) ? 1u : 0u);
         }
 
         // ==============================
