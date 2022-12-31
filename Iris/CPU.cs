@@ -1053,6 +1053,21 @@ namespace Iris
             return (shifterOperand, shifterCarryOut);
         }
 
+        private static UInt32 CarryFrom(UInt64 result)
+        {
+            return (result > 0xffff_ffff) ? 1u : 0u;
+        }
+
+        private static UInt32 BorrowFrom(UInt32 leftOperand, UInt32 rightOperand)
+        {
+            return (leftOperand < rightOperand) ? 1u : 0u;
+        }
+
+        private static UInt32 OverflowFrom_Subtraction(UInt32 leftOperand, UInt32 rightOperand)
+        {
+            return (((leftOperand >> 31) != (rightOperand >> 31)) && ((leftOperand >> 31) != (rightOperand >> 31))) ? 1u : 0u;
+        }
+
         private static void ARM_ADC(CPU cpu, UInt32 instruction)
         {
             UInt32 cond = (instruction >> 28) & 0b1111;
@@ -1094,7 +1109,8 @@ namespace Iris
 
                 UInt32 rn = (instruction >> 16) & 0b1111;
                 UInt32 rd = (instruction >> 12) & 0b1111;
-                cpu.reg[rd] = cpu.reg[rn] + shifterOperand;
+                UInt64 result = cpu.reg[rn] + shifterOperand;
+                cpu.reg[rd] = (UInt32)result;
 
                 UInt32 s = (instruction >> 20) & 1;
                 if (s == 1)
@@ -1108,7 +1124,7 @@ namespace Iris
                     {
                         cpu.SetFlag(Flags.N, cpu.reg[rd] >> 31);
                         cpu.SetFlag(Flags.Z, (cpu.reg[rd] == 0) ? 1u : 0u);
-                        // TODO: C flag
+                        cpu.SetFlag(Flags.C, CarryFrom(result));
                         // TODO: V flag
                     }
                 }
@@ -1206,8 +1222,8 @@ namespace Iris
 
                 cpu.SetFlag(Flags.N, aluOut >> 31);
                 cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
-                // TODO: C flag
-                // TODO: V flag
+                cpu.SetFlag(Flags.C, ~BorrowFrom(cpu.reg[rn], shifterOperand) & 1);
+                cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(cpu.reg[rn], shifterOperand));
             }
         }
 
