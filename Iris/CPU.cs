@@ -785,74 +785,11 @@ namespace Iris
 
         private void SetFlag(Flags flag, UInt32 value)
         {
+            UInt32 mask = 1u << (int)flag;
             if (value == 1)
-            {
-                cpsr |= 1u << (int)flag;
-            }
+                cpsr |= mask;
             else
-            {
-                cpsr &= ~(1u << (int)flag);
-            }
-        }
-
-        private bool ConditionPassed(UInt32 cond)
-        {
-            switch (cond)
-            {
-                // EQ / Equal
-                case 0b0000:
-                    return GetFlag(Flags.Z) == 1;
-
-                // NE / Not equal
-                case 0b0001:
-                    return GetFlag(Flags.Z) == 0;
-
-                // CS/HS / Carry set/unsigned higher or same
-                case 0b0010:
-                    return GetFlag(Flags.C) == 1;
-
-                // CC/LO / Carry clear/unsigned lower
-                case 0b0011:
-                    return GetFlag(Flags.C) == 0;
-
-                // MI / Minus/negative
-                case 0b0100:
-                    return GetFlag(Flags.N) == 1;
-
-                // PL / Plus/positive or zero
-                case 0b0101:
-                    return GetFlag(Flags.N) == 0;
-
-                // VS / Overflow
-                case 0b0110:
-                    return GetFlag(Flags.V) == 1;
-
-                // VC / No overflow
-                case 0b0111:
-                    return GetFlag(Flags.V) == 0;
-
-                // GT / Signed greater than
-                case 0b1100:
-                    return (GetFlag(Flags.Z) == 0) && (GetFlag(Flags.N) == GetFlag(Flags.V));
-
-                // LE / Signed less than or equal
-                case 0b1101:
-                    return (GetFlag(Flags.Z) == 1) || (GetFlag(Flags.N) != GetFlag(Flags.V));
-
-                // AL / Always (unconditional)
-                case 0b1110:
-                    return true;
-
-                // UNPREDICTABLE
-                case 0b1111:
-                    return false;
-
-                // Unimplemented
-                default:
-                    Console.WriteLine("Condition {0} unimplemented", cond);
-                    Environment.Exit(1);
-                    return false;
-            }
+                cpsr &= ~mask;
         }
 
         private bool InPrivilegedMode()
@@ -888,8 +825,64 @@ namespace Iris
         }
 
         // ********************************************************************
-        //                          ARM instructions
+        //                               ARM
         // ********************************************************************
+
+        private bool ConditionPassed(UInt32 cond)
+        {
+            switch (cond)
+            {
+                // EQ
+                case 0b0000:
+                    return GetFlag(Flags.Z) == 1;
+
+                // NE
+                case 0b0001:
+                    return GetFlag(Flags.Z) == 0;
+
+                // CS/HS
+                case 0b0010:
+                    return GetFlag(Flags.C) == 1;
+
+                // CC/LO
+                case 0b0011:
+                    return GetFlag(Flags.C) == 0;
+
+                // MI
+                case 0b0100:
+                    return GetFlag(Flags.N) == 1;
+
+                // PL
+                case 0b0101:
+                    return GetFlag(Flags.N) == 0;
+
+                // VS
+                case 0b0110:
+                    return GetFlag(Flags.V) == 1;
+
+                // VC
+                case 0b0111:
+                    return GetFlag(Flags.V) == 0;
+
+                // GT
+                case 0b1100:
+                    return (GetFlag(Flags.Z) == 0) && (GetFlag(Flags.N) == GetFlag(Flags.V));
+
+                // LE
+                case 0b1101:
+                    return (GetFlag(Flags.Z) == 1) || (GetFlag(Flags.N) != GetFlag(Flags.V));
+
+                // AL
+                case 0b1110:
+                    return true;
+
+                // Unimplemented
+                default:
+                    Console.WriteLine("Condition {0} unimplemented", cond);
+                    Environment.Exit(1);
+                    return false;
+            }
+        }
 
         private static UInt32 RotateRight(UInt32 value, int rotateAmount)
         {
@@ -967,7 +960,7 @@ namespace Iris
                         case 0b10: // Arithmetic shift right
                             if (shiftImm == 0)
                             {
-                                if ((reg[rm] & 0x8000_0000) == 0)
+                                if ((reg[rm] >> 31) == 0)
                                     shifterOperand = 0;
                                 else
                                     shifterOperand = 0xffff_ffff;
@@ -1036,7 +1029,7 @@ namespace Iris
                             }
                             else
                             {
-                                if ((reg[rm] & 0x8000_0000) == 0)
+                                if ((reg[rm] >> 31) == 0)
                                     shifterOperand = 0;
                                 else
                                     shifterOperand = 0xffff_ffff;
