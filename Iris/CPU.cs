@@ -1093,7 +1093,7 @@ namespace Iris
 
                 UInt32 regRn = cpu.reg[rn];
                 UInt32 rightOperand = shifterOperand + cpu.GetFlag(Flags.C);
-                UInt64 result = regRn + rightOperand;
+                UInt64 result = (UInt64)regRn + (UInt64)rightOperand;
                 cpu.reg[rd] = (UInt32)result;
 
                 UInt32 s = (instruction >> 20) & 1;
@@ -1127,7 +1127,7 @@ namespace Iris
                 UInt32 rd = (instruction >> 12) & 0b1111;
 
                 UInt32 regRn = cpu.reg[rn];
-                UInt64 result = regRn + shifterOperand;
+                UInt64 result = (UInt64)regRn + (UInt64)shifterOperand;
                 cpu.reg[rd] = (UInt32)result;
 
                 UInt32 s = (instruction >> 20) & 1;
@@ -1219,7 +1219,7 @@ namespace Iris
 
                 UInt32 rn = (instruction >> 16) & 0b1111;
 
-                UInt64 result = cpu.reg[rn] + shifterOperand;
+                UInt64 result = (UInt64)cpu.reg[rn] + (UInt64)shifterOperand;
                 UInt32 aluOut = (UInt32)result;
 
                 cpu.SetFlag(Flags.N, aluOut >> 31);
@@ -1499,7 +1499,7 @@ namespace Iris
                 UInt32 rs = (instruction >> 8) & 0b1111;
                 UInt32 rm = instruction & 0b1111;
 
-                Int64 result = (Int32)cpu.reg[rm] * (Int32)cpu.reg[rs];
+                Int64 result = (Int64)(Int32)cpu.reg[rm] * (Int64)(Int32)cpu.reg[rs];
                 cpu.reg[rdHi] = (UInt32)(result >> 32);
                 cpu.reg[rdLo] = (UInt32)result;
 
@@ -1523,8 +1523,8 @@ namespace Iris
                 UInt32 rs = (instruction >> 8) & 0b1111;
                 UInt32 rm = instruction & 0b1111;
 
-                UInt64 result = cpu.reg[rm] * cpu.reg[rs];
-                UInt64 resultLo = result + cpu.reg[rdLo]; 
+                UInt64 result = (UInt64)cpu.reg[rm] * (UInt64)cpu.reg[rs];
+                UInt64 resultLo = result + (UInt64)cpu.reg[rdLo]; 
                 cpu.reg[rdLo] = (UInt32)resultLo;
                 cpu.reg[rdHi] += (UInt32)(result >> 32) + CarryFrom(resultLo);
 
@@ -1548,7 +1548,7 @@ namespace Iris
                 UInt32 rs = (instruction >> 8) & 0b1111;
                 UInt32 rm = instruction & 0b1111;
 
-                UInt64 result = cpu.reg[rm] * cpu.reg[rs];
+                UInt64 result = (UInt64)cpu.reg[rm] * (UInt64)cpu.reg[rs];
                 cpu.reg[rdHi] = (UInt32)(result >> 32);
                 cpu.reg[rdLo] = (UInt32)result;
 
