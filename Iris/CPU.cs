@@ -125,6 +125,9 @@ namespace Iris
             // SMULL
             new(0x0fe0_00f0, 0x00c0_0090, ARM_SMULL),
 
+            // UMLAL
+            new(0x0fe0_00f0, 0x00a0_0090, ARM_UMLAL),
+
             // UMULL
             new(0x0fe0_00f0, 0x0080_0090, ARM_UMULL),
         };
@@ -864,6 +867,10 @@ namespace Iris
                 case 0b0111:
                     return GetFlag(Flags.V) == 0;
 
+                // GE
+                case 0b1010:
+                    return GetFlag(Flags.N) == GetFlag(Flags.V);
+
                 // GT
                 case 0b1100:
                     return (GetFlag(Flags.Z) == 0) && (GetFlag(Flags.N) == GetFlag(Flags.V));
@@ -1495,6 +1502,31 @@ namespace Iris
                 Int64 result = (Int32)cpu.reg[rm] * (Int32)cpu.reg[rs];
                 cpu.reg[rdHi] = (UInt32)(result >> 32);
                 cpu.reg[rdLo] = (UInt32)result;
+
+                UInt32 s = (instruction >> 20) & 1;
+                if (s == 1)
+                {
+                    cpu.SetFlag(Flags.N, cpu.reg[rdHi] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu.reg[rdHi] == 0 && cpu.reg[rdLo] == 0) ? 1u : 0u);
+                    // C & V flags unpredictable
+                }
+            }
+        }
+
+        private static void ARM_UMLAL(CPU cpu, UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (cpu.ConditionPassed(cond))
+            {
+                UInt32 rdHi = (instruction >> 16) & 0b1111;
+                UInt32 rdLo = (instruction >> 12) & 0b1111;
+                UInt32 rs = (instruction >> 8) & 0b1111;
+                UInt32 rm = instruction & 0b1111;
+
+                UInt64 result = cpu.reg[rm] * cpu.reg[rs];
+                UInt64 resultLo = result + cpu.reg[rdLo]; 
+                cpu.reg[rdLo] = (UInt32)resultLo;
+                cpu.reg[rdHi] += (UInt32)(result >> 32) + CarryFrom(resultLo);
 
                 UInt32 s = (instruction >> 20) & 1;
                 if (s == 1)
