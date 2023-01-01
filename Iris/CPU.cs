@@ -45,16 +45,16 @@ namespace Iris
         private static readonly ARM_InstructionTableEntry[] ARM_InstructionTable = new ARM_InstructionTableEntry[]
         {
             // ADC
-            new(0x0fa0_0000, 0x02a0_0000, ARM_ADC), // I bit is 1
-            new(0x0fa0_0090, 0x00a0_0000, ARM_ADC), // I bit is 0, bit[7] is 0 and bit[4] is 0
-            new(0x0fa0_0090, 0x00a0_0080, ARM_ADC), // I bit is 0, bit[7] is 1 and bit[4] is 0
-            new(0x0fa0_0090, 0x00a0_0010, ARM_ADC), // I bit is 0, bit[7] is 0 and bit[4] is 1
+            new(0x0fe0_0000, 0x02a0_0000, ARM_ADC), // I bit is 1
+            new(0x0fe0_0090, 0x00a0_0000, ARM_ADC), // I bit is 0, bit[7] is 0 and bit[4] is 0
+            new(0x0fe0_0090, 0x00a0_0080, ARM_ADC), // I bit is 0, bit[7] is 1 and bit[4] is 0
+            new(0x0fe0_0090, 0x00a0_0010, ARM_ADC), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
             // ADD
-            new(0x0fa0_0000, 0x0280_0000, ARM_ADD), // I bit is 1
-            new(0x0fa0_0090, 0x0080_0000, ARM_ADD), // I bit is 0, bit[7] is 0 and bit[4] is 0
-            new(0x0fa0_0090, 0x0080_0080, ARM_ADD), // I bit is 0, bit[7] is 1 and bit[4] is 0
-            new(0x0fa0_0090, 0x0080_0010, ARM_ADD), // I bit is 0, bit[7] is 0 and bit[4] is 1
+            new(0x0fe0_0000, 0x0280_0000, ARM_ADD), // I bit is 1
+            new(0x0fe0_0090, 0x0080_0000, ARM_ADD), // I bit is 0, bit[7] is 0 and bit[4] is 0
+            new(0x0fe0_0090, 0x0080_0080, ARM_ADD), // I bit is 0, bit[7] is 1 and bit[4] is 0
+            new(0x0fe0_0090, 0x0080_0010, ARM_ADD), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
             // AND
             new(0x0fe0_0000, 0x0200_0000, ARM_AND), // I bit is 1
@@ -68,12 +68,11 @@ namespace Iris
             new(0x0fe0_0090, 0x01c0_0080, ARM_BIC), // I bit is 0, bit[7] is 1 and bit[4] is 0
             new(0x0fe0_0090, 0x01c0_0010, ARM_BIC), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
-
             // CMN
             new(0x0ff0_0000, 0x0370_0000, ARM_CMN), // I bit is 1
             new(0x0ff0_0090, 0x0170_0000, ARM_CMN), // I bit is 0, bit[7] is 0 and bit[4] is 0
             new(0x0ff0_0090, 0x0170_0080, ARM_CMN), // I bit is 0, bit[7] is 1 and bit[4] is 0
-            new(0x0ff0_0090, 0x0170_0010, ARM_CMN), //I bit is 0, bit[7] is 0 and bit[4] is 1
+            new(0x0ff0_0090, 0x0170_0010, ARM_CMN), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
             // CMP
             new(0x0ff0_0000, 0x0350_0000, ARM_CMP), // I bit is 1
@@ -96,14 +95,14 @@ namespace Iris
             new(0x0fe0_0090, 0x01a0_0080, ARM_MOV), // I bit is 0, bit[7] is 1 and bit[4] is 0
             new(0x0fe0_0090, 0x01a0_0010, ARM_MOV), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
+            // MUL
+            new(0x0fe0_00f0, 0x0000_0090, ARM_MUL),
+
             // MVN
             new(0x0fe0_0000, 0x03e0_0000, ARM_MVN), // I bit is 1
             new(0x0fe0_0090, 0x01e0_0000, ARM_MVN), // I bit is 0, bit[7] is 0 and bit[4] is 0
             new(0x0fe0_0090, 0x01e0_0080, ARM_MVN), // I bit is 0, bit[7] is 1 and bit[4] is 0
-            new(0x0fe0_0090, 0x01e0_0010, ARM_MVN), // I bit is 0, bit[7] is 0 and bit[4] is 1s
-
-            // MUL
-            new(0x0fe0_00f0, 0x0000_0090, ARM_MUL),
+            new(0x0fe0_0090, 0x01e0_0010, ARM_MVN), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
             // ORR
             new(0x0fe0_0000, 0x0380_0000, ARM_ORR), // I bit is 1
