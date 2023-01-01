@@ -998,23 +998,25 @@ namespace Iris
                 else if (((instruction >> 7) & 1) == 0) // Register shifts
                 {
                     UInt32 rs = (instruction >> 8) & 0b1111;
+                    UInt32 regRm = (rm == PC) ? reg[PC] + 4 : reg[rm];
+                    UInt32 regRs = reg[rs] & 0xff;
                     switch (shift)
                     {
                         case 0b00: // Logical shift left
-                            if ((reg[rs] & 0xff) == 0)
+                            if (regRs == 0)
                             {
-                                shifterOperand = reg[rm];
+                                shifterOperand = regRm;
                                 shifterCarryOut = GetFlag(Flags.C);
                             }
-                            else if ((reg[rs] & 0xff) < 32)
+                            else if (regRs < 32)
                             {
-                                shifterOperand = LogicalShiftLeft(reg[rm], (int)(reg[rs] & 0xff));
-                                shifterCarryOut = (reg[rm] >> (32 - (int)(reg[rs] & 0xff))) & 1;
+                                shifterOperand = LogicalShiftLeft(regRm, (int)regRs);
+                                shifterCarryOut = (regRm >> (32 - (int)regRs)) & 1;
                             }
-                            else if ((reg[rs] & 0xff) == 32)
+                            else if (regRs == 32)
                             {
                                 shifterOperand = 0;
-                                shifterCarryOut = reg[rm] & 1;
+                                shifterCarryOut = regRm & 1;
                             }
                             else
                             {
@@ -1024,24 +1026,24 @@ namespace Iris
                             break;
 
                         case 0b10: // Arithmetic shift right
-                            if ((reg[rs] & 0xff) == 0)
+                            if (regRs == 0)
                             {
-                                shifterOperand = reg[rm];
+                                shifterOperand = regRm;
                                 shifterCarryOut = GetFlag(Flags.C);
                             }
-                            else if ((reg[rs] & 0xff) < 32)
+                            else if (regRs < 32)
                             {
-                                shifterOperand = ArithmeticShiftRight(reg[rm], (int)(reg[rs] & 0xff));
-                                shifterCarryOut = (reg[rm] >> ((int)(reg[rs] & 0xff) - 1)) & 1;
+                                shifterOperand = ArithmeticShiftRight(regRm, (int)regRs);
+                                shifterCarryOut = (regRm >> ((int)regRs - 1)) & 1;
                             }
                             else
                             {
-                                if ((reg[rm] >> 31) == 0)
+                                if ((regRm >> 31) == 0)
                                     shifterOperand = 0;
                                 else
                                     shifterOperand = 0xffff_ffff;
 
-                                shifterCarryOut = reg[rm] >> 31;
+                                shifterCarryOut = regRm >> 31;
                             }
                             break;
 
