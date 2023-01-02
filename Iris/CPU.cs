@@ -99,7 +99,8 @@ namespace Iris
             new(0x0fb0_0000, 0x0100_0000, ARM_MRS),
 
             // MSR
-            // TODO
+            new(0x0fb0_0000, 0x0320_0000, ARM_MSR), // Immediate operand
+            new(0x0fb0_00f0, 0x0120_0000, ARM_MSR), // Register operand
 
             // MUL
             new(0x0fe0_00f0, 0x0000_0090, ARM_MUL),
@@ -296,15 +297,8 @@ namespace Iris
                         // Miscellaneous instructions
                         else if ((instruction & 0x0190_0010) == 0x0100_0000)
                         {
-                            if ((instruction & 0x0fb0_00f0) == 0x0120_0000)
-                            {
-                                ARM_MoveToStatusRegister_Register(instruction);
-                            }
-                            else
-                            {
-                                Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstrAddr);
-                                Environment.Exit(1);
-                            }
+                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                            Environment.Exit(1);
                         }
 
                         // Data processing register shift
@@ -798,25 +792,6 @@ namespace Iris
             }
         }
 
-        private UInt32 GetFlag(Flags flag)
-        {
-            return (_cpsr >> (int)flag) & 1;
-        }
-
-        private void SetFlag(Flags flag, UInt32 value)
-        {
-            UInt32 mask = 1u << (int)flag;
-            if (value == 1)
-                _cpsr |= mask;
-            else
-                _cpsr &= ~mask;
-        }
-
-        private bool InPrivilegedMode()
-        {
-            return (_cpsr & 0b1_1111) != 0b1_0000; // mode != user
-        }
-
         private static UInt32 SignExtend(UInt32 value, int size)
         {
             if ((value >> (size - 1)) == 1)
@@ -847,6 +822,41 @@ namespace Iris
         // ********************************************************************
         //                               ARM
         // ********************************************************************
+
+        private UInt32 GetMode()
+        {
+            const UInt32 mask = 0b1_1111;
+            return _cpsr & mask;
+        }
+
+        private bool InAPrivilegedMode()
+        {
+            const UInt32 User = 0b1_0000;
+            return GetMode() != User;
+        }
+
+        private bool CurrentModeHasSPSR()
+        {
+            const UInt32 User = 0b1_0000;
+            const UInt32 System = 0b1_1111;
+
+            UInt32 mode = GetMode();
+            return (mode != User) && (mode != System);
+        }
+
+        private UInt32 GetFlag(Flags flag)
+        {
+            return (_cpsr >> (int)flag) & 1;
+        }
+
+        private void SetFlag(Flags flag, UInt32 value)
+        {
+            UInt32 mask = (UInt32)1 << (int)flag;
+            if (value == 1)
+                _cpsr |= mask;
+            else
+                _cpsr &= ~mask;
+        }
 
         private bool ConditionPassed(UInt32 cond)
         {
@@ -1071,9 +1081,7 @@ namespace Iris
                     }
                 }
                 else
-                {
                     throw new Exception("CPU: Wrong encoding");
-                }
             }
 
             return (shifterOperand, shifterCarryOut);
@@ -1104,7 +1112,6 @@ namespace Iris
             UInt32 cond = (instruction >> 28) & 0b1111;
             if (cpu.ConditionPassed(cond))
             {
-                // Addressing mode 1
                 var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
 
                 UInt32 rn = (instruction >> 16) & 0b1111;
@@ -1139,7 +1146,6 @@ namespace Iris
             UInt32 cond = (instruction >> 28) & 0b1111;
             if (cpu.ConditionPassed(cond))
             {
-                // Addressing mode 1
                 var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
 
                 UInt32 rn = (instruction >> 16) & 0b1111;
@@ -1173,7 +1179,6 @@ namespace Iris
             UInt32 cond = (instruction >> 28) & 0b1111;
             if (cpu.ConditionPassed(cond))
             {
-                // Addressing mode 1
                 var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
 
                 UInt32 rn = (instruction >> 16) & 0b1111;
@@ -1203,7 +1208,6 @@ namespace Iris
             UInt32 cond = (instruction >> 28) & 0b1111;
             if (cpu.ConditionPassed(cond))
             {
-                // Addressing mode 1
                 var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
 
                 UInt32 rn = (instruction >> 16) & 0b1111;
@@ -1233,7 +1237,6 @@ namespace Iris
             UInt32 cond = (instruction >> 28) & 0b1111;
             if (cpu.ConditionPassed(cond))
             {
-                // Addressing mode 1
                 var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
 
                 UInt32 rn = (instruction >> 16) & 0b1111;
@@ -1253,7 +1256,6 @@ namespace Iris
             UInt32 cond = (instruction >> 28) & 0b1111;
             if (cpu.ConditionPassed(cond))
             {
-                // Addressing mode 1
                 var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
 
                 UInt32 rn = (instruction >> 16) & 0b1111;
@@ -1271,7 +1273,6 @@ namespace Iris
             UInt32 cond = (instruction >> 28) & 0b1111;
             if (cpu.ConditionPassed(cond))
             {
-                // Addressing mode 1
                 var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
 
                 UInt32 rn = (instruction >> 16) & 0b1111;
@@ -1319,7 +1320,6 @@ namespace Iris
                     {
                         cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
                         cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
-                        // C flag unpredictable
                     }
                 }
             }
@@ -1330,7 +1330,6 @@ namespace Iris
             UInt32 cond = (instruction >> 28) & 0b1111;
             if (cpu.ConditionPassed(cond))
             {
-                // Addressing mode 1
                 var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
 
                 UInt32 rd = (instruction >> 12) & 0b1111;
@@ -1369,6 +1368,55 @@ namespace Iris
             }
         }
 
+        private static void ARM_MSR(CPU cpu, UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (cpu.ConditionPassed(cond))
+            {
+                UInt32 operand;
+                if (((instruction >> 25) & 1) == 1)
+                {
+                    UInt32 rotateImm = (instruction >> 8) & 0b1111;
+                    UInt32 imm = instruction & 0xff;
+
+                    int rotateAmount = 2 * (int)rotateImm;
+                    operand = RotateRight(imm, rotateAmount);
+                }
+                else
+                {
+                    UInt32 rm = instruction & 0b1111;
+                    operand = cpu._reg[rm];
+                }
+
+                UInt32 fieldMask = (instruction >> 16) & 0b1111;
+                UInt32 byteMask = (UInt32)((((fieldMask >> 0) & 1) == 1) ? 0x0000_00ff : 0)
+                                | (UInt32)((((fieldMask >> 1) & 1) == 1) ? 0x0000_ff00 : 0)
+                                | (UInt32)((((fieldMask >> 2) & 1) == 1) ? 0x00ff_0000 : 0)
+                                | (UInt32)((((fieldMask >> 3) & 1) == 1) ? 0xff00_0000 : 0);
+
+                const UInt32 UserMask = 0xf000_0000;
+                const UInt32 PrivMask = 0x0000_000f;
+                const UInt32 StateMask = 0x0000_0020;
+
+                UInt32 r = (instruction >> 22) & 1;
+                if (r == 0)
+                {
+                    UInt32 mask;
+                    if (cpu.InAPrivilegedMode())
+                        mask = byteMask & (UserMask | PrivMask);
+                    else
+                        mask = byteMask & UserMask;
+
+                    cpu._cpsr = (cpu._cpsr & ~mask) | (operand & mask);
+                }
+                else if (cpu.CurrentModeHasSPSR())
+                {
+                    UInt32 mask = byteMask & (UserMask | PrivMask | StateMask);
+                    cpu._spsr = (cpu._spsr & ~mask) | (operand & mask);
+                }
+            }
+        }
+
         private static void ARM_MUL(CPU cpu, UInt32 instruction)
         {
             UInt32 cond = (instruction >> 28) & 0b1111;
@@ -1391,7 +1439,6 @@ namespace Iris
                     {
                         cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
                         cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
-                        // C flag unpredictable
                     }
                 }
             }
@@ -1402,7 +1449,6 @@ namespace Iris
             UInt32 cond = (instruction >> 28) & 0b1111;
             if (cpu.ConditionPassed(cond))
             {
-                // Addressing mode 1
                 var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
 
                 UInt32 rd = (instruction >> 12) & 0b1111;
@@ -1431,7 +1477,6 @@ namespace Iris
             UInt32 cond = (instruction >> 28) & 0b1111;
             if (cpu.ConditionPassed(cond))
             {
-                // Addressing mode 1
                 var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
 
                 UInt32 rn = (instruction >> 16) & 0b1111;
@@ -1461,7 +1506,6 @@ namespace Iris
             UInt32 cond = (instruction >> 28) & 0b1111;
             if (cpu.ConditionPassed(cond))
             {
-                // Addressing mode 1
                 var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
 
                 UInt32 rn = (instruction >> 16) & 0b1111;
@@ -1494,7 +1538,6 @@ namespace Iris
             UInt32 cond = (instruction >> 28) & 0b1111;
             if (cpu.ConditionPassed(cond))
             {
-                // Addressing mode 1
                 var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
 
                 UInt32 rn = (instruction >> 16) & 0b1111;
@@ -1543,7 +1586,6 @@ namespace Iris
                 {
                     cpu.SetFlag(Flags.N, cpu._reg[rdHi] >> 31);
                     cpu.SetFlag(Flags.Z, (cpu._reg[rdHi] == 0 && cpu._reg[rdLo] == 0) ? 1u : 0u);
-                    // C & V flags unpredictable
                 }
             }
         }
@@ -1567,7 +1609,6 @@ namespace Iris
                 {
                     cpu.SetFlag(Flags.N, cpu._reg[rdHi] >> 31);
                     cpu.SetFlag(Flags.Z, (cpu._reg[rdHi] == 0 && cpu._reg[rdLo] == 0) ? 1u : 0u);
-                    // C & V flags unpredictable
                 }
             }
         }
@@ -1615,7 +1656,7 @@ namespace Iris
                 UInt32 rm = instruction & 0b1111;
 
                 UInt64 result = (UInt64)cpu._reg[rm] * (UInt64)cpu._reg[rs];
-                UInt64 resultLo = (UInt32)result + cpu._reg[rdLo]; 
+                UInt64 resultLo = (UInt32)result + cpu._reg[rdLo];
                 cpu._reg[rdLo] = (UInt32)resultLo;
                 cpu._reg[rdHi] += (UInt32)(result >> 32) + CarryFrom(resultLo);
 
@@ -1624,7 +1665,6 @@ namespace Iris
                 {
                     cpu.SetFlag(Flags.N, cpu._reg[rdHi] >> 31);
                     cpu.SetFlag(Flags.Z, (cpu._reg[rdHi] == 0 && cpu._reg[rdLo] == 0) ? 1u : 0u);
-                    // C & V flags unpredictable
                 }
             }
         }
@@ -1648,7 +1688,6 @@ namespace Iris
                 {
                     cpu.SetFlag(Flags.N, cpu._reg[rdHi] >> 31);
                     cpu.SetFlag(Flags.Z, (cpu._reg[rdHi] == 0 && cpu._reg[rdLo] == 0) ? 1u : 0u);
-                    // C & V flags unpredictable
                 }
             }
         }
@@ -1778,63 +1817,6 @@ namespace Iris
                 UInt32 rm = instruction & 0b1111;
                 _cpsr = (_cpsr & ~(1u << 5)) | (_reg[rm] & 1) << 5;
                 _reg[PC] = _reg[rm] & 0xffff_fffe;
-            }
-        }
-
-        // MSR (register)
-        private void ARM_MoveToStatusRegister_Register(UInt32 instruction)
-        {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
-            {
-                UInt32 rm = instruction & 0b1111;
-                UInt32 operand = _reg[rm];
-
-                const UInt32 unallocMask = 0x0fff_ff00;
-                if ((operand & unallocMask) != 0)
-                {
-                    Console.WriteLine("MSR (register): UNPREDICTABLE (attempt to set reserved bits)");
-                    Environment.Exit(1);
-                }
-
-                UInt32 fieldMask = (instruction >> 16) & 0b1111;
-                UInt32 byteMask = (UInt32)(((fieldMask & 0b0001) != 0) ? 0x0000_00ff : 0)
-                                | (UInt32)(((fieldMask & 0b0010) != 0) ? 0x0000_ff00 : 0)
-                                | (UInt32)(((fieldMask & 0b0100) != 0) ? 0x00ff_0000 : 0)
-                                | (UInt32)(((fieldMask & 0b1000) != 0) ? 0xff00_0000 : 0);
-
-                UInt32 r = (instruction >> 22) & 1;
-                if (r == 0)
-                {
-                    const UInt32 userMask = 0xf0000000;
-
-                    UInt32 mask = 0;
-                    if (InPrivilegedMode())
-                    {
-                        const UInt32 stateMask = 0x00000020;
-                        if ((operand & stateMask) != 0)
-                        {
-                            Console.WriteLine("MSR (register): UNPREDICTABLE (attempt to set non-ARM execution state)");
-                            Environment.Exit(1);
-                        }
-                        else
-                        {
-                            const UInt32 privMask = 0x0000000f;
-                            mask = byteMask & (userMask | privMask);
-                        }
-                    }
-                    else
-                    {
-                        mask = byteMask & userMask;
-                    }
-
-                    _cpsr = (_cpsr & ~mask) | (operand & mask);
-                }
-                else
-                {
-                    Console.WriteLine("MSR (register): R field unimplemented");
-                    Environment.Exit(1);
-                }
             }
         }
 
