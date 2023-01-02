@@ -95,6 +95,12 @@ namespace Iris
             new(0x0fe0_0090, 0x01a0_0080, ARM_MOV), // I bit is 0, bit[7] is 1 and bit[4] is 0
             new(0x0fe0_0090, 0x01a0_0010, ARM_MOV), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
+            // MRS
+            new(0x0fb0_0000, 0x0100_0000, ARM_MRS),
+
+            // MSR
+            // TODO
+
             // MUL
             new(0x0fe0_00f0, 0x0000_0090, ARM_MUL),
 
@@ -122,8 +128,17 @@ namespace Iris
             new(0x0fe0_0090, 0x00c0_0080, ARM_SBC), // I bit is 0, bit[7] is 1 and bit[4] is 0
             new(0x0fe0_0090, 0x00c0_0010, ARM_SBC), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
+            // SMLAL
+            new(0x0fe0_00f0, 0x00e0_0090, ARM_SMLAL),
+
             // SMULL
             new(0x0fe0_00f0, 0x00c0_0090, ARM_SMULL),
+
+            // SWP
+            new(0x0ff0_00f0, 0x0100_0090, ARM_SWP),
+
+            // SWPB
+            new(0x0ff0_00f0, 0x0140_0090, ARM_SWPB),
 
             // UMLAL
             new(0x0fe0_00f0, 0x00a0_0090, ARM_UMLAL),
@@ -141,9 +156,11 @@ namespace Iris
         };
 
         private readonly ICallbacks _callbacks;
+        private UInt32 _nextInstrAddr;
+
         private readonly UInt32[] _reg = new UInt32[16];
         private UInt32 _cpsr;
-        private UInt32 _nextInstrAddr;
+        private UInt32 _spsr;
 
         public CPU(ICallbacks callbacks)
         {
@@ -1337,6 +1354,21 @@ namespace Iris
             }
         }
 
+        private static void ARM_MRS(CPU cpu, UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (cpu.ConditionPassed(cond))
+            {
+                UInt32 r = (instruction >> 22) & 1;
+                UInt32 rd = (instruction >> 12) & 0b1111;
+
+                if (r == 1)
+                    cpu._reg[rd] = cpu._spsr;
+                else
+                    cpu._reg[rd] = cpu._cpsr;
+            }
+        }
+
         private static void ARM_MUL(CPU cpu, UInt32 instruction)
         {
             UInt32 cond = (instruction >> 28) & 0b1111;
@@ -1491,6 +1523,31 @@ namespace Iris
             }
         }
 
+        private static void ARM_SMLAL(CPU cpu, UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (cpu.ConditionPassed(cond))
+            {
+                UInt32 rdHi = (instruction >> 16) & 0b1111;
+                UInt32 rdLo = (instruction >> 12) & 0b1111;
+                UInt32 rs = (instruction >> 8) & 0b1111;
+                UInt32 rm = instruction & 0b1111;
+
+                Int64 result = (Int64)(Int32)cpu._reg[rm] * (Int64)(Int32)cpu._reg[rs];
+                Int64 resultLo = result + (Int64)cpu._reg[rdLo];
+                cpu._reg[rdLo] += (UInt32)resultLo;
+                cpu._reg[rdHi] += (UInt32)(result >> 32) + CarryFrom((UInt64)resultLo);
+
+                UInt32 s = (instruction >> 20) & 1;
+                if (s == 1)
+                {
+                    cpu.SetFlag(Flags.N, cpu._reg[rdHi] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu._reg[rdHi] == 0 && cpu._reg[rdLo] == 0) ? 1u : 0u);
+                    // C & V flags unpredictable
+                }
+            }
+        }
+
         private static void ARM_SMULL(CPU cpu, UInt32 instruction)
         {
             UInt32 cond = (instruction >> 28) & 0b1111;
@@ -1512,6 +1569,38 @@ namespace Iris
                     cpu.SetFlag(Flags.Z, (cpu._reg[rdHi] == 0 && cpu._reg[rdLo] == 0) ? 1u : 0u);
                     // C & V flags unpredictable
                 }
+            }
+        }
+
+        private static void ARM_SWP(CPU cpu, UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (cpu.ConditionPassed(cond))
+            {
+                UInt32 rn = (instruction >> 16) & 0b1111;
+                UInt32 rd = (instruction >> 12) & 0b1111;
+                UInt32 rm = instruction & 0b1111;
+
+                UInt32 address = cpu._reg[rn];
+                UInt32 temp = cpu._callbacks.ReadMemory32(address);
+                cpu._callbacks.WriteMemory32(address, cpu._reg[rm]);
+                cpu._reg[rd] = temp;
+            }
+        }
+
+        private static void ARM_SWPB(CPU cpu, UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (cpu.ConditionPassed(cond))
+            {
+                UInt32 rn = (instruction >> 16) & 0b1111;
+                UInt32 rd = (instruction >> 12) & 0b1111;
+                UInt32 rm = instruction & 0b1111;
+
+                UInt32 address = cpu._reg[rn];
+                Byte temp = cpu._callbacks.ReadMemory8(address);
+                cpu._callbacks.WriteMemory8(address, (Byte)cpu._reg[rm]);
+                cpu._reg[rd] = temp;
             }
         }
 
