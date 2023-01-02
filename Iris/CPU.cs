@@ -22,10 +22,6 @@ namespace Iris
             void WriteMemory32(UInt32 address, UInt32 value);
         }
 
-        private const UInt32 SP = 13;
-        private const UInt32 LR = 14;
-        private const UInt32 PC = 15;
-
         private readonly struct ARM_InstructionTableEntry
         {
             public delegate void InstructionHandler(CPU cpu, UInt32 instruction);
@@ -156,12 +152,29 @@ namespace Iris
             N = 31
         };
 
-        private readonly ICallbacks _callbacks;
-        private UInt32 _nextInstrAddr;
+        private const UInt32 UserMode = 0b1_0000;
+        private const UInt32 SystemMode = 0b1_1111;
+        private const UInt32 SupervisorMode = 0b1_0011;
+        private const UInt32 AbortMode = 0b1_0111;
+        private const UInt32 UndefinedMode = 0b1_1011;
+        private const UInt32 InterruptMode = 0b1_0010;
+        private const UInt32 FastInterruptMode = 0b1_0001;
+
+        private const UInt32 SP = 13;
+        private const UInt32 LR = 14;
+        private const UInt32 PC = 15;
 
         private readonly UInt32[] _reg = new UInt32[16];
+        private UInt32 _reg13_svc, _reg14_svc;
+        private UInt32 _reg13_abt, _reg14_abt;
+        private UInt32 _reg13_und, _reg14_und;
+        private UInt32 _reg13_irq, _reg14_irq;
+        private UInt32 _reg8_fiq, _reg9_fiq, _reg10_fiq, _reg11_fiq, _reg12_fiq, _reg13_fiq, _reg14_fiq;
         private UInt32 _cpsr;
-        private UInt32 _spsr;
+        private UInt32 _spsr_svc, _spsr_abt, _spsr_und, _spsr_irq, _spsr_fiq;
+
+        private readonly ICallbacks _callbacks;
+        private UInt32 _nextInstructionAddress;
 
         public CPU(ICallbacks callbacks)
         {
@@ -170,8 +183,8 @@ namespace Iris
 
         public void Init(UInt32 pc, UInt32 cpsr)
         {
-            _nextInstrAddr = pc;
-            _reg[PC] = _nextInstrAddr + 4;
+            _nextInstructionAddress = pc;
+            _reg[PC] = _nextInstructionAddress + 4;
 
             _cpsr = cpsr;
         }
@@ -180,14 +193,14 @@ namespace Iris
         {
             if (((_cpsr >> 5) & 1) == 0) // ARM mode
             {
-                if (_reg[PC] != _nextInstrAddr + 4)
+                if (_reg[PC] != _nextInstructionAddress + 4)
                 {
-                    _nextInstrAddr = _reg[PC];
+                    _nextInstructionAddress = _reg[PC];
                 }
 
-                UInt32 instruction = _callbacks.ReadMemory32(_nextInstrAddr);
-                _nextInstrAddr += 4;
-                _reg[PC] = _nextInstrAddr + 4;
+                UInt32 instruction = _callbacks.ReadMemory32(_nextInstructionAddress);
+                _nextInstructionAddress += 4;
+                _reg[PC] = _nextInstructionAddress + 4;
 
                 foreach (ARM_InstructionTableEntry entry in ARM_InstructionTable)
                 {
@@ -207,7 +220,7 @@ namespace Iris
                             // Multiplies
                             if (((instruction >> 24) & 1) == 0 && ((instruction >> 5) & 0b11) == 0)
                             {
-                                Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                 Environment.Exit(1);
                             }
 
@@ -218,14 +231,14 @@ namespace Iris
                                 {
                                     if (((instruction >> 5) & 1) == 0)
                                     {
-                                        Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                        Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                         Environment.Exit(1);
                                     }
                                     else
                                     {
                                         if (((instruction >> 22) & 1) == 0)
                                         {
-                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                             Environment.Exit(1);
                                         }
                                         else
@@ -246,7 +259,7 @@ namespace Iris
                                                         break;
 
                                                     default:
-                                                        Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                                        Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                                         Environment.Exit(1);
                                                         break;
                                                 }
@@ -264,7 +277,7 @@ namespace Iris
                                                         break;
 
                                                     default:
-                                                        Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                                        Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                                         Environment.Exit(1);
                                                         break;
                                                 }
@@ -274,7 +287,7 @@ namespace Iris
                                 }
                                 else
                                 {
-                                    Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                    Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                     Environment.Exit(1);
                                 }
                             }
@@ -289,7 +302,7 @@ namespace Iris
                             }
                             else
                             {
-                                Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                 Environment.Exit(1);
                             }
                         }
@@ -297,14 +310,14 @@ namespace Iris
                         // Miscellaneous instructions
                         else if ((instruction & 0x0190_0010) == 0x0100_0000)
                         {
-                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                             Environment.Exit(1);
                         }
 
                         // Data processing register shift
                         else if ((instruction & 0x0000_0090) == 0x0000_0010)
                         {
-                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                             Environment.Exit(1);
                         }
                         break;
@@ -328,7 +341,7 @@ namespace Iris
                                     break;
 
                                 default:
-                                    Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                    Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                     Environment.Exit(1);
                                     break;
                             }
@@ -358,12 +371,12 @@ namespace Iris
 
                                         case 0b11:
                                             //ARM_LoadRegisterByte_ImmediatePreIndexed(instruction);
-                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                             Environment.Exit(1);
                                             break;
 
                                         default:
-                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                             Environment.Exit(1);
                                             break;
                                     }
@@ -374,7 +387,7 @@ namespace Iris
                                     {
                                         case 0b00:
                                             // ARM_StoreRegisterByte_ImmediatePostIndexed(instruction);
-                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                             Environment.Exit(1);
                                             break;
 
@@ -384,12 +397,12 @@ namespace Iris
 
                                         case 0b11:
                                             //ARM_LoadRegisterByte_ImmediatePreIndexed(instruction);
-                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                             Environment.Exit(1);
                                             break;
 
                                         default:
-                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                             Environment.Exit(1);
                                             break;
                                     }
@@ -411,12 +424,12 @@ namespace Iris
 
                                         case 0b11:
                                             //ARM_LoadRegister_ImmediatePreIndexed(instruction);
-                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                             Environment.Exit(1);
                                             break;
 
                                         default:
-                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                             Environment.Exit(1);
                                             break;
                                     }
@@ -435,12 +448,12 @@ namespace Iris
 
                                         case 0b11:
                                             //ARM_StoreRegister_ImmediatePreIndexed(instruction);
-                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                             Environment.Exit(1);
                                             break;
 
                                         default:
-                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                             Environment.Exit(1);
                                             break;
                                     }
@@ -466,14 +479,14 @@ namespace Iris
                                             break;
 
                                         default:
-                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                             Environment.Exit(1);
                                             break;
                                     }
                                 }
                                 else
                                 {
-                                    Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                    Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                     Environment.Exit(1);
                                 }
                             }
@@ -488,14 +501,14 @@ namespace Iris
                                             break;
 
                                         default:
-                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                             Environment.Exit(1);
                                             break;
                                     }
                                 }
                                 else
                                 {
-                                    Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                    Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                     Environment.Exit(1);
                                 }
                             }
@@ -519,21 +532,21 @@ namespace Iris
 
                     // Unknown
                     default:
-                        Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                        Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                         Environment.Exit(1);
                         break;
                 }
             }
             else // THUMB mode
             {
-                if (_reg[PC] != _nextInstrAddr + 2)
+                if (_reg[PC] != _nextInstructionAddress + 2)
                 {
-                    _nextInstrAddr = _reg[PC];
+                    _nextInstructionAddress = _reg[PC];
                 }
 
-                UInt16 instruction = _callbacks.ReadMemory16(_nextInstrAddr);
-                _nextInstrAddr += 2;
-                _reg[PC] = _nextInstrAddr + 2;
+                UInt16 instruction = _callbacks.ReadMemory16(_nextInstructionAddress);
+                _nextInstructionAddress += 2;
+                _reg[PC] = _nextInstructionAddress + 2;
 
                 switch ((instruction >> 13) & 0b111)
                 {
@@ -565,7 +578,7 @@ namespace Iris
                                 // Add/subtract immediate
                                 else
                                 {
-                                    Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                    Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                     Environment.Exit(1);
                                 }
                             }
@@ -587,7 +600,7 @@ namespace Iris
                                     break;
 
                                 default:
-                                    Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                    Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                     Environment.Exit(1);
                                     break;
                             }
@@ -598,7 +611,7 @@ namespace Iris
                         // Load/store register offset
                         if (((instruction >> 12) & 1) == 1)
                         {
-                            Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                            Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                             Environment.Exit(1);
                         }
                         else
@@ -621,7 +634,7 @@ namespace Iris
                                             break;
 
                                         default:
-                                            Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                            Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                             Environment.Exit(1);
                                             break;
                                     }
@@ -633,7 +646,7 @@ namespace Iris
                                     {
                                         if (((instruction >> 7) & 1) == 1)
                                         {
-                                            Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                            Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                             Environment.Exit(1);
                                         }
                                         else
@@ -654,7 +667,7 @@ namespace Iris
                                                 break;
 
                                             default:
-                                                Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                                Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                                 Environment.Exit(1);
                                                 break;
                                         }
@@ -674,12 +687,12 @@ namespace Iris
                             {
                                 if (l == 1)
                                 {
-                                    Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                    Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                     Environment.Exit(1);
                                 }
                                 else
                                 {
-                                    Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                    Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                     Environment.Exit(1);
                                 }
                             }
@@ -687,7 +700,7 @@ namespace Iris
                             {
                                 if (l == 1)
                                 {
-                                    Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                    Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                     Environment.Exit(1);
                                 }
                                 else
@@ -719,14 +732,14 @@ namespace Iris
                                         break;
                                     }
                                 default:
-                                    Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                    Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                     Environment.Exit(1);
                                     break;
                             }
                         }
                         else
                         {
-                            Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                            Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                             Environment.Exit(1);
                         }
                         break;
@@ -741,7 +754,7 @@ namespace Iris
                             }
                             else
                             {
-                                Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                                Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                 Environment.Exit(1);
                             }
                         }
@@ -778,14 +791,14 @@ namespace Iris
                         }
                         else
                         {
-                            Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                            Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                             Environment.Exit(1);
                         }
                         break;
 
                     // Unknown
                     default:
-                        Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstrAddr);
+                        Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                         Environment.Exit(1);
                         break;
                 }
@@ -831,17 +844,64 @@ namespace Iris
 
         private bool InAPrivilegedMode()
         {
-            const UInt32 User = 0b1_0000;
-            return GetMode() != User;
+            return GetMode() != UserMode;
         }
 
         private bool CurrentModeHasSPSR()
         {
-            const UInt32 User = 0b1_0000;
-            const UInt32 System = 0b1_1111;
+            return GetMode() switch
+            {
+                UserMode or SystemMode => false,
+                _ => true,
+            };
+        }
 
-            UInt32 mode = GetMode();
-            return (mode != User) && (mode != System);
+        //private UInt32 GetReg(UInt32 i)
+        //{
+        //    switch (i)
+        //    {
+        //        case 
+        //    }
+        //}
+
+        //private void SetReg(UInt32 i, UInt32 value)
+        //{
+
+        //}
+
+        private UInt32 GetSPSR()
+        {
+            return GetMode() switch
+            {
+                SupervisorMode => _spsr_svc,
+                AbortMode => _spsr_abt,
+                UndefinedMode => _spsr_und,
+                InterruptMode => _spsr_irq,
+                FastInterruptMode => _spsr_fiq,
+                _ => throw new Exception("CPU: No SPSR for a non-exception mode"),
+            };
+        }
+
+        private void SetSPSR(UInt32 value)
+        {
+            switch (GetMode())
+            {
+                case SupervisorMode:
+                    _spsr_svc = value;
+                    break;
+                case AbortMode:
+                    _spsr_abt = value;
+                    break;
+                case UndefinedMode:
+                    _spsr_und = value;
+                    break;
+                case InterruptMode:
+                    _spsr_irq = value;
+                    break;
+                case FastInterruptMode:
+                    _spsr_fiq = value;
+                    break;
+            }
         }
 
         private UInt32 GetFlag(Flags flag)
@@ -862,56 +922,31 @@ namespace Iris
         {
             switch (cond)
             {
-                // EQ
-                case 0b0000:
+                case 0b0000: // EQ
                     return GetFlag(Flags.Z) == 1;
-
-                // NE
-                case 0b0001:
+                case 0b0001: // NE
                     return GetFlag(Flags.Z) == 0;
-
-                // CS/HS
-                case 0b0010:
+                case 0b0010: // CS/HS
                     return GetFlag(Flags.C) == 1;
-
-                // CC/LO
-                case 0b0011:
+                case 0b0011: // CC/LO
                     return GetFlag(Flags.C) == 0;
-
-                // MI
-                case 0b0100:
+                case 0b0100: // MI
                     return GetFlag(Flags.N) == 1;
-
-                // PL
-                case 0b0101:
+                case 0b0101: // PL
                     return GetFlag(Flags.N) == 0;
-
-                // VS
-                case 0b0110:
+                case 0b0110: // VS
                     return GetFlag(Flags.V) == 1;
-
-                // VC
-                case 0b0111:
+                case 0b0111: // VC
                     return GetFlag(Flags.V) == 0;
-
-                // GE
-                case 0b1010:
+                case 0b1010: // GE
                     return GetFlag(Flags.N) == GetFlag(Flags.V);
-
-                // GT
-                case 0b1100:
+                case 0b1100: // GT
                     return (GetFlag(Flags.Z) == 0) && (GetFlag(Flags.N) == GetFlag(Flags.V));
-
-                // LE
-                case 0b1101:
+                case 0b1101: // LE
                     return (GetFlag(Flags.Z) == 1) || (GetFlag(Flags.N) != GetFlag(Flags.V));
-
-                // AL
-                case 0b1110:
+                case 0b1110: // AL
                     return true;
-
-                // Unimplemented
-                default:
+                default: // Unimplemented
                     Console.WriteLine("Condition {0} unimplemented", cond);
                     Environment.Exit(1);
                     return false;
@@ -977,7 +1012,6 @@ namespace Iris
                                 shifterCarryOut = (_reg[rm] >> (32 - (int)shiftImm)) & 1;
                             }
                             break;
-
                         case 0b01: // Logical shift right
                             if (shiftImm == 0)
                             {
@@ -990,7 +1024,6 @@ namespace Iris
                                 shifterCarryOut = (_reg[rm] >> ((int)shiftImm - 1)) & 1;
                             }
                             break;
-
                         case 0b10: // Arithmetic shift right
                             if (shiftImm == 0)
                             {
@@ -1007,7 +1040,6 @@ namespace Iris
                                 shifterCarryOut = (_reg[rm] >> ((int)shiftImm - 1)) & 1;
                             }
                             break;
-
                         case 0b11: // Rotate right
                             if (shiftImm == 0)
                             {
@@ -1051,7 +1083,6 @@ namespace Iris
                                 shifterCarryOut = 0;
                             }
                             break;
-
                         case 0b10: // Arithmetic shift right
                             if (regRs == 0)
                             {
@@ -1073,7 +1104,6 @@ namespace Iris
                                 shifterCarryOut = regRm >> 31;
                             }
                             break;
-
                         default:
                             Console.WriteLine("CPU: encoding unimplemented");
                             Environment.Exit(1);
@@ -1362,7 +1392,7 @@ namespace Iris
                 UInt32 rd = (instruction >> 12) & 0b1111;
 
                 if (r == 1)
-                    cpu._reg[rd] = cpu._spsr;
+                    cpu._reg[rd] = cpu.GetSPSR();
                 else
                     cpu._reg[rd] = cpu._cpsr;
             }
@@ -1412,7 +1442,7 @@ namespace Iris
                 else if (cpu.CurrentModeHasSPSR())
                 {
                     UInt32 mask = byteMask & (UserMask | PrivMask | StateMask);
-                    cpu._spsr = (cpu._spsr & ~mask) | (operand & mask);
+                    cpu.SetSPSR((cpu.GetSPSR() & ~mask) | (operand & mask));
                 }
             }
         }
@@ -2176,7 +2206,7 @@ namespace Iris
             UInt32 cond = (instruction >> 28) & 0b1111;
             if (ConditionPassed(cond))
             {
-                _reg[LR] = _nextInstrAddr;
+                _reg[LR] = _nextInstructionAddress;
 
                 UInt32 imm = instruction & 0xff_ffff;
                 _reg[PC] += (SignExtend_30(imm, 24) << 2);
@@ -2481,7 +2511,7 @@ namespace Iris
         {
             UInt16 offset = (UInt16)(instruction & 0x7ff);
             _reg[PC] = _reg[LR] + ((UInt32)offset << 1);
-            _reg[LR] = _nextInstrAddr | 1;
+            _reg[LR] = _nextInstructionAddress | 1;
         }
     }
 }
