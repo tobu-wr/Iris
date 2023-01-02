@@ -1534,7 +1534,7 @@ namespace Iris
                 UInt32 rm = instruction & 0b1111;
 
                 Int64 result = (Int64)(Int32)cpu._reg[rm] * (Int64)(Int32)cpu._reg[rs];
-                UInt64 resultLo = (UInt32)(Int32)result + cpu._reg[rdLo];
+                UInt64 resultLo = (UInt32)result + cpu._reg[rdLo];
                 cpu._reg[rdLo] = (UInt32)resultLo;
                 cpu._reg[rdHi] += (UInt32)(result >> 32) + CarryFrom(resultLo);
 
