@@ -24,59 +24,59 @@ namespace Iris
 
         private const int KB = 1024;
 
-        private Byte[]? rom;
-        private readonly Byte[] externalWRAM = new Byte[256 * KB];
-        private readonly Byte[] internalWRAM = new Byte[32 * KB];
+        private Byte[]? _rom;
+        private readonly Byte[] _externalWRAM = new Byte[256 * KB];
+        private readonly Byte[] _internalWRAM = new Byte[32 * KB];
 
-        private readonly CPU cpu;
-        private readonly PPU ppu;
+        private readonly CPU _cpu;
+        private readonly PPU _ppu;
 
-        private UInt16 keyinput = 0x03ff;
+        private UInt16 _KEYINPUT = 0x03ff;
 
-        private bool running = false;
+        private bool _running = false;
 
         public GBA(IRenderer renderer)
         {
-            this.cpu = new(this);
-            this.ppu = new(renderer);
+            _cpu = new(this);
+            _ppu = new(renderer);
         }
 
         public void Init()
         {
-            cpu.Init(0x0800_0000, 0b1101_1111); // flags cleared + IRQ & FIQ interrupts disabled + ARM state + system mode
-            keyinput = 0x03ff;
+            _cpu.Init(0x0800_0000, 0b1101_1111); // flags cleared + IRQ & FIQ interrupts disabled + ARM state + system mode
+            _KEYINPUT = 0x03ff;
         }
 
         public void LoadROM(string filename)
         {
-            rom = File.ReadAllBytes(filename);
+            _rom = File.ReadAllBytes(filename);
             Init();
         }
 
         public bool IsRunning()
         {
-            return running;
+            return _running;
         }
 
         public void Run()
         {
-            running = true;
-            while (running)
+            _running = true;
+            while (_running)
             {
-                cpu.Step();
-                ppu.Step();
+                _cpu.Step();
+                _ppu.Step();
             }
         }
 
         public void Pause()
         {
-            running = false;
+            _running = false;
         }
 
         public void SetKeyStatus(Keys key, bool pressed)
         {
             int mask = 1 << (int)key;
-            keyinput = pressed ? (UInt16)(keyinput & ~mask) : (UInt16)(keyinput | mask);
+            _KEYINPUT = pressed ? (UInt16)(_KEYINPUT & ~mask) : (UInt16)(_KEYINPUT | mask);
         }
 
         public Byte ReadMemory8(UInt32 address)
@@ -84,14 +84,14 @@ namespace Iris
             if (0x0200_0000 <= address && address < 0x0300_0000)
             {
                 UInt32 offset = address - 0x0200_0000;
-                if (offset < externalWRAM.Length)
-                    return externalWRAM[offset];
+                if (offset < _externalWRAM.Length)
+                    return _externalWRAM[offset];
             }
             else if (0x0300_0000 <= address && address < 0x0400_0000)
             {
                 UInt32 offset = address - 0x0300_0000;
-                if (offset < internalWRAM.Length)
-                    return internalWRAM[offset];
+                if (offset < _internalWRAM.Length)
+                    return _internalWRAM[offset];
             }
             else if (0x0400_0000 <= address && address < 0x0500_0000)
             {
@@ -99,24 +99,24 @@ namespace Iris
                 switch (offset)
                 {
                     case 0x004:
-                        return (Byte)ppu.dispstat;
+                        return (Byte)_ppu.DISPSTAT;
                     case 0x005:
-                        return (Byte)(ppu.dispstat >> 8);
+                        return (Byte)(_ppu.DISPSTAT >> 8);
 
                     case 0x130:
-                        return (Byte)keyinput;
+                        return (Byte)_KEYINPUT;
                     case 0x131:
-                        return (Byte)(keyinput >> 8);
+                        return (Byte)(_KEYINPUT >> 8);
                 }
             }
             else if (0x0800_0000 <= address && address < 0x0A00_0000)
             {
-                if (rom == null)
+                if (_rom == null)
                     throw new Exception("GBA: No ROM loaded");
 
                 UInt32 offset = address - 0x0800_0000;
-                if (offset < rom.Length)
-                    return rom[offset];
+                if (offset < _rom.Length)
+                    return _rom[offset];
             }
 
             throw new Exception(string.Format("GBA: Invalid read from address 0x{0:x8}", address));
@@ -137,16 +137,16 @@ namespace Iris
             if (0x0200_0000 <= address && address < 0x0300_0000)
             {
                 UInt32 offset = address - 0x0200_0000;
-                if (offset < externalWRAM.Length)
-                    externalWRAM[offset] = value;
+                if (offset < _externalWRAM.Length)
+                    _externalWRAM[offset] = value;
                 else
                     throw new Exception(string.Format("GBA: Invalid write to address 0x{0:x8}", address));
             }
             else if (0x0300_0000 <= address && address < 0x0400_0000)
             {
                 UInt32 offset = address - 0x0300_0000;
-                if (offset < internalWRAM.Length)
-                    internalWRAM[offset] = value;
+                if (offset < _internalWRAM.Length)
+                    _internalWRAM[offset] = value;
                 else
                     throw new Exception(string.Format("GBA: Invalid write to address 0x{0:x8}", address));
             }
@@ -156,10 +156,10 @@ namespace Iris
                 switch (offset)
                 {
                     case 0x000:
-                        ppu.dispcnt = (UInt16)((ppu.dispcnt & 0xff00) | value);
+                        _ppu.DISPCNT = (UInt16)((_ppu.DISPCNT & 0xff00) | value);
                         break;
                     case 0x001:
-                        ppu.dispcnt = (UInt16)((ppu.dispcnt & 0x00ff) | (value << 8));
+                        _ppu.DISPCNT = (UInt16)((_ppu.DISPCNT & 0x00ff) | (value << 8));
                         break;
 
                     case 0x002:
@@ -184,16 +184,16 @@ namespace Iris
             else if (0x0500_0000 <= address && address < 0x0600_0000)
             {
                 UInt32 offset = address - 0x0500_0000;
-                if (offset < ppu.paletteRAM.Length)
-                    ppu.paletteRAM[offset] = value;
+                if (offset < _ppu.PaletteRAM.Length)
+                    _ppu.PaletteRAM[offset] = value;
                 else
                     throw new Exception(string.Format("GBA: Invalid write to address 0x{0:x8}", address));
             }
             else if (0x0600_0000 <= address && address < 0x0700_0000)
             {
                 UInt32 offset = address - 0x0600_0000;
-                if (offset < ppu.VRAM.Length)
-                    ppu.VRAM[offset] = value;
+                if (offset < _ppu.VRAM.Length)
+                    _ppu.VRAM[offset] = value;
                 else
                     throw new Exception(string.Format("GBA: Invalid write to address 0x{0:x8}", address));
             }

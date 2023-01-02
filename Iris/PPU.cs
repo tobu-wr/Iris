@@ -10,51 +10,51 @@ namespace Iris
     {
         private const int KB = 1024;
 
-        public Byte[] paletteRAM = new Byte[1 * KB];
+        public Byte[] PaletteRAM = new Byte[1 * KB];
         public Byte[] VRAM = new Byte[96 * KB];
 
-        public UInt16 dispstat = 0;
-        public UInt16 dispcnt = 0;
+        public UInt16 DISPSTAT = 0;
+        public UInt16 DISPCNT = 0;
 
-        private const UInt32 SCREEN_WIDTH = 240;
-        private const UInt32 SCREEN_HEIGHT = 160;
-        private const UInt32 HORIZONTAL_LINE_WIDTH = 308;
-        private const UInt32 HORIZONTAL_LINE_COUNT = 228;
+        private const UInt32 ScreenWidth = 240;
+        private const UInt32 ScreenHeight = 160;
+        private const UInt32 HorizontalLineWidth = 308;
+        private const UInt32 HorizontalLineCount = 228;
 
-        private readonly IRenderer renderer;
-        private UInt32 cycleCounter = 0;
+        private readonly IRenderer _renderer;
+        private UInt32 _cycleCounter = 0;
 
         public PPU(IRenderer renderer)
         {
-            this.renderer = renderer;
+            _renderer = renderer;
         }
 
         public void Step()
         {
-            if (cycleCounter == HORIZONTAL_LINE_WIDTH * SCREEN_HEIGHT)
+            if (_cycleCounter == HorizontalLineWidth * ScreenHeight)
             {
                 // start of vertical blank
-                UInt16 bgMode = (UInt16)(dispcnt & 0b111);
+                UInt16 bgMode = (UInt16)(DISPCNT & 0b111);
                 switch (bgMode)
                 {
                     case 0b100:
                         {
-                            UInt16 bg2 = (UInt16)((dispcnt >> 10) & 1);
+                            UInt16 bg2 = (UInt16)((DISPCNT >> 10) & 1);
                             if (bg2 == 1)
                             {
-                                UInt16 frameBuffer = (UInt16)((dispcnt >> 4) & 1);
+                                UInt16 frameBuffer = (UInt16)((DISPCNT >> 4) & 1);
                                 UInt32 frameBufferAddress = (frameBuffer == 0) ? 0x0_0000u : 0x0_a000u;
 
-                                UInt16[] rendererFrameBuffer = new UInt16[SCREEN_WIDTH * SCREEN_HEIGHT];
-                                for (UInt32 i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; ++i)
+                                UInt16[] rendererFrameBuffer = new UInt16[ScreenWidth * ScreenHeight];
+                                for (UInt32 i = 0; i < ScreenWidth * ScreenHeight; ++i)
                                 {
                                     Byte colorNo = VRAM[frameBufferAddress + i];
-                                    UInt16 color = (UInt16)((paletteRAM[(colorNo * 2) + 1] << 8)
-                                                          | (paletteRAM[(colorNo * 2) + 0] << 0));
+                                    UInt16 color = (UInt16)((PaletteRAM[(colorNo * 2) + 1] << 8)
+                                                          | (PaletteRAM[(colorNo * 2) + 0] << 0));
                                     rendererFrameBuffer[i] = color;
                                 }
 
-                                renderer.DrawFrame(rendererFrameBuffer);
+                                _renderer.DrawFrame(rendererFrameBuffer);
                             }
                             break;
                         }
@@ -64,18 +64,18 @@ namespace Iris
                         break;
                 }
 
-                dispstat |= 1;
-                ++cycleCounter;
+                DISPSTAT |= 1;
+                ++_cycleCounter;
             }
-            else if (cycleCounter == HORIZONTAL_LINE_WIDTH * HORIZONTAL_LINE_COUNT)
+            else if (_cycleCounter == HorizontalLineWidth * HorizontalLineCount)
             {
                 // end of vertical blank
-                dispstat &= (UInt16)(~1 & 0xffff);
-                cycleCounter = 0;
+                DISPSTAT &= (UInt16)(~1 & 0xffff);
+                _cycleCounter = 0;
             }
             else
             {
-                ++cycleCounter;
+                ++_cycleCounter;
             }
         }
     }

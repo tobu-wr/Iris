@@ -17,7 +17,7 @@ namespace Iris
 {
     public partial class MainWindow : Form, IRenderer
     {
-        private static readonly Dictionary<Keys, GBA.Keys> keyMapping = new()
+        private static readonly Dictionary<Keys, GBA.Keys> KeyMapping = new()
         {
             { Keys.A, GBA.Keys.A },
             { Keys.Z, GBA.Keys.B},
@@ -31,17 +31,17 @@ namespace Iris
             { Keys.Q, GBA.Keys.L},
         };
 
-        private readonly GBA gba;
+        private readonly GBA _gba;
 
-        private int frameCount = 0;
-        private readonly System.Timers.Timer performanceUpdateTimer = new(1000);
+        private int _frameCount = 0;
+        private readonly System.Timers.Timer _performanceUpdateTimer = new(1000);
 
         public MainWindow(string[] args)
         {
             InitializeComponent();
-            gba = new(this);
+            _gba = new(this);
 
-            performanceUpdateTimer.Elapsed += new ElapsedEventHandler(PerformanceUpdateTimer_Elapsed);
+            _performanceUpdateTimer.Elapsed += new ElapsedEventHandler(PerformanceUpdateTimer_Elapsed);
 
             if (args.Length > 0 && LoadROM(args[0]))
             {
@@ -56,16 +56,16 @@ namespace Iris
 
         public void DrawFrame(UInt16[] frameBuffer)
         {
-            const int SCREEN_WIDTH = 240;
-            const int SCREEN_HEIGHT = 160;
-            const PixelFormat PIXEL_FORMAT = PixelFormat.Format16bppRgb555;
+            const int ScreenWidth = 240;
+            const int ScreenHeight = 160;
+            const PixelFormat PixelFormat = PixelFormat.Format16bppRgb555;
 
-            Bitmap bitmap = new(SCREEN_WIDTH, SCREEN_HEIGHT, PIXEL_FORMAT);
-            BitmapData data = bitmap.LockBits(new Rectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT), ImageLockMode.WriteOnly, PIXEL_FORMAT);
+            Bitmap bitmap = new(ScreenWidth, ScreenHeight, PixelFormat);
+            BitmapData data = bitmap.LockBits(new Rectangle(0, 0, ScreenWidth, ScreenHeight), ImageLockMode.WriteOnly, PixelFormat);
 
-            const int PIXEL_COUNT = SCREEN_WIDTH * SCREEN_HEIGHT;
-            Int16[] buffer = new Int16[PIXEL_COUNT];
-            for (int i = 0; i < PIXEL_COUNT; ++i)
+            const int PixelCount = ScreenWidth * ScreenHeight;
+            Int16[] buffer = new Int16[PixelCount];
+            for (int i = 0; i < PixelCount; ++i)
             {
                 UInt16 gbaColor = frameBuffer[i]; // BGR format
                 Byte red = (Byte)((gbaColor >> 0) & 0x1f);
@@ -74,19 +74,19 @@ namespace Iris
                 buffer[i] = (Int16)((red << 10) | (green << 5) | blue);
             }
 
-            System.Runtime.InteropServices.Marshal.Copy(buffer, 0, data.Scan0, PIXEL_COUNT);
+            System.Runtime.InteropServices.Marshal.Copy(buffer, 0, data.Scan0, PixelCount);
             bitmap.UnlockBits(data);
             pictureBox1.Invoke(() => pictureBox1.Image = bitmap);
             pictureBox1.Invalidate();
 
-            ++frameCount;
+            ++_frameCount;
         }
 
         private bool LoadROM(string fileName)
         {
             try
             {
-                gba.LoadROM(fileName);
+                _gba.LoadROM(fileName);
                 return true;
             }
             catch
@@ -106,17 +106,17 @@ namespace Iris
             {
                 try
                 {
-                    gba.Run();
+                    _gba.Run();
                 }
                 catch (Exception ex)
                 {
                     Pause();
-                    gba.Init();
+                    _gba.Init();
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             });
 
-            performanceUpdateTimer.Start();
+            _performanceUpdateTimer.Start();
         }
 
         private void Pause()
@@ -124,16 +124,16 @@ namespace Iris
             runToolStripMenuItem.Enabled = true;
             pauseToolStripMenuItem.Enabled = false;
             toolStripStatusLabel1.Text = "Paused";
-            gba.Pause();
+            _gba.Pause();
 
-            performanceUpdateTimer.Stop();
+            _performanceUpdateTimer.Stop();
             toolStripStatusLabel2.Text = "FPS: 0";
-            frameCount = 0;
+            _frameCount = 0;
         }
 
         private void LoadROMToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            bool running = gba.IsRunning();
+            bool running = _gba.IsRunning();
             if (running)
                 Pause();
 
@@ -157,7 +157,7 @@ namespace Iris
 
         private void LoadStateToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            bool running = gba.IsRunning();
+            bool running = _gba.IsRunning();
             if (running)
                 Pause();
 
@@ -173,7 +173,7 @@ namespace Iris
 
         private void SaveStateToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            bool running = gba.IsRunning();
+            bool running = _gba.IsRunning();
             if (running)
                 Pause();
 
@@ -204,11 +204,11 @@ namespace Iris
 
         private void RestartToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            bool running = gba.IsRunning();
+            bool running = _gba.IsRunning();
             if (running)
                 Pause();
 
-            gba.Init();
+            _gba.Init();
 
             if (running)
                 Run();
@@ -216,21 +216,21 @@ namespace Iris
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
-            if (keyMapping.TryGetValue(e.KeyCode, out GBA.Keys value))
-                gba.SetKeyStatus(value, true);
+            if (KeyMapping.TryGetValue(e.KeyCode, out GBA.Keys value))
+                _gba.SetKeyStatus(value, true);
         }
 
         private void MainWindow_KeyUp(object sender, KeyEventArgs e)
         {
-            if (keyMapping.TryGetValue(e.KeyCode, out GBA.Keys value))
-                gba.SetKeyStatus(value, false);
+            if (KeyMapping.TryGetValue(e.KeyCode, out GBA.Keys value))
+                _gba.SetKeyStatus(value, false);
         }
 
         private void PerformanceUpdateTimer_Elapsed(object? sender, ElapsedEventArgs e)
         {
-            int fps = (int)(frameCount * 1000 / performanceUpdateTimer.Interval);
+            int fps = (int)(_frameCount * 1000 / _performanceUpdateTimer.Interval);
             menuStrip1.Invoke(() => toolStripStatusLabel2.Text = "FPS: " + fps);
-            frameCount = 0;
+            _frameCount = 0;
         }
     }
 }
