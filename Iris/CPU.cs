@@ -144,6 +144,15 @@ namespace Iris
             // SMULL
             new(0x0fe0_00f0, 0x00c0_0090, ARM_SMULL),
 
+            // STR
+            new(0x0c50_0000, 0x0400_0000, ARM_STR),
+
+            // STRB
+            new(0x0c50_0000, 0x0440_0000, ARM_STRB),
+
+            // STRH
+            new(0x0e10_00f0, 0x0000_00b0, ARM_STRH),
+
             // SWP
             new(0x0ff0_0ff0, 0x0100_0090, ARM_SWP),
 
@@ -235,67 +244,8 @@ namespace Iris
                         // Multiplies & Extra load/stores
                         if ((instruction & 0x0000_0090) == 0x0000_0090)
                         {
-                            // Multiplies
-                            if (((instruction >> 24) & 1) == 0 && ((instruction >> 5) & 0b11) == 0)
-                            {
-                                Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                Environment.Exit(1);
-                            }
-
-                            // Extra load/stores
-                            else
-                            {
-                                if (((instruction >> 6) & 1) == 0)
-                                {
-                                    if (((instruction >> 5) & 1) == 0)
-                                    {
-                                        Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                        Environment.Exit(1);
-                                    }
-                                    else
-                                    {
-                                        if (((instruction >> 22) & 1) == 0)
-                                        {
-                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                            Environment.Exit(1);
-                                        }
-                                        else
-                                        {
-                                            UInt32 p = (instruction >> 24) & 1;
-                                            UInt32 w = (instruction >> 21) & 1;
-                                            UInt32 l = (instruction >> 20) & 1;
-                                            if (l == 0)
-                                            {
-                                                switch ((p << 1) | w)
-                                                {
-                                                    case 0b00:
-                                                        ARM_StoreRegisterHalfWord_ImmediatePostIndexed(instruction);
-                                                        break;
-
-                                                    case 0b10:
-                                                        ARM_StoreRegisterHalfWord_ImmediateOffset(instruction);
-                                                        break;
-
-                                                    default:
-                                                        Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                                        Environment.Exit(1);
-                                                        break;
-                                                }
-                                            }
-                                            else
-                                            {
-                                                Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                                Environment.Exit(1);
-                                            }
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                    Environment.Exit(1);
-                                }
-                            }
+                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
+                            Environment.Exit(1);
                         }
 
                         // Miscellaneous instructions
@@ -349,82 +299,6 @@ namespace Iris
                                     Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                     Environment.Exit(1);
                                     break;
-                            }
-                            break;
-                        }
-
-                    // Load/store immediate offset
-                    case 0b010:
-                        {
-                            UInt32 p = (instruction >> 24) & 1;
-                            UInt32 b = (instruction >> 22) & 1;
-                            UInt32 w = (instruction >> 21) & 1;
-                            UInt32 l = (instruction >> 20) & 1;
-                            if (b == 1)
-                            {
-                                if (l == 1)
-                                {
-                                    Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                    Environment.Exit(1);
-                                }
-                                else
-                                {
-                                    switch ((p << 1) | w)
-                                    {
-                                        case 0b00:
-                                            // ARM_StoreRegisterByte_ImmediatePostIndexed(instruction);
-                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                            Environment.Exit(1);
-                                            break;
-
-                                        case 0b10:
-                                            ARM_StoreRegisterByte_ImmediateOffset(instruction);
-                                            break;
-
-                                        case 0b11:
-                                            //ARM_LoadRegisterByte_ImmediatePreIndexed(instruction);
-                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                            Environment.Exit(1);
-                                            break;
-
-                                        default:
-                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                            Environment.Exit(1);
-                                            break;
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                if (l == 1)
-                                {
-                                    Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                    Environment.Exit(1);
-                                }
-                                else
-                                {
-                                    switch ((p << 1) | w)
-                                    {
-                                        case 0b00:
-                                            ARM_StoreRegister_ImmediatePostIndexed(instruction);
-                                            break;
-
-                                        case 0b10:
-                                            ARM_StoreRegister_ImmediateOffset(instruction);
-                                            break;
-
-                                        case 0b11:
-                                            //ARM_StoreRegister_ImmediatePreIndexed(instruction);
-                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                            Environment.Exit(1);
-                                            break;
-
-                                        default:
-                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                            Environment.Exit(1);
-                                            break;
-                                    }
-                                }
                             }
                             break;
                         }
@@ -1467,6 +1341,11 @@ namespace Iris
             return address;
         }
 
+        private static UInt32 ZeroExtend(UInt16 value)
+        {
+            return value;
+        }
+
         private static UInt32 SignExtend(Byte value)
         {
             return (UInt32)(Int32)(SByte)value;
@@ -1699,7 +1578,7 @@ namespace Iris
 
                 UInt16 data = cpu._callbacks.ReadMemory16(address);
                 UInt32 rd = (instruction >> 12) & 0b1111;
-                cpu._reg[rd] = data;
+                cpu._reg[rd] = ZeroExtend(data);
             }
         }
 
@@ -2032,6 +1911,42 @@ namespace Iris
             }
         }
 
+        private static void ARM_STR(CPU cpu, UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (cpu.ConditionPassed(cond))
+            {
+                UInt32 address = cpu.GetAddress(instruction);
+
+                UInt32 rd = (instruction >> 12) & 0b1111;
+                cpu._callbacks.WriteMemory32(address, cpu._reg[rd]);
+            }
+        }
+
+        private static void ARM_STRB(CPU cpu, UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (cpu.ConditionPassed(cond))
+            {
+                UInt32 address = cpu.GetAddress(instruction);
+
+                UInt32 rd = (instruction >> 12) & 0b1111;
+                cpu._callbacks.WriteMemory8(address, (Byte)cpu._reg[rd]);
+            }
+        }
+
+        private static void ARM_STRH(CPU cpu, UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (cpu.ConditionPassed(cond))
+            {
+                UInt32 address = cpu.GetAddress_Misc(instruction);
+
+                UInt32 rd = (instruction >> 12) & 0b1111;
+                cpu._callbacks.WriteMemory16(address, (UInt16)cpu._reg[rd]);
+            }
+        }
+
         private static void ARM_SWP(CPU cpu, UInt32 instruction)
         {
             UInt32 cond = (instruction >> 28) & 0b1111;
@@ -2108,64 +2023,6 @@ namespace Iris
                     cpu.SetFlag(Flags.N, cpu._reg[rdHi] >> 31);
                     cpu.SetFlag(Flags.Z, (cpu._reg[rdHi] == 0 && cpu._reg[rdLo] == 0) ? 1u : 0u);
                 }
-            }
-        }
-
-        // ==============================
-        // Multiplies & Extra load/stores
-        // ==============================
-
-        // STRH (immediate post-indexed)
-        private void ARM_StoreRegisterHalfWord_ImmediatePostIndexed(UInt32 instruction)
-        {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
-            {
-                UInt32 u = (instruction >> 23) & 1;
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 immH = (instruction >> 8) & 0b1111;
-                UInt32 immL = instruction & 0b1111;
-                UInt32 offset = (immH << 4) | immL;
-
-                UInt32 address = _reg[rn];
-                if (u == 1)
-                {
-                    _reg[rn] += offset;
-                }
-                else
-                {
-                    _reg[rn] -= offset;
-                }
-
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                _callbacks.WriteMemory16(address, (UInt16)_reg[rd]);
-            }
-        }
-
-        // STRH (immediate offset)
-        private void ARM_StoreRegisterHalfWord_ImmediateOffset(UInt32 instruction)
-        {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
-            {
-                UInt32 u = (instruction >> 23) & 1;
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 immH = (instruction >> 8) & 0b1111;
-                UInt32 immL = instruction & 0b1111;
-                UInt32 offset = (immH << 4) | immL;
-
-                UInt32 address;
-                if (u == 1)
-                {
-                    address = _reg[rn] + offset;
-                }
-                else
-                {
-                    address = _reg[rn] - offset;
-                }
-
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                _callbacks.WriteMemory16(address, (UInt16)_reg[rd]);
             }
         }
 
@@ -2261,85 +2118,6 @@ namespace Iris
                 // TODO: N flag
                 SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
                 // TODO: C flag
-            }
-        }
-
-        // ==============================
-        // Load/store immediate offset
-        // ==============================
-
-        // STRB (immediate offset)
-        private void ARM_StoreRegisterByte_ImmediateOffset(UInt32 instruction)
-        {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
-            {
-                UInt32 u = (instruction >> 23) & 1;
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 offset = instruction & 0xfff;
-
-                UInt32 address;
-                if (u == 1)
-                {
-                    address = _reg[rn] + offset;
-                }
-                else
-                {
-                    address = _reg[rn] - offset;
-                }
-
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                _callbacks.WriteMemory8(address, (Byte)_reg[rd]);
-            }
-        }
-
-        // STR (immediate post-indexed)
-        private void ARM_StoreRegister_ImmediatePostIndexed(UInt32 instruction)
-        {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
-            {
-                UInt32 u = (instruction >> 23) & 1;
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 offset = instruction & 0xfff;
-
-                UInt32 address = _reg[rn];
-                if (u == 1)
-                {
-                    _reg[rn] += offset;
-                }
-                else
-                {
-                    _reg[rn] -= offset;
-                }
-
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                _callbacks.WriteMemory32(address, _reg[rd]);
-            }
-        }
-
-        // STR (immediate offset)
-        private void ARM_StoreRegister_ImmediateOffset(UInt32 instruction)
-        {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
-            {
-                UInt32 u = (instruction >> 23) & 1;
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 offset = instruction & 0xfff;
-
-                UInt32 address;
-                if (u == 1)
-                {
-                    address = _reg[rn] + offset;
-                }
-                else
-                {
-                    address = _reg[rn] - offset;
-                }
-
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                _callbacks.WriteMemory32(address, _reg[rd]);
             }
         }
 
@@ -2442,7 +2220,7 @@ namespace Iris
         }
 
         // ********************************************************************
-        //                         THUMB instructions
+        //                              THUMB
         // ********************************************************************
 
         // ==============================
