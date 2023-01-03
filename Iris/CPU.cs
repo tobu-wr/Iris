@@ -164,13 +164,18 @@ namespace Iris
         private const UInt32 LR = 14;
         private const UInt32 PC = 15;
 
+        // exposed registers
         private readonly UInt32[] _reg = new UInt32[16];
+        private UInt32 _cpsr;
+        private UInt32 _spsr;
+
+        // banked registers
+        private UInt32 _reg8, _reg9, _reg10, _reg11, _reg12, _reg13, _reg14;
         private UInt32 _reg13_svc, _reg14_svc;
         private UInt32 _reg13_abt, _reg14_abt;
         private UInt32 _reg13_und, _reg14_und;
         private UInt32 _reg13_irq, _reg14_irq;
         private UInt32 _reg8_fiq, _reg9_fiq, _reg10_fiq, _reg11_fiq, _reg12_fiq, _reg13_fiq, _reg14_fiq;
-        private UInt32 _cpsr;
         private UInt32 _spsr_svc, _spsr_abt, _spsr_und, _spsr_irq, _spsr_fiq;
 
         private readonly ICallbacks _callbacks;
@@ -856,51 +861,145 @@ namespace Iris
             };
         }
 
-        //private UInt32 GetReg(UInt32 i)
-        //{
-        //    switch (i)
-        //    {
-        //        case 
-        //    }
-        //}
-
-        //private void SetReg(UInt32 i, UInt32 value)
-        //{
-
-        //}
-
-        private UInt32 GetSPSR()
+        private void SetCPSR(UInt32 value)
         {
-            return GetMode() switch
-            {
-                SupervisorMode => _spsr_svc,
-                AbortMode => _spsr_abt,
-                UndefinedMode => _spsr_und,
-                InterruptMode => _spsr_irq,
-                FastInterruptMode => _spsr_fiq,
-                _ => throw new Exception("CPU: No SPSR for a non-exception mode"),
-            };
-        }
+            const UInt32 mask = 0b1_1111;
+            UInt32 previousMode = _cpsr & mask;
+            UInt32 newMode = value & mask;
 
-        private void SetSPSR(UInt32 value)
-        {
-            switch (GetMode())
+            _cpsr = value;
+
+            if (previousMode != newMode)
             {
-                case SupervisorMode:
-                    _spsr_svc = value;
-                    break;
-                case AbortMode:
-                    _spsr_abt = value;
-                    break;
-                case UndefinedMode:
-                    _spsr_und = value;
-                    break;
-                case InterruptMode:
-                    _spsr_irq = value;
-                    break;
-                case FastInterruptMode:
-                    _spsr_fiq = value;
-                    break;
+                // save previous mode registers
+                switch (previousMode)
+                {
+                    case UserMode:
+                    case SystemMode:
+                        _reg8 = _reg[8];
+                        _reg9 = _reg[9];
+                        _reg10 = _reg[10];
+                        _reg11 = _reg[11];
+                        _reg12 = _reg[12];
+                        _reg13 = _reg[13];
+                        _reg14 = _reg[14];
+                        break;
+                    case SupervisorMode:
+                        _reg8 = _reg[8];
+                        _reg9 = _reg[9];
+                        _reg10 = _reg[10];
+                        _reg11 = _reg[11];
+                        _reg12 = _reg[12];
+                        _reg13_svc = _reg[13];
+                        _reg14_svc = _reg[14];
+                        _spsr_svc = _spsr;
+                        break;
+                    case AbortMode:
+                        _reg8 = _reg[8];
+                        _reg9 = _reg[9];
+                        _reg10 = _reg[10];
+                        _reg11 = _reg[11];
+                        _reg12 = _reg[12];
+                        _reg13_abt = _reg[13];
+                        _reg14_abt = _reg[14];
+                        _spsr_abt = _spsr;
+                        break;
+                    case UndefinedMode:
+                        _reg8 = _reg[8];
+                        _reg9 = _reg[9];
+                        _reg10 = _reg[10];
+                        _reg11 = _reg[11];
+                        _reg12 = _reg[12];
+                        _reg13_und = _reg[13];
+                        _reg14_und = _reg[14];
+                        _spsr_und = _spsr;
+                        break;
+                    case InterruptMode:
+                        _reg8 = _reg[8];
+                        _reg9 = _reg[9];
+                        _reg10 = _reg[10];
+                        _reg11 = _reg[11];
+                        _reg12 = _reg[12];
+                        _reg13_irq = _reg[13];
+                        _reg14_irq = _reg[14];
+                        _spsr_irq = _spsr;
+                        break;
+                    case FastInterruptMode:
+                        _reg8_fiq = _reg[8];
+                        _reg9_fiq = _reg[9];
+                        _reg10_fiq = _reg[10];
+                        _reg11_fiq = _reg[11];
+                        _reg12_fiq = _reg[12];
+                        _reg13_fiq = _reg[13];
+                        _reg14_fiq = _reg[14];
+                        _spsr_fiq = _spsr;
+                        break;
+                }
+
+                // load new mode registers
+                switch (newMode)
+                {
+                    case UserMode:
+                    case SystemMode:
+                        _reg[8] = _reg8;
+                        _reg[9] = _reg9;
+                        _reg[10] = _reg10;
+                        _reg[11] = _reg11;
+                        _reg[12] = _reg12;
+                        _reg[13] = _reg13;
+                        _reg[14] = _reg14;
+                        break;
+                    case SupervisorMode:
+                        _reg[8] = _reg8;
+                        _reg[9] = _reg9;
+                        _reg[10] = _reg10;
+                        _reg[11] = _reg11;
+                        _reg[12] = _reg12;
+                        _reg[13] = _reg13_svc;
+                        _reg[14] = _reg14_svc;
+                        _spsr = _spsr_svc;
+                        break;
+                    case AbortMode:
+                        _reg[8] = _reg8;
+                        _reg[9] = _reg9;
+                        _reg[10] = _reg10;
+                        _reg[11] = _reg11;
+                        _reg[12] = _reg12;
+                        _reg[13] = _reg13_abt;
+                        _reg[14] = _reg14_abt;
+                        _spsr = _spsr_abt;
+                        break;
+                    case UndefinedMode:
+                        _reg[8] = _reg8;
+                        _reg[9] = _reg9;
+                        _reg[10] = _reg10;
+                        _reg[11] = _reg11;
+                        _reg[12] = _reg12;
+                        _reg[13] = _reg13_und;
+                        _reg[14] = _reg14_und;
+                        _spsr = _spsr_und;
+                        break;
+                    case InterruptMode:
+                        _reg[8] = _reg8;
+                        _reg[9] = _reg9;
+                        _reg[10] = _reg10;
+                        _reg[11] = _reg11;
+                        _reg[12] = _reg12;
+                        _reg[13] = _reg13_irq;
+                        _reg[14] = _reg14_irq;
+                        _spsr = _spsr_irq;
+                        break;
+                    case FastInterruptMode:
+                        _reg[8] = _reg8_fiq;
+                        _reg[9] = _reg9_fiq;
+                        _reg[10] = _reg10_fiq;
+                        _reg[11] = _reg11_fiq;
+                        _reg[12] = _reg12_fiq;
+                        _reg[13] = _reg13_fiq;
+                        _reg[14] = _reg14_fiq;
+                        _spsr = _spsr_fiq;
+                        break;
+                }
             }
         }
 
@@ -1392,7 +1491,7 @@ namespace Iris
                 UInt32 rd = (instruction >> 12) & 0b1111;
 
                 if (r == 1)
-                    cpu._reg[rd] = cpu.GetSPSR();
+                    cpu._reg[rd] = cpu._spsr;
                 else
                     cpu._reg[rd] = cpu._cpsr;
             }
@@ -1437,12 +1536,12 @@ namespace Iris
                     else
                         mask = byteMask & UserMask;
 
-                    cpu._cpsr = (cpu._cpsr & ~mask) | (operand & mask);
+                    cpu.SetCPSR((cpu._cpsr & ~mask) | (operand & mask));
                 }
                 else if (cpu.CurrentModeHasSPSR())
                 {
                     UInt32 mask = byteMask & (UserMask | PrivMask | StateMask);
-                    cpu.SetSPSR((cpu.GetSPSR() & ~mask) | (operand & mask));
+                    cpu._spsr = (cpu._spsr & ~mask) | (operand & mask);
                 }
             }
         }
@@ -1845,7 +1944,7 @@ namespace Iris
             if (ConditionPassed(cond))
             {
                 UInt32 rm = instruction & 0b1111;
-                _cpsr = (_cpsr & ~(1u << 5)) | (_reg[rm] & 1) << 5;
+                SetCPSR((_cpsr & ~(1u << 5)) | (_reg[rm] & 1) << 5);
                 _reg[PC] = _reg[rm] & 0xffff_fffe;
             }
         }
@@ -2344,7 +2443,7 @@ namespace Iris
         {
             UInt16 h2 = (UInt16)((instruction >> 6) & 1);
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
-            _cpsr = (_cpsr & ~(1u << 5)) | (_reg[(h2 << 3) | rm] & 1) << 5;
+            SetCPSR((_cpsr & ~(1u << 5)) | (_reg[(h2 << 3) | rm] & 1) << 5);
             _reg[PC] = _reg[(h2 << 3) | rm] & 0xffff_fffe;
         }
 
