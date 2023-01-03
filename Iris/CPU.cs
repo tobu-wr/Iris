@@ -153,6 +153,12 @@ namespace Iris
             // STRH
             new(0x0e10_00f0, 0x0000_00b0, ARM_STRH),
 
+            // SUB
+            new(0x0fe0_0000, 0x0240_0000, ARM_SUB), // I bit is 1
+            new(0x0fe0_0090, 0x0040_0000, ARM_SUB), // I bit is 0, bit[7] is 0 and bit[4] is 0
+            new(0x0fe0_0090, 0x0040_0080, ARM_SUB), // I bit is 0, bit[7] is 1 and bit[4] is 0
+            new(0x0fe0_0090, 0x0040_0010, ARM_SUB), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
             // SWP
             new(0x0ff0_0ff0, 0x0100_0090, ARM_SWP),
 
@@ -283,10 +289,6 @@ namespace Iris
                             UInt32 opcode = (instruction >> 21) & 0b1111;
                             switch (opcode)
                             {
-                                case 0b0010:
-                                    ARM_Subtract_Immediate(instruction);
-                                    break;
-
                                 case 0b1000:
                                     ARM_Test_Immediate(instruction);
                                     break;
@@ -1548,7 +1550,7 @@ namespace Iris
             {
                 UInt32 address = cpu.GetAddress(instruction);
 
-                UInt32 data = RotateRight(cpu._callbacks.ReadMemory32(address), (int)(8 * (address & 0b11)));
+                UInt32 data = RotateRight(cpu._callbacks.ReadMemory32(address), 8 * (int)(address & 0b11));
                 UInt32 rd = (instruction >> 12) & 0b1111;
                 if (rd == PC)
                     cpu._reg[PC] = data & 0xffff_fffc;
@@ -1947,6 +1949,38 @@ namespace Iris
             }
         }
 
+        private static void ARM_SUB(CPU cpu, UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (cpu.ConditionPassed(cond))
+            {
+                var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
+
+                UInt32 rn = (instruction >> 16) & 0b1111;
+                UInt32 rd = (instruction >> 12) & 0b1111;
+
+                UInt32 regRn = cpu._reg[rn];
+                cpu._reg[rd] = regRn - shifterOperand;
+
+                UInt32 s = (instruction >> 20) & 1;
+                if (s == 1)
+                {
+                    if (rd == PC)
+                    {
+                        Console.WriteLine("SUB: S field partially implemented");
+                        Environment.Exit(1);
+                    }
+                    else
+                    {
+                        cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
+                        cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+                        cpu.SetFlag(Flags.C, ~BorrowFrom(regRn, shifterOperand) & 1);
+                        cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(regRn, shifterOperand, cpu._reg[rd]));
+                    }
+                }
+            }
+        }
+
         private static void ARM_SWP(CPU cpu, UInt32 instruction)
         {
             UInt32 cond = (instruction >> 28) & 0b1111;
@@ -1957,7 +1991,7 @@ namespace Iris
                 UInt32 rm = instruction & 0b1111;
 
                 UInt32 address = cpu._reg[rn];
-                UInt32 temp = RotateRight(cpu._callbacks.ReadMemory32(address), (int)(8 * (address & 0b11)));
+                UInt32 temp = RotateRight(cpu._callbacks.ReadMemory32(address), 8 * (int)(address & 0b11));
                 cpu._callbacks.WriteMemory32(address, cpu._reg[rm]);
                 cpu._reg[rd] = temp;
             }
@@ -2039,45 +2073,6 @@ namespace Iris
                 UInt32 rm = instruction & 0b1111;
                 SetCPSR((_cpsr & ~(1u << 5)) | (_reg[rm] & 1) << 5);
                 _reg[PC] = _reg[rm] & 0xffff_fffe;
-            }
-        }
-
-        // ==============================
-        // Data processing immediate
-        // ==============================
-
-        // SUB (immediate)
-        private void ARM_Subtract_Immediate(UInt32 instruction)
-        {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
-            {
-                UInt32 rotateImm = (instruction >> 8) & 0b1111;
-                UInt32 imm = instruction & 0xff;
-
-                int rotateAmount = 2 * (int)rotateImm;
-                UInt32 shifterOperand = (imm >> rotateAmount) | (imm << (32 - rotateAmount));
-
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                _reg[rd] = _reg[rn] - shifterOperand;
-
-                UInt32 s = (instruction >> 20) & 1;
-                if (s == 1)
-                {
-                    if (rd == PC)
-                    {
-                        Console.WriteLine("SUB (immediate): S field partially implemented");
-                        Environment.Exit(1);
-                    }
-                    else
-                    {
-                        SetFlag(Flags.N, _reg[rd] >> 31);
-                        SetFlag(Flags.Z, (_reg[rd] == 0) ? 1u : 0u);
-                        // TODO: C flag
-                        // TODO: V flag
-                    }
-                }
             }
         }
 
