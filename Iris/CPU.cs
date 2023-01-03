@@ -65,16 +65,16 @@ namespace Iris
             new(0x0fe0_0090, 0x01c0_0010, ARM_BIC), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
             // CMN
-            new(0x0ff0_0000, 0x0370_0000, ARM_CMN), // I bit is 1
-            new(0x0ff0_0090, 0x0170_0000, ARM_CMN), // I bit is 0, bit[7] is 0 and bit[4] is 0
-            new(0x0ff0_0090, 0x0170_0080, ARM_CMN), // I bit is 0, bit[7] is 1 and bit[4] is 0
-            new(0x0ff0_0090, 0x0170_0010, ARM_CMN), // I bit is 0, bit[7] is 0 and bit[4] is 1
+            new(0x0ff0_f000, 0x0370_0000, ARM_CMN), // I bit is 1
+            new(0x0ff0_f090, 0x0170_0000, ARM_CMN), // I bit is 0, bit[7] is 0 and bit[4] is 0
+            new(0x0ff0_f090, 0x0170_0080, ARM_CMN), // I bit is 0, bit[7] is 1 and bit[4] is 0
+            new(0x0ff0_f090, 0x0170_0010, ARM_CMN), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
             // CMP
-            new(0x0ff0_0000, 0x0350_0000, ARM_CMP), // I bit is 1
-            new(0x0ff0_0090, 0x0150_0000, ARM_CMP), // I bit is 0, bit[7] is 0 and bit[4] is 0
-            new(0x0ff0_0090, 0x0150_0080, ARM_CMP), // I bit is 0, bit[7] is 1 and bit[4] is 0
-            new(0x0ff0_0090, 0x0150_0010, ARM_CMP), // I bit is 0, bit[7] is 0 and bit[4] is 1
+            new(0x0ff0_f000, 0x0350_0000, ARM_CMP), // I bit is 1
+            new(0x0ff0_f090, 0x0150_0000, ARM_CMP), // I bit is 0, bit[7] is 0 and bit[4] is 0
+            new(0x0ff0_f090, 0x0150_0080, ARM_CMP), // I bit is 0, bit[7] is 1 and bit[4] is 0
+            new(0x0ff0_f090, 0x0150_0010, ARM_CMP), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
             // EOR
             new(0x0fe0_0000, 0x0220_0000, ARM_EOR), // I bit is 1
@@ -86,26 +86,26 @@ namespace Iris
             new(0x0fe0_00f0, 0x0020_0090, ARM_MLA),
 
             // MOV
-            new(0x0fe0_0000, 0x03a0_0000, ARM_MOV), // I bit is 1
-            new(0x0fe0_0090, 0x01a0_0000, ARM_MOV), // I bit is 0, bit[7] is 0 and bit[4] is 0
-            new(0x0fe0_0090, 0x01a0_0080, ARM_MOV), // I bit is 0, bit[7] is 1 and bit[4] is 0
-            new(0x0fe0_0090, 0x01a0_0010, ARM_MOV), // I bit is 0, bit[7] is 0 and bit[4] is 1
+            new(0x0fef_0000, 0x03a0_0000, ARM_MOV), // I bit is 1
+            new(0x0fef_0090, 0x01a0_0000, ARM_MOV), // I bit is 0, bit[7] is 0 and bit[4] is 0
+            new(0x0fef_0090, 0x01a0_0080, ARM_MOV), // I bit is 0, bit[7] is 1 and bit[4] is 0
+            new(0x0fef_0090, 0x01a0_0010, ARM_MOV), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
             // MRS
-            new(0x0fb0_0000, 0x0100_0000, ARM_MRS),
+            new(0x0fbf_0fff, 0x010f_0000, ARM_MRS),
 
             // MSR
-            new(0x0fb0_0000, 0x0320_0000, ARM_MSR), // Immediate operand
-            new(0x0fb0_00f0, 0x0120_0000, ARM_MSR), // Register operand
+            new(0x0fb0_f000, 0x0320_f000, ARM_MSR), // Immediate operand
+            new(0x0fb0_fff0, 0x0120_f000, ARM_MSR), // Register operand
 
             // MUL
-            new(0x0fe0_00f0, 0x0000_0090, ARM_MUL),
+            new(0x0fe0_f0f0, 0x0000_0090, ARM_MUL),
 
             // MVN
-            new(0x0fe0_0000, 0x03e0_0000, ARM_MVN), // I bit is 1
-            new(0x0fe0_0090, 0x01e0_0000, ARM_MVN), // I bit is 0, bit[7] is 0 and bit[4] is 0
-            new(0x0fe0_0090, 0x01e0_0080, ARM_MVN), // I bit is 0, bit[7] is 1 and bit[4] is 0
-            new(0x0fe0_0090, 0x01e0_0010, ARM_MVN), // I bit is 0, bit[7] is 0 and bit[4] is 1
+            new(0x0fef_0000, 0x03e0_0000, ARM_MVN), // I bit is 1
+            new(0x0fef_0090, 0x01e0_0000, ARM_MVN), // I bit is 0, bit[7] is 0 and bit[4] is 0
+            new(0x0fef_0090, 0x01e0_0080, ARM_MVN), // I bit is 0, bit[7] is 1 and bit[4] is 0
+            new(0x0fef_0090, 0x01e0_0010, ARM_MVN), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
             // ORR
             new(0x0fe0_0000, 0x0380_0000, ARM_ORR), // I bit is 1
@@ -132,10 +132,10 @@ namespace Iris
             new(0x0fe0_00f0, 0x00c0_0090, ARM_SMULL),
 
             // SWP
-            new(0x0ff0_00f0, 0x0100_0090, ARM_SWP),
+            new(0x0ff0_0ff0, 0x0100_0090, ARM_SWP),
 
             // SWPB
-            new(0x0ff0_00f0, 0x0140_0090, ARM_SWPB),
+            new(0x0ff0_0ff0, 0x0140_0090, ARM_SWPB),
 
             // UMLAL
             new(0x0fe0_00f0, 0x00a0_0090, ARM_UMLAL),
