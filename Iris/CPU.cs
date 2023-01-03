@@ -1957,7 +1957,7 @@ namespace Iris
                 UInt32 rm = instruction & 0b1111;
 
                 UInt32 address = cpu._reg[rn];
-                UInt32 temp = cpu._callbacks.ReadMemory32(address);
+                UInt32 temp = RotateRight(cpu._callbacks.ReadMemory32(address), (int)(8 * (address & 0b11)));
                 cpu._callbacks.WriteMemory32(address, cpu._reg[rm]);
                 cpu._reg[rd] = temp;
             }
