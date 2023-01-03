@@ -83,6 +83,11 @@ namespace Iris
             new(0x0fe0_0090, 0x0020_0080, ARM_EOR), // I bit is 0, bit[7] is 1 and bit[4] is 0
             new(0x0fe0_0090, 0x0020_0010, ARM_EOR), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
+            // LDM
+            new(0x0e50_0000, 0x0810_0000, ARM_LDM1),
+            new(0x0e70_8000, 0x0850_0000, ARM_LDM2),
+            new(0x0e50_8000, 0x0850_8000, ARM_LDM3),
+
             // LDR
             new(0x0c50_0000, 0x0410_0000, ARM_LDR),
 
@@ -143,6 +148,10 @@ namespace Iris
 
             // SMULL
             new(0x0fe0_00f0, 0x00c0_0090, ARM_SMULL),
+
+            // STM
+            new(0x0e50_0000, 0x0800_0000, ARM_STM1),
+            new(0x0e70_0000, 0x0840_0000, ARM_STM2),
 
             // STR
             new(0x0c50_0000, 0x0400_0000, ARM_STR),
@@ -301,59 +310,6 @@ namespace Iris
                                     Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
                                     Environment.Exit(1);
                                     break;
-                            }
-                            break;
-                        }
-
-                    // Load/store multiple
-                    case 0b100:
-                        {
-                            UInt32 l = (instruction >> 20) & 1;
-                            UInt32 s = (instruction >> 22) & 1;
-                            UInt32 pu = (instruction >> 23) & 0b11;
-                            if (l == 0)
-                            {
-                                if (s == 0)
-                                {
-                                    switch (pu)
-                                    {
-                                        case 0b10:
-                                            ARM_StoreMultiple_FullDescending(instruction);
-                                            break;
-
-                                        default:
-                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                            Environment.Exit(1);
-                                            break;
-                                    }
-                                }
-                                else
-                                {
-                                    Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                    Environment.Exit(1);
-                                }
-                            }
-                            else
-                            {
-                                if (s == 0)
-                                {
-                                    switch (pu)
-                                    {
-                                        case 0b01:
-                                            ARM_LoadMultiple_FullDescending(instruction);
-                                            break;
-
-                                        default:
-                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                            Environment.Exit(1);
-                                            break;
-                                    }
-                                }
-                                else
-                                {
-                                    Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                    Environment.Exit(1);
-                                }
                             }
                             break;
                         }
@@ -663,16 +619,6 @@ namespace Iris
         private static UInt32 SignExtend_30(UInt32 value, int size)
         {
             return SignExtend(value, size) & 0x3fff_ffff;
-        }
-
-        private static UInt32 Number_Of_Set_Bits_In(UInt32 value, int size)
-        {
-            UInt32 count = 0;
-            for (int i = 0; i < size; ++i)
-            {
-                count += ((value >> i) & 1);
-            }
-            return count;
         }
 
         // ********************************************************************
@@ -1343,6 +1289,64 @@ namespace Iris
             return address;
         }
 
+        private static UInt32 NumberOfSetBitsIn(UInt32 value, int size)
+        {
+            UInt32 count = 0;
+            for (var i = 0; i < size; ++i)
+                count += (value >> i) & 1;
+            return count;
+        }
+
+        // Addressing mode 4
+        private (UInt32 startAddress, UInt32 endAddress) GetAddress_Multiple(UInt32 instruction)
+        {
+            UInt32 startAddress;
+            UInt32 endAddress;
+
+            UInt32 u = (instruction >> 23) & 1;
+            UInt32 p = (instruction >> 24) & 1;
+            UInt32 rn = (instruction >> 16) & 0b1111;
+            UInt32 registerList = instruction & 0xffff;
+
+            UInt32 value;
+            if (u == 1) // increment
+            {
+                value = _reg[rn] + (NumberOfSetBitsIn(registerList, 16) * 4);
+
+                if (p == 0) // after
+                {
+                    startAddress = _reg[rn];
+                    endAddress = value - 4;
+                }
+                else // before
+                {
+                    startAddress = _reg[rn] + 4;
+                    endAddress = value;
+                }
+            }
+            else // decrement
+            {
+                value = _reg[rn] - (NumberOfSetBitsIn(registerList, 16) * 4);
+
+                if (p == 0) // after
+                {
+                    startAddress = value + 4;
+                    endAddress = _reg[rn];
+                }
+                else // before
+                {
+                    startAddress = value;
+                    endAddress = _reg[rn] - 4;
+                }
+            }
+
+            UInt32 w = (instruction >> 21) & 1;
+            if (w == 1)
+                _reg[rn] = value;
+
+            return (startAddress, endAddress);
+        }
+
         private static UInt32 ZeroExtend(UInt16 value)
         {
             return value;
@@ -1540,6 +1544,53 @@ namespace Iris
                         cpu.SetFlag(Flags.C, shifterCarryOut);
                     }
                 }
+            }
+        }
+
+        private static void ARM_LDM1(CPU cpu, UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (cpu.ConditionPassed(cond))
+            {
+                var (startAddress, _) = cpu.GetAddress_Multiple(instruction);
+
+                UInt32 address = startAddress;
+
+                UInt32 registerList = instruction & 0xffff;
+                for (var i = 0; i <= 14; ++i)
+                {
+                    if (((registerList >> i) & 1) == 1)
+                    {
+                        cpu._reg[i] = cpu._callbacks.ReadMemory32(address);
+                        address += 4;
+                    }
+                }
+
+                if (((registerList >> 15) & 1) == 1)
+                {
+                    UInt32 value = cpu._callbacks.ReadMemory32(address);
+                    cpu._reg[PC] = value & 0xffff_fffc;
+                }
+            }
+        }
+
+        private static void ARM_LDM2(CPU cpu, UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (cpu.ConditionPassed(cond))
+            {
+                Console.WriteLine("Unimplemented instruction");
+                Environment.Exit(1);
+            }
+        }
+
+        private static void ARM_LDM3(CPU cpu, UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (cpu.ConditionPassed(cond))
+            {
+                Console.WriteLine("Unimplemented instruction");
+                Environment.Exit(1);
             }
         }
 
@@ -1913,6 +1964,37 @@ namespace Iris
             }
         }
 
+        private static void ARM_STM1(CPU cpu, UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (cpu.ConditionPassed(cond))
+            {
+                var (startAddress, _) = cpu.GetAddress_Multiple(instruction);
+
+                UInt32 address = startAddress;
+
+                UInt32 registerList = instruction & 0xffff;
+                for (int i = 0; i <= 15; ++i)
+                {
+                    if (((registerList >> i) & 1) == 1)
+                    {
+                        cpu._callbacks.WriteMemory32(address, cpu._reg[i]);
+                        address += 4;
+                    }
+                }
+            }
+        }
+
+        private static void ARM_STM2(CPU cpu, UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (cpu.ConditionPassed(cond))
+            {
+                Console.WriteLine("Unimplemented instruction");
+                Environment.Exit(1);
+            }
+        }
+
         private static void ARM_STR(CPU cpu, UInt32 instruction)
         {
             UInt32 cond = (instruction >> 28) & 0b1111;
@@ -2117,76 +2199,6 @@ namespace Iris
         }
 
         // ==============================
-        // Load/store multiple
-        // ==============================
-
-        // STMFD
-        private void ARM_StoreMultiple_FullDescending(UInt32 instruction)
-        {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
-            {
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 registerList = instruction & 0xffff;
-
-                UInt32 startAddress = _reg[rn] - (Number_Of_Set_Bits_In(registerList, 16) * 4);
-                UInt32 endAddress = _reg[rn] - 4;
-
-                UInt32 w = (instruction >> 21) & 1;
-                if (w == 1)
-                {
-                    _reg[rn] -= (Number_Of_Set_Bits_In(registerList, 16) * 4);
-                }
-
-                UInt32 address = startAddress;
-                for (int i = 0; i <= 15; ++i)
-                {
-                    if (((registerList >> i) & 1) == 1)
-                    {
-                        _callbacks.WriteMemory32(address, _reg[i]);
-                        address += 4;
-                    }
-                }
-            }
-        }
-
-        // LDMFD
-        private void ARM_LoadMultiple_FullDescending(UInt32 instruction)
-        {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
-            {
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 registerList = instruction & 0xffff;
-
-                UInt32 startAddress = _reg[rn];
-                UInt32 endAddress = _reg[rn] + (Number_Of_Set_Bits_In(registerList, 16) * 4) - 4;
-
-                UInt32 w = (instruction >> 21) & 1;
-                if (w == 1)
-                {
-                    _reg[rn] += (Number_Of_Set_Bits_In(registerList, 16) * 4);
-                }
-
-                UInt32 address = startAddress;
-                for (int i = 0; i <= 14; ++i)
-                {
-                    if (((registerList >> i) & 1) == 1)
-                    {
-                        _reg[i] = _callbacks.ReadMemory32(address);
-                        address += 4;
-                    }
-                }
-
-                if (((registerList >> 15) & 1) == 1)
-                {
-                    UInt32 value = _callbacks.ReadMemory32(address);
-                    _reg[PC] = value & 0xffff_fffc;
-                }
-            }
-        }
-
-        // ==============================
         // Branch and branch with link
         // ==============================
 
@@ -2376,7 +2388,7 @@ namespace Iris
             UInt16 r = (UInt16)((instruction >> 8) & 1);
             UInt16 registerList = (UInt16)(instruction & 0xff);
             UInt32 startAddress = _reg[SP];
-            UInt32 endAddress = _reg[SP] + 4 * (r + Number_Of_Set_Bits_In(registerList, 8));
+            UInt32 endAddress = _reg[SP] + 4 * (r + NumberOfSetBitsIn(registerList, 8));
             UInt32 address = startAddress;
 
             for (int i = 0; i <= 7; ++i)
@@ -2402,7 +2414,7 @@ namespace Iris
         {
             UInt16 r = (UInt16)((instruction >> 8) & 1);
             UInt16 registerList = (UInt16)(instruction & 0xff);
-            UInt32 startAddress = _reg[SP] - 4 * (r + Number_Of_Set_Bits_In(registerList, 8));
+            UInt32 startAddress = _reg[SP] - 4 * (r + NumberOfSetBitsIn(registerList, 8));
             UInt32 endAddress = _reg[SP] - 4;
             UInt32 address = startAddress;
 
@@ -2420,7 +2432,7 @@ namespace Iris
                 _callbacks.WriteMemory32(address, _reg[LR]);
             }
 
-            _reg[SP] -= 4 * (r + Number_Of_Set_Bits_In(registerList, 8));
+            _reg[SP] -= 4 * (r + NumberOfSetBitsIn(registerList, 8));
         }
 
         // ==============================
@@ -2448,7 +2460,7 @@ namespace Iris
             UInt16 rn = (UInt16)((instruction >> 8) & 0b111);
             UInt16 registerList = (UInt16)(instruction & 0xff);
             UInt32 startAddress = _reg[rn];
-            UInt32 endAddress = _reg[rn] + (Number_Of_Set_Bits_In(registerList, 8) * 4) - 4;
+            UInt32 endAddress = _reg[rn] + (NumberOfSetBitsIn(registerList, 8) * 4) - 4;
             UInt32 address = startAddress;
 
             for (int i = 0; i <= 7; ++i)
@@ -2460,7 +2472,7 @@ namespace Iris
                 }
             }
 
-            _reg[rn] += Number_Of_Set_Bits_In(registerList, 8) * 4;
+            _reg[rn] += NumberOfSetBitsIn(registerList, 8) * 4;
         }
 
         // STMIA
@@ -2469,7 +2481,7 @@ namespace Iris
             UInt16 rn = (UInt16)((instruction >> 8) & 0b111);
             UInt16 registerList = (UInt16)(instruction & 0xff);
             UInt32 startAddress = _reg[rn];
-            UInt32 endAddress = _reg[rn] + (Number_Of_Set_Bits_In(registerList, 8) * 4) - 4;
+            UInt32 endAddress = _reg[rn] + (NumberOfSetBitsIn(registerList, 8) * 4) - 4;
             UInt32 address = startAddress;
 
             for (int i = 0; i <= 7; ++i)
@@ -2481,7 +2493,7 @@ namespace Iris
                 }
             }
 
-            _reg[rn] += Number_Of_Set_Bits_In(registerList, 8) * 4;
+            _reg[rn] += NumberOfSetBitsIn(registerList, 8) * 4;
         }
 
         // ==============================
