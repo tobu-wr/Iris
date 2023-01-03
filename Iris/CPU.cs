@@ -82,6 +82,9 @@ namespace Iris
             new(0x0fe0_0090, 0x0020_0080, ARM_EOR), // I bit is 0, bit[7] is 1 and bit[4] is 0
             new(0x0fe0_0090, 0x0020_0010, ARM_EOR), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
+            // LDR
+            new(0x0c50_0000, 0x0410_0000, ARM_LDR),
+
             // MLA
             new(0x0fe0_00f0, 0x0020_0090, ARM_MLA),
 
@@ -417,27 +420,8 @@ namespace Iris
                             {
                                 if (l == 1)
                                 {
-                                    switch ((p << 1) | w)
-                                    {
-                                        case 0b00:
-                                            ARM_LoadRegister_ImmediatePostIndexed(instruction);
-                                            break;
-
-                                        case 0b10:
-                                            ARM_LoadRegister_ImmediateOffset(instruction);
-                                            break;
-
-                                        case 0b11:
-                                            //ARM_LoadRegister_ImmediatePreIndexed(instruction);
-                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                            Environment.Exit(1);
-                                            break;
-
-                                        default:
-                                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                            Environment.Exit(1);
-                                            break;
-                                    }
+                                    Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
+                                    Environment.Exit(1);
                                 }
                                 else
                                 {
@@ -1072,6 +1056,7 @@ namespace Iris
             return (UInt32)((Int32)value >> shiftAmount);
         }
 
+        // Addressing mode 1
         private (UInt32 shifterOperand, UInt32 shifterCarryOut) GetShifterOperand(UInt32 instruction)
         {
             UInt32 shifterOperand = 0;
@@ -1214,6 +1199,61 @@ namespace Iris
             }
 
             return (shifterOperand, shifterCarryOut);
+        }
+
+        // Addressing mode 2
+        private UInt32 GetAddress(UInt32 instruction)
+        {
+            UInt32 address = 0;
+
+            UInt32 rn = (instruction >> 16) & 0b1111;
+            if (((instruction >> 25) & 1) == 0) // Immediate
+            {
+                UInt32 p = (instruction >> 24) & 1;
+                UInt32 u = (instruction >> 23) & 1;
+                UInt32 w = (instruction >> 21) & 1;
+                UInt32 offset = instruction & 0xfff;
+                if (p == 0) // Post-indexed addressing
+                {
+                    address = _reg[rn];
+                    if (u == 1)
+                        _reg[rn] += offset;
+                    else
+                        _reg[rn] -= offset;
+                }
+                else if (w == 0) // Offset addressing
+                {
+                    if (u == 1)
+                        address = _reg[rn] + offset;
+                    else
+                        address = _reg[rn] - offset;
+                }
+                else // Pre-indexed addressing
+                {
+                    if (u == 1)
+                        address = _reg[rn] + offset;
+                    else
+                        address = _reg[rn] - offset;
+                    _reg[rn] = address;
+                }
+            }
+            else
+            {
+                UInt32 shiftImm = (instruction >> 7) & 0b1_1111;
+                UInt32 shift = (instruction >> 5) & 0b11;
+                if ((shiftImm == 0) && shift == 0) // Register
+                {
+                    Console.WriteLine("CPU: encoding unimplemented");
+                    Environment.Exit(1);
+                }
+                else // Scaled register
+                {
+                    Console.WriteLine("CPU: encoding unimplemented");
+                    Environment.Exit(1);
+                }
+            }
+
+            return address;
         }
 
         private static UInt32 CarryFrom(UInt64 result)
@@ -1423,6 +1463,22 @@ namespace Iris
                         cpu.SetFlag(Flags.C, shifterCarryOut);
                     }
                 }
+            }
+        }
+
+        private static void ARM_LDR(CPU cpu, UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (cpu.ConditionPassed(cond))
+            {
+                UInt32 address = cpu.GetAddress(instruction);
+
+                UInt32 data = cpu._callbacks.ReadMemory32(address);
+                UInt32 rd = (instruction >> 12) & 0b1111;
+                if (rd == PC)
+                    cpu._reg[PC] = data & 0xffff_fffc;
+                else
+                    cpu._reg[rd] = data;
             }
         }
 
@@ -2104,74 +2160,6 @@ namespace Iris
 
                 UInt32 rd = (instruction >> 12) & 0b1111;
                 _callbacks.WriteMemory8(address, (Byte)_reg[rd]);
-            }
-        }
-
-        // LDR (immediate post-indexed)
-        private void ARM_LoadRegister_ImmediatePostIndexed(UInt32 instruction)
-        {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
-            {
-                UInt32 u = (instruction >> 23) & 1;
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 offset = instruction & 0xfff;
-
-                UInt32 address = _reg[rn];
-                if (u == 1)
-                {
-                    _reg[rn] += offset;
-                }
-                else
-                {
-                    _reg[rn] -= offset;
-                }
-
-                UInt32 data = _callbacks.ReadMemory32(address);
-                UInt32 rd = (instruction >> 12) & 0b1111;
-
-                if (rd == PC)
-                {
-                    _reg[PC] = data & 0xffff_fffc;
-                }
-                else
-                {
-                    _reg[rd] = data;
-                }
-            }
-        }
-
-        // LDR (immediate offset)
-        private void ARM_LoadRegister_ImmediateOffset(UInt32 instruction)
-        {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
-            {
-                UInt32 u = (instruction >> 23) & 1;
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 offset = instruction & 0xfff;
-
-                UInt32 address;
-                if (u == 1)
-                {
-                    address = _reg[rn] + offset;
-                }
-                else
-                {
-                    address = _reg[rn] - offset;
-                }
-
-                UInt32 data = _callbacks.ReadMemory32(address);
-                UInt32 rd = (instruction >> 12) & 0b1111;
-
-                if (rd == PC)
-                {
-                    _reg[PC] = data & 0xffff_fffc;
-                }
-                else
-                {
-                    _reg[rd] = data;
-                }
             }
         }
 
