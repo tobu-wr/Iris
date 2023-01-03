@@ -1548,7 +1548,7 @@ namespace Iris
             {
                 UInt32 address = cpu.GetAddress(instruction);
 
-                UInt32 data = cpu._callbacks.ReadMemory32(address);
+                UInt32 data = RotateRight(cpu._callbacks.ReadMemory32(address), (int)(8 * (address & 0b11)));
                 UInt32 rd = (instruction >> 12) & 0b1111;
                 if (rd == PC)
                     cpu._reg[PC] = data & 0xffff_fffc;

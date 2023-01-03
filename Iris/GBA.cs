@@ -124,11 +124,13 @@ namespace Iris
 
         public UInt16 ReadMemory16(UInt32 address)
         {
+            address &= 0xffff_fffe;
             return (UInt16)((ReadMemory8(address + 1) << 8) | ReadMemory8(address));
         }
 
         public UInt32 ReadMemory32(UInt32 address)
         {
+            address &= 0xffff_fffc;
             return (UInt32)((ReadMemory16(address + 2) << 16) | ReadMemory16(address));
         }
 
@@ -205,12 +207,14 @@ namespace Iris
 
         public void WriteMemory16(UInt32 address, UInt16 value)
         {
+            address &= 0xffff_fffe;
             WriteMemory8(address + 1, (Byte)(value >> 8));
             WriteMemory8(address, (Byte)value);
         }
 
         public void WriteMemory32(UInt32 address, UInt32 value)
         {
+            address &= 0xffff_fffc;
             WriteMemory16(address + 2, (UInt16)(value >> 16));
             WriteMemory16(address, (UInt16)value);
         }
