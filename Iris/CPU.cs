@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -59,11 +60,20 @@ namespace Iris
             new(0x0fe0_0090, 0x0000_0080, ARM_AND), // I bit is 0, bit[7] is 1 and bit[4] is 0
             new(0x0fe0_0090, 0x0000_0010, ARM_AND), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
+            // B
+            new(0x0f00_0000, 0x0a00_0000, ARM_B),
+
+            // BL
+            new(0x0f00_0000, 0x0b00_0000, ARM_BL),
+
             // BIC
             new(0x0fe0_0000, 0x03c0_0000, ARM_BIC), // I bit is 1
             new(0x0fe0_0090, 0x01c0_0000, ARM_BIC), // I bit is 0, bit[7] is 0 and bit[4] is 0
             new(0x0fe0_0090, 0x01c0_0080, ARM_BIC), // I bit is 0, bit[7] is 1 and bit[4] is 0
             new(0x0fe0_0090, 0x01c0_0010, ARM_BIC), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
+            // BX
+            new(0x0fff_fff0, 0x012f_ff10, ARM_BX),
 
             // CMN
             new(0x0ff0_f000, 0x0370_0000, ARM_CMN), // I bit is 1
@@ -172,6 +182,9 @@ namespace Iris
             // SWPB
             new(0x0ff0_0ff0, 0x0140_0090, ARM_SWPB),
 
+            // TST
+            new(0x0df0_f000, 0x0110_0000, ARM_TST),
+
             // UMLAL
             new(0x0fe0_00f0, 0x00a0_0090, ARM_UMLAL),
 
@@ -251,88 +264,7 @@ namespace Iris
                     }
                 }
 
-                switch ((instruction >> 25) & 0b111)
-                {
-                    case 0b000:
-                        // Multiplies & Extra load/stores
-                        if ((instruction & 0x0000_0090) == 0x0000_0090)
-                        {
-                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                            Environment.Exit(1);
-                        }
-
-                        // Miscellaneous instructions
-                        else if ((instruction & 0x0190_0090) == 0x0100_0010)
-                        {
-                            if ((instruction & 0x0ff0_00f0) == 0x0120_0010)
-                            {
-                                ARM_BranchExchange(instruction);
-                            }
-                            else
-                            {
-                                Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                Environment.Exit(1);
-                            }
-                        }
-
-                        // Miscellaneous instructions
-                        else if ((instruction & 0x0190_0010) == 0x0100_0000)
-                        {
-                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                            Environment.Exit(1);
-                        }
-
-                        // Data processing register shift
-                        else if ((instruction & 0x0000_0090) == 0x0000_0010)
-                        {
-                            Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                            Environment.Exit(1);
-                        }
-                        break;
-
-                    // Data processing immediate
-                    case 0b001:
-                        {
-                            UInt32 opcode = (instruction >> 21) & 0b1111;
-                            switch (opcode)
-                            {
-                                case 0b1000:
-                                    ARM_Test_Immediate(instruction);
-                                    break;
-
-                                case 0b1001:
-                                    ARM_TestEquivalence_Immediate(instruction);
-                                    break;
-
-                                default:
-                                    Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                    Environment.Exit(1);
-                                    break;
-                            }
-                            break;
-                        }
-
-                    // Branch and branch with link
-                    case 0b101:
-                        {
-                            UInt32 l = (instruction >> 24) & 1;
-                            if (l == 1)
-                            {
-                                ARM_BranchLink(instruction);
-                            }
-                            else
-                            {
-                                ARM_Branch(instruction);
-                            }
-                            break;
-                        }
-
-                    // Unknown
-                    default:
-                        Console.WriteLine("Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                        Environment.Exit(1);
-                        break;
-                }
+                throw new Exception(string.Format("CPU: Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress - 4));
             }
             else // THUMB mode
             {
@@ -612,11 +544,6 @@ namespace Iris
             {
                 return value;
             }
-        }
-
-        private static UInt32 SignExtend_30(UInt32 value, int size)
-        {
-            return SignExtend(value, size) & 0x3fff_ffff;
         }
 
         // ********************************************************************
@@ -1355,6 +1282,11 @@ namespace Iris
             return (UInt32)(Int32)(SByte)value;
         }
 
+        private static UInt32 SignExtend30(UInt32 value)
+        {
+            return ((value >> 23) == 1) ? value | 0x3f00_0000 : value;
+        }
+
         private static void ARM_ADC(CPU cpu, UInt32 instruction)
         {
             UInt32 cond = (instruction >> 28) & 0b1111;
@@ -1451,6 +1383,28 @@ namespace Iris
             }
         }
 
+        private static void ARM_B(CPU cpu, UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (cpu.ConditionPassed(cond))
+            {
+                UInt32 imm = instruction & 0xff_ffff;
+                cpu._reg[PC] += SignExtend30(imm) << 2;
+            }
+        }
+
+        private static void ARM_BL(CPU cpu, UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (cpu.ConditionPassed(cond))
+            {
+                cpu._reg[LR] = cpu._nextInstructionAddress;
+
+                UInt32 imm = instruction & 0xff_ffff;
+                cpu._reg[PC] += SignExtend30(imm) << 2;
+            }
+        }
+
         private static void ARM_BIC(CPU cpu, UInt32 instruction)
         {
             UInt32 cond = (instruction >> 28) & 0b1111;
@@ -1477,6 +1431,17 @@ namespace Iris
                         cpu.SetFlag(Flags.C, shifterCarryOut);
                     }
                 }
+            }
+        }
+
+        private static void ARM_BX(CPU cpu, UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (cpu.ConditionPassed(cond))
+            {
+                UInt32 rm = instruction & 0b1111;
+                cpu.SetCPSR((cpu._cpsr & ~(1u << 5)) | ((cpu._reg[rm] & 1) << 5));
+                cpu._reg[PC] = cpu._reg[rm] & 0xffff_fffe;
             }
         }
 
@@ -2112,6 +2077,22 @@ namespace Iris
             }
         }
 
+        private static void ARM_TST(CPU cpu, UInt32 instruction)
+        {
+            UInt32 cond = (instruction >> 28) & 0b1111;
+            if (cpu.ConditionPassed(cond))
+            {
+                var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
+
+                UInt32 rn = (instruction >> 16) & 0b1111;
+                UInt32 aluOut = cpu._reg[rn] & shifterOperand;
+
+                cpu.SetFlag(Flags.N, aluOut >> 31);
+                cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
+                cpu.SetFlag(Flags.C, shifterCarryOut);
+            }
+        }
+
         private static void ARM_UMLAL(CPU cpu, UInt32 instruction)
         {
             UInt32 cond = (instruction >> 28) & 0b1111;
@@ -2156,90 +2137,6 @@ namespace Iris
                     cpu.SetFlag(Flags.N, cpu._reg[rdHi] >> 31);
                     cpu.SetFlag(Flags.Z, (cpu._reg[rdHi] == 0 && cpu._reg[rdLo] == 0) ? 1u : 0u);
                 }
-            }
-        }
-
-        // ==============================
-        // Miscellaneous instructions
-        // ==============================
-
-        // BX
-        private void ARM_BranchExchange(UInt32 instruction)
-        {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
-            {
-                UInt32 rm = instruction & 0b1111;
-                SetCPSR((_cpsr & ~(1u << 5)) | (_reg[rm] & 1) << 5);
-                _reg[PC] = _reg[rm] & 0xffff_fffe;
-            }
-        }
-
-        // TST (immediate)
-        private void ARM_Test_Immediate(UInt32 instruction)
-        {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
-            {
-                UInt32 rotateImm = (instruction >> 8) & 0b1111;
-                UInt32 imm = instruction & 0xff;
-
-                int rotateAmount = 2 * (int)rotateImm;
-                UInt32 shifterOperand = (imm >> rotateAmount) | (imm << (32 - rotateAmount));
-
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 aluOut = _reg[rn] & shifterOperand;
-                // TODO: N flag
-                SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
-                // TODO: C flag
-            }
-        }
-
-        // TEQ (immediate)
-        private void ARM_TestEquivalence_Immediate(UInt32 instruction)
-        {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
-            {
-                UInt32 rotateImm = (instruction >> 8) & 0b1111;
-                UInt32 imm = instruction & 0xff;
-
-                int rotateAmount = 2 * (int)rotateImm;
-                UInt32 shifterOperand = (imm >> rotateAmount) | (imm << (32 - rotateAmount));
-
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 aluOut = _reg[rn] ^ shifterOperand;
-                // TODO: N flag
-                SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
-                // TODO: C flag
-            }
-        }
-
-        // ==============================
-        // Branch and branch with link
-        // ==============================
-
-        // BL
-        private void ARM_BranchLink(UInt32 instruction)
-        {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
-            {
-                _reg[LR] = _nextInstructionAddress;
-
-                UInt32 imm = instruction & 0xff_ffff;
-                _reg[PC] += (SignExtend_30(imm, 24) << 2);
-            }
-        }
-
-        // B
-        private void ARM_Branch(UInt32 instruction)
-        {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (ConditionPassed(cond))
-            {
-                UInt32 imm = instruction & 0xff_ffff;
-                _reg[PC] += (SignExtend_30(imm, 24) << 2);
             }
         }
 
