@@ -85,8 +85,7 @@ namespace Iris
 
             // LDM
             new(0x0e50_0000, 0x0810_0000, ARM_LDM1),
-            new(0x0e70_8000, 0x0850_0000, ARM_LDM2),
-            new(0x0e50_8000, 0x0850_8000, ARM_LDM3),
+            new(0x0e50_8000, 0x0850_0000, ARM_LDM2),
 
             // LDR
             new(0x0c50_0000, 0x0410_0000, ARM_LDR),
@@ -151,7 +150,6 @@ namespace Iris
 
             // STM
             new(0x0e50_0000, 0x0800_0000, ARM_STM1),
-            new(0x0e70_0000, 0x0840_0000, ARM_STM2),
 
             // STR
             new(0x0c50_0000, 0x0400_0000, ARM_STR),
@@ -1303,8 +1301,8 @@ namespace Iris
             UInt32 startAddress;
             UInt32 endAddress;
 
-            UInt32 u = (instruction >> 23) & 1;
             UInt32 p = (instruction >> 24) & 1;
+            UInt32 u = (instruction >> 23) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 registerList = instruction & 0xffff;
 
@@ -1579,18 +1577,47 @@ namespace Iris
             UInt32 cond = (instruction >> 28) & 0b1111;
             if (cpu.ConditionPassed(cond))
             {
-                Console.WriteLine("Unimplemented instruction");
-                Environment.Exit(1);
-            }
-        }
+                var (startAddress, _) = cpu.GetAddress_Multiple(instruction);
 
-        private static void ARM_LDM3(CPU cpu, UInt32 instruction)
-        {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
-            {
-                Console.WriteLine("Unimplemented instruction");
-                Environment.Exit(1);
+                UInt32 address = startAddress;
+
+                UInt32 registerList = instruction & 0x7fff;
+                for (var i = 0; i <= 14; ++i)
+                {
+                    if (((registerList >> i) & 1) == 1)
+                    {
+                        UInt32 value = cpu._callbacks.ReadMemory32(address);
+                        switch (i)
+                        {
+                            case 8:
+                                cpu._reg8 = value;
+                                break;
+                            case 9:
+                                cpu._reg9 = value;
+                                break;
+                            case 10:
+                                cpu._reg10 = value;
+                                break;
+                            case 11:
+                                cpu._reg11 = value;
+                                break;
+                            case 12:
+                                cpu._reg12 = value;
+                                break;
+                            case 13:
+                                cpu._reg13 = value;
+                                break;
+                            case 14:
+                                cpu._reg14 = value;
+                                break;
+                            default:
+                                cpu._reg[i] = value;
+                                break;
+                        }
+
+                        address += 4;
+                    }
+                }
             }
         }
 
@@ -1982,16 +2009,6 @@ namespace Iris
                         address += 4;
                     }
                 }
-            }
-        }
-
-        private static void ARM_STM2(CPU cpu, UInt32 instruction)
-        {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
-            {
-                Console.WriteLine("Unimplemented instruction");
-                Environment.Exit(1);
             }
         }
 

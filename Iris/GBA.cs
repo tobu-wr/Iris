@@ -201,7 +201,7 @@ namespace Iris
             }
             else
             {
-                throw new Exception(string.Format("GBA: Invalid write to address 0x{0:x8}", address));
+                //throw new Exception(string.Format("GBA: Invalid write to address 0x{0:x8}", address));
             }
         }
 
