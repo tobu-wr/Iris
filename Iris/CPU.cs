@@ -210,11 +210,64 @@ namespace Iris
 
         private static readonly THUMB_InstructionTableEntry[] THUMB_InstructionTable = new THUMB_InstructionTableEntry[]
         {
+            // ADD
+            new(0xfe00, 0x1c00, THUMB_ADD1),
+            new(0xf800, 0x3000, THUMB_ADD2),
+            new(0xfe00, 0x1800, THUMB_ADD3),
+
+            // ASR
+            new(0xf800, 0x1000, THUMB_ASR1),
+
+            // B
+            new(0xf000, 0xd000, THUMB_B1),
+
+            // BIC
+            new(0xffc0, 0x4380, THUMB_BIC),
+
+            // BL
+            new(0xf000, 0xf000, THUMB_BL),
+
+            // BX
+            new(0xff87, 0x4700, THUMB_BX),
+
+            // CMP
+            new(0xf800, 0x2800, THUMB_CMP1),
+            new(0xffc0, 0x4280, THUMB_CMP2),
+
+            // LDMIA
+            new(0xf800, 0xc800, THUMB_LDMIA),
+
+            // LDR
+            new(0xf800, 0x4800, THUMB_LDR3),
+
             // LDRH
             new(0xf800, 0x8800, THUMB_LDRH1),
 
             // LSL
-            new(0xf800, 0x0800, THUMB_LSL1),
+            new(0xf800, 0x0000, THUMB_LSL1),
+
+            // LSL
+            new(0xf800, 0x0800, THUMB_LSR1),
+
+            // MOV
+            new(0xf800, 0x2000, THUMB_MOV1),
+            new(0xff00, 0x4600, THUMB_MOV3),
+
+            // POP
+            new(0xfe00, 0xbc00, THUMB_POP),
+
+            // PUSH
+            new(0xfe00, 0xb400, THUMB_PUSH),
+
+            // STMIA
+            new(0xf800, 0xc000, THUMB_STMIA),
+
+            // STR
+            new(0xf800, 0x6000, THUMB_STR1),
+
+            // SUB
+            new(0xf800, 0x3800, THUMB_SUB2),
+            new(0xfe00, 0x1a00, THUMB_SUB3),
         };
 
         private enum Flags
@@ -272,9 +325,7 @@ namespace Iris
             if (((_cpsr >> 5) & 1) == 0) // ARM state
             {
                 if (_reg[PC] != _nextInstructionAddress + 4)
-                {
                     _nextInstructionAddress = _reg[PC];
-                }
 
                 UInt32 instruction = _callbacks.ReadMemory32(_nextInstructionAddress);
                 _nextInstructionAddress += 4;
@@ -294,9 +345,7 @@ namespace Iris
             else // THUMB state
             {
                 if (_reg[PC] != _nextInstructionAddress + 2)
-                {
                     _nextInstructionAddress = _reg[PC];
-                }
 
                 UInt16 instruction = _callbacks.ReadMemory16(_nextInstructionAddress);
                 _nextInstructionAddress += 2;
@@ -311,377 +360,8 @@ namespace Iris
                     }
                 }
 
-                switch ((instruction >> 13) & 0b111)
-                {
-                    case 0b000:
-                        {
-                            UInt16 opcode = (UInt16)((instruction >> 11) & 0b11);
-                            if (opcode == 0b11)
-                            {
-                                // Add/subtract register
-                                if (((instruction >> 10) & 1) == 0)
-                                {
-                                    UInt16 opc = (UInt16)((instruction >> 9) & 1);
-                                    if (opc == 0)
-                                    {
-                                        THUMB_Add_Register(instruction);
-                                    }
-                                    else
-                                    {
-                                        THUMB_Sub_Register(instruction);
-                                    }
-                                }
-
-                                // Add/subtract immediate
-                                else
-                                {
-                                    Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                    Environment.Exit(1);
-                                }
-                            }
-                            break;
-                        }
-
-                    // Add/subtract/compare/move immediate
-                    case 0b001:
-                        {
-                            UInt16 opcode = (UInt16)((instruction >> 11) & 0b11);
-                            switch (opcode)
-                            {
-                                case 0b00:
-                                    THUMB_Move_Immediate(instruction);
-                                    break;
-
-                                case 0b11:
-                                    THUMB_Subtract_Immediate(instruction);
-                                    break;
-
-                                default:
-                                    Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                    Environment.Exit(1);
-                                    break;
-                            }
-                            break;
-                        }
-
-                    case 0b010:
-                        // Load/store register offset
-                        if (((instruction >> 12) & 1) == 1)
-                        {
-                            Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                            Environment.Exit(1);
-                        }
-                        else
-                        {
-                            // Load from literal pool
-                            if (((instruction >> 11) & 1) == 1)
-                            {
-                                THUMB_LoadRegister_PCRelative(instruction);
-                            }
-                            else
-                            {
-                                // Data-processing register
-                                if (((instruction >> 10) & 1) == 0)
-                                {
-                                    UInt16 opcode = (UInt16)((instruction >> 6) & 0b1111);
-                                    switch (opcode)
-                                    {
-                                        case 0b1110:
-                                            THUMB_BitClear(instruction);
-                                            break;
-
-                                        default:
-                                            Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                            Environment.Exit(1);
-                                            break;
-                                    }
-                                }
-                                else
-                                {
-                                    // Branch/exchange instruction set
-                                    if (((instruction >> 8) & 0b11) == 0b11)
-                                    {
-                                        if (((instruction >> 7) & 1) == 1)
-                                        {
-                                            Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                            Environment.Exit(1);
-                                        }
-                                        else
-                                        {
-                                            THUMB_BranchExchange(instruction);
-                                        }
-                                    }
-
-                                    // Special data processing
-                                    else
-                                    {
-
-                                        UInt16 opcode = (UInt16)((instruction >> 8) & 0b11);
-                                        switch (opcode)
-                                        {
-                                            case 0b10:
-                                                THUMB_Move(instruction);
-                                                break;
-
-                                            default:
-                                                Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                                Environment.Exit(1);
-                                                break;
-                                        }
-
-                                    }
-                                }
-                            }
-                        }
-                        break;
-
-                    // Load/store word/byte immediate offset
-                    case 0b011:
-                        {
-                            UInt16 b = (UInt16)((instruction >> 12) & 1);
-                            UInt16 l = (UInt16)((instruction >> 11) & 1);
-                            if (b == 1)
-                            {
-                                if (l == 1)
-                                {
-                                    Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                    Environment.Exit(1);
-                                }
-                                else
-                                {
-                                    Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                    Environment.Exit(1);
-                                }
-                            }
-                            else
-                            {
-                                if (l == 1)
-                                {
-                                    Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                    Environment.Exit(1);
-                                }
-                                else
-                                {
-                                    THUMB_StoreRegister_ImmediateOffset(instruction);
-                                }
-                            }
-                            break;
-                        }
-
-                    case 0b101:
-                        // Miscellaneous
-                        if (((instruction >> 12) & 1) == 1)
-                        {
-                            switch ((instruction >> 9) & 0b11)
-                            {
-                                // Push/pop register list
-                                case 0b10:
-                                    {
-                                        UInt16 l = (UInt16)((instruction >> 11) & 1);
-                                        if (l == 1)
-                                        {
-                                            THUMB_PopMultipleRegisters(instruction);
-                                        }
-                                        else
-                                        {
-                                            THUMB_PushMultipleRegisters(instruction);
-                                        }
-                                        break;
-                                    }
-                                default:
-                                    Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                    Environment.Exit(1);
-                                    break;
-                            }
-                        }
-                        else
-                        {
-                            Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                            Environment.Exit(1);
-                        }
-                        break;
-
-                    case 0b110:
-                        if (((instruction >> 12) & 1) == 1)
-                        {
-                            // Conditional branch
-                            if (((instruction >> 9) & 0b111) != 0b111)
-                            {
-                                THUMB_Branch_Conditional(instruction);
-                            }
-                            else
-                            {
-                                Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                                Environment.Exit(1);
-                            }
-                        }
-
-                        // Load/store multiple
-                        else
-                        {
-                            UInt16 l = (UInt16)((instruction >> 11) & 1);
-                            if (l == 1)
-                            {
-                                THUMB_LoadMultipleIncrementAfter(instruction);
-                            }
-                            else
-                            {
-                                THUMB_StoreMultipleIncrementAfter(instruction);
-                            }
-                        }
-                        break;
-
-                    case 0b111:
-                        if (((instruction >> 12) & 1) == 1)
-                        {
-                            // BL prefix
-                            if (((instruction >> 11) & 1) == 0)
-                            {
-                                THUMB_BranchLink_Prefix(instruction);
-                            }
-
-                            // BL suffix
-                            else
-                            {
-                                THUMB_BranchLink_Suffix(instruction);
-                            }
-                        }
-                        else
-                        {
-                            Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                            Environment.Exit(1);
-                        }
-                        break;
-
-                    // Unknown
-                    default:
-                        Console.WriteLine("Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstructionAddress);
-                        Environment.Exit(1);
-                        break;
-                }
+                throw new Exception(string.Format("CPU: Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, _nextInstructionAddress - 2));
             }
-        }
-
-        private static UInt32 SignExtend(UInt32 value, int size)
-        {
-            if ((value >> (size - 1)) == 1)
-            {
-                return value | (0xffff_ffff << size);
-            }
-            else
-            {
-                return value;
-            }
-        }
-
-        private UInt32 GetFlag(Flags flag)
-        {
-            return (_cpsr >> (int)flag) & 1;
-        }
-
-        private void SetFlag(Flags flag, UInt32 value)
-        {
-            UInt32 mask = (UInt32)1 << (int)flag;
-            if (value == 1)
-                _cpsr |= mask;
-            else
-                _cpsr &= ~mask;
-        }
-
-        private bool ConditionPassed(UInt32 cond)
-        {
-            switch (cond)
-            {
-                case 0b0000: // EQ
-                    return GetFlag(Flags.Z) == 1;
-                case 0b0001: // NE
-                    return GetFlag(Flags.Z) == 0;
-                case 0b0010: // CS/HS
-                    return GetFlag(Flags.C) == 1;
-                case 0b0011: // CC/LO
-                    return GetFlag(Flags.C) == 0;
-                case 0b0100: // MI
-                    return GetFlag(Flags.N) == 1;
-                case 0b0101: // PL
-                    return GetFlag(Flags.N) == 0;
-                case 0b0110: // VS
-                    return GetFlag(Flags.V) == 1;
-                case 0b0111: // VC
-                    return GetFlag(Flags.V) == 0;
-                case 0b1000: // HI
-                    return (GetFlag(Flags.C) == 1) && (GetFlag(Flags.Z) == 0);
-                case 0b1010: // GE
-                    return GetFlag(Flags.N) == GetFlag(Flags.V);
-                case 0b1100: // GT
-                    return (GetFlag(Flags.Z) == 0) && (GetFlag(Flags.N) == GetFlag(Flags.V));
-                case 0b1101: // LE
-                    return (GetFlag(Flags.Z) == 1) || (GetFlag(Flags.N) != GetFlag(Flags.V));
-                case 0b1110: // AL
-                    return true;
-                default: // Unimplemented
-                    Console.WriteLine("Condition {0} unimplemented", cond);
-                    Environment.Exit(1);
-                    return false;
-            }
-        }
-
-        private static UInt32 RotateRight(UInt32 value, int rotateAmount)
-        {
-            return (value >> rotateAmount) | (value << (32 - rotateAmount));
-        }
-
-        private static UInt32 LogicalShiftLeft(UInt32 value, int shiftAmount)
-        {
-            return value << shiftAmount;
-        }
-
-        private static UInt32 LogicalShiftRight(UInt32 value, int shiftAmount)
-        {
-            return value >> shiftAmount;
-        }
-
-        private static UInt32 ArithmeticShiftRight(UInt32 value, int shiftAmount)
-        {
-            return (UInt32)((Int32)value >> shiftAmount);
-        }
-
-        private static UInt32 ZeroExtend(UInt16 value)
-        {
-            return value;
-        }
-
-        private static UInt32 SignExtend(Byte value)
-        {
-            return (UInt32)(Int32)(SByte)value;
-        }
-
-        private static UInt32 SignExtend30(UInt32 value)
-        {
-            return ((value >> 23) == 1) ? value | 0x3f00_0000 : value;
-        }
-
-        // ********************************************************************
-        //                               ARM
-        // ********************************************************************
-
-        private UInt32 GetMode()
-        {
-            const UInt32 mask = 0b1_1111;
-            return _cpsr & mask;
-        }
-
-        private bool InAPrivilegedMode()
-        {
-            return GetMode() != UserMode;
-        }
-
-        private bool CurrentModeHasSPSR()
-        {
-            return GetMode() switch
-            {
-                UserMode or SystemMode => false,
-                _ => true,
-            };
         }
 
         private void SetCPSR(UInt32 value)
@@ -826,6 +506,57 @@ namespace Iris
             }
         }
 
+        private UInt32 GetFlag(Flags flag)
+        {
+            return (_cpsr >> (int)flag) & 1;
+        }
+
+        private void SetFlag(Flags flag, UInt32 value)
+        {
+            UInt32 mask = (UInt32)1 << (int)flag;
+            if (value == 1)
+                _cpsr |= mask;
+            else
+                _cpsr &= ~mask;
+        }
+
+        private bool ConditionPassed(UInt32 cond)
+        {
+            switch (cond)
+            {
+                case 0b0000: // EQ
+                    return GetFlag(Flags.Z) == 1;
+                case 0b0001: // NE
+                    return GetFlag(Flags.Z) == 0;
+                case 0b0010: // CS/HS
+                    return GetFlag(Flags.C) == 1;
+                case 0b0011: // CC/LO
+                    return GetFlag(Flags.C) == 0;
+                case 0b0100: // MI
+                    return GetFlag(Flags.N) == 1;
+                case 0b0101: // PL
+                    return GetFlag(Flags.N) == 0;
+                case 0b0110: // VS
+                    return GetFlag(Flags.V) == 1;
+                case 0b0111: // VC
+                    return GetFlag(Flags.V) == 0;
+                case 0b1000: // HI
+                    return (GetFlag(Flags.C) == 1) && (GetFlag(Flags.Z) == 0);
+                case 0b1010: // GE
+                    return GetFlag(Flags.N) == GetFlag(Flags.V);
+                case 0b1100: // GT
+                    return (GetFlag(Flags.Z) == 0) && (GetFlag(Flags.N) == GetFlag(Flags.V));
+                case 0b1101: // LE
+                    return (GetFlag(Flags.Z) == 1) || (GetFlag(Flags.N) != GetFlag(Flags.V));
+                case 0b1110: // AL
+                    return true;
+                default: // Unimplemented
+                    Console.WriteLine("Condition {0} unimplemented", cond);
+                    Environment.Exit(1);
+                    return false;
+            }
+        }
+
         private static UInt32 CarryFrom(UInt64 result)
         {
             return (result > 0xffff_ffff) ? 1u : 0u;
@@ -844,6 +575,73 @@ namespace Iris
         private static UInt32 OverflowFrom_Subtraction(UInt32 leftOperand, UInt32 rightOperand, UInt32 result)
         {
             return (((leftOperand >> 31) != (rightOperand >> 31)) && ((leftOperand >> 31) != (result >> 31))) ? 1u : 0u;
+        }
+
+        private static UInt32 RotateRight(UInt32 value, int rotateAmount)
+        {
+            return (value >> rotateAmount) | (value << (32 - rotateAmount));
+        }
+
+        private static UInt32 LogicalShiftLeft(UInt32 value, int shiftAmount)
+        {
+            return value << shiftAmount;
+        }
+
+        private static UInt32 LogicalShiftRight(UInt32 value, int shiftAmount)
+        {
+            return value >> shiftAmount;
+        }
+
+        private static UInt32 ArithmeticShiftRight(UInt32 value, int shiftAmount)
+        {
+            return (UInt32)((Int32)value >> shiftAmount);
+        }
+
+        private static UInt32 ZeroExtend(UInt16 value)
+        {
+            return value;
+        }
+
+        private static UInt32 SignExtend(UInt32 value, int size)
+        {
+            return ((value >> (size - 1)) == 1) ? value | (0xffff_ffff << size) : value;
+        }
+
+        private static UInt32 SignExtend30(UInt32 value)
+        {
+            return SignExtend(value, 24) & 0x3fff_ffff;
+        }
+
+        private static UInt32 NumberOfSetBitsIn(UInt32 value, int size)
+        {
+            UInt32 count = 0;
+            for (var i = 0; i < size; ++i)
+                count += (value >> i) & 1;
+            return count;
+        }
+
+        // ********************************************************************
+        //                               ARM
+        // ********************************************************************
+
+        private UInt32 GetMode()
+        {
+            const UInt32 mask = 0b1_1111;
+            return _cpsr & mask;
+        }
+
+        private bool InAPrivilegedMode()
+        {
+            return GetMode() != UserMode;
+        }
+
+        private bool CurrentModeHasSPSR()
+        {
+            return GetMode() switch
+            {
+                UserMode or SystemMode => false,
+                _ => true,
+            };
         }
 
         // Addressing mode 1
@@ -1257,14 +1055,6 @@ namespace Iris
             return address;
         }
 
-        private static UInt32 NumberOfSetBitsIn(UInt32 value, int size)
-        {
-            UInt32 count = 0;
-            for (var i = 0; i < size; ++i)
-                count += (value >> i) & 1;
-            return count;
-        }
-
         // Addressing mode 4
         private (UInt32 startAddress, UInt32 endAddress) GetAddress_Multiple(UInt32 instruction)
         {
@@ -1664,7 +1454,7 @@ namespace Iris
 
                 Byte data = cpu._callbacks.ReadMemory8(address);
                 UInt32 rd = (instruction >> 12) & 0b1111;
-                cpu._reg[rd] = SignExtend(data);
+                cpu._reg[rd] = SignExtend(data, 8);
             }
         }
 
@@ -2172,11 +1962,182 @@ namespace Iris
         //                              THUMB
         // ********************************************************************
 
+        private static void THUMB_ADD1(CPU cpu, UInt16 instruction)
+        {
+            UInt16 imm = (UInt16)((instruction >> 6) & 0b111);
+            UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
+            UInt16 rd = (UInt16)(instruction & 0b111);
+
+            UInt32 regRn = cpu._reg[rn];
+            UInt64 result = (UInt64)regRn + (UInt64)imm;
+            cpu._reg[rd] = (UInt32)result;
+
+            cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
+            cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+            cpu.SetFlag(Flags.C, CarryFrom(result));
+            cpu.SetFlag(Flags.V, OverflowFrom_Addition(regRn, imm, cpu._reg[rd]));
+        }
+
+        private static void THUMB_ADD2(CPU cpu, UInt16 instruction)
+        {
+            UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
+            UInt16 imm = (UInt16)(instruction & 0xff);
+
+            UInt32 regRd = cpu._reg[rd];
+            UInt64 result = (UInt64)regRd + (UInt64)imm;
+            cpu._reg[rd] = (UInt32)result;
+
+            cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
+            cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+            cpu.SetFlag(Flags.C, CarryFrom(result));
+            cpu.SetFlag(Flags.V, OverflowFrom_Addition(regRd, imm, cpu._reg[rd]));
+        }
+
+        private static void THUMB_ADD3(CPU cpu, UInt16 instruction)
+        {
+            UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
+            UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
+            UInt16 rd = (UInt16)(instruction & 0b111);
+
+            UInt32 regRn = cpu._reg[rn];
+            UInt32 regRm = cpu._reg[rm];
+            UInt64 result = (UInt64)regRn + (UInt64)regRm;
+            cpu._reg[rd] = (UInt32)result;
+
+            cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
+            cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+            cpu.SetFlag(Flags.C, CarryFrom(result));
+            cpu.SetFlag(Flags.V, OverflowFrom_Addition(regRn, regRm, cpu._reg[rd]));
+        }
+
+        private static void THUMB_ASR1(CPU cpu, UInt16 instruction)
+        {
+            UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
+            UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
+            UInt16 rd = (UInt16)(instruction & 0b111);
+
+            if (imm == 0)
+            {
+                cpu.SetFlag(Flags.C, cpu._reg[rm] >> 31);
+
+                if ((cpu._reg[rm] >> 31) == 0)
+                    cpu._reg[rd] = 0;
+                else
+                    cpu._reg[rd] = 0xffff_ffff;
+            }
+            else
+            {
+                cpu.SetFlag(Flags.C, (cpu._reg[rm] >> (imm - 1)) & 1);
+                cpu._reg[rd] = ArithmeticShiftRight(cpu._reg[rm], imm);
+            }
+
+            cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
+            cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+        }
+
+        private static void THUMB_B1(CPU cpu, UInt16 instruction)
+        {
+            UInt16 cond = (UInt16)((instruction >> 8) & 0b1111);
+            if (cpu.ConditionPassed(cond))
+            {
+                UInt16 imm = (UInt16)(instruction & 0xff);
+                cpu._reg[PC] += SignExtend(imm, 8) << 1;
+            }
+        }
+
+        private static void THUMB_BIC(CPU cpu, UInt16 instruction)
+        {
+            UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
+            UInt16 rd = (UInt16)(instruction & 0b111);
+            cpu._reg[rd] &= ~cpu._reg[rm];
+
+            cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
+            cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+        }
+
+        private static void THUMB_BL(CPU cpu, UInt16 instruction)
+        {
+            UInt16 h = (UInt16)((instruction >> 11) & 0b11);
+            UInt16 offset = (UInt16)(instruction & 0x7ff);
+
+            if (h == 0b10)
+                cpu._reg[LR] = cpu._reg[PC] + (SignExtend(offset, 11) << 12);
+            else if (h == 0b11)
+            {
+                cpu._reg[PC] = cpu._reg[LR] + (UInt32)(offset << 1);
+                cpu._reg[LR] = cpu._nextInstructionAddress | 1;
+            }
+        }
+
+        private static void THUMB_BX(CPU cpu, UInt16 instruction)
+        {
+            UInt16 h2 = (UInt16)((instruction >> 6) & 1);
+            UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
+
+            UInt32 regRm = cpu._reg[(h2 << 3) | rm];
+            cpu.SetCPSR((cpu._cpsr & ~(1u << 5)) | ((regRm & 1) << 5));
+            cpu._reg[PC] = regRm & 0xffff_fffe;
+        }
+
+        private static void THUMB_CMP1(CPU cpu, UInt16 instruction)
+        {
+            UInt16 rn = (UInt16)((instruction >> 8) & 0b111);
+            UInt16 imm = (UInt16)(instruction & 0xff);
+            UInt32 aluOut = cpu._reg[rn] - imm;
+
+            cpu.SetFlag(Flags.N, aluOut >> 31);
+            cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
+            cpu.SetFlag(Flags.C, ~BorrowFrom(cpu._reg[rn], imm) & 1);
+            cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(cpu._reg[rn], imm, aluOut));
+        }
+
+        private static void THUMB_CMP2(CPU cpu, UInt16 instruction)
+        {
+            UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
+            UInt16 rn = (UInt16)(instruction & 0b111);
+            UInt32 aluOut = cpu._reg[rn] - cpu._reg[rm];
+
+            cpu.SetFlag(Flags.N, aluOut >> 31);
+            cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
+            cpu.SetFlag(Flags.C, ~BorrowFrom(cpu._reg[rn], cpu._reg[rm]) & 1);
+            cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(cpu._reg[rn], cpu._reg[rm], aluOut));
+        }
+
+        private static void THUMB_LDMIA(CPU cpu, UInt16 instruction)
+        {
+            UInt16 rn = (UInt16)((instruction >> 8) & 0b111);
+            UInt16 registerList = (UInt16)(instruction & 0xff);
+
+            UInt32 startAddress = cpu._reg[rn];
+            UInt32 address = startAddress;
+
+            for (var i = 0; i <= 7; ++i)
+            {
+                if (((registerList >> i) & 1) == 1)
+                {
+                    cpu._reg[i] = cpu._callbacks.ReadMemory32(address);
+                    address += 4;
+                }
+            }
+
+            cpu._reg[rn] += NumberOfSetBitsIn(registerList, 8) * 4;
+        }
+
+        private static void THUMB_LDR3(CPU cpu, UInt16 instruction)
+        {
+            UInt16 imm = (UInt16)(instruction & 0xff);
+            UInt32 address = (cpu._reg[PC] & 0xffff_fffc) + (imm * 4u);
+
+            UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
+            cpu._reg[rd] = cpu._callbacks.ReadMemory32(address);
+        }
+
         private static void THUMB_LDRH1(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
             UInt32 address = cpu._reg[rn] + (imm * 2u);
+
             UInt16 data = cpu._callbacks.ReadMemory16(address);
 
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -2188,6 +2149,7 @@ namespace Iris
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
+
             if (imm == 0)
                 cpu._reg[rd] = cpu._reg[rm];
             else
@@ -2200,266 +2162,154 @@ namespace Iris
             cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
         }
 
-        // ==============================
-        // Add/subtract register
-        // ==============================
-
-        // ADD (register)
-        private void THUMB_Add_Register(UInt16 instruction)
+        private static void THUMB_LSR1(CPU cpu, UInt16 instruction)
         {
-            UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
-            UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
-            UInt16 rd = (UInt16)(instruction & 0b111);
-            _reg[rd] = _reg[rn] + _reg[rm];
-            // TODO: N flag
-            // TODO: Z flag
-            // TODO: C flag
-            // TODO: V flag
-        }
-
-        // SUB (register)
-        private void THUMB_Sub_Register(UInt16 instruction)
-        {
-            UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
-            UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
-            UInt16 rd = (UInt16)(instruction & 0b111);
-            _reg[rd] = _reg[rn] - _reg[rm];
-            // TODO: N flag
-            // TODO: Z flag
-            // TODO: C flag
-            // TODO: V flag
-        }
-
-        // ==============================
-        // Add/subtract/compare/move immediate
-        // ==============================
-
-        // MOV (immediate)
-        private void THUMB_Move_Immediate(UInt16 instruction)
-        {
-            UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
-            UInt16 imm = (UInt16)(instruction & 0xff);
-            _reg[rd] = imm;
-            // TODO: N flag
-            // TODO: Z flag
-        }
-
-        // SUB (immediate)
-        private void THUMB_Subtract_Immediate(UInt16 instruction)
-        {
-            UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
-            UInt16 imm = (UInt16)(instruction & 0xff);
-            _reg[rd] -= imm;
-            // TODO: N flag
-            SetFlag(Flags.Z, (_reg[rd] == 0) ? 1u : 0u);
-            // TODO: C flag
-            // TODO: V flag
-        }
-
-        // ==============================
-        // Load from literal pool
-        // ==============================
-
-        // LDR (PC relative)
-        private void THUMB_LoadRegister_PCRelative(UInt16 instruction)
-        {
-            UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
-            UInt16 imm = (UInt16)(instruction & 0xff);
-            UInt32 address = (_reg[PC] & 0xffff_fffc) + (UInt32)(imm * 4);
-            _reg[rd] = _callbacks.ReadMemory32(address);
-        }
-
-        // ==============================
-        // Data-processing register
-        // ==============================
-
-        // BIC
-        private void THUMB_BitClear(UInt16 instruction)
-        {
+            UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
-            _reg[rd] &= ~_reg[rm];
-            // TODO: N flag
-            SetFlag(Flags.Z, (_reg[rd] == 0) ? 1u : 0u);
+
+            if (imm == 0)
+            {
+                cpu.SetFlag(Flags.C, cpu._reg[rm] >> 31);
+                cpu._reg[rd] = 0;
+            }
+            else
+            {
+                cpu.SetFlag(Flags.C, (cpu._reg[rm] >> (imm - 1)) & 1);
+                cpu._reg[rd] = LogicalShiftRight(cpu._reg[rm], imm);
+            }
+
+            cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
+            cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
         }
 
-        // ==============================
-        // Branch/exchange instruction set
-        // ==============================
-
-        // BX
-        private void THUMB_BranchExchange(UInt16 instruction)
+        private static void THUMB_MOV1(CPU cpu, UInt16 instruction)
         {
-            UInt16 h2 = (UInt16)((instruction >> 6) & 1);
-            UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
-            SetCPSR((_cpsr & ~(1u << 5)) | (_reg[(h2 << 3) | rm] & 1) << 5);
-            _reg[PC] = _reg[(h2 << 3) | rm] & 0xffff_fffe;
+            UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
+            UInt16 imm = (UInt16)(instruction & 0xff);
+            cpu._reg[rd] = imm;
+
+            cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
+            cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
         }
 
-        // ==============================
-        // Special data processing
-        // ==============================
-
-        // MOV
-        private void THUMB_Move(UInt16 instruction)
+        private static void THUMB_MOV3(CPU cpu, UInt16 instruction)
         {
             UInt16 h1 = (UInt16)((instruction >> 7) & 1);
             UInt16 h2 = (UInt16)((instruction >> 6) & 1);
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
-            _reg[(h1 << 3) | rd] = _reg[(h2 << 3) | rm];
+            cpu._reg[(h1 << 3) | rd] = cpu._reg[(h2 << 3) | rm];
         }
 
-        // ==============================
-        // Load/store word/byte immediate offset
-        // ==============================
+        private static void THUMB_POP(CPU cpu, UInt16 instruction)
+        {
+            UInt16 r = (UInt16)((instruction >> 8) & 1);
+            UInt16 registerList = (UInt16)(instruction & 0xff);
 
-        // STR (immediate offset)
-        private void THUMB_StoreRegister_ImmediateOffset(UInt16 instruction)
+            UInt32 startAddress = cpu._reg[SP];
+            UInt32 endAddress = cpu._reg[SP] + 4 * (r + NumberOfSetBitsIn(registerList, 8));
+            UInt32 address = startAddress;
+
+            for (var i = 0; i <= 7; ++i)
+            {
+                if (((registerList >> i) & 1) == 1)
+                {
+                    cpu._reg[i] = cpu._callbacks.ReadMemory32(address);
+                    address += 4;
+                }
+            }
+
+            if (r == 1)
+            {
+                UInt32 value = cpu._callbacks.ReadMemory32(address);
+                cpu._reg[PC] = value & 0xffff_fffe;
+            }
+
+            cpu._reg[SP] = endAddress;
+        }
+
+        private static void THUMB_PUSH(CPU cpu, UInt16 instruction)
+        {
+            UInt16 r = (UInt16)((instruction >> 8) & 1);
+            UInt16 registerList = (UInt16)(instruction & 0xff);
+
+            UInt32 startAddress = cpu._reg[SP] - 4 * (r + NumberOfSetBitsIn(registerList, 8));
+            UInt32 address = startAddress;
+
+            for (var i = 0; i <= 7; ++i)
+            {
+                if (((registerList >> i) & 1) == 1)
+                {
+                    cpu._callbacks.WriteMemory32(address, cpu._reg[i]);
+                    address += 4;
+                }
+            }
+
+            if (r == 1)
+                cpu._callbacks.WriteMemory32(address, cpu._reg[LR]);
+
+            cpu._reg[SP] = startAddress;
+        }
+
+        private static void THUMB_STMIA(CPU cpu, UInt16 instruction)
+        {
+            UInt16 rn = (UInt16)((instruction >> 8) & 0b111);
+            UInt16 registerList = (UInt16)(instruction & 0xff);
+
+            UInt32 startAddress = cpu._reg[rn];
+            UInt32 address = startAddress;
+
+            for (var i = 0; i <= 7; ++i)
+            {
+                if (((registerList >> i) & 1) == 1)
+                {
+                    cpu._callbacks.WriteMemory32(address, cpu._reg[i]);
+                    address += 4;
+                }
+            }
+
+            cpu._reg[rn] += NumberOfSetBitsIn(registerList, 8) * 4;
+        }
+
+        private static void THUMB_STR1(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
+            UInt32 address = cpu._reg[rn] + (imm * 4u);
+
             UInt16 rd = (UInt16)(instruction & 0b111);
-            UInt32 address = _reg[rn] + ((UInt32)imm * 4);
-            _callbacks.WriteMemory32(address, _reg[rd]);
+            cpu._callbacks.WriteMemory32(address, cpu._reg[rd]);
         }
 
-        // ==============================
-        // Miscellaneous
-        // ==============================
-
-        // POP
-        private void THUMB_PopMultipleRegisters(UInt16 instruction)
+        private static void THUMB_SUB2(CPU cpu, UInt16 instruction)
         {
-            UInt16 r = (UInt16)((instruction >> 8) & 1);
-            UInt16 registerList = (UInt16)(instruction & 0xff);
-            UInt32 startAddress = _reg[SP];
-            UInt32 endAddress = _reg[SP] + 4 * (r + NumberOfSetBitsIn(registerList, 8));
-            UInt32 address = startAddress;
+            UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
+            UInt16 imm = (UInt16)(instruction & 0xff);
 
-            for (int i = 0; i <= 7; ++i)
-            {
-                if (((registerList >> i) & 1) == 1)
-                {
-                    _reg[i] = _callbacks.ReadMemory32(address);
-                    address += 4;
-                }
-            }
+            UInt32 regRd = cpu._reg[rd];
+            cpu._reg[rd] -= imm;
 
-            if (r == 1)
-            {
-                UInt32 value = _callbacks.ReadMemory32(address);
-                _reg[PC] = value & 0xffff_fffe;
-            }
-
-            _reg[SP] = endAddress;
+            cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
+            cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+            cpu.SetFlag(Flags.C, ~BorrowFrom(regRd, imm) & 1);
+            cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(regRd, imm, cpu._reg[rd]));
         }
 
-        // PUSH
-        private void THUMB_PushMultipleRegisters(UInt16 instruction)
+        private static void THUMB_SUB3(CPU cpu, UInt16 instruction)
         {
-            UInt16 r = (UInt16)((instruction >> 8) & 1);
-            UInt16 registerList = (UInt16)(instruction & 0xff);
-            UInt32 startAddress = _reg[SP] - 4 * (r + NumberOfSetBitsIn(registerList, 8));
-            UInt32 endAddress = _reg[SP] - 4;
-            UInt32 address = startAddress;
+            UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
+            UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
+            UInt16 rd = (UInt16)(instruction & 0b111);
 
-            for (int i = 0; i <= 7; ++i)
-            {
-                if (((registerList >> i) & 1) == 1)
-                {
-                    _callbacks.WriteMemory32(address, _reg[i]);
-                    address += 4;
-                }
-            }
+            UInt32 regRn = cpu._reg[rn];
+            UInt32 regRm = cpu._reg[rm];
+            cpu._reg[rd] = regRn - regRm;
 
-            if (r == 1)
-            {
-                _callbacks.WriteMemory32(address, _reg[LR]);
-            }
-
-            _reg[SP] -= 4 * (r + NumberOfSetBitsIn(registerList, 8));
-        }
-
-        // ==============================
-        // Conditional branch
-        // ==============================
-
-        // B (conditional)
-        private void THUMB_Branch_Conditional(UInt16 instruction)
-        {
-            UInt16 cond = (UInt16)((instruction >> 8) & 0b1111);
-            if (ConditionPassed(cond))
-            {
-                UInt16 imm = (UInt16)(instruction & 0xff);
-                _reg[PC] += SignExtend(imm, 8) << 1;
-            }
-        }
-
-        // ==============================
-        // Load/store multiple
-        // ==============================
-
-        // LDMI
-        private void THUMB_LoadMultipleIncrementAfter(UInt16 instruction)
-        {
-            UInt16 rn = (UInt16)((instruction >> 8) & 0b111);
-            UInt16 registerList = (UInt16)(instruction & 0xff);
-            UInt32 startAddress = _reg[rn];
-            UInt32 endAddress = _reg[rn] + (NumberOfSetBitsIn(registerList, 8) * 4) - 4;
-            UInt32 address = startAddress;
-
-            for (int i = 0; i <= 7; ++i)
-            {
-                if (((registerList >> i) & 1) == 1)
-                {
-                    _reg[i] = _callbacks.ReadMemory32(address);
-                    address += 4;
-                }
-            }
-
-            _reg[rn] += NumberOfSetBitsIn(registerList, 8) * 4;
-        }
-
-        // STMIA
-        private void THUMB_StoreMultipleIncrementAfter(UInt16 instruction)
-        {
-            UInt16 rn = (UInt16)((instruction >> 8) & 0b111);
-            UInt16 registerList = (UInt16)(instruction & 0xff);
-            UInt32 startAddress = _reg[rn];
-            UInt32 endAddress = _reg[rn] + (NumberOfSetBitsIn(registerList, 8) * 4) - 4;
-            UInt32 address = startAddress;
-
-            for (int i = 0; i <= 7; ++i)
-            {
-                if (((registerList >> i) & 1) == 1)
-                {
-                    _callbacks.WriteMemory32(address, _reg[i]);
-                    address += 4;
-                }
-            }
-
-            _reg[rn] += NumberOfSetBitsIn(registerList, 8) * 4;
-        }
-
-        // ==============================
-        // BL prefix
-        // ==============================
-
-        private void THUMB_BranchLink_Prefix(UInt16 instruction)
-        {
-            UInt16 offset = (UInt16)(instruction & 0x7ff);
-            _reg[LR] = _reg[PC] + (SignExtend(offset, 11) << 12);
-        }
-
-        // ==============================
-        // BL suffix
-        // ==============================
-        private void THUMB_BranchLink_Suffix(UInt16 instruction)
-        {
-            UInt16 offset = (UInt16)(instruction & 0x7ff);
-            _reg[PC] = _reg[LR] + ((UInt32)offset << 1);
-            _reg[LR] = _nextInstructionAddress | 1;
+            cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
+            cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+            cpu.SetFlag(Flags.C, ~BorrowFrom(regRn, regRm) & 1);
+            cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(regRn, regRm, cpu._reg[rd]));
         }
     }
 }
