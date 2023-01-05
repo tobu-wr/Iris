@@ -192,6 +192,31 @@ namespace Iris
             new(0x0fe0_00f0, 0x0080_0090, ARM_UMULL),
         };
 
+        private readonly struct THUMB_InstructionTableEntry
+        {
+            public delegate void InstructionHandler(CPU cpu, UInt16 instruction);
+
+            public readonly UInt16 Mask;
+            public readonly UInt16 Expected;
+            public readonly InstructionHandler Handler;
+
+            public THUMB_InstructionTableEntry(UInt16 mask, UInt16 expected, InstructionHandler handler)
+            {
+                Mask = mask;
+                Expected = expected;
+                Handler = handler;
+            }
+        }
+
+        private static readonly THUMB_InstructionTableEntry[] THUMB_InstructionTable = new THUMB_InstructionTableEntry[]
+        {
+            // LDRH
+            new(0xf800, 0x8800, THUMB_LDRH1),
+
+            // LSL
+            new(0xf800, 0x0800, THUMB_LSL1),
+        };
+
         private enum Flags
         {
             V = 28,
@@ -244,7 +269,7 @@ namespace Iris
 
         public void Step()
         {
-            if (((_cpsr >> 5) & 1) == 0) // ARM mode
+            if (((_cpsr >> 5) & 1) == 0) // ARM state
             {
                 if (_reg[PC] != _nextInstructionAddress + 4)
                 {
@@ -266,7 +291,7 @@ namespace Iris
 
                 throw new Exception(string.Format("CPU: Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress - 4));
             }
-            else // THUMB mode
+            else // THUMB state
             {
                 if (_reg[PC] != _nextInstructionAddress + 2)
                 {
@@ -277,18 +302,21 @@ namespace Iris
                 _nextInstructionAddress += 2;
                 _reg[PC] = _nextInstructionAddress + 2;
 
+                foreach (THUMB_InstructionTableEntry entry in THUMB_InstructionTable)
+                {
+                    if ((instruction & entry.Mask) == entry.Expected)
+                    {
+                        entry.Handler(this, instruction);
+                        return;
+                    }
+                }
+
                 switch ((instruction >> 13) & 0b111)
                 {
                     case 0b000:
                         {
                             UInt16 opcode = (UInt16)((instruction >> 11) & 0b11);
-
-                            // Shift by immediate
-                            if (opcode != 0b11)
-                            {
-                                THUMB_LogicalShiftLeft_Immediate(instruction);
-                            }
-                            else
+                            if (opcode == 0b11)
                             {
                                 // Add/subtract register
                                 if (((instruction >> 10) & 1) == 0)
@@ -546,6 +574,92 @@ namespace Iris
             }
         }
 
+        private UInt32 GetFlag(Flags flag)
+        {
+            return (_cpsr >> (int)flag) & 1;
+        }
+
+        private void SetFlag(Flags flag, UInt32 value)
+        {
+            UInt32 mask = (UInt32)1 << (int)flag;
+            if (value == 1)
+                _cpsr |= mask;
+            else
+                _cpsr &= ~mask;
+        }
+
+        private bool ConditionPassed(UInt32 cond)
+        {
+            switch (cond)
+            {
+                case 0b0000: // EQ
+                    return GetFlag(Flags.Z) == 1;
+                case 0b0001: // NE
+                    return GetFlag(Flags.Z) == 0;
+                case 0b0010: // CS/HS
+                    return GetFlag(Flags.C) == 1;
+                case 0b0011: // CC/LO
+                    return GetFlag(Flags.C) == 0;
+                case 0b0100: // MI
+                    return GetFlag(Flags.N) == 1;
+                case 0b0101: // PL
+                    return GetFlag(Flags.N) == 0;
+                case 0b0110: // VS
+                    return GetFlag(Flags.V) == 1;
+                case 0b0111: // VC
+                    return GetFlag(Flags.V) == 0;
+                case 0b1000: // HI
+                    return (GetFlag(Flags.C) == 1) && (GetFlag(Flags.Z) == 0);
+                case 0b1010: // GE
+                    return GetFlag(Flags.N) == GetFlag(Flags.V);
+                case 0b1100: // GT
+                    return (GetFlag(Flags.Z) == 0) && (GetFlag(Flags.N) == GetFlag(Flags.V));
+                case 0b1101: // LE
+                    return (GetFlag(Flags.Z) == 1) || (GetFlag(Flags.N) != GetFlag(Flags.V));
+                case 0b1110: // AL
+                    return true;
+                default: // Unimplemented
+                    Console.WriteLine("Condition {0} unimplemented", cond);
+                    Environment.Exit(1);
+                    return false;
+            }
+        }
+
+        private static UInt32 RotateRight(UInt32 value, int rotateAmount)
+        {
+            return (value >> rotateAmount) | (value << (32 - rotateAmount));
+        }
+
+        private static UInt32 LogicalShiftLeft(UInt32 value, int shiftAmount)
+        {
+            return value << shiftAmount;
+        }
+
+        private static UInt32 LogicalShiftRight(UInt32 value, int shiftAmount)
+        {
+            return value >> shiftAmount;
+        }
+
+        private static UInt32 ArithmeticShiftRight(UInt32 value, int shiftAmount)
+        {
+            return (UInt32)((Int32)value >> shiftAmount);
+        }
+
+        private static UInt32 ZeroExtend(UInt16 value)
+        {
+            return value;
+        }
+
+        private static UInt32 SignExtend(Byte value)
+        {
+            return (UInt32)(Int32)(SByte)value;
+        }
+
+        private static UInt32 SignExtend30(UInt32 value)
+        {
+            return ((value >> 23) == 1) ? value | 0x3f00_0000 : value;
+        }
+
         // ********************************************************************
         //                               ARM
         // ********************************************************************
@@ -712,57 +826,6 @@ namespace Iris
             }
         }
 
-        private UInt32 GetFlag(Flags flag)
-        {
-            return (_cpsr >> (int)flag) & 1;
-        }
-
-        private void SetFlag(Flags flag, UInt32 value)
-        {
-            UInt32 mask = (UInt32)1 << (int)flag;
-            if (value == 1)
-                _cpsr |= mask;
-            else
-                _cpsr &= ~mask;
-        }
-
-        private bool ConditionPassed(UInt32 cond)
-        {
-            switch (cond)
-            {
-                case 0b0000: // EQ
-                    return GetFlag(Flags.Z) == 1;
-                case 0b0001: // NE
-                    return GetFlag(Flags.Z) == 0;
-                case 0b0010: // CS/HS
-                    return GetFlag(Flags.C) == 1;
-                case 0b0011: // CC/LO
-                    return GetFlag(Flags.C) == 0;
-                case 0b0100: // MI
-                    return GetFlag(Flags.N) == 1;
-                case 0b0101: // PL
-                    return GetFlag(Flags.N) == 0;
-                case 0b0110: // VS
-                    return GetFlag(Flags.V) == 1;
-                case 0b0111: // VC
-                    return GetFlag(Flags.V) == 0;
-                case 0b1000: // HI
-                    return (GetFlag(Flags.C) == 1) && (GetFlag(Flags.Z) == 0);
-                case 0b1010: // GE
-                    return GetFlag(Flags.N) == GetFlag(Flags.V);
-                case 0b1100: // GT
-                    return (GetFlag(Flags.Z) == 0) && (GetFlag(Flags.N) == GetFlag(Flags.V));
-                case 0b1101: // LE
-                    return (GetFlag(Flags.Z) == 1) || (GetFlag(Flags.N) != GetFlag(Flags.V));
-                case 0b1110: // AL
-                    return true;
-                default: // Unimplemented
-                    Console.WriteLine("Condition {0} unimplemented", cond);
-                    Environment.Exit(1);
-                    return false;
-            }
-        }
-
         private static UInt32 CarryFrom(UInt64 result)
         {
             return (result > 0xffff_ffff) ? 1u : 0u;
@@ -781,26 +844,6 @@ namespace Iris
         private static UInt32 OverflowFrom_Subtraction(UInt32 leftOperand, UInt32 rightOperand, UInt32 result)
         {
             return (((leftOperand >> 31) != (rightOperand >> 31)) && ((leftOperand >> 31) != (result >> 31))) ? 1u : 0u;
-        }
-
-        private static UInt32 RotateRight(UInt32 value, int rotateAmount)
-        {
-            return (value >> rotateAmount) | (value << (32 - rotateAmount));
-        }
-
-        private static UInt32 LogicalShiftLeft(UInt32 value, int shiftAmount)
-        {
-            return value << shiftAmount;
-        }
-
-        private static UInt32 LogicalShiftRight(UInt32 value, int shiftAmount)
-        {
-            return value >> shiftAmount;
-        }
-
-        private static UInt32 ArithmeticShiftRight(UInt32 value, int shiftAmount)
-        {
-            return (UInt32)((Int32)value >> shiftAmount);
         }
 
         // Addressing mode 1
@@ -1270,21 +1313,6 @@ namespace Iris
                 _reg[rn] = value;
 
             return (startAddress, endAddress);
-        }
-
-        private static UInt32 ZeroExtend(UInt16 value)
-        {
-            return value;
-        }
-
-        private static UInt32 SignExtend(Byte value)
-        {
-            return (UInt32)(Int32)(SByte)value;
-        }
-
-        private static UInt32 SignExtend30(UInt32 value)
-        {
-            return ((value >> 23) == 1) ? value | 0x3f00_0000 : value;
         }
 
         private static void ARM_ADC(CPU cpu, UInt32 instruction)
@@ -2144,28 +2172,32 @@ namespace Iris
         //                              THUMB
         // ********************************************************************
 
-        // ==============================
-        // Shift by immediate
-        // ==============================
+        private static void THUMB_LDRH1(CPU cpu, UInt16 instruction)
+        {
+            UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
+            UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
+            UInt32 address = cpu._reg[rn] + (imm * 2u);
+            UInt16 data = cpu._callbacks.ReadMemory16(address);
 
-        private void THUMB_LogicalShiftLeft_Immediate(UInt16 instruction)
+            UInt16 rd = (UInt16)(instruction & 0b111);
+            cpu._reg[rd] = ZeroExtend(data);
+        }
+
+        private static void THUMB_LSL1(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
-
             if (imm == 0)
-            {
-                _reg[rd] = _reg[rm];
-            }
+                cpu._reg[rd] = cpu._reg[rm];
             else
             {
-                SetFlag(Flags.C, (_reg[rm] >> (32 - imm)) & 1);
-                _reg[rd] = _reg[rm] << imm;
+                cpu.SetFlag(Flags.C, (cpu._reg[rm] >> (32 - imm)) & 1);
+                cpu._reg[rd] = LogicalShiftLeft(cpu._reg[rm], imm);
             }
 
-            // TODO: N flag
-            // TODO: Z flag
+            cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
+            cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
         }
 
         // ==============================
