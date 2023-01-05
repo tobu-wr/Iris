@@ -238,6 +238,7 @@ namespace Iris
             new(0xf800, 0xc800, THUMB_LDMIA),
 
             // LDR
+            new(0xf800, 0x6800, THUMB_LDR1),
             new(0xf800, 0x4800, THUMB_LDR3),
 
             // LDRH
@@ -2121,6 +2122,17 @@ namespace Iris
             }
 
             cpu._reg[rn] += NumberOfSetBitsIn(registerList, 8) * 4;
+        }
+
+        private static void THUMB_LDR1(CPU cpu, UInt16 instruction)
+        {
+            UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
+            UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
+            UInt32 address = cpu._reg[rn] + (imm * 4u);
+            UInt32 data = cpu._callbacks.ReadMemory32(address);
+
+            UInt16 rd = (UInt16)(instruction & 0b111);
+            cpu._reg[rd] = data;
         }
 
         private static void THUMB_LDR3(CPU cpu, UInt16 instruction)
