@@ -254,6 +254,9 @@ namespace Iris
             new(0xf800, 0x2000, THUMB_MOV1),
             new(0xff00, 0x4600, THUMB_MOV3),
 
+            // ORR
+            new(0xffc0, 0x4300, THUMB_ORR),
+
             // POP
             new(0xfe00, 0xbc00, THUMB_POP),
 
@@ -2212,6 +2215,16 @@ namespace Iris
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
             cpu._reg[(h1 << 3) | rd] = cpu._reg[(h2 << 3) | rm];
+        }
+
+        private static void THUMB_ORR(CPU cpu, UInt16 instruction)
+        {
+            UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
+            UInt16 rd = (UInt16)(instruction & 0b111);
+            cpu._reg[rd] |= cpu._reg[rm];
+
+            cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
+            cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
         }
 
         private static void THUMB_POP(CPU cpu, UInt16 instruction)
