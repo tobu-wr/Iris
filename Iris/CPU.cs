@@ -787,7 +787,9 @@ namespace Iris
                     }
                 }
                 else
+                {
                     throw new Exception("CPU: Wrong addressing mode 1 encoding");
+                }
             }
 
             return (shifterOperand, shifterCarryOut);
@@ -891,7 +893,9 @@ namespace Iris
                                         index = 0;
                                 }
                                 else
+                                {
                                     index = ArithmeticShiftRight(_reg[rm], (int)shiftImm);
+                                }
                                 break;
                             case 0b11:
                                 if (shiftImm == 0) // RRX
@@ -929,7 +933,9 @@ namespace Iris
                                         index = 0;
                                 }
                                 else
+                                {
                                     index = ArithmeticShiftRight(_reg[rm], (int)shiftImm);
+                                }
                                 break;
                             case 0b11:
                                 if (shiftImm == 0) // RRX
@@ -967,7 +973,9 @@ namespace Iris
                                         index = 0;
                                 }
                                 else
+                                {
                                     index = ArithmeticShiftRight(_reg[rm], (int)shiftImm);
+                                }
                                 break;
                             case 0b11:
                                 if (shiftImm == 0) // RRX
@@ -987,7 +995,9 @@ namespace Iris
                 }
             }
             else
+            {
                 throw new Exception("CPU: Wrong addressing mode 2 encoding");
+            }
 
             return address;
         }
@@ -1054,7 +1064,9 @@ namespace Iris
                 }
             }
             else
+            {
                 throw new Exception("CPU: Wrong addressing mode 3 encoding");
+            }
 
             return address;
         }
@@ -1788,7 +1800,7 @@ namespace Iris
                 UInt32 address = startAddress;
 
                 UInt32 registerList = instruction & 0xffff;
-                for (int i = 0; i <= 15; ++i)
+                for (var i = 0; i <= 15; ++i)
                 {
                     if (((registerList >> i) & 1) == 1)
                     {
@@ -2065,7 +2077,9 @@ namespace Iris
             UInt16 offset = (UInt16)(instruction & 0x7ff);
 
             if (h == 0b10)
+            {
                 cpu._reg[LR] = cpu._reg[PC] + (SignExtend(offset, 11) << 12);
+            }
             else if (h == 0b11)
             {
                 cpu._reg[PC] = cpu._reg[LR] + (UInt32)(offset << 1);
@@ -2166,7 +2180,9 @@ namespace Iris
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             if (imm == 0)
+            {
                 cpu._reg[rd] = cpu._reg[rm];
+            }
             else
             {
                 cpu.SetFlag(Flags.C, (cpu._reg[rm] >> (32 - imm)) & 1);
