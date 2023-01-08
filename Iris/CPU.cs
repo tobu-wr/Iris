@@ -12,9 +12,9 @@ using System.Threading.Tasks;
 
 namespace Iris
 {
-    public class CPU
+    internal class CPU
     {
-        public interface ICallbacks
+        internal interface ICallbacks
         {
             Byte ReadMemory8(UInt32 address);
             UInt16 ReadMemory16(UInt32 address);
@@ -26,13 +26,13 @@ namespace Iris
 
         private readonly struct ARM_InstructionTableEntry
         {
-            public delegate void InstructionHandler(CPU cpu, UInt32 instruction);
+            internal delegate void InstructionHandler(CPU cpu, UInt32 instruction);
 
-            public readonly UInt32 Mask;
-            public readonly UInt32 Expected;
-            public readonly InstructionHandler Handler;
+            internal readonly UInt32 Mask;
+            internal readonly UInt32 Expected;
+            internal readonly InstructionHandler Handler;
 
-            public ARM_InstructionTableEntry(UInt32 mask, UInt32 expected, InstructionHandler handler)
+            internal ARM_InstructionTableEntry(UInt32 mask, UInt32 expected, InstructionHandler handler)
             {
                 Mask = mask;
                 Expected = expected;
@@ -194,13 +194,13 @@ namespace Iris
 
         private readonly struct THUMB_InstructionTableEntry
         {
-            public delegate void InstructionHandler(CPU cpu, UInt16 instruction);
+            internal delegate void InstructionHandler(CPU cpu, UInt16 instruction);
 
-            public readonly UInt16 Mask;
-            public readonly UInt16 Expected;
-            public readonly InstructionHandler Handler;
+            internal readonly UInt16 Mask;
+            internal readonly UInt16 Expected;
+            internal readonly InstructionHandler Handler;
 
-            public THUMB_InstructionTableEntry(UInt16 mask, UInt16 expected, InstructionHandler handler)
+            internal THUMB_InstructionTableEntry(UInt16 mask, UInt16 expected, InstructionHandler handler)
             {
                 Mask = mask;
                 Expected = expected;
@@ -311,12 +311,12 @@ namespace Iris
         private readonly ICallbacks _callbacks;
         private UInt32 _nextInstructionAddress;
 
-        public CPU(ICallbacks callbacks)
+        internal CPU(ICallbacks callbacks)
         {
             _callbacks = callbacks;
         }
 
-        public void Init(UInt32 pc, UInt32 cpsr)
+        internal void Init(UInt32 pc, UInt32 cpsr)
         {
             _nextInstructionAddress = pc;
             _reg[PC] = _nextInstructionAddress + 4;
@@ -324,7 +324,7 @@ namespace Iris
             _cpsr = cpsr;
         }
 
-        public void Step()
+        internal void Step()
         {
             if (((_cpsr >> 5) & 1) == 0) // ARM state
             {
