@@ -251,13 +251,19 @@ namespace Iris
 
             // LDR
             new(0xf800, 0x6800, THUMB_LDR1),
+            new(0xfe00, 0x5800, THUMB_LDR2),
             new(0xf800, 0x4800, THUMB_LDR3),
 
             // LDRB
             new(0xf800, 0x7800, THUMB_LDRB1),
+            new(0xfe00, 0x5c00, THUMB_LDRB2),
 
             // LDRH
             new(0xf800, 0x8800, THUMB_LDRH1),
+            new(0xfe00, 0x5a00, THUMB_LDRH2),
+
+            // LDRSH
+            new(0xfe00, 0x5e00, THUMB_LDRSH),
 
             // LSL
             new(0xf800, 0x0000, THUMB_LSL1),
@@ -2241,6 +2247,19 @@ namespace Iris
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
             UInt32 address = cpu._reg[rn] + (imm * 4u);
+
+            UInt32 data = cpu._callbacks.ReadMemory32(address);
+
+            UInt16 rd = (UInt16)(instruction & 0b111);
+            cpu._reg[rd] = data;
+        }
+
+        private static void THUMB_LDR2(CPU cpu, UInt16 instruction)
+        {
+            UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
+            UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
+            UInt32 address = cpu._reg[rn] + cpu._reg[rm];
+
             UInt32 data = cpu._callbacks.ReadMemory32(address);
 
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -2266,6 +2285,16 @@ namespace Iris
             cpu._reg[rd] = cpu._callbacks.ReadMemory8(address);
         }
 
+        private static void THUMB_LDRB2(CPU cpu, UInt16 instruction)
+        {
+            UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
+            UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
+            UInt32 address = cpu._reg[rn] + cpu._reg[rm];
+
+            UInt16 rd = (UInt16)(instruction & 0b111);
+            cpu._reg[rd] = cpu._callbacks.ReadMemory8(address);
+        }
+
         private static void THUMB_LDRH1(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
@@ -2276,6 +2305,30 @@ namespace Iris
 
             UInt16 rd = (UInt16)(instruction & 0b111);
             cpu._reg[rd] = ZeroExtend(data);
+        }
+
+        private static void THUMB_LDRH2(CPU cpu, UInt16 instruction)
+        {
+            UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
+            UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
+            UInt32 address = cpu._reg[rn] + cpu._reg[rm];
+
+            UInt16 data = cpu._callbacks.ReadMemory16(address);
+
+            UInt16 rd = (UInt16)(instruction & 0b111);
+            cpu._reg[rd] = ZeroExtend(data);
+        }
+
+        private static void THUMB_LDRSH(CPU cpu, UInt16 instruction)
+        {
+            UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
+            UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
+            UInt32 address = cpu._reg[rn] + cpu._reg[rm];
+
+            UInt16 data = cpu._callbacks.ReadMemory16(address);
+
+            UInt16 rd = (UInt16)(instruction & 0b111);
+            cpu._reg[rd] = SignExtend(data, 16);
         }
 
         private static void THUMB_LSL1(CPU cpu, UInt16 instruction)
