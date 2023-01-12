@@ -646,7 +646,7 @@ namespace Iris
 
         private static UInt32 RotateRight(UInt32 value, UInt32 rotateAmount)
         {
-            return (value >> (int)rotateAmount) | (value << (32 - (int)rotateAmount));
+            return (value >> ((int)rotateAmount % 32)) | (value << (32 - ((int)rotateAmount % 32)));
         }
 
         private static UInt32 LogicalShiftLeft(UInt32 value, UInt32 shiftAmount)
@@ -2234,7 +2234,11 @@ namespace Iris
             UInt16 rs = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
 
-            if ((cpu._reg[rs] & 0xff) < 32)
+            if ((cpu._reg[rs] & 0xff) == 0)
+            {
+                // nothing to do
+            }
+            else if ((cpu._reg[rs] & 0xff) < 32)
             {
                 cpu.SetFlag(Flags.C, (cpu._reg[rd] >> (32 - ((int)cpu._reg[rs] & 0xff))) & 1);
                 cpu._reg[rd] = LogicalShiftLeft(cpu._reg[rd], cpu._reg[rs] & 0xff);
@@ -2244,7 +2248,7 @@ namespace Iris
                 cpu.SetFlag(Flags.C, cpu._reg[rd] & 1);
                 cpu._reg[rd] = 0;
             }
-            else if ((cpu._reg[rs] & 0xff) > 32)
+            else
             {
                 cpu.SetFlag(Flags.C, 0);
                 cpu._reg[rd] = 0;
@@ -2391,11 +2395,15 @@ namespace Iris
             UInt16 rs = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
 
-            if ((cpu._reg[rs] & 0b1111) == 0)
+            if ((cpu._reg[rs] & 0xff) == 0)
+            {
+                // nothing to do
+            }
+            else if ((cpu._reg[rs] & 0b1111) == 0)
             {
                 cpu.SetFlag(Flags.C, cpu._reg[rd] >> 31);
             }
-            else if ((cpu._reg[rs] & 0b1111) > 0)
+            else
             {
                 cpu.SetFlag(Flags.C, (cpu._reg[rd] >> (((int)cpu._reg[rs] & 0b1111) - 1)) & 1);
                 cpu._reg[rd] = RotateRight(cpu._reg[rd], cpu._reg[rs] & 0b1111);
