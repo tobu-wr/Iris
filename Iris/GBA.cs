@@ -103,6 +103,11 @@ namespace Iris
                     case 0x005:
                         return (Byte)(_ppu.DISPSTAT >> 8);
 
+                    case 0x0ba:
+                    case 0x0bb:
+                        Console.WriteLine("GBA: Read from DMA0CNT_H register unimplemented");
+                        return 0;
+
                     case 0x130:
                         return (Byte)_KEYINPUT;
                     case 0x131:
@@ -168,6 +173,16 @@ namespace Iris
                     case 0x003:
                         // undocumented - green swap
                         break; // ignore
+
+                    case 0x0ba:
+                    case 0x0bb:
+                        Console.WriteLine("GBA: Write to DMA0CNT_H register unimplemented");
+                        break;
+
+                    case 0x204:
+                    case 0x205:
+                        Console.WriteLine("GBA: Write to WAITCNT register unimplemented");
+                        break;
 
                     case 0x208:
                     case 0x209:
