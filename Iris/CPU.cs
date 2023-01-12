@@ -370,18 +370,23 @@ namespace Iris
             {
                 UInt32 instruction = _callbacks.ReadMemory32(_nextInstructionAddress);
                 _nextInstructionAddress += 4;
-                _reg[PC] = _nextInstructionAddress + 4;
 
-                foreach (ARM_InstructionTableEntry entry in ARM_InstructionTable)
+                UInt32 cond = (instruction >> 28) & 0b1111;
+                if (ConditionPassed(cond))
                 {
-                    if ((instruction & entry.Mask) == entry.Expected)
-                    {
-                        entry.Handler(this, instruction);
-                        return;
-                    }
-                }
+                    _reg[PC] = _nextInstructionAddress + 4;
 
-                throw new Exception(string.Format("CPU: Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress - 4));
+                    foreach (ARM_InstructionTableEntry entry in ARM_InstructionTable)
+                    {
+                        if ((instruction & entry.Mask) == entry.Expected)
+                        {
+                            entry.Handler(this, instruction);
+                            return;
+                        }
+                    }
+
+                    throw new Exception(string.Format("CPU: Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress - 4));
+                }
             }
 
             // THUMB state
@@ -1175,854 +1180,706 @@ namespace Iris
 
         private static void ARM_ADC(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
+            var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
+
+            UInt32 rn = (instruction >> 16) & 0b1111;
+            UInt32 rd = (instruction >> 12) & 0b1111;
+
+            UInt32 regRn = cpu._reg[rn];
+            UInt64 rightOperand = (UInt64)shifterOperand + (UInt64)cpu.GetFlag(Flags.C);
+            UInt64 result = (UInt64)regRn + rightOperand;
+            cpu.SetReg(rd, (UInt32)result);
+
+            UInt32 s = (instruction >> 20) & 1;
+            if (s == 1)
             {
-                var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
-
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 rd = (instruction >> 12) & 0b1111;
-
-                UInt32 regRn = cpu._reg[rn];
-                UInt64 rightOperand = (UInt64)shifterOperand + (UInt64)cpu.GetFlag(Flags.C);
-                UInt64 result = (UInt64)regRn + rightOperand;
-                cpu.SetReg(rd, (UInt32)result);
-
-                UInt32 s = (instruction >> 20) & 1;
-                if (s == 1)
+                if (rd == PC)
                 {
-                    if (rd == PC)
-                    {
-                        Console.WriteLine("ADC: S field partially implemented");
-                        Environment.Exit(1);
-                    }
-                    else
-                    {
-                        cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
-                        cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
-                        cpu.SetFlag(Flags.C, CarryFrom(result));
-                        cpu.SetFlag(Flags.V, OverflowFrom_Addition(regRn, (UInt32)rightOperand, cpu._reg[rd]));
-                    }
+                    Console.WriteLine("ADC: S field partially implemented");
+                    Environment.Exit(1);
+                }
+                else
+                {
+                    cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flags.C, CarryFrom(result));
+                    cpu.SetFlag(Flags.V, OverflowFrom_Addition(regRn, (UInt32)rightOperand, cpu._reg[rd]));
                 }
             }
         }
 
         private static void ARM_ADD(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
+            var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
+
+            UInt32 rn = (instruction >> 16) & 0b1111;
+            UInt32 rd = (instruction >> 12) & 0b1111;
+
+            UInt32 regRn = cpu._reg[rn];
+            UInt64 result = (UInt64)regRn + (UInt64)shifterOperand;
+            cpu.SetReg(rd, (UInt32)result);
+
+            UInt32 s = (instruction >> 20) & 1;
+            if (s == 1)
             {
-                var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
-
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 rd = (instruction >> 12) & 0b1111;
-
-                UInt32 regRn = cpu._reg[rn];
-                UInt64 result = (UInt64)regRn + (UInt64)shifterOperand;
-                cpu.SetReg(rd, (UInt32)result);
-
-                UInt32 s = (instruction >> 20) & 1;
-                if (s == 1)
+                if (rd == PC)
                 {
-                    if (rd == PC)
-                    {
-                        Console.WriteLine("ADD: S field partially implemented");
-                        Environment.Exit(1);
-                    }
-                    else
-                    {
-                        cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
-                        cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
-                        cpu.SetFlag(Flags.C, CarryFrom(result));
-                        cpu.SetFlag(Flags.V, OverflowFrom_Addition(regRn, shifterOperand, cpu._reg[rd]));
-                    }
+                    Console.WriteLine("ADD: S field partially implemented");
+                    Environment.Exit(1);
+                }
+                else
+                {
+                    cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flags.C, CarryFrom(result));
+                    cpu.SetFlag(Flags.V, OverflowFrom_Addition(regRn, shifterOperand, cpu._reg[rd]));
                 }
             }
         }
 
         private static void ARM_AND(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
+            var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
+
+            UInt32 rn = (instruction >> 16) & 0b1111;
+            UInt32 rd = (instruction >> 12) & 0b1111;
+            cpu.SetReg(rd, cpu._reg[rn] & shifterOperand);
+
+            UInt32 s = (instruction >> 20) & 1;
+            if (s == 1)
             {
-                var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
-
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                cpu.SetReg(rd, cpu._reg[rn] & shifterOperand);
-
-                UInt32 s = (instruction >> 20) & 1;
-                if (s == 1)
+                if (rd == PC)
                 {
-                    if (rd == PC)
-                    {
-                        Console.WriteLine("AND: S field partially implemented");
-                        Environment.Exit(1);
-                    }
-                    else
-                    {
-                        cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
-                        cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
-                        cpu.SetFlag(Flags.C, shifterCarryOut);
-                    }
+                    Console.WriteLine("AND: S field partially implemented");
+                    Environment.Exit(1);
+                }
+                else
+                {
+                    cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flags.C, shifterCarryOut);
                 }
             }
         }
 
         private static void ARM_B(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
-            {
-                UInt32 imm = instruction & 0xff_ffff;
-                cpu.SetPC(cpu._reg[PC] + (SignExtend30(imm) << 2));
-            }
+            UInt32 imm = instruction & 0xff_ffff;
+            cpu.SetPC(cpu._reg[PC] + (SignExtend30(imm) << 2));
         }
 
         private static void ARM_BL(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
-            {
-                cpu._reg[LR] = cpu._nextInstructionAddress;
+            cpu._reg[LR] = cpu._nextInstructionAddress;
 
-                UInt32 imm = instruction & 0xff_ffff;
-                cpu.SetPC(cpu._reg[PC] + (SignExtend30(imm) << 2));
-            }
+            UInt32 imm = instruction & 0xff_ffff;
+            cpu.SetPC(cpu._reg[PC] + (SignExtend30(imm) << 2));
         }
 
         private static void ARM_BIC(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
+            var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
+
+            UInt32 rn = (instruction >> 16) & 0b1111;
+            UInt32 rd = (instruction >> 12) & 0b1111;
+            cpu.SetReg(rd, cpu._reg[rn] & ~shifterOperand);
+
+            UInt32 s = (instruction >> 20) & 1;
+            if (s == 1)
             {
-                var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
-
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                cpu.SetReg(rd, cpu._reg[rn] & ~shifterOperand);
-
-                UInt32 s = (instruction >> 20) & 1;
-                if (s == 1)
+                if (rd == PC)
                 {
-                    if (rd == PC)
-                    {
-                        Console.WriteLine("BIC: S field partially implemented");
-                        Environment.Exit(1);
-                    }
-                    else
-                    {
-                        cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
-                        cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
-                        cpu.SetFlag(Flags.C, shifterCarryOut);
-                    }
+                    Console.WriteLine("BIC: S field partially implemented");
+                    Environment.Exit(1);
+                }
+                else
+                {
+                    cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flags.C, shifterCarryOut);
                 }
             }
         }
 
         private static void ARM_BX(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
-            {
-                UInt32 rm = instruction & 0b1111;
-                cpu.SetCPSR((cpu._cpsr & ~(1u << 5)) | ((cpu._reg[rm] & 1) << 5));
-                cpu.SetPC(cpu._reg[rm] & 0xffff_fffe);
-            }
+            UInt32 rm = instruction & 0b1111;
+            cpu.SetCPSR((cpu._cpsr & ~(1u << 5)) | ((cpu._reg[rm] & 1) << 5));
+            cpu.SetPC(cpu._reg[rm] & 0xffff_fffe);
         }
 
         private static void ARM_CMN(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
-            {
-                var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
+            var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
 
-                UInt32 rn = (instruction >> 16) & 0b1111;
+            UInt32 rn = (instruction >> 16) & 0b1111;
 
-                UInt64 result = (UInt64)cpu._reg[rn] + (UInt64)shifterOperand;
-                UInt32 aluOut = (UInt32)result;
+            UInt64 result = (UInt64)cpu._reg[rn] + (UInt64)shifterOperand;
+            UInt32 aluOut = (UInt32)result;
 
-                cpu.SetFlag(Flags.N, aluOut >> 31);
-                cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
-                cpu.SetFlag(Flags.C, CarryFrom(result));
-                cpu.SetFlag(Flags.V, OverflowFrom_Addition(cpu._reg[rn], shifterOperand, aluOut));
-            }
+            cpu.SetFlag(Flags.N, aluOut >> 31);
+            cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
+            cpu.SetFlag(Flags.C, CarryFrom(result));
+            cpu.SetFlag(Flags.V, OverflowFrom_Addition(cpu._reg[rn], shifterOperand, aluOut));
         }
 
         private static void ARM_CMP(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
-            {
-                var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
+            var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
 
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 aluOut = cpu._reg[rn] - shifterOperand;
+            UInt32 rn = (instruction >> 16) & 0b1111;
+            UInt32 aluOut = cpu._reg[rn] - shifterOperand;
 
-                cpu.SetFlag(Flags.N, aluOut >> 31);
-                cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
-                cpu.SetFlag(Flags.C, ~BorrowFrom(cpu._reg[rn], shifterOperand) & 1);
-                cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(cpu._reg[rn], shifterOperand, aluOut));
-            }
+            cpu.SetFlag(Flags.N, aluOut >> 31);
+            cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
+            cpu.SetFlag(Flags.C, ~BorrowFrom(cpu._reg[rn], shifterOperand) & 1);
+            cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(cpu._reg[rn], shifterOperand, aluOut));
         }
 
         private static void ARM_EOR(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
+            var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
+
+            UInt32 rn = (instruction >> 16) & 0b1111;
+            UInt32 rd = (instruction >> 12) & 0b1111;
+            cpu.SetReg(rd, cpu._reg[rn] ^ shifterOperand);
+
+            UInt32 s = (instruction >> 20) & 1;
+            if (s == 1)
             {
-                var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
-
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                cpu.SetReg(rd, cpu._reg[rn] ^ shifterOperand);
-
-                UInt32 s = (instruction >> 20) & 1;
-                if (s == 1)
+                if (rd == PC)
                 {
-                    if (rd == PC)
-                    {
-                        Console.WriteLine("EOR: S field partially implemented");
-                        Environment.Exit(1);
-                    }
-                    else
-                    {
-                        cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
-                        cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
-                        cpu.SetFlag(Flags.C, shifterCarryOut);
-                    }
+                    Console.WriteLine("EOR: S field partially implemented");
+                    Environment.Exit(1);
+                }
+                else
+                {
+                    cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flags.C, shifterCarryOut);
                 }
             }
         }
 
         private static void ARM_LDM1(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
+            var (startAddress, _) = cpu.GetAddress_Multiple(instruction);
+
+            UInt32 address = startAddress;
+
+            UInt32 registerList = instruction & 0xffff;
+            for (var i = 0; i <= 14; ++i)
             {
-                var (startAddress, _) = cpu.GetAddress_Multiple(instruction);
-
-                UInt32 address = startAddress;
-
-                UInt32 registerList = instruction & 0xffff;
-                for (var i = 0; i <= 14; ++i)
+                if (((registerList >> i) & 1) == 1)
                 {
-                    if (((registerList >> i) & 1) == 1)
-                    {
-                        cpu._reg[i] = cpu._callbacks.ReadMemory32(address);
-                        address += 4;
-                    }
+                    cpu._reg[i] = cpu._callbacks.ReadMemory32(address);
+                    address += 4;
                 }
+            }
 
-                if (((registerList >> 15) & 1) == 1)
-                {
-                    UInt32 value = cpu._callbacks.ReadMemory32(address);
-                    cpu.SetPC(value & 0xffff_fffc);
-                }
+            if (((registerList >> 15) & 1) == 1)
+            {
+                UInt32 value = cpu._callbacks.ReadMemory32(address);
+                cpu.SetPC(value & 0xffff_fffc);
             }
         }
 
         private static void ARM_LDM2(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
+            var (startAddress, _) = cpu.GetAddress_Multiple(instruction);
+
+            UInt32 address = startAddress;
+
+            UInt32 registerList = instruction & 0x7fff;
+            for (var i = 0; i <= 14; ++i)
             {
-                var (startAddress, _) = cpu.GetAddress_Multiple(instruction);
-
-                UInt32 address = startAddress;
-
-                UInt32 registerList = instruction & 0x7fff;
-                for (var i = 0; i <= 14; ++i)
+                if (((registerList >> i) & 1) == 1)
                 {
-                    if (((registerList >> i) & 1) == 1)
+                    UInt32 value = cpu._callbacks.ReadMemory32(address);
+                    switch (i)
                     {
-                        UInt32 value = cpu._callbacks.ReadMemory32(address);
-                        switch (i)
-                        {
-                            case 8:
-                                cpu._reg8 = value;
-                                break;
-                            case 9:
-                                cpu._reg9 = value;
-                                break;
-                            case 10:
-                                cpu._reg10 = value;
-                                break;
-                            case 11:
-                                cpu._reg11 = value;
-                                break;
-                            case 12:
-                                cpu._reg12 = value;
-                                break;
-                            case 13:
-                                cpu._reg13 = value;
-                                break;
-                            case 14:
-                                cpu._reg14 = value;
-                                break;
-                            default:
-                                cpu._reg[i] = value;
-                                break;
-                        }
-
-                        address += 4;
+                        case 8:
+                            cpu._reg8 = value;
+                            break;
+                        case 9:
+                            cpu._reg9 = value;
+                            break;
+                        case 10:
+                            cpu._reg10 = value;
+                            break;
+                        case 11:
+                            cpu._reg11 = value;
+                            break;
+                        case 12:
+                            cpu._reg12 = value;
+                            break;
+                        case 13:
+                            cpu._reg13 = value;
+                            break;
+                        case 14:
+                            cpu._reg14 = value;
+                            break;
+                        default:
+                            cpu._reg[i] = value;
+                            break;
                     }
+
+                    address += 4;
                 }
             }
         }
 
         private static void ARM_LDR(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
-            {
-                UInt32 address = cpu.GetAddress(instruction);
+            UInt32 address = cpu.GetAddress(instruction);
 
-                UInt32 data = RotateRight(cpu._callbacks.ReadMemory32(address), 8 * (address & 0b11));
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                if (rd == PC)
-                    cpu.SetPC(data & 0xffff_fffc);
-                else
-                    cpu._reg[rd] = data;
-            }
+            UInt32 data = RotateRight(cpu._callbacks.ReadMemory32(address), 8 * (address & 0b11));
+            UInt32 rd = (instruction >> 12) & 0b1111;
+            if (rd == PC)
+                cpu.SetPC(data & 0xffff_fffc);
+            else
+                cpu._reg[rd] = data;
         }
 
         private static void ARM_LDRB(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
-            {
-                UInt32 address = cpu.GetAddress(instruction);
+            UInt32 address = cpu.GetAddress(instruction);
 
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                cpu.SetReg(rd, cpu._callbacks.ReadMemory8(address));
-            }
+            UInt32 rd = (instruction >> 12) & 0b1111;
+            cpu.SetReg(rd, cpu._callbacks.ReadMemory8(address));
         }
 
         private static void ARM_LDRH(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
-            {
-                UInt32 address = cpu.GetAddress_Misc(instruction);
+            UInt32 address = cpu.GetAddress_Misc(instruction);
 
-                UInt16 data = cpu._callbacks.ReadMemory16(address);
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                cpu.SetReg(rd, ZeroExtend(data));
-            }
+            UInt16 data = cpu._callbacks.ReadMemory16(address);
+            UInt32 rd = (instruction >> 12) & 0b1111;
+            cpu.SetReg(rd, ZeroExtend(data));
         }
 
         private static void ARM_LDRSB(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
-            {
-                UInt32 address = cpu.GetAddress_Misc(instruction);
+            UInt32 address = cpu.GetAddress_Misc(instruction);
 
-                Byte data = cpu._callbacks.ReadMemory8(address);
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                cpu.SetReg(rd, SignExtend(data, 8));
-            }
+            Byte data = cpu._callbacks.ReadMemory8(address);
+            UInt32 rd = (instruction >> 12) & 0b1111;
+            cpu.SetReg(rd, SignExtend(data, 8));
         }
 
         private static void ARM_MLA(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
-            {
-                UInt32 rd = (instruction >> 16) & 0b1111;
-                UInt32 rn = (instruction >> 12) & 0b1111;
-                UInt32 rs = (instruction >> 8) & 0b1111;
-                UInt32 rm = instruction & 0b1111;
-                cpu.SetReg(rd, (cpu._reg[rm] * cpu._reg[rs]) + cpu._reg[rn]);
+            UInt32 rd = (instruction >> 16) & 0b1111;
+            UInt32 rn = (instruction >> 12) & 0b1111;
+            UInt32 rs = (instruction >> 8) & 0b1111;
+            UInt32 rm = instruction & 0b1111;
+            cpu.SetReg(rd, (cpu._reg[rm] * cpu._reg[rs]) + cpu._reg[rn]);
 
-                UInt32 s = (instruction >> 20) & 1;
-                if (s == 1)
+            UInt32 s = (instruction >> 20) & 1;
+            if (s == 1)
+            {
+                if (rd == PC)
                 {
-                    if (rd == PC)
-                    {
-                        Console.WriteLine("MLA: S field partially implemented");
-                        Environment.Exit(1);
-                    }
-                    else
-                    {
-                        cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
-                        cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
-                    }
+                    Console.WriteLine("MLA: S field partially implemented");
+                    Environment.Exit(1);
+                }
+                else
+                {
+                    cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
                 }
             }
         }
 
         private static void ARM_MOV(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
+            var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
+
+            UInt32 rd = (instruction >> 12) & 0b1111;
+            cpu.SetReg(rd, shifterOperand);
+
+            UInt32 s = (instruction >> 20) & 1;
+            if (s == 1)
             {
-                var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
-
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                cpu.SetReg(rd, shifterOperand);
-
-                UInt32 s = (instruction >> 20) & 1;
-                if (s == 1)
+                if (rd == PC)
                 {
-                    if (rd == PC)
-                    {
-                        Console.WriteLine("MOV: S field partially implemented");
-                        Environment.Exit(1);
-                    }
-                    else
-                    {
-                        cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
-                        cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
-                        cpu.SetFlag(Flags.C, shifterCarryOut);
-                    }
+                    Console.WriteLine("MOV: S field partially implemented");
+                    Environment.Exit(1);
+                }
+                else
+                {
+                    cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flags.C, shifterCarryOut);
                 }
             }
         }
 
         private static void ARM_MRS(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
-            {
-                UInt32 r = (instruction >> 22) & 1;
-                UInt32 rd = (instruction >> 12) & 0b1111;
+            UInt32 r = (instruction >> 22) & 1;
+            UInt32 rd = (instruction >> 12) & 0b1111;
 
-                if (r == 1)
-                    cpu.SetReg(rd, cpu._spsr);
-                else
-                    cpu.SetReg(rd, cpu._cpsr);
-            }
+            if (r == 1)
+                cpu.SetReg(rd, cpu._spsr);
+            else
+                cpu.SetReg(rd, cpu._cpsr);
         }
 
         private static void ARM_MSR(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
+            UInt32 operand;
+            if (((instruction >> 25) & 1) == 1)
             {
-                UInt32 operand;
-                if (((instruction >> 25) & 1) == 1)
-                {
-                    UInt32 rotateImm = (instruction >> 8) & 0b1111;
-                    UInt32 imm = instruction & 0xff;
+                UInt32 rotateImm = (instruction >> 8) & 0b1111;
+                UInt32 imm = instruction & 0xff;
 
-                    UInt32 rotateAmount = 2 * rotateImm;
-                    operand = RotateRight(imm, rotateAmount);
-                }
+                UInt32 rotateAmount = 2 * rotateImm;
+                operand = RotateRight(imm, rotateAmount);
+            }
+            else
+            {
+                UInt32 rm = instruction & 0b1111;
+                operand = cpu._reg[rm];
+            }
+
+            UInt32 fieldMask = (instruction >> 16) & 0b1111;
+            UInt32 byteMask = (UInt32)((((fieldMask >> 0) & 1) == 1) ? 0x0000_00ff : 0)
+                            | (UInt32)((((fieldMask >> 1) & 1) == 1) ? 0x0000_ff00 : 0)
+                            | (UInt32)((((fieldMask >> 2) & 1) == 1) ? 0x00ff_0000 : 0)
+                            | (UInt32)((((fieldMask >> 3) & 1) == 1) ? 0xff00_0000 : 0);
+
+            const UInt32 UserMask = 0xf000_0000;
+            const UInt32 PrivMask = 0x0000_000f;
+            const UInt32 StateMask = 0x0000_0020;
+
+            UInt32 r = (instruction >> 22) & 1;
+            if (r == 0)
+            {
+                UInt32 mask;
+                if (cpu.InAPrivilegedMode())
+                    mask = byteMask & (UserMask | PrivMask);
                 else
-                {
-                    UInt32 rm = instruction & 0b1111;
-                    operand = cpu._reg[rm];
-                }
+                    mask = byteMask & UserMask;
 
-                UInt32 fieldMask = (instruction >> 16) & 0b1111;
-                UInt32 byteMask = (UInt32)((((fieldMask >> 0) & 1) == 1) ? 0x0000_00ff : 0)
-                                | (UInt32)((((fieldMask >> 1) & 1) == 1) ? 0x0000_ff00 : 0)
-                                | (UInt32)((((fieldMask >> 2) & 1) == 1) ? 0x00ff_0000 : 0)
-                                | (UInt32)((((fieldMask >> 3) & 1) == 1) ? 0xff00_0000 : 0);
-
-                const UInt32 UserMask = 0xf000_0000;
-                const UInt32 PrivMask = 0x0000_000f;
-                const UInt32 StateMask = 0x0000_0020;
-
-                UInt32 r = (instruction >> 22) & 1;
-                if (r == 0)
-                {
-                    UInt32 mask;
-                    if (cpu.InAPrivilegedMode())
-                        mask = byteMask & (UserMask | PrivMask);
-                    else
-                        mask = byteMask & UserMask;
-
-                    cpu.SetCPSR((cpu._cpsr & ~mask) | (operand & mask));
-                }
-                else if (cpu.CurrentModeHasSPSR())
-                {
-                    UInt32 mask = byteMask & (UserMask | PrivMask | StateMask);
-                    cpu._spsr = (cpu._spsr & ~mask) | (operand & mask);
-                }
+                cpu.SetCPSR((cpu._cpsr & ~mask) | (operand & mask));
+            }
+            else if (cpu.CurrentModeHasSPSR())
+            {
+                UInt32 mask = byteMask & (UserMask | PrivMask | StateMask);
+                cpu._spsr = (cpu._spsr & ~mask) | (operand & mask);
             }
         }
 
         private static void ARM_MUL(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
-            {
-                UInt32 rd = (instruction >> 16) & 0b1111;
-                UInt32 rs = (instruction >> 8) & 0b1111;
-                UInt32 rm = instruction & 0b1111;
-                cpu.SetReg(rd, cpu._reg[rm] * cpu._reg[rs]);
+            UInt32 rd = (instruction >> 16) & 0b1111;
+            UInt32 rs = (instruction >> 8) & 0b1111;
+            UInt32 rm = instruction & 0b1111;
+            cpu.SetReg(rd, cpu._reg[rm] * cpu._reg[rs]);
 
-                UInt32 s = (instruction >> 20) & 1;
-                if (s == 1)
+            UInt32 s = (instruction >> 20) & 1;
+            if (s == 1)
+            {
+                if (rd == PC)
                 {
-                    if (rd == PC)
-                    {
-                        Console.WriteLine("MUL: S field partially implemented");
-                        Environment.Exit(1);
-                    }
-                    else
-                    {
-                        cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
-                        cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
-                    }
+                    Console.WriteLine("MUL: S field partially implemented");
+                    Environment.Exit(1);
+                }
+                else
+                {
+                    cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
                 }
             }
         }
 
         private static void ARM_MVN(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
+            var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
+
+            UInt32 rd = (instruction >> 12) & 0b1111;
+            cpu.SetReg(rd, ~shifterOperand);
+
+            UInt32 s = (instruction >> 20) & 1;
+            if (s == 1)
             {
-                var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
-
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                cpu.SetReg(rd, ~shifterOperand);
-
-                UInt32 s = (instruction >> 20) & 1;
-                if (s == 1)
+                if (rd == PC)
                 {
-                    if (rd == PC)
-                    {
-                        Console.WriteLine("MVN: S field partially implemented");
-                        Environment.Exit(1);
-                    }
-                    else
-                    {
-                        cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
-                        cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
-                        cpu.SetFlag(Flags.C, shifterCarryOut);
-                    }
+                    Console.WriteLine("MVN: S field partially implemented");
+                    Environment.Exit(1);
+                }
+                else
+                {
+                    cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flags.C, shifterCarryOut);
                 }
             }
         }
 
         private static void ARM_ORR(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
+            var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
+
+            UInt32 rn = (instruction >> 16) & 0b1111;
+            UInt32 rd = (instruction >> 12) & 0b1111;
+            cpu.SetReg(rd, cpu._reg[rn] | shifterOperand);
+
+            UInt32 s = (instruction >> 20) & 1;
+            if (s == 1)
             {
-                var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
-
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                cpu.SetReg(rd, cpu._reg[rn] | shifterOperand);
-
-                UInt32 s = (instruction >> 20) & 1;
-                if (s == 1)
+                if (rd == PC)
                 {
-                    if (rd == PC)
-                    {
-                        Console.WriteLine("ORR: S field partially implemented");
-                        Environment.Exit(1);
-                    }
-                    else
-                    {
-                        cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
-                        cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
-                        cpu.SetFlag(Flags.C, shifterCarryOut);
-                    }
+                    Console.WriteLine("ORR: S field partially implemented");
+                    Environment.Exit(1);
+                }
+                else
+                {
+                    cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flags.C, shifterCarryOut);
                 }
             }
         }
 
         private static void ARM_RSC(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
+            var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
+
+            UInt32 rn = (instruction >> 16) & 0b1111;
+            UInt32 rd = (instruction >> 12) & 0b1111;
+
+            UInt32 rightOperand = cpu._reg[rn] + (~cpu.GetFlag(Flags.C) & 1);
+            cpu.SetReg(rd, shifterOperand - rightOperand);
+
+            UInt32 s = (instruction >> 20) & 1;
+            if (s == 1)
             {
-                var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
-
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 rd = (instruction >> 12) & 0b1111;
-
-                UInt32 rightOperand = cpu._reg[rn] + (~cpu.GetFlag(Flags.C) & 1);
-                cpu.SetReg(rd, shifterOperand - rightOperand);
-
-                UInt32 s = (instruction >> 20) & 1;
-                if (s == 1)
+                if (rd == PC)
                 {
-                    if (rd == PC)
-                    {
-                        Console.WriteLine("RSC: S field partially implemented");
-                        Environment.Exit(1);
-                    }
-                    else
-                    {
-                        cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
-                        cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
-                        cpu.SetFlag(Flags.C, ~BorrowFrom(shifterOperand, rightOperand) & 1);
-                        cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(shifterOperand, rightOperand, cpu._reg[rd]));
-                    }
+                    Console.WriteLine("RSC: S field partially implemented");
+                    Environment.Exit(1);
+                }
+                else
+                {
+                    cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flags.C, ~BorrowFrom(shifterOperand, rightOperand) & 1);
+                    cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(shifterOperand, rightOperand, cpu._reg[rd]));
                 }
             }
         }
 
         private static void ARM_SBC(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
+            var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
+
+            UInt32 rn = (instruction >> 16) & 0b1111;
+            UInt32 rd = (instruction >> 12) & 0b1111;
+
+            UInt32 regRn = cpu._reg[rn];
+            UInt32 rightOperand = shifterOperand + (~cpu.GetFlag(Flags.C) & 1);
+            cpu.SetReg(rd, regRn - rightOperand);
+
+            UInt32 s = (instruction >> 20) & 1;
+            if (s == 1)
             {
-                var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
-
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 rd = (instruction >> 12) & 0b1111;
-
-                UInt32 regRn = cpu._reg[rn];
-                UInt32 rightOperand = shifterOperand + (~cpu.GetFlag(Flags.C) & 1);
-                cpu.SetReg(rd, regRn - rightOperand);
-
-                UInt32 s = (instruction >> 20) & 1;
-                if (s == 1)
+                if (rd == PC)
                 {
-                    if (rd == PC)
-                    {
-                        Console.WriteLine("SBC: S field partially implemented");
-                        Environment.Exit(1);
-                    }
-                    else
-                    {
-                        cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
-                        cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
-                        cpu.SetFlag(Flags.C, ~BorrowFrom(regRn, rightOperand) & 1);
-                        cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(regRn, rightOperand, cpu._reg[rd]));
-                    }
+                    Console.WriteLine("SBC: S field partially implemented");
+                    Environment.Exit(1);
+                }
+                else
+                {
+                    cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flags.C, ~BorrowFrom(regRn, rightOperand) & 1);
+                    cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(regRn, rightOperand, cpu._reg[rd]));
                 }
             }
         }
 
         private static void ARM_SMLAL(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
+            UInt32 rdHi = (instruction >> 16) & 0b1111;
+            UInt32 rdLo = (instruction >> 12) & 0b1111;
+            UInt32 rs = (instruction >> 8) & 0b1111;
+            UInt32 rm = instruction & 0b1111;
+
+            Int64 result = (Int64)(Int32)cpu._reg[rm] * (Int64)(Int32)cpu._reg[rs];
+            UInt64 resultLo = (UInt64)(UInt32)result + (UInt64)cpu._reg[rdLo];
+            cpu.SetReg(rdLo, (UInt32)resultLo);
+            cpu.SetReg(rdHi, cpu._reg[rdHi] + (UInt32)(result >> 32) + CarryFrom(resultLo));
+
+            UInt32 s = (instruction >> 20) & 1;
+            if (s == 1)
             {
-                UInt32 rdHi = (instruction >> 16) & 0b1111;
-                UInt32 rdLo = (instruction >> 12) & 0b1111;
-                UInt32 rs = (instruction >> 8) & 0b1111;
-                UInt32 rm = instruction & 0b1111;
-
-                Int64 result = (Int64)(Int32)cpu._reg[rm] * (Int64)(Int32)cpu._reg[rs];
-                UInt64 resultLo = (UInt64)(UInt32)result + (UInt64)cpu._reg[rdLo];
-                cpu.SetReg(rdLo, (UInt32)resultLo);
-                cpu.SetReg(rdHi, cpu._reg[rdHi] + (UInt32)(result >> 32) + CarryFrom(resultLo));
-
-                UInt32 s = (instruction >> 20) & 1;
-                if (s == 1)
-                {
-                    cpu.SetFlag(Flags.N, cpu._reg[rdHi] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu._reg[rdHi] == 0 && cpu._reg[rdLo] == 0) ? 1u : 0u);
-                }
+                cpu.SetFlag(Flags.N, cpu._reg[rdHi] >> 31);
+                cpu.SetFlag(Flags.Z, (cpu._reg[rdHi] == 0 && cpu._reg[rdLo] == 0) ? 1u : 0u);
             }
         }
 
         private static void ARM_SMULL(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
+            UInt32 rdHi = (instruction >> 16) & 0b1111;
+            UInt32 rdLo = (instruction >> 12) & 0b1111;
+            UInt32 rs = (instruction >> 8) & 0b1111;
+            UInt32 rm = instruction & 0b1111;
+
+            Int64 result = (Int64)(Int32)cpu._reg[rm] * (Int64)(Int32)cpu._reg[rs];
+            cpu.SetReg(rdHi, (UInt32)(result >> 32));
+            cpu.SetReg(rdLo, (UInt32)result);
+
+            UInt32 s = (instruction >> 20) & 1;
+            if (s == 1)
             {
-                UInt32 rdHi = (instruction >> 16) & 0b1111;
-                UInt32 rdLo = (instruction >> 12) & 0b1111;
-                UInt32 rs = (instruction >> 8) & 0b1111;
-                UInt32 rm = instruction & 0b1111;
-
-                Int64 result = (Int64)(Int32)cpu._reg[rm] * (Int64)(Int32)cpu._reg[rs];
-                cpu.SetReg(rdHi, (UInt32)(result >> 32));
-                cpu.SetReg(rdLo, (UInt32)result);
-
-                UInt32 s = (instruction >> 20) & 1;
-                if (s == 1)
-                {
-                    cpu.SetFlag(Flags.N, cpu._reg[rdHi] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu._reg[rdHi] == 0 && cpu._reg[rdLo] == 0) ? 1u : 0u);
-                }
+                cpu.SetFlag(Flags.N, cpu._reg[rdHi] >> 31);
+                cpu.SetFlag(Flags.Z, (cpu._reg[rdHi] == 0 && cpu._reg[rdLo] == 0) ? 1u : 0u);
             }
         }
 
         private static void ARM_STM1(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
+            var (startAddress, _) = cpu.GetAddress_Multiple(instruction);
+
+            UInt32 address = startAddress;
+
+            UInt32 registerList = instruction & 0xffff;
+            for (var i = 0; i <= 15; ++i)
             {
-                var (startAddress, _) = cpu.GetAddress_Multiple(instruction);
-
-                UInt32 address = startAddress;
-
-                UInt32 registerList = instruction & 0xffff;
-                for (var i = 0; i <= 15; ++i)
+                if (((registerList >> i) & 1) == 1)
                 {
-                    if (((registerList >> i) & 1) == 1)
-                    {
-                        cpu._callbacks.WriteMemory32(address, cpu._reg[i]);
-                        address += 4;
-                    }
+                    cpu._callbacks.WriteMemory32(address, cpu._reg[i]);
+                    address += 4;
                 }
             }
         }
 
         private static void ARM_STR(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
-            {
-                UInt32 address = cpu.GetAddress(instruction);
+            UInt32 address = cpu.GetAddress(instruction);
 
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                cpu._callbacks.WriteMemory32(address, cpu._reg[rd]);
-            }
+            UInt32 rd = (instruction >> 12) & 0b1111;
+            cpu._callbacks.WriteMemory32(address, cpu._reg[rd]);
         }
 
         private static void ARM_STRB(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
-            {
-                UInt32 address = cpu.GetAddress(instruction);
+            UInt32 address = cpu.GetAddress(instruction);
 
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                cpu._callbacks.WriteMemory8(address, (Byte)cpu._reg[rd]);
-            }
+            UInt32 rd = (instruction >> 12) & 0b1111;
+            cpu._callbacks.WriteMemory8(address, (Byte)cpu._reg[rd]);
         }
 
         private static void ARM_STRH(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
-            {
-                UInt32 address = cpu.GetAddress_Misc(instruction);
+            UInt32 address = cpu.GetAddress_Misc(instruction);
 
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                cpu._callbacks.WriteMemory16(address, (UInt16)cpu._reg[rd]);
-            }
+            UInt32 rd = (instruction >> 12) & 0b1111;
+            cpu._callbacks.WriteMemory16(address, (UInt16)cpu._reg[rd]);
         }
 
         private static void ARM_SUB(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
+            var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
+
+            UInt32 rn = (instruction >> 16) & 0b1111;
+            UInt32 rd = (instruction >> 12) & 0b1111;
+
+            UInt32 regRn = cpu._reg[rn];
+            cpu.SetReg(rd, regRn - shifterOperand);
+
+            UInt32 s = (instruction >> 20) & 1;
+            if (s == 1)
             {
-                var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
-
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 rd = (instruction >> 12) & 0b1111;
-
-                UInt32 regRn = cpu._reg[rn];
-                cpu.SetReg(rd, regRn - shifterOperand);
-
-                UInt32 s = (instruction >> 20) & 1;
-                if (s == 1)
+                if (rd == PC)
                 {
-                    if (rd == PC)
-                    {
-                        Console.WriteLine("SUB: S field partially implemented");
-                        Environment.Exit(1);
-                    }
-                    else
-                    {
-                        cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
-                        cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
-                        cpu.SetFlag(Flags.C, ~BorrowFrom(regRn, shifterOperand) & 1);
-                        cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(regRn, shifterOperand, cpu._reg[rd]));
-                    }
+                    Console.WriteLine("SUB: S field partially implemented");
+                    Environment.Exit(1);
+                }
+                else
+                {
+                    cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flags.C, ~BorrowFrom(regRn, shifterOperand) & 1);
+                    cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(regRn, shifterOperand, cpu._reg[rd]));
                 }
             }
         }
 
         private static void ARM_SWP(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
-            {
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                UInt32 rm = instruction & 0b1111;
+            UInt32 rn = (instruction >> 16) & 0b1111;
+            UInt32 rd = (instruction >> 12) & 0b1111;
+            UInt32 rm = instruction & 0b1111;
 
-                UInt32 address = cpu._reg[rn];
-                UInt32 temp = RotateRight(cpu._callbacks.ReadMemory32(address), 8 * (address & 0b11));
-                cpu._callbacks.WriteMemory32(address, cpu._reg[rm]);
-                cpu.SetReg(rd, temp);
-            }
+            UInt32 address = cpu._reg[rn];
+            UInt32 temp = RotateRight(cpu._callbacks.ReadMemory32(address), 8 * (address & 0b11));
+            cpu._callbacks.WriteMemory32(address, cpu._reg[rm]);
+            cpu.SetReg(rd, temp);
         }
 
         private static void ARM_SWPB(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
-            {
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 rd = (instruction >> 12) & 0b1111;
-                UInt32 rm = instruction & 0b1111;
+            UInt32 rn = (instruction >> 16) & 0b1111;
+            UInt32 rd = (instruction >> 12) & 0b1111;
+            UInt32 rm = instruction & 0b1111;
 
-                UInt32 address = cpu._reg[rn];
-                Byte temp = cpu._callbacks.ReadMemory8(address);
-                cpu._callbacks.WriteMemory8(address, (Byte)cpu._reg[rm]);
-                cpu.SetReg(rd, temp);
-            }
+            UInt32 address = cpu._reg[rn];
+            Byte temp = cpu._callbacks.ReadMemory8(address);
+            cpu._callbacks.WriteMemory8(address, (Byte)cpu._reg[rm]);
+            cpu.SetReg(rd, temp);
         }
 
         private static void ARM_TST(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
-            {
-                var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
+            var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
 
-                UInt32 rn = (instruction >> 16) & 0b1111;
-                UInt32 aluOut = cpu._reg[rn] & shifterOperand;
+            UInt32 rn = (instruction >> 16) & 0b1111;
+            UInt32 aluOut = cpu._reg[rn] & shifterOperand;
 
-                cpu.SetFlag(Flags.N, aluOut >> 31);
-                cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
-                cpu.SetFlag(Flags.C, shifterCarryOut);
-            }
+            cpu.SetFlag(Flags.N, aluOut >> 31);
+            cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
+            cpu.SetFlag(Flags.C, shifterCarryOut);
         }
 
         private static void ARM_UMLAL(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
+            UInt32 rdHi = (instruction >> 16) & 0b1111;
+            UInt32 rdLo = (instruction >> 12) & 0b1111;
+            UInt32 rs = (instruction >> 8) & 0b1111;
+            UInt32 rm = instruction & 0b1111;
+
+            UInt64 result = (UInt64)cpu._reg[rm] * (UInt64)cpu._reg[rs];
+            UInt64 resultLo = (UInt64)(UInt32)result + (UInt64)cpu._reg[rdLo];
+            cpu.SetReg(rdLo, (UInt32)resultLo);
+            cpu.SetReg(rdHi, cpu._reg[rdHi] + (UInt32)(result >> 32) + CarryFrom(resultLo));
+
+            UInt32 s = (instruction >> 20) & 1;
+            if (s == 1)
             {
-                UInt32 rdHi = (instruction >> 16) & 0b1111;
-                UInt32 rdLo = (instruction >> 12) & 0b1111;
-                UInt32 rs = (instruction >> 8) & 0b1111;
-                UInt32 rm = instruction & 0b1111;
-
-                UInt64 result = (UInt64)cpu._reg[rm] * (UInt64)cpu._reg[rs];
-                UInt64 resultLo = (UInt64)(UInt32)result + (UInt64)cpu._reg[rdLo];
-                cpu.SetReg(rdLo, (UInt32)resultLo);
-                cpu.SetReg(rdHi, cpu._reg[rdHi] + (UInt32)(result >> 32) + CarryFrom(resultLo));
-
-                UInt32 s = (instruction >> 20) & 1;
-                if (s == 1)
-                {
-                    cpu.SetFlag(Flags.N, cpu._reg[rdHi] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu._reg[rdHi] == 0 && cpu._reg[rdLo] == 0) ? 1u : 0u);
-                }
+                cpu.SetFlag(Flags.N, cpu._reg[rdHi] >> 31);
+                cpu.SetFlag(Flags.Z, (cpu._reg[rdHi] == 0 && cpu._reg[rdLo] == 0) ? 1u : 0u);
             }
         }
 
         private static void ARM_UMULL(CPU cpu, UInt32 instruction)
         {
-            UInt32 cond = (instruction >> 28) & 0b1111;
-            if (cpu.ConditionPassed(cond))
+            UInt32 rdHi = (instruction >> 16) & 0b1111;
+            UInt32 rdLo = (instruction >> 12) & 0b1111;
+            UInt32 rs = (instruction >> 8) & 0b1111;
+            UInt32 rm = instruction & 0b1111;
+
+            UInt64 result = (UInt64)cpu._reg[rm] * (UInt64)cpu._reg[rs];
+            cpu.SetReg(rdHi, (UInt32)(result >> 32));
+            cpu.SetReg(rdLo, (UInt32)result);
+
+            UInt32 s = (instruction >> 20) & 1;
+            if (s == 1)
             {
-                UInt32 rdHi = (instruction >> 16) & 0b1111;
-                UInt32 rdLo = (instruction >> 12) & 0b1111;
-                UInt32 rs = (instruction >> 8) & 0b1111;
-                UInt32 rm = instruction & 0b1111;
-
-                UInt64 result = (UInt64)cpu._reg[rm] * (UInt64)cpu._reg[rs];
-                cpu.SetReg(rdHi, (UInt32)(result >> 32));
-                cpu.SetReg(rdLo, (UInt32)result);
-
-                UInt32 s = (instruction >> 20) & 1;
-                if (s == 1)
-                {
-                    cpu.SetFlag(Flags.N, cpu._reg[rdHi] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu._reg[rdHi] == 0 && cpu._reg[rdLo] == 0) ? 1u : 0u);
-                }
+                cpu.SetFlag(Flags.N, cpu._reg[rdHi] >> 31);
+                cpu.SetFlag(Flags.Z, (cpu._reg[rdHi] == 0 && cpu._reg[rdLo] == 0) ? 1u : 0u);
             }
         }
 
