@@ -262,6 +262,9 @@ namespace Iris
             new(0xf800, 0x8800, THUMB_LDRH1),
             new(0xfe00, 0x5a00, THUMB_LDRH2),
 
+            // LDRSB
+            new(0xfe00, 0x5600, THUMB_LDRSB),
+
             // LDRSH
             new(0xfe00, 0x5e00, THUMB_LDRSH),
 
@@ -302,6 +305,9 @@ namespace Iris
 
             // STR
             new(0xf800, 0x6000, THUMB_STR1),
+
+            // STRB
+            new(0xf800, 0x7000, THUMB_STRB1),
 
             // STRH
             new(0xf800, 0x8000, THUMB_STRH1),
@@ -2181,6 +2187,17 @@ namespace Iris
             cpu._reg[rd] = ZeroExtend(data);
         }
 
+        private static void THUMB_LDRSB(CPU cpu, UInt16 instruction)
+        {
+            UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
+            UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
+            UInt32 address = cpu._reg[rn] + cpu._reg[rm];
+
+            Byte data = cpu._callbacks.ReadMemory8(address);
+            UInt16 rd = (UInt16)(instruction & 0b111);
+            cpu._reg[rd] = SignExtend(data, 8);
+        }
+
         private static void THUMB_LDRSH(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
@@ -2219,7 +2236,7 @@ namespace Iris
 
             if ((cpu._reg[rs] & 0xff) < 32)
             {
-                cpu.SetFlag(Flags.C, (cpu._reg[rd] >> (32 - (int)(cpu._reg[rs] & 0xff))) & 1);
+                cpu.SetFlag(Flags.C, (cpu._reg[rd] >> (32 - ((int)cpu._reg[rs] & 0xff))) & 1);
                 cpu._reg[rd] = LogicalShiftLeft(cpu._reg[rd], cpu._reg[rs] & 0xff);
             }
             else if ((cpu._reg[rs] & 0xff) == 32)
@@ -2415,6 +2432,16 @@ namespace Iris
 
             UInt16 rd = (UInt16)(instruction & 0b111);
             cpu._callbacks.WriteMemory32(address, cpu._reg[rd]);
+        }
+
+        private static void THUMB_STRB1(CPU cpu, UInt16 instruction)
+        {
+            UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
+            UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
+            UInt32 address = cpu._reg[rn] + imm;
+
+            UInt16 rd = (UInt16)(instruction & 0b111);
+            cpu._callbacks.WriteMemory8(address, (Byte)cpu._reg[rd]);
         }
 
         private static void THUMB_STRH1(CPU cpu, UInt16 instruction)
