@@ -237,7 +237,7 @@ namespace Iris
             new(0xf000, 0xf000, THUMB_BL),
 
             // BX
-            new(0xff87, 0x4700, THUMB_BX),
+            new(0xff80, 0x4700, THUMB_BX),
 
             // CMP
             new(0xf800, 0x2800, THUMB_CMP1),
