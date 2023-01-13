@@ -108,6 +108,21 @@ namespace Iris
                         Console.WriteLine("GBA: Read from DMA0CNT_H register unimplemented");
                         return 0;
 
+                    case 0x0c6:
+                    case 0x0c7:
+                        Console.WriteLine("GBA: Read from DMA1CNT_H register unimplemented");
+                        return 0;
+
+                    case 0x0d2:
+                    case 0x0d3:
+                        Console.WriteLine("GBA: Read from DMA2CNT_H register unimplemented");
+                        return 0;
+
+                    case 0x0de:
+                    case 0x0df:
+                        Console.WriteLine("GBA: Read from DMA3CNT_H register unimplemented");
+                        return 0;
+
                     case 0x130:
                         return (Byte)_KEYINPUT;
                     case 0x131:
@@ -177,6 +192,21 @@ namespace Iris
                     case 0x0ba:
                     case 0x0bb:
                         Console.WriteLine("GBA: Write to DMA0CNT_H register unimplemented");
+                        break;
+
+                    case 0x0c6:
+                    case 0x0c7:
+                        Console.WriteLine("GBA: Write to DMA1CNT_H register unimplemented");
+                        break;
+
+                    case 0x0d2:
+                    case 0x0d3:
+                        Console.WriteLine("GBA: Write to DMA2CNT_H register unimplemented");
+                        break;
+
+                    case 0x0de:
+                    case 0x0df:
+                        Console.WriteLine("GBA: Write to DMA3CNT_H register unimplemented");
                         break;
 
                     case 0x204:
