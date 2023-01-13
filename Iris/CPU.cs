@@ -619,6 +619,8 @@ namespace Iris
                     return (GetFlag(Flags.Z) == 1) || (GetFlag(Flags.N) != GetFlag(Flags.V));
                 case 0b1110: // AL
                     return true;
+                case 0b1111:
+                    return true;
                 default: // Unimplemented
                     Console.WriteLine("Condition {0} unimplemented", cond);
                     Environment.Exit(1);
