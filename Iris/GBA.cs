@@ -103,14 +103,39 @@ namespace Iris
                     case 0x005:
                         return (Byte)(_ppu.DISPSTAT >> 8);
 
+                    case 0x006:
+                    case 0x007:
+                        Console.WriteLine("GBA: Read from VCOUNT register unimplemented");
+                        return 0;
+
+                    case 0x050:
+                    case 0x051:
+                        Console.WriteLine("GBA: Read from BLDCNT register unimplemented");
+                        return 0;
+
+                    case 0x088:
+                    case 0x089:
+                        Console.WriteLine("GBA: Read from SOUNDBIAS register unimplemented");
+                        return 0;
+
                     case 0x0ba:
                     case 0x0bb:
                         Console.WriteLine("GBA: Read from DMA0CNT_H register unimplemented");
                         return 0;
 
+                    case 0x0c4:
+                    case 0x0c5:
+                        Console.WriteLine("GBA: Read from DMA1CNT_L register unimplemented");
+                        return 0;
+
                     case 0x0c6:
                     case 0x0c7:
                         Console.WriteLine("GBA: Read from DMA1CNT_H register unimplemented");
+                        return 0;
+
+                    case 0x0d0:
+                    case 0x0d1:
+                        Console.WriteLine("GBA: Read from DMA2CNT_L register unimplemented");
                         return 0;
 
                     case 0x0d2:
@@ -189,14 +214,129 @@ namespace Iris
                         // undocumented - green swap
                         break; // ignore
 
+                    case 0x008:
+                    case 0x009:
+                        Console.WriteLine("GBA: Write to BG0CNT register unimplemented");
+                        break;
+
+                    case 0x00a:
+                    case 0x00b:
+                        Console.WriteLine("GBA: Write to BG1CNT register unimplemented");
+                        break;
+
+                    case 0x00c:
+                    case 0x00d:
+                        Console.WriteLine("GBA: Write to BG2CNT register unimplemented");
+                        break;
+
+                    case 0x00e:
+                    case 0x00f:
+                        Console.WriteLine("GBA: Write to BG3CNT register unimplemented");
+                        break;
+
+                    case 0x040:
+                    case 0x041:
+                        Console.WriteLine("GBA: Write to WIN0H register unimplemented");
+                        break;
+
+                    case 0x042:
+                    case 0x043:
+                        Console.WriteLine("GBA: Write to WIN1H register unimplemented");
+                        break;
+
+                    case 0x044:
+                    case 0x045:
+                        Console.WriteLine("GBA: Write to WIN0V register unimplemented");
+                        break;
+
+                    case 0x046:
+                    case 0x047:
+                        Console.WriteLine("GBA: Write to WIN1V register unimplemented");
+                        break;
+
+                    case 0x048:
+                    case 0x049:
+                        Console.WriteLine("GBA: Write to WININ register unimplemented");
+                        break;
+
+                    case 0x04a:
+                    case 0x04b:
+                        Console.WriteLine("GBA: Write to WINOUT register unimplemented");
+                        break;
+
+                    case 0x050:
+                    case 0x051:
+                        Console.WriteLine("GBA: Write to BLDCNT register unimplemented");
+                        break;
+
+                    case 0x052:
+                    case 0x053:
+                        Console.WriteLine("GBA: Write to BLDALPHA register unimplemented");
+                        break;
+
+                    case 0x082:
+                    case 0x083:
+                        Console.WriteLine("GBA: Write to SOUNDCNT_H register unimplemented");
+                        break;
+
+                    case 0x084:
+                    case 0x085:
+                        Console.WriteLine("GBA: Write to SOUNDCNT_X register unimplemented");
+                        break;
+
+                    case 0x088:
+                    case 0x089:
+                        Console.WriteLine("GBA: Write to SOUNDBIAS register unimplemented");
+                        break;
+
                     case 0x0ba:
                     case 0x0bb:
                         Console.WriteLine("GBA: Write to DMA0CNT_H register unimplemented");
                         break;
 
+                    case 0x0bc:
+                    case 0x0bd:
+                        Console.WriteLine("GBA: Write to DMA1SAD_L register unimplemented");
+                        break;
+
+                    case 0x0be:
+                    case 0x0bf:
+                        Console.WriteLine("GBA: Write to DMA1SAD_H register unimplemented");
+                        break;
+
+                    case 0x0c0:
+                    case 0x0c1:
+                        Console.WriteLine("GBA: Write to DMA1DAD_L register unimplemented");
+                        break;
+
+                    case 0x0c2:
+                    case 0x0c3:
+                        Console.WriteLine("GBA: Write to DMA1DAD_H register unimplemented");
+                        break;
+
                     case 0x0c6:
                     case 0x0c7:
                         Console.WriteLine("GBA: Write to DMA1CNT_H register unimplemented");
+                        break;
+
+                    case 0x0c8:
+                    case 0x0c9:
+                        Console.WriteLine("GBA: Write to DMA2SAD_L register unimplemented");
+                        break;
+
+                    case 0x0ca:
+                    case 0x0cb:
+                        Console.WriteLine("GBA: Write to DMA2SAD_H register unimplemented");
+                        break;
+
+                    case 0x0cc:
+                    case 0x0cd:
+                        Console.WriteLine("GBA: Write to DMA2DAD_L register unimplemented");
+                        break;
+
+                    case 0x0ce:
+                    case 0x0cf:
+                        Console.WriteLine("GBA: Write to DMA2DAD_H register unimplemented");
                         break;
 
                     case 0x0d2:
@@ -207,6 +347,16 @@ namespace Iris
                     case 0x0de:
                     case 0x0df:
                         Console.WriteLine("GBA: Write to DMA3CNT_H register unimplemented");
+                        break;
+
+                    case 0x100:
+                    case 0x101:
+                        Console.WriteLine("GBA: Write to TM0CNT_L register unimplemented");
+                        break;
+
+                    case 0x102:
+                    case 0x103:
+                        Console.WriteLine("GBA: Write to TM0CNT_H register unimplemented");
                         break;
 
                     case 0x204:
