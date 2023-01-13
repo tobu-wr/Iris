@@ -1749,16 +1749,19 @@ namespace Iris
 
         private static void ARM_STM1(CPU cpu, UInt32 instruction)
         {
+            UInt32 rn = (instruction >> 16) & 0b1111;
+            UInt32 regRn = cpu._reg[rn];
+
             var (startAddress, _) = cpu.GetAddress_Multiple(instruction);
 
             UInt32 address = startAddress;
 
-            UInt32 registerList = instruction & 0xffff;
+            UInt32 registerList = instruction & 0xffff; 
             for (var i = 0; i <= 15; ++i)
             {
                 if (((registerList >> i) & 1) == 1)
                 {
-                    cpu._callbacks.WriteMemory32(address, cpu._reg[i]);
+                    cpu._callbacks.WriteMemory32(address, (i == rn) ? regRn : cpu._reg[i]);
                     address += 4;
                 }
             }
