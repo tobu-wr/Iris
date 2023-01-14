@@ -2153,7 +2153,7 @@ namespace Iris
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
             UInt32 address = cpu._reg[rn] + (imm * 4u);
 
-            UInt32 data = cpu._callbacks.ReadMemory32(address);
+            UInt32 data = RotateRight(cpu._callbacks.ReadMemory32(address), 8 * (address & 0b11));
             UInt16 rd = (UInt16)(instruction & 0b111);
             cpu._reg[rd] = data;
         }
@@ -2164,7 +2164,7 @@ namespace Iris
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
             UInt32 address = cpu._reg[rn] + cpu._reg[rm];
 
-            UInt32 data = cpu._callbacks.ReadMemory32(address);
+            UInt32 data = RotateRight(cpu._callbacks.ReadMemory32(address), 8 * (address & 0b11));
             UInt16 rd = (UInt16)(instruction & 0b111);
             cpu._reg[rd] = data;
         }
@@ -2445,14 +2445,14 @@ namespace Iris
             {
                 // nothing to do
             }
-            else if ((cpu._reg[rs] & 0b1111) == 0)
+            else if ((cpu._reg[rs] & 0b1_1111) == 0)
             {
                 cpu.SetFlag(Flags.C, cpu._reg[rd] >> 31);
             }
             else
             {
-                cpu.SetFlag(Flags.C, (cpu._reg[rd] >> (((int)cpu._reg[rs] & 0b1111) - 1)) & 1);
-                cpu._reg[rd] = RotateRight(cpu._reg[rd], cpu._reg[rs] & 0b1111);
+                cpu.SetFlag(Flags.C, (cpu._reg[rd] >> (((int)cpu._reg[rs] & 0b1_1111) - 1)) & 1);
+                cpu._reg[rd] = RotateRight(cpu._reg[rd], cpu._reg[rs] & 0b1_1111);
             }
 
             cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
