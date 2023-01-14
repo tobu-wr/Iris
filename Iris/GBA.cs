@@ -188,6 +188,11 @@ namespace Iris
                 if (offset < _rom.Length)
                     return _rom[offset];
             }
+            else if (0x0e00_0000 <= address && address < 0x0e01_0000)
+            {
+                // TODO: implement SRAM
+                return 0;
+            }
 
             throw new Exception(string.Format("GBA: Invalid read from address 0x{0:x8}", address));
         }
@@ -264,6 +269,46 @@ namespace Iris
                     case 0x00e:
                     case 0x00f:
                         Console.WriteLine("GBA: Write to BG3CNT register unimplemented");
+                        break;
+
+                    case 0x010:
+                    case 0x011:
+                        Console.WriteLine("GBA: Write to BG0HOFS register unimplemented");
+                        break;
+
+                    case 0x012:
+                    case 0x013:
+                        Console.WriteLine("GBA: Write to BG0VOFS register unimplemented");
+                        break;
+
+                    case 0x014:
+                    case 0x015:
+                        Console.WriteLine("GBA: Write to BG1HOFS register unimplemented");
+                        break;
+
+                    case 0x016:
+                    case 0x017:
+                        Console.WriteLine("GBA: Write to BG1VOFS register unimplemented");
+                        break;
+
+                    case 0x018:
+                    case 0x019:
+                        Console.WriteLine("GBA: Write to BG2HOFS register unimplemented");
+                        break;
+
+                    case 0x01a:
+                    case 0x01b:
+                        Console.WriteLine("GBA: Write to BG2VOFS register unimplemented");
+                        break;
+
+                    case 0x01c:
+                    case 0x01d:
+                        Console.WriteLine("GBA: Write to BG3HOFS register unimplemented");
+                        break;
+
+                    case 0x01e:
+                    case 0x01f:
+                        Console.WriteLine("GBA: Write to BG3VOFS register unimplemented");
                         break;
 
                     case 0x040:
@@ -500,6 +545,10 @@ namespace Iris
                     _ppu.VRAM[offset] = value;
                 else
                     throw new Exception(string.Format("GBA: Invalid write to address 0x{0:x8}", address));
+            }
+            else if (0x0e00_0000 <= address && address < 0x0e01_0000)
+            {
+                // TODO: implement SRAM
             }
             else
             {
