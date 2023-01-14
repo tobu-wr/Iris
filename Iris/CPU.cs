@@ -333,6 +333,7 @@ namespace Iris
             N = 31
         };
 
+        private const UInt32 ModeMask = 0b1_1111;
         private const UInt32 UserMode = 0b1_0000;
         private const UInt32 SystemMode = 0b1_1111;
         private const UInt32 SupervisorMode = 0b1_0011;
@@ -435,9 +436,8 @@ namespace Iris
 
         private void SetCPSR(UInt32 value)
         {
-            const UInt32 mask = 0b1_1111;
-            UInt32 previousMode = _cpsr & mask;
-            UInt32 newMode = value & mask;
+            UInt32 previousMode = _cpsr & ModeMask;
+            UInt32 newMode = value & ModeMask;
 
             _cpsr = value;
 
@@ -582,11 +582,7 @@ namespace Iris
 
         private void SetFlag(Flags flag, UInt32 value)
         {
-            UInt32 mask = 1u << (int)flag;
-            if (value == 1)
-                _cpsr |= mask;
-            else
-                _cpsr &= ~mask;
+            _cpsr = (_cpsr & ~(1u << (int)flag)) | (value << (int)flag);
         }
 
         private bool ConditionPassed(UInt32 cond)
@@ -652,7 +648,7 @@ namespace Iris
 
         private static UInt32 RotateRight(UInt32 value, UInt32 rotateAmount)
         {
-            return (value >> ((int)rotateAmount % 32)) | (value << (32 - ((int)rotateAmount % 32)));
+            return (value >> ((int)rotateAmount & 0x1f)) | (value << (32 - ((int)rotateAmount & 0x1f)));
         }
 
         private static UInt32 LogicalShiftLeft(UInt32 value, UInt32 shiftAmount)
@@ -699,8 +695,7 @@ namespace Iris
 
         private UInt32 GetMode()
         {
-            const UInt32 mask = 0b1_1111;
-            return _cpsr & mask;
+            return _cpsr & ModeMask;
         }
 
         private bool InAPrivilegedMode()
