@@ -590,43 +590,43 @@ namespace Iris
 
         private bool ConditionPassed(UInt32 cond)
         {
-            switch (cond)
+            return cond switch
             {
-                case 0b0000: // EQ
-                    return GetFlag(Flags.Z) == 1;
-                case 0b0001: // NE
-                    return GetFlag(Flags.Z) == 0;
-                case 0b0010: // CS/HS
-                    return GetFlag(Flags.C) == 1;
-                case 0b0011: // CC/LO
-                    return GetFlag(Flags.C) == 0;
-                case 0b0100: // MI
-                    return GetFlag(Flags.N) == 1;
-                case 0b0101: // PL
-                    return GetFlag(Flags.N) == 0;
-                case 0b0110: // VS
-                    return GetFlag(Flags.V) == 1;
-                case 0b0111: // VC
-                    return GetFlag(Flags.V) == 0;
-                case 0b1000: // HI
-                    return (GetFlag(Flags.C) == 1) && (GetFlag(Flags.Z) == 0);
-                case 0b1010: // GE
-                    return GetFlag(Flags.N) == GetFlag(Flags.V);
-                case 0b1011: // LT
-                    return GetFlag(Flags.N) != GetFlag(Flags.V);
-                case 0b1100: // GT
-                    return (GetFlag(Flags.Z) == 0) && (GetFlag(Flags.N) == GetFlag(Flags.V));
-                case 0b1101: // LE
-                    return (GetFlag(Flags.Z) == 1) || (GetFlag(Flags.N) != GetFlag(Flags.V));
-                case 0b1110: // AL
-                    return true;
-                case 0b1111:
-                    return true;
-                default: // Unimplemented
-                    Console.WriteLine("Condition {0} unimplemented", cond);
-                    Environment.Exit(1);
-                    return false;
-            }
+                // EQ
+                0b0000 => GetFlag(Flags.Z) == 1,
+                // NE
+                0b0001 => GetFlag(Flags.Z) == 0,
+                // CS/HS
+                0b0010 => GetFlag(Flags.C) == 1,
+                // CC/LO
+                0b0011 => GetFlag(Flags.C) == 0,
+                // MI
+                0b0100 => GetFlag(Flags.N) == 1,
+                // PL
+                0b0101 => GetFlag(Flags.N) == 0,
+                // VS
+                0b0110 => GetFlag(Flags.V) == 1,
+                // VC
+                0b0111 => GetFlag(Flags.V) == 0,
+                // HI
+                0b1000 => (GetFlag(Flags.C) == 1) && (GetFlag(Flags.Z) == 0),
+                // LS
+                0b1001 => (GetFlag(Flags.C) == 0) || (GetFlag(Flags.Z) == 1),
+                // GE
+                0b1010 => GetFlag(Flags.N) == GetFlag(Flags.V),
+                // LT
+                0b1011 => GetFlag(Flags.N) != GetFlag(Flags.V),
+                // GT
+                0b1100 => (GetFlag(Flags.Z) == 0) && (GetFlag(Flags.N) == GetFlag(Flags.V)),
+                // LE
+                0b1101 => (GetFlag(Flags.Z) == 1) || (GetFlag(Flags.N) != GetFlag(Flags.V)),
+                // AL
+                0b1110 => true,
+                // UNPREDICTABLE
+                0b1111 => true,
+                // should never happen
+                _ => throw new NotImplementedException(),
+            };
         }
 
         private static UInt32 CarryFrom(UInt64 result)
@@ -1759,7 +1759,7 @@ namespace Iris
 
             UInt32 address = startAddress;
 
-            UInt32 registerList = instruction & 0xffff; 
+            UInt32 registerList = instruction & 0xffff;
             for (var i = 0; i <= 15; ++i)
             {
                 if (((registerList >> i) & 1) == 1)
