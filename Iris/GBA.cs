@@ -98,6 +98,11 @@ namespace Iris
                 UInt32 offset = address - 0x0400_0000;
                 switch (offset)
                 {
+                    case 0x000:
+                        return (Byte)_ppu.DISPCNT;
+                    case 0x001:
+                        return (Byte)(_ppu.DISPCNT >> 8);
+
                     case 0x004:
                         return (Byte)_ppu.DISPSTAT;
                     case 0x005:
@@ -148,10 +153,30 @@ namespace Iris
                         Console.WriteLine("GBA: Read from DMA3CNT_H register unimplemented");
                         return 0;
 
+                    case 0x128:
+                    case 0x129:
+                        Console.WriteLine("GBA: Read from SIOCNT register unimplemented");
+                        return 0;
+
                     case 0x130:
                         return (Byte)_KEYINPUT;
                     case 0x131:
                         return (Byte)(_KEYINPUT >> 8);
+
+                    case 0x200:
+                    case 0x201:
+                        Console.WriteLine("GBA: Read from IE register unimplemented");
+                        return 0;
+
+                    case 0x204:
+                    case 0x205:
+                        Console.WriteLine("GBA: Read from WAITCNT register unimplemented");
+                        return 0;
+
+                    case 0x208:
+                    case 0x209:
+                        Console.WriteLine("GBA: Read from IME register unimplemented");
+                        return 0;
                 }
             }
             else if (0x0800_0000 <= address && address < 0x0A00_0000)
@@ -213,6 +238,13 @@ namespace Iris
                     case 0x003:
                         // undocumented - green swap
                         break; // ignore
+
+                    case 0x004:
+                        _ppu.DISPSTAT = (UInt16)((_ppu.DISPSTAT & 0xff00) | value);
+                        break;
+                    case 0x005:
+                        _ppu.DISPSTAT = (UInt16)((_ppu.DISPSTAT & 0x00ff) | (value << 8));
+                        break;
 
                     case 0x008:
                     case 0x009:
@@ -397,6 +429,41 @@ namespace Iris
                     case 0x102:
                     case 0x103:
                         Console.WriteLine("GBA: Write to TM0CNT_H register unimplemented");
+                        break;
+
+                    case 0x10c:
+                    case 0x10d:
+                        Console.WriteLine("GBA: Write to TM3CNT_L register unimplemented");
+                        break;
+
+                    case 0x10e:
+                    case 0x10f:
+                        Console.WriteLine("GBA: Write to TM3CNT_H register unimplemented");
+                        break;
+
+                    case 0x128:
+                    case 0x129:
+                        Console.WriteLine("GBA: Write to SIOCNT register unimplemented");
+                        break;
+
+                    case 0x12a:
+                    case 0x12b:
+                        Console.WriteLine("GBA: Write to SIODATA8 register unimplemented");
+                        break;
+
+                    case 0x134:
+                    case 0x135:
+                        Console.WriteLine("GBA: Write to RCNT register unimplemented");
+                        break;
+
+                    case 0x200:
+                    case 0x201:
+                        Console.WriteLine("GBA: Write to IE register unimplemented");
+                        break;
+
+                    case 0x202:
+                    case 0x203:
+                        Console.WriteLine("GBA: Write to IF register unimplemented");
                         break;
 
                     case 0x204:

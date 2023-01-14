@@ -219,6 +219,7 @@ namespace Iris
             new(0xfe00, 0x1800, THUMB_ADD3),
             new(0xff00, 0x4400, THUMB_ADD4),
             new(0xf800, 0xa000, THUMB_ADD5),
+            new(0xf800, 0xa800, THUMB_ADD6),
             new(0xff80, 0xb000, THUMB_ADD7),
 
             // AND
@@ -1981,10 +1982,17 @@ namespace Iris
             cpu._reg[rd] = (cpu._reg[PC] & 0xffff_fffc) + (imm * 4u);
         }
 
+        private static void THUMB_ADD6(CPU cpu, UInt16 instruction)
+        {
+            UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
+            UInt16 imm = (UInt16)(instruction & 0xff);
+            cpu._reg[rd] = cpu._reg[SP] + (imm * 4u);
+        }
+
         private static void THUMB_ADD7(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)(instruction & 0x7f);
-            cpu._reg[SP] += (UInt32)(imm << 2);
+            cpu._reg[SP] += imm * 4u;
         }
 
         private static void THUMB_AND(CPU cpu, UInt16 instruction)
