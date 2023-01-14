@@ -43,7 +43,7 @@ namespace Iris
 
         public void Init()
         {
-            _cpu.Init(0x0800_0000, 0b1101_1111); // flags cleared + IRQ & FIQ interrupts disabled + ARM state + system mode
+            _cpu.Init(0x0300_7f00, 0x0800_0000, 0b1101_1111);
             _KEYINPUT = 0x03ff;
         }
 

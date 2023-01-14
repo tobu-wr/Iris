@@ -370,8 +370,9 @@ namespace Iris
             _callbacks = callbacks;
         }
 
-        internal void Init(UInt32 pc, UInt32 cpsr)
+        internal void Init(UInt32 sp, UInt32 pc, UInt32 cpsr)
         {
+            _reg[SP] = sp;
             _nextInstructionAddress = pc;
             _cpsr = cpsr;
         }
