@@ -104,9 +104,9 @@ namespace Iris
                         return (Byte)(_ppu.DISPSTAT >> 8);
 
                     case 0x006:
+                        return (Byte)_ppu.VCOUNT;
                     case 0x007:
-                        Console.WriteLine("GBA: Read from VCOUNT register unimplemented");
-                        return 0;
+                        return (Byte)(_ppu.VCOUNT >> 8);
 
                     case 0x050:
                     case 0x051:
@@ -272,6 +272,46 @@ namespace Iris
                     case 0x052:
                     case 0x053:
                         Console.WriteLine("GBA: Write to BLDALPHA register unimplemented");
+                        break;
+
+                    case 0x062:
+                    case 0x063:
+                        Console.WriteLine("GBA: Write to SOUND1CNT_H register unimplemented");
+                        break;
+
+                    case 0x064:
+                    case 0x065:
+                        Console.WriteLine("GBA: Write to SOUND1CNT_X register unimplemented");
+                        break;
+
+                    case 0x068:
+                    case 0x069:
+                        Console.WriteLine("GBA: Write to SOUND2CNT_L register unimplemented");
+                        break;
+
+                    case 0x06c:
+                    case 0x06d:
+                        Console.WriteLine("GBA: Write to SOUND2CNT_H register unimplemented");
+                        break;
+
+                    case 0x070:
+                    case 0x071:
+                        Console.WriteLine("GBA: Write to SOUND3CNT_L register unimplemented");
+                        break;
+
+                    case 0x078:
+                    case 0x079:
+                        Console.WriteLine("GBA: Write to SOUND4CNT_L register unimplemented");
+                        break;
+
+                    case 0x07c:
+                    case 0x07d:
+                        Console.WriteLine("GBA: Write to SOUND4CNT_H register unimplemented");
+                        break;
+
+                    case 0x080:
+                    case 0x081:
+                        Console.WriteLine("GBA: Write to SOUNDCNT_L register unimplemented");
                         break;
 
                     case 0x082:

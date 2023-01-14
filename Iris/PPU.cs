@@ -15,6 +15,7 @@ namespace Iris
 
         public UInt16 DISPSTAT = 0;
         public UInt16 DISPCNT = 0;
+        public UInt16 VCOUNT = 0;
 
         private const UInt32 ScreenWidth = 240;
         private const UInt32 ScreenHeight = 160;
@@ -31,6 +32,8 @@ namespace Iris
 
         public void Step()
         {
+            VCOUNT = (UInt16)(_cycleCounter % HorizontalLineWidth);
+
             if (_cycleCounter == HorizontalLineWidth * ScreenHeight)
             {
                 // start of vertical blank
