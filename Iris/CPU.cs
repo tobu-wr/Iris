@@ -826,6 +826,28 @@ namespace Iris
                                 shifterCarryOut = 0;
                             }
                             break;
+                        case 0b01: // Logical shift right
+                            if (regRs == 0)
+                            {
+                                shifterOperand = regRm;
+                                shifterCarryOut = GetFlag(Flags.C);
+                            }
+                            else if (regRs < 32)
+                            {
+                                shifterOperand = LogicalShiftRight(regRm, regRs);
+                                shifterCarryOut = (regRm >> ((int)regRs - 1)) & 1;
+                            }
+                            else if (regRs == 32)
+                            {
+                                shifterOperand = 0;
+                                shifterCarryOut = regRm >> 31;
+                            }
+                            else
+                            {
+                                shifterOperand = 0;
+                                shifterCarryOut = 0;
+                            }
+                            break;
                         case 0b10: // Arithmetic shift right
                             if (regRs == 0)
                             {
@@ -847,9 +869,22 @@ namespace Iris
                                 shifterCarryOut = regRm >> 31;
                             }
                             break;
-                        default:
-                            Console.WriteLine("CPU: encoding unimplemented");
-                            Environment.Exit(1);
+                        case 0b11: // Rotate right
+                            if (regRs == 0)
+                            {
+                                shifterOperand = regRm;
+                                shifterCarryOut = GetFlag(Flags.C);
+                            }
+                            else if ((regRs & 0b1_1111) == 0)
+                            {
+                                shifterOperand = regRm;
+                                shifterCarryOut = regRm >> 31;
+                            }
+                            else
+                            {
+                                shifterOperand = RotateRight(regRm, regRs & 0b1_1111);
+                                shifterCarryOut = (regRm >> ((int)(regRs & 0b1_1111) - 1)) & 1;
+                            }
                             break;
                     }
                 }
