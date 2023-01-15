@@ -580,10 +580,14 @@ namespace Iris
             {
                 // Div
                 case 0x06:
-                    _cpu._reg[0] = (UInt32)((Int32)_cpu._reg[0] / (Int32)_cpu._reg[1]);
-                    _cpu._reg[1] = (UInt32)((Int32)_cpu._reg[0] % (Int32)_cpu._reg[1]);
-                    _cpu._reg[3] = (UInt32)Math.Abs((Int32)_cpu._reg[0]);
-                    break;
+                    {
+                        Int32 number = (Int32)_cpu._reg[0];
+                        Int32 denom = (Int32)_cpu._reg[1];
+                        _cpu._reg[0] = (UInt32)(number / denom);
+                        _cpu._reg[1] = (UInt32)(number % denom);
+                        _cpu._reg[3] = (UInt32)Math.Abs((Int32)_cpu._reg[0]);
+                        break;
+                    }
 
                 default:
                     Console.WriteLine("GBA: Unknown BIOS function 0x{0:x2}", function);
