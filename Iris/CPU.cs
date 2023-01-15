@@ -22,6 +22,7 @@ namespace Iris
             void WriteMemory8(UInt32 address, Byte value);
             void WriteMemory16(UInt32 address, UInt16 value);
             void WriteMemory32(UInt32 address, UInt32 value);
+            void HandleSWI(UInt32 value);
         }
 
         private readonly struct ARM_InstructionTableEntry
@@ -182,6 +183,9 @@ namespace Iris
             new(0x0fe0_0090, 0x0040_0080, ARM_SUB), // I bit is 0, bit[7] is 1 and bit[4] is 0
             new(0x0fe0_0090, 0x0040_0010, ARM_SUB), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
+            // SWI
+            new(0x0f00_0000, 0x0f00_0000, ARM_SWI),
+
             // SWP
             new(0x0ff0_0ff0, 0x0100_0090, ARM_SWP),
 
@@ -293,6 +297,7 @@ namespace Iris
 
             // LSR
             new(0xf800, 0x0800, THUMB_LSR1),
+            new(0xffc0, 0x40c0, THUMB_LSR2),
 
             // MOV
             new(0xf800, 0x2000, THUMB_MOV1),
@@ -1886,8 +1891,8 @@ namespace Iris
             {
                 if (rd == PC)
                 {
-                    Console.WriteLine("SUB: S field partially implemented");
-                    Environment.Exit(1);
+                    if (cpu.CurrentModeHasSPSR())
+                        cpu._cpsr = cpu._spsr;
                 }
                 else
                 {
@@ -1897,6 +1902,12 @@ namespace Iris
                     cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(regRn, shifterOperand, cpu._reg[rd]));
                 }
             }
+        }
+
+        private static void ARM_SWI(CPU cpu, UInt32 instruction)
+        {
+            UInt32 imm = instruction & 0xff_ffff;
+            cpu._callbacks.HandleSWI(imm);
         }
 
         private static void ARM_SWP(CPU cpu, UInt32 instruction)
@@ -2410,6 +2421,35 @@ namespace Iris
             {
                 cpu.SetFlag(Flags.C, (cpu._reg[rm] >> (imm - 1)) & 1);
                 cpu._reg[rd] = LogicalShiftRight(cpu._reg[rm], imm);
+            }
+
+            cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
+            cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+        }
+
+        private static void THUMB_LSR2(CPU cpu, UInt16 instruction)
+        {
+            UInt16 rs = (UInt16)((instruction >> 3) & 0b111);
+            UInt16 rd = (UInt16)(instruction & 0b111);
+
+            if ((cpu._reg[rs] & 0xff) == 0)
+            {
+                // nothing to do
+            }
+            else if ((cpu._reg[rs] & 0xff) < 0)
+            {
+                cpu.SetFlag(Flags.C, (cpu._reg[rd] >> ((int)(cpu._reg[rs] & 0xff) - 1)) & 1);
+                cpu._reg[rd] = LogicalShiftRight(cpu._reg[rd], cpu._reg[rs] & 0xff);
+            }
+            else if ((cpu._reg[rs] & 0xff) == 32)
+            {
+                cpu.SetFlag(Flags.C, cpu._reg[rd] >> 31);
+                cpu._reg[rd] = 0;
+            }
+            else
+            {
+                cpu.SetFlag(Flags.C, 0);
+                cpu._reg[rd] = 0;
             }
 
             cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);

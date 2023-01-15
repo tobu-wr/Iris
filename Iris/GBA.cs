@@ -569,5 +569,10 @@ namespace Iris
             WriteMemory16(address + 2, (UInt16)(value >> 16));
             WriteMemory16(address, (UInt16)value);
         }
+
+        public void HandleSWI(UInt32 value)
+        {
+            throw new Exception(string.Format("GBA: swi 0x{0:x8} unimplemented", value));
+        }
     }
 }
