@@ -2429,7 +2429,7 @@ namespace Iris
             {
                 // nothing to do
             }
-            else if ((cpu._reg[rs] & 0xff) < 0)
+            else if ((cpu._reg[rs] & 0xff) < 32)
             {
                 cpu.SetFlag(Flags.C, (cpu._reg[rd] >> ((int)(cpu._reg[rs] & 0xff) - 1)) & 1);
                 cpu._reg[rd] = LogicalShiftRight(cpu._reg[rd], cpu._reg[rs] & 0xff);
