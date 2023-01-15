@@ -43,7 +43,10 @@ namespace Iris
 
         public void Init()
         {
-            _cpu.Init(0x0300_7f00, 0x0800_0000, 0b1101_1111);
+            _cpu._reg[13] = 0x0300_7f00;
+            _cpu._cpsr = 0b1101_1111;
+            _cpu._nextInstructionAddress = 0x0800_0000;
+
             _KEYINPUT = 0x03ff;
         }
 
@@ -572,7 +575,20 @@ namespace Iris
 
         public void HandleSWI(UInt32 value)
         {
-            throw new Exception(string.Format("GBA: swi 0x{0:x8} unimplemented", value));
+            Byte function = (Byte)((value >> 16) & 0xff);
+            switch (function)
+            {
+                // Div
+                case 0x06:
+                    _cpu._reg[0] = (UInt32)((Int32)_cpu._reg[0] / (Int32)_cpu._reg[1]);
+                    _cpu._reg[1] = (UInt32)((Int32)_cpu._reg[0] % (Int32)_cpu._reg[1]);
+                    _cpu._reg[3] = (UInt32)Math.Abs((Int32)_cpu._reg[0]);
+                    break;
+
+                default:
+                    Console.WriteLine("GBA: Unknown BIOS function 0x{0:x2}", function);
+                    break;
+            }
         }
     }
 }

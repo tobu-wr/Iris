@@ -369,8 +369,8 @@ namespace Iris
         private const UInt32 PC = 15;
 
         // exposed registers
-        private readonly UInt32[] _reg = new UInt32[16];
-        private UInt32 _cpsr;
+        internal readonly UInt32[] _reg = new UInt32[16];
+        internal UInt32 _cpsr;
         private UInt32 _spsr;
 
         // banked registers
@@ -383,18 +383,11 @@ namespace Iris
         private UInt32 _spsr_svc, _spsr_abt, _spsr_und, _spsr_irq, _spsr_fiq;
 
         private readonly ICallbacks _callbacks;
-        private UInt32 _nextInstructionAddress;
+        internal UInt32 _nextInstructionAddress;
 
         internal CPU(ICallbacks callbacks)
         {
             _callbacks = callbacks;
-        }
-
-        internal void Init(UInt32 sp, UInt32 pc, UInt32 cpsr)
-        {
-            _reg[SP] = sp;
-            _nextInstructionAddress = pc;
-            _cpsr = cpsr;
         }
 
         internal void Step()
