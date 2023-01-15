@@ -140,6 +140,12 @@ namespace Iris
             new(0x0fe0_0090, 0x0180_0080, ARM_ORR), // I bit is 0, bit[7] is 1 and bit[4] is 0
             new(0x0fe0_0090, 0x0180_0010, ARM_ORR), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
+            // RSB
+            new(0x0fe0_0000, 0x0260_0000, ARM_RSB), // I bit is 1
+            new(0x0fe0_0090, 0x0060_0000, ARM_RSB), // I bit is 0, bit[7] is 0 and bit[4] is 0
+            new(0x0fe0_0090, 0x0060_0080, ARM_RSB), // I bit is 0, bit[7] is 1 and bit[4] is 0
+            new(0x0fe0_0090, 0x0060_0010, ARM_RSB), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
             // RSC
             new(0x0fe0_0000, 0x02e0_0000, ARM_RSC), // I bit is 1
             new(0x0fe0_0090, 0x00e0_0000, ARM_RSC), // I bit is 0, bit[7] is 0 and bit[4] is 0
@@ -182,8 +188,17 @@ namespace Iris
             // SWPB
             new(0x0ff0_0ff0, 0x0140_0090, ARM_SWPB),
 
+            // TEQ
+            new(0x0ff0_f000, 0x0330_0000, ARM_TEQ), // I bit is 1
+            new(0x0ff0_f090, 0x0130_0000, ARM_TEQ), // I bit is 0, bit[7] is 0 and bit[4] is 0
+            new(0x0ff0_f090, 0x0130_0080, ARM_TEQ), // I bit is 0, bit[7] is 1 and bit[4] is 0
+            new(0x0ff0_f090, 0x0130_0010, ARM_TEQ), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
             // TST
-            new(0x0df0_f000, 0x0110_0000, ARM_TST),
+            new(0x0ff0_f000, 0x0310_0000, ARM_TST), // I bit is 1
+            new(0x0ff0_f090, 0x0110_0000, ARM_TST), // I bit is 0, bit[7] is 0 and bit[4] is 0
+            new(0x0ff0_f090, 0x0110_0080, ARM_TST), // I bit is 0, bit[7] is 1 and bit[4] is 0
+            new(0x0ff0_f090, 0x0110_0010, ARM_TST), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
             // UMLAL
             new(0x0fe0_00f0, 0x00a0_0090, ARM_UMLAL),
@@ -1688,6 +1703,34 @@ namespace Iris
             }
         }
 
+        private static void ARM_RSB(CPU cpu, UInt32 instruction)
+        {
+            var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
+
+            UInt32 rn = (instruction >> 16) & 0b1111;
+            UInt32 rd = (instruction >> 12) & 0b1111;
+
+            UInt32 regRn = cpu._reg[rn];
+            cpu.SetReg(rd, shifterOperand - regRn);
+
+            UInt32 s = (instruction >> 20) & 1;
+            if (s == 1)
+            {
+                if (rd == PC)
+                {
+                    Console.WriteLine("RSC: S field partially implemented");
+                    Environment.Exit(1);
+                }
+                else
+                {
+                    cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flags.C, ~BorrowFrom(shifterOperand, regRn) & 1);
+                    cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(shifterOperand, regRn, cpu._reg[rd]));
+                }
+            }
+        }
+
         private static void ARM_RSC(CPU cpu, UInt32 instruction)
         {
             var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
@@ -1878,6 +1921,18 @@ namespace Iris
             Byte temp = cpu._callbacks.ReadMemory8(address);
             cpu._callbacks.WriteMemory8(address, (Byte)cpu._reg[rm]);
             cpu.SetReg(rd, temp);
+        }
+
+        private static void ARM_TEQ(CPU cpu, UInt32 instruction)
+        {
+            var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
+
+            UInt32 rn = (instruction >> 16) & 0b1111;
+            UInt32 aluOut = cpu._reg[rn] ^ shifterOperand;
+
+            cpu.SetFlag(Flags.N, aluOut >> 31);
+            cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
+            cpu.SetFlag(Flags.C, shifterCarryOut);
         }
 
         private static void ARM_TST(CPU cpu, UInt32 instruction)
