@@ -246,6 +246,7 @@ namespace Iris
 
             // ASR
             new(0xf800, 0x1000, THUMB_ASR1),
+            new(0xffc0, 0x4100, THUMB_ASR2),
 
             // B
             new(0xf000, 0xd000, THUMB_B1),
@@ -2116,6 +2117,34 @@ namespace Iris
             {
                 cpu.SetFlag(Flags.C, (cpu._reg[rm] >> (imm - 1)) & 1);
                 cpu._reg[rd] = ArithmeticShiftRight(cpu._reg[rm], imm);
+            }
+
+            cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
+            cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+        }
+
+        private static void THUMB_ASR2(CPU cpu, UInt16 instruction)
+        {
+            UInt16 rs = (UInt16)((instruction >> 3) & 0b111);
+            UInt16 rd = (UInt16)(instruction & 0b111);
+
+            if ((cpu._reg[rs] & 0xff) == 0)
+            {
+                // nothing to do
+            }
+            else if ((cpu._reg[rs] & 0xff) < 32)
+            {
+                cpu.SetFlag(Flags.C, (cpu._reg[rd] >> ((int)(cpu._reg[rs] & 0xff) - 1)) & 1);
+                cpu._reg[rd] = ArithmeticShiftRight(cpu._reg[rd], cpu._reg[rs] & 0xff);
+            }
+            else
+            {
+                cpu.SetFlag(Flags.C, cpu._reg[rd] >> 31);
+
+                if ((cpu._reg[rd] >> 31) == 0)
+                    cpu._reg[rd] = 0;
+                else
+                    cpu._reg[rd] = 0xffff_ffff;
             }
 
             cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
