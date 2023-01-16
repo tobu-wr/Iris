@@ -1888,7 +1888,7 @@ namespace Iris
                 if (rd == PC)
                 {
                     if (cpu.CurrentModeHasSPSR())
-                        cpu._cpsr = cpu._spsr;
+                        cpu.SetCPSR(cpu._spsr);
                 }
                 else
                 {
