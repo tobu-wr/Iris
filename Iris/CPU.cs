@@ -2665,22 +2665,28 @@ namespace Iris
         private static void THUMB_STMIA(CPU cpu, UInt16 instruction)
         {
             UInt16 rn = (UInt16)((instruction >> 8) & 0b111);
+            UInt32 regRn = cpu._reg[rn];
+
             UInt16 registerList = (UInt16)(instruction & 0xff);
             UInt32 startAddress = cpu._reg[rn];
             UInt32 address = startAddress;
 
             if (registerList != 0)
             {
+                cpu._reg[rn] += NumberOfSetBitsIn(registerList, 8) * 4;
+
                 for (var i = 0; i <= 7; ++i)
                 {
                     if (((registerList >> i) & 1) == 1)
                     {
-                        cpu._callbacks.WriteMemory32(address, cpu._reg[i]);
+                        if ((i == rn) && (registerList & ~(0xffff_ffff << i)) == 0)
+                            cpu._callbacks.WriteMemory32(address, regRn);
+                        else
+                            cpu._callbacks.WriteMemory32(address, cpu._reg[i]);
+
                         address += 4;
                     }
                 }
-
-                cpu._reg[rn] += NumberOfSetBitsIn(registerList, 8) * 4;
             }
             else
             {
