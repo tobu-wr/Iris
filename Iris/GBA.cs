@@ -166,6 +166,11 @@ namespace Iris
                     case 0x131:
                         return (Byte)(_KEYINPUT >> 8);
 
+                    case 0x132:
+                    case 0x133:
+                        Console.WriteLine("GBA: Read from KEYCNT register unimplemented");
+                        return 0;
+
                     case 0x200:
                     case 0x201:
                         Console.WriteLine("GBA: Read from IE register unimplemented");
