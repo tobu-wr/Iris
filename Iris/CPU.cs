@@ -25,21 +25,11 @@ namespace Iris
             void HandleSWI(UInt32 value);
         }
 
-        private readonly struct ARM_InstructionTableEntry
-        {
-            internal delegate void InstructionHandler(CPU cpu, UInt32 instruction);
+        private delegate void ARM_InstructionHandler(CPU cpu, UInt32 instruction);
+        private delegate void THUMB_InstructionHandler(CPU cpu, UInt16 instruction);
 
-            internal readonly UInt32 Mask;
-            internal readonly UInt32 Expected;
-            internal readonly InstructionHandler Handler;
-
-            internal ARM_InstructionTableEntry(UInt32 mask, UInt32 expected, InstructionHandler handler)
-            {
-                Mask = mask;
-                Expected = expected;
-                Handler = handler;
-            }
-        }
+        private readonly record struct ARM_InstructionTableEntry(UInt32 Mask, UInt32 Expected, ARM_InstructionHandler Handler);
+        private readonly record struct THUMB_InstructionTableEntry(UInt16 Mask, UInt16 Expected, THUMB_InstructionHandler Handler);
 
         private static readonly ARM_InstructionTableEntry[] ARM_InstructionTable = new ARM_InstructionTableEntry[]
         {
@@ -210,22 +200,6 @@ namespace Iris
             // UMULL
             new(0x0fe0_00f0, 0x0080_0090, ARM_UMULL),
         };
-
-        private readonly struct THUMB_InstructionTableEntry
-        {
-            internal delegate void InstructionHandler(CPU cpu, UInt16 instruction);
-
-            internal readonly UInt16 Mask;
-            internal readonly UInt16 Expected;
-            internal readonly InstructionHandler Handler;
-
-            internal THUMB_InstructionTableEntry(UInt16 mask, UInt16 expected, InstructionHandler handler)
-            {
-                Mask = mask;
-                Expected = expected;
-                Handler = handler;
-            }
-        }
 
         private static readonly THUMB_InstructionTableEntry[] THUMB_InstructionTable = new THUMB_InstructionTableEntry[]
         {
@@ -437,18 +411,33 @@ namespace Iris
             }
         }
 
-        private void SetPC(UInt32 value)
+        private void ARM_SetPC(UInt32 value)
         {
             _reg[PC] = value;
             _nextInstructionAddress = value;
         }
 
-        private void SetReg(UInt32 i, UInt32 value)
+        private void ARM_SetReg(UInt32 i, UInt32 value)
         {
-            _reg[i] = value;
-
             if (i == PC)
-                _nextInstructionAddress = value;
+                ARM_SetPC(value);
+            else
+                _reg[i] = value;
+        }
+
+        private void THUMB_SetPC(UInt32 value)
+        {
+            value &= 0xffff_fffe;
+            _reg[PC] = value;
+            _nextInstructionAddress = value;
+        }
+
+        private void THUMB_SetReg(UInt32 i, UInt32 value)
+        {
+            if (i == PC)
+                THUMB_SetPC(value);
+            else
+                _reg[i] = value;
         }
 
         private void SetCPSR(UInt32 value)
@@ -928,9 +917,9 @@ namespace Iris
                     address = _reg[rn];
 
                     if (u == 1)
-                        SetReg(rn, _reg[rn] + offset);
+                        ARM_SetReg(rn, _reg[rn] + offset);
                     else
-                        SetReg(rn, _reg[rn] - offset);
+                        ARM_SetReg(rn, _reg[rn] - offset);
                 }
                 else if (w == 0) // Offset
                 {
@@ -946,7 +935,7 @@ namespace Iris
                     else
                         address = _reg[rn] - offset;
 
-                    SetReg(rn, address);
+                    ARM_SetReg(rn, address);
                 }
             }
             else if (((instruction >> 4) & 1) == 0)
@@ -961,9 +950,9 @@ namespace Iris
                         address = _reg[rn];
 
                         if (u == 1)
-                            SetReg(rn, _reg[rn] + _reg[rm]);
+                            ARM_SetReg(rn, _reg[rn] + _reg[rm]);
                         else
-                            SetReg(rn, _reg[rn] - _reg[rm]);
+                            ARM_SetReg(rn, _reg[rn] - _reg[rm]);
                     }
                     else if (w == 0) // Offset
                     {
@@ -979,7 +968,7 @@ namespace Iris
                         else
                             address = _reg[rn] - _reg[rm];
 
-                        SetReg(rn, address);
+                        ARM_SetReg(rn, address);
                     }
                 }
                 else // Scaled register
@@ -1022,9 +1011,9 @@ namespace Iris
                         }
 
                         if (u == 1)
-                            SetReg(rn, _reg[rn] + index);
+                            ARM_SetReg(rn, _reg[rn] + index);
                         else
-                            SetReg(rn, _reg[rn] - index);
+                            ARM_SetReg(rn, _reg[rn] - index);
                     }
                     else if (w == 0) // Offset
                     {
@@ -1106,7 +1095,7 @@ namespace Iris
                         else
                             address = _reg[rn] - index;
 
-                        SetReg(rn, address);
+                        ARM_SetReg(rn, address);
                     }
                 }
             }
@@ -1137,9 +1126,9 @@ namespace Iris
                     address = _reg[rn];
 
                     if (u == 1)
-                        SetReg(rn, _reg[rn] + offset);
+                        ARM_SetReg(rn, _reg[rn] + offset);
                     else
-                        SetReg(rn, _reg[rn] - offset);
+                        ARM_SetReg(rn, _reg[rn] - offset);
                 }
                 else if (w == 0) // Offset
                 {
@@ -1155,7 +1144,7 @@ namespace Iris
                     else
                         address = _reg[rn] - offset;
 
-                    SetReg(rn, address);
+                    ARM_SetReg(rn, address);
                 }
             }
             else if (((instruction >> 8) & 0b1111) == 0) // Register
@@ -1232,7 +1221,7 @@ namespace Iris
 
             UInt32 w = (instruction >> 21) & 1;
             if (w == 1)
-                SetReg(rn, value);
+                ARM_SetReg(rn, value);
 
             return (startAddress, endAddress);
         }
@@ -1247,7 +1236,7 @@ namespace Iris
             UInt32 regRn = cpu._reg[rn];
             UInt64 rightOperand = (UInt64)shifterOperand + (UInt64)cpu.GetFlag(Flags.C);
             UInt64 result = (UInt64)regRn + rightOperand;
-            cpu.SetReg(rd, (UInt32)result);
+            cpu.ARM_SetReg(rd, (UInt32)result);
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
@@ -1276,7 +1265,7 @@ namespace Iris
 
             UInt32 regRn = cpu._reg[rn];
             UInt64 result = (UInt64)regRn + (UInt64)shifterOperand;
-            cpu.SetReg(rd, (UInt32)result);
+            cpu.ARM_SetReg(rd, (UInt32)result);
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
@@ -1302,7 +1291,7 @@ namespace Iris
 
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
-            cpu.SetReg(rd, cpu._reg[rn] & shifterOperand);
+            cpu.ARM_SetReg(rd, cpu._reg[rn] & shifterOperand);
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
@@ -1324,7 +1313,7 @@ namespace Iris
         private static void ARM_B(CPU cpu, UInt32 instruction)
         {
             UInt32 imm = instruction & 0xff_ffff;
-            cpu.SetPC(cpu._reg[PC] + (SignExtend30(imm) << 2));
+            cpu.ARM_SetPC(cpu._reg[PC] + (SignExtend30(imm) << 2));
         }
 
         private static void ARM_BL(CPU cpu, UInt32 instruction)
@@ -1332,7 +1321,7 @@ namespace Iris
             cpu._reg[LR] = cpu._nextInstructionAddress;
 
             UInt32 imm = instruction & 0xff_ffff;
-            cpu.SetPC(cpu._reg[PC] + (SignExtend30(imm) << 2));
+            cpu.ARM_SetPC(cpu._reg[PC] + (SignExtend30(imm) << 2));
         }
 
         private static void ARM_BIC(CPU cpu, UInt32 instruction)
@@ -1341,7 +1330,7 @@ namespace Iris
 
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
-            cpu.SetReg(rd, cpu._reg[rn] & ~shifterOperand);
+            cpu.ARM_SetReg(rd, cpu._reg[rn] & ~shifterOperand);
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
@@ -1364,7 +1353,7 @@ namespace Iris
         {
             UInt32 rm = instruction & 0b1111;
             cpu.SetCPSR((cpu._cpsr & ~(1u << 5)) | ((cpu._reg[rm] & 1) << 5));
-            cpu.SetPC(cpu._reg[rm] & 0xffff_fffe);
+            cpu.ARM_SetPC(cpu._reg[rm] & 0xffff_fffe);
         }
 
         private static void ARM_CMN(CPU cpu, UInt32 instruction)
@@ -1401,7 +1390,7 @@ namespace Iris
 
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
-            cpu.SetReg(rd, cpu._reg[rn] ^ shifterOperand);
+            cpu.ARM_SetReg(rd, cpu._reg[rn] ^ shifterOperand);
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
@@ -1439,7 +1428,7 @@ namespace Iris
             if (((registerList >> 15) & 1) == 1)
             {
                 UInt32 value = cpu._callbacks.ReadMemory32(address);
-                cpu.SetPC(value & 0xffff_fffc);
+                cpu.ARM_SetPC(value & 0xffff_fffc);
             }
         }
 
@@ -1495,7 +1484,7 @@ namespace Iris
             UInt32 data = RotateRight(cpu._callbacks.ReadMemory32(address), 8 * (address & 0b11));
             UInt32 rd = (instruction >> 12) & 0b1111;
             if (rd == PC)
-                cpu.SetPC(data & 0xffff_fffc);
+                cpu.ARM_SetPC(data & 0xffff_fffc);
             else
                 cpu._reg[rd] = data;
         }
@@ -1505,7 +1494,7 @@ namespace Iris
             UInt32 address = cpu.GetAddress(instruction);
 
             UInt32 rd = (instruction >> 12) & 0b1111;
-            cpu.SetReg(rd, cpu._callbacks.ReadMemory8(address));
+            cpu.ARM_SetReg(rd, cpu._callbacks.ReadMemory8(address));
         }
 
         private static void ARM_LDRH(CPU cpu, UInt32 instruction)
@@ -1514,7 +1503,7 @@ namespace Iris
 
             UInt16 data = cpu._callbacks.ReadMemory16(address);
             UInt32 rd = (instruction >> 12) & 0b1111;
-            cpu.SetReg(rd, ZeroExtend(data));
+            cpu.ARM_SetReg(rd, ZeroExtend(data));
         }
 
         private static void ARM_LDRSB(CPU cpu, UInt32 instruction)
@@ -1523,7 +1512,7 @@ namespace Iris
 
             Byte data = cpu._callbacks.ReadMemory8(address);
             UInt32 rd = (instruction >> 12) & 0b1111;
-            cpu.SetReg(rd, SignExtend(data, 8));
+            cpu.ARM_SetReg(rd, SignExtend(data, 8));
         }
 
         private static void ARM_MLA(CPU cpu, UInt32 instruction)
@@ -1532,7 +1521,7 @@ namespace Iris
             UInt32 rn = (instruction >> 12) & 0b1111;
             UInt32 rs = (instruction >> 8) & 0b1111;
             UInt32 rm = instruction & 0b1111;
-            cpu.SetReg(rd, (cpu._reg[rm] * cpu._reg[rs]) + cpu._reg[rn]);
+            cpu.ARM_SetReg(rd, (cpu._reg[rm] * cpu._reg[rs]) + cpu._reg[rn]);
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
@@ -1555,7 +1544,7 @@ namespace Iris
             var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
 
             UInt32 rd = (instruction >> 12) & 0b1111;
-            cpu.SetReg(rd, shifterOperand);
+            cpu.ARM_SetReg(rd, shifterOperand);
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
@@ -1580,9 +1569,9 @@ namespace Iris
             UInt32 rd = (instruction >> 12) & 0b1111;
 
             if (r == 1)
-                cpu.SetReg(rd, cpu._spsr);
+                cpu.ARM_SetReg(rd, cpu._spsr);
             else
-                cpu.SetReg(rd, cpu._cpsr);
+                cpu.ARM_SetReg(rd, cpu._cpsr);
         }
 
         private static void ARM_MSR(CPU cpu, UInt32 instruction)
@@ -1635,7 +1624,7 @@ namespace Iris
             UInt32 rd = (instruction >> 16) & 0b1111;
             UInt32 rs = (instruction >> 8) & 0b1111;
             UInt32 rm = instruction & 0b1111;
-            cpu.SetReg(rd, cpu._reg[rm] * cpu._reg[rs]);
+            cpu.ARM_SetReg(rd, cpu._reg[rm] * cpu._reg[rs]);
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
@@ -1658,7 +1647,7 @@ namespace Iris
             var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
 
             UInt32 rd = (instruction >> 12) & 0b1111;
-            cpu.SetReg(rd, ~shifterOperand);
+            cpu.ARM_SetReg(rd, ~shifterOperand);
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
@@ -1683,7 +1672,7 @@ namespace Iris
 
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
-            cpu.SetReg(rd, cpu._reg[rn] | shifterOperand);
+            cpu.ARM_SetReg(rd, cpu._reg[rn] | shifterOperand);
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
@@ -1710,7 +1699,7 @@ namespace Iris
             UInt32 rd = (instruction >> 12) & 0b1111;
 
             UInt32 regRn = cpu._reg[rn];
-            cpu.SetReg(rd, shifterOperand - regRn);
+            cpu.ARM_SetReg(rd, shifterOperand - regRn);
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
@@ -1738,7 +1727,7 @@ namespace Iris
             UInt32 rd = (instruction >> 12) & 0b1111;
 
             UInt32 rightOperand = cpu._reg[rn] + (~cpu.GetFlag(Flags.C) & 1);
-            cpu.SetReg(rd, shifterOperand - rightOperand);
+            cpu.ARM_SetReg(rd, shifterOperand - rightOperand);
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
@@ -1767,7 +1756,7 @@ namespace Iris
 
             UInt32 regRn = cpu._reg[rn];
             UInt32 rightOperand = shifterOperand + (~cpu.GetFlag(Flags.C) & 1);
-            cpu.SetReg(rd, regRn - rightOperand);
+            cpu.ARM_SetReg(rd, regRn - rightOperand);
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
@@ -1796,8 +1785,8 @@ namespace Iris
 
             Int64 result = (Int64)(Int32)cpu._reg[rm] * (Int64)(Int32)cpu._reg[rs];
             UInt64 resultLo = (UInt64)(UInt32)result + (UInt64)cpu._reg[rdLo];
-            cpu.SetReg(rdLo, (UInt32)resultLo);
-            cpu.SetReg(rdHi, cpu._reg[rdHi] + (UInt32)(result >> 32) + CarryFrom(resultLo));
+            cpu.ARM_SetReg(rdLo, (UInt32)resultLo);
+            cpu.ARM_SetReg(rdHi, cpu._reg[rdHi] + (UInt32)(result >> 32) + CarryFrom(resultLo));
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
@@ -1815,8 +1804,8 @@ namespace Iris
             UInt32 rm = instruction & 0b1111;
 
             Int64 result = (Int64)(Int32)cpu._reg[rm] * (Int64)(Int32)cpu._reg[rs];
-            cpu.SetReg(rdHi, (UInt32)(result >> 32));
-            cpu.SetReg(rdLo, (UInt32)result);
+            cpu.ARM_SetReg(rdHi, (UInt32)(result >> 32));
+            cpu.ARM_SetReg(rdLo, (UInt32)result);
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
@@ -1878,7 +1867,7 @@ namespace Iris
             UInt32 rd = (instruction >> 12) & 0b1111;
 
             UInt32 regRn = cpu._reg[rn];
-            cpu.SetReg(rd, regRn - shifterOperand);
+            cpu.ARM_SetReg(rd, regRn - shifterOperand);
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
@@ -1913,7 +1902,7 @@ namespace Iris
             UInt32 address = cpu._reg[rn];
             UInt32 temp = RotateRight(cpu._callbacks.ReadMemory32(address), 8 * (address & 0b11));
             cpu._callbacks.WriteMemory32(address, cpu._reg[rm]);
-            cpu.SetReg(rd, temp);
+            cpu.ARM_SetReg(rd, temp);
         }
 
         private static void ARM_SWPB(CPU cpu, UInt32 instruction)
@@ -1925,7 +1914,7 @@ namespace Iris
             UInt32 address = cpu._reg[rn];
             Byte temp = cpu._callbacks.ReadMemory8(address);
             cpu._callbacks.WriteMemory8(address, (Byte)cpu._reg[rm]);
-            cpu.SetReg(rd, temp);
+            cpu.ARM_SetReg(rd, temp);
         }
 
         private static void ARM_TEQ(CPU cpu, UInt32 instruction)
@@ -1961,8 +1950,8 @@ namespace Iris
 
             UInt64 result = (UInt64)cpu._reg[rm] * (UInt64)cpu._reg[rs];
             UInt64 resultLo = (UInt64)(UInt32)result + (UInt64)cpu._reg[rdLo];
-            cpu.SetReg(rdLo, (UInt32)resultLo);
-            cpu.SetReg(rdHi, cpu._reg[rdHi] + (UInt32)(result >> 32) + CarryFrom(resultLo));
+            cpu.ARM_SetReg(rdLo, (UInt32)resultLo);
+            cpu.ARM_SetReg(rdHi, cpu._reg[rdHi] + (UInt32)(result >> 32) + CarryFrom(resultLo));
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
@@ -1980,8 +1969,8 @@ namespace Iris
             UInt32 rm = instruction & 0b1111;
 
             UInt64 result = (UInt64)cpu._reg[rm] * (UInt64)cpu._reg[rs];
-            cpu.SetReg(rdHi, (UInt32)(result >> 32));
-            cpu.SetReg(rdLo, (UInt32)result);
+            cpu.ARM_SetReg(rdHi, (UInt32)(result >> 32));
+            cpu.ARM_SetReg(rdLo, (UInt32)result);
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
@@ -2065,7 +2054,7 @@ namespace Iris
             UInt16 h2 = (UInt16)((instruction >> 6) & 1);
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
-            cpu.SetReg((UInt32)((h1 << 3) | rd), cpu._reg[(h1 << 3) | rd] + cpu._reg[(h2 << 3) | rm]);
+            cpu.THUMB_SetReg((UInt32)((h1 << 3) | rd), cpu._reg[(h1 << 3) | rd] + cpu._reg[(h2 << 3) | rm]);
         }
 
         private static void THUMB_ADD5(CPU cpu, UInt16 instruction)
@@ -2157,14 +2146,14 @@ namespace Iris
             if (cpu.ConditionPassed(cond))
             {
                 UInt16 imm = (UInt16)(instruction & 0xff);
-                cpu.SetPC(cpu._reg[PC] + (SignExtend(imm, 8) << 1));
+                cpu.THUMB_SetPC(cpu._reg[PC] + (SignExtend(imm, 8) << 1));
             }
         }
 
         private static void THUMB_B2(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)(instruction & 0x7ff);
-            cpu.SetPC(cpu._reg[PC] + (SignExtend(imm, 11) << 1));
+            cpu.THUMB_SetPC(cpu._reg[PC] + (SignExtend(imm, 11) << 1));
         }
 
         private static void THUMB_BIC(CPU cpu, UInt16 instruction)
@@ -2189,7 +2178,7 @@ namespace Iris
             else if (h == 0b11)
             {
                 UInt32 nextInstructionAddress = cpu._nextInstructionAddress;
-                cpu.SetPC(cpu._reg[LR] + (UInt32)(offset << 1));
+                cpu.THUMB_SetPC(cpu._reg[LR] + (UInt32)(offset << 1));
                 cpu._reg[LR] = nextInstructionAddress | 1;
             }
         }
@@ -2201,7 +2190,7 @@ namespace Iris
 
             UInt32 regRm = cpu._reg[(h2 << 3) | rm];
             cpu.SetCPSR((cpu._cpsr & ~(1u << 5)) | ((regRm & 1) << 5));
-            cpu.SetPC(regRm & 0xffff_fffe);
+            cpu.THUMB_SetPC(regRm & 0xffff_fffe);
         }
 
         private static void THUMB_CMP1(CPU cpu, UInt16 instruction)
@@ -2494,7 +2483,7 @@ namespace Iris
             UInt16 h2 = (UInt16)((instruction >> 6) & 1);
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
-            cpu.SetReg((UInt32)((h1 << 3) | rd), cpu._reg[(h2 << 3) | rm]);
+            cpu.THUMB_SetReg((UInt32)((h1 << 3) | rd), cpu._reg[(h2 << 3) | rm]);
         }
 
         private static void THUMB_MUL(CPU cpu, UInt16 instruction)
@@ -2561,7 +2550,7 @@ namespace Iris
             if (r == 1)
             {
                 UInt32 value = cpu._callbacks.ReadMemory32(address);
-                cpu.SetPC(value & 0xffff_fffe);
+                cpu.THUMB_SetPC(value & 0xffff_fffe);
             }
 
             cpu._reg[SP] = endAddress;
