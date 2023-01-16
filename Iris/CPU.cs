@@ -652,11 +652,6 @@ namespace Iris
             return (UInt32)((Int32)value >> (int)shiftAmount);
         }
 
-        private static UInt32 ZeroExtend(UInt16 value)
-        {
-            return value;
-        }
-
         private static UInt32 SignExtend(UInt32 value, int size)
         {
             return ((value >> (size - 1)) == 1) ? value | (0xffff_ffff << size) : value;
@@ -1497,7 +1492,7 @@ namespace Iris
 
             UInt16 data = cpu._callbacks.ReadMemory16(address);
             UInt32 rd = (instruction >> 12) & 0b1111;
-            cpu.ARM_SetReg(rd, ZeroExtend(data));
+            cpu.ARM_SetReg(rd, data);
         }
 
         private static void ARM_LDRSB(CPU cpu, UInt32 instruction)
@@ -2355,7 +2350,7 @@ namespace Iris
 
             UInt16 data = cpu._callbacks.ReadMemory16(address);
             UInt16 rd = (UInt16)(instruction & 0b111);
-            cpu._reg[rd] = ZeroExtend(data);
+            cpu._reg[rd] = data;
         }
 
         private static void THUMB_LDRH2(CPU cpu, UInt16 instruction)
@@ -2364,9 +2359,9 @@ namespace Iris
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
             UInt32 address = cpu._reg[rn] + cpu._reg[rm];
 
-            UInt16 data = cpu._callbacks.ReadMemory16(address);
+            UInt32 data = RotateRight(cpu._callbacks.ReadMemory16(address), 8 * (address & 1));
             UInt16 rd = (UInt16)(instruction & 0b111);
-            cpu._reg[rd] = ZeroExtend(data);
+            cpu._reg[rd] = data;
         }
 
         private static void THUMB_LDRSB(CPU cpu, UInt16 instruction)
