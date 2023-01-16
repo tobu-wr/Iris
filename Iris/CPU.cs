@@ -1739,8 +1739,8 @@ namespace Iris
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
 
-            UInt32 rightOperand = cpu._reg[rn] + (~cpu.GetFlag(Flags.C) & 1);
-            cpu.ARM_SetReg(rd, shifterOperand - rightOperand);
+            UInt64 rightOperand = (UInt64)cpu._reg[rn] + (UInt64)(~cpu.GetFlag(Flags.C) & 1);
+            cpu.ARM_SetReg(rd, shifterOperand - (UInt32)rightOperand);
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
@@ -1755,7 +1755,7 @@ namespace Iris
                     cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
                     cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
                     cpu.SetFlag(Flags.C, ~BorrowFrom(shifterOperand, rightOperand) & 1);
-                    cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(shifterOperand, rightOperand, cpu._reg[rd]));
+                    cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(shifterOperand, (UInt32)rightOperand, cpu._reg[rd]));
                 }
             }
         }
