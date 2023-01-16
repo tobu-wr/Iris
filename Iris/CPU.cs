@@ -100,6 +100,9 @@ namespace Iris
             // LDRSB
             new(0x0e10_00f0, 0x0010_00d0, ARM_LDRSB),
 
+            // LDRSH
+            new(0x0e10_00f0, 0x0010_00f0, ARM_LDRSH),
+
             // MLA
             new(0x0fe0_00f0, 0x0020_0090, ARM_MLA),
 
@@ -1514,6 +1517,15 @@ namespace Iris
             Byte data = cpu._callbacks.ReadMemory8(address);
             UInt32 rd = (instruction >> 12) & 0b1111;
             cpu.ARM_SetReg(rd, SignExtend(data, 8));
+        }
+
+        private static void ARM_LDRSH(CPU cpu, UInt32 instruction)
+        {
+            UInt32 address = cpu.GetAddress_Misc(instruction);
+
+            UInt16 data = cpu._callbacks.ReadMemory16(address);
+            UInt32 rd = (instruction >> 12) & 0b1111;
+            cpu.ARM_SetReg(rd, SignExtend(data, 16));
         }
 
         private static void ARM_MLA(CPU cpu, UInt32 instruction)
