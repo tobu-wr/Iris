@@ -420,35 +420,6 @@ namespace Iris
             }
         }
 
-        private void ARM_SetPC(UInt32 value)
-        {
-            _reg[PC] = value;
-            _nextInstructionAddress = value;
-        }
-
-        private void ARM_SetReg(UInt32 i, UInt32 value)
-        {
-            if (i == PC)
-                ARM_SetPC(value);
-            else
-                _reg[i] = value;
-        }
-
-        private void THUMB_SetPC(UInt32 value)
-        {
-            value &= 0xffff_fffe;
-            _reg[PC] = value;
-            _nextInstructionAddress = value;
-        }
-
-        private void THUMB_SetReg(UInt32 i, UInt32 value)
-        {
-            if (i == PC)
-                THUMB_SetPC(value);
-            else
-                _reg[i] = value;
-        }
-
         private void SetCPSR(UInt32 value)
         {
             UInt32 previousMode = _cpsr & ModeMask;
@@ -713,7 +684,7 @@ namespace Iris
             return _cpsr & ModeMask;
         }
 
-        private bool InAPrivilegedMode()
+        private bool InPrivilegedMode()
         {
             return GetMode() != UserMode;
         }
@@ -725,6 +696,20 @@ namespace Iris
                 UserMode or SystemMode => false,
                 _ => true,
             };
+        }
+
+        private void ARM_SetPC(UInt32 value)
+        {
+            _reg[PC] = value;
+            _nextInstructionAddress = value;
+        }
+
+        private void ARM_SetReg(UInt32 i, UInt32 value)
+        {
+            if (i == PC)
+                ARM_SetPC(value);
+            else
+                _reg[i] = value;
         }
 
         // Addressing mode 1
@@ -1614,7 +1599,7 @@ namespace Iris
             if (r == 0)
             {
                 UInt32 mask;
-                if (cpu.InAPrivilegedMode())
+                if (cpu.InPrivilegedMode())
                     mask = byteMask & (UserMask | PrivMask);
                 else
                     mask = byteMask & UserMask;
@@ -1992,6 +1977,21 @@ namespace Iris
         // ********************************************************************
         //                              THUMB
         // ********************************************************************
+
+        private void THUMB_SetPC(UInt32 value)
+        {
+            value &= 0xffff_fffe;
+            _reg[PC] = value;
+            _nextInstructionAddress = value;
+        }
+
+        private void THUMB_SetReg(UInt32 i, UInt32 value)
+        {
+            if (i == PC)
+                THUMB_SetPC(value);
+            else
+                _reg[i] = value;
+        }
 
         private static void THUMB_ADC(CPU cpu, UInt16 instruction)
         {
