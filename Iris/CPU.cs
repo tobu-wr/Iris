@@ -2327,7 +2327,7 @@ namespace Iris
             UInt16 imm = (UInt16)(instruction & 0xff);
             UInt32 address = cpu._reg[SP] + (imm * 4u);
 
-            UInt32 data = cpu._callbacks.ReadMemory32(address);
+            UInt32 data = RotateRight(cpu._callbacks.ReadMemory32(address), 8 * (address & 0b11));
             UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
             cpu._reg[rd] = data;
         }
@@ -2360,7 +2360,7 @@ namespace Iris
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
             UInt32 address = cpu._reg[rn] + (imm * 2u);
 
-            UInt16 data = cpu._callbacks.ReadMemory16(address);
+            UInt32 data = RotateRight(cpu._callbacks.ReadMemory16(address), 8 * (address & 1));
             UInt16 rd = (UInt16)(instruction & 0b111);
             cpu._reg[rd] = data;
         }
@@ -2393,9 +2393,17 @@ namespace Iris
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
             UInt32 address = cpu._reg[rn] + cpu._reg[rm];
 
-            UInt16 data = cpu._callbacks.ReadMemory16(address);
             UInt16 rd = (UInt16)(instruction & 0b111);
-            cpu._reg[rd] = SignExtend(data, 16);
+            if ((address & 1) == 1)
+            {
+                Byte data = cpu._callbacks.ReadMemory8(address);
+                cpu._reg[rd] = SignExtend(data, 8);
+            }
+            else
+            {
+                UInt16 data = cpu._callbacks.ReadMemory16(address);
+                cpu._reg[rd] = SignExtend(data, 16);
+            }
         }
 
         private static void THUMB_LSL1(CPU cpu, UInt16 instruction)
