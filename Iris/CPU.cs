@@ -1264,10 +1264,12 @@ namespace Iris
         {
             var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
 
+            UInt32 i = (instruction >> 25) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
+            UInt32 r = (instruction >> 4) & 1;
 
-            UInt32 regRn = cpu._reg[rn];
+            UInt32 regRn = ((rn == PC) && (i == 0) && (r == 1)) ? cpu._reg[PC] + 4 : cpu._reg[rn];
             UInt64 result = (UInt64)regRn + (UInt64)shifterOperand;
             cpu.ARM_SetReg(rd, (UInt32)result);
 
