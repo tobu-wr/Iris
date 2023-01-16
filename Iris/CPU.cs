@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Iris
 {
-    internal class CPU
+    internal sealed class CPU
     {
         internal interface ICallbacks
         {
@@ -353,8 +353,8 @@ namespace Iris
         private const UInt32 PC = 15;
 
         // exposed registers
-        internal readonly UInt32[] _reg = new UInt32[16];
-        internal UInt32 _cpsr;
+        private readonly UInt32[] _reg = new UInt32[16];
+        private UInt32 _cpsr;
         private UInt32 _spsr;
 
         // banked registers
@@ -367,7 +367,19 @@ namespace Iris
         private UInt32 _spsr_svc, _spsr_abt, _spsr_und, _spsr_irq, _spsr_fiq;
 
         private readonly ICallbacks _callbacks;
-        internal UInt32 _nextInstructionAddress;
+        private UInt32 _nextInstructionAddress;
+
+        internal UInt32[] Reg => _reg;
+
+        internal UInt32 CPSR
+        {
+            set => _cpsr = value;
+        }
+
+        internal UInt32 NextInstructionAddress
+        {
+            set => _nextInstructionAddress = value;
+        }
 
         internal CPU(ICallbacks callbacks)
         {

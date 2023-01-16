@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Iris
 {
-    public class GBA : CPU.ICallbacks
+    internal sealed class GBA : CPU.ICallbacks
     {
         public enum Keys
         {
@@ -43,9 +43,9 @@ namespace Iris
 
         public void Init()
         {
-            _cpu._reg[13] = 0x0300_7f00;
-            _cpu._cpsr = 0b1101_1111;
-            _cpu._nextInstructionAddress = 0x0800_0000;
+            _cpu.Reg[13] = 0x0300_7f00;
+            _cpu.CPSR = 0b1101_1111;
+            _cpu.NextInstructionAddress = 0x0800_0000;
 
             _KEYINPUT = 0x03ff;
         }
@@ -581,11 +581,11 @@ namespace Iris
                 // Div
                 case 0x06:
                     {
-                        Int32 number = (Int32)_cpu._reg[0];
-                        Int32 denom = (Int32)_cpu._reg[1];
-                        _cpu._reg[0] = (UInt32)(number / denom);
-                        _cpu._reg[1] = (UInt32)(number % denom);
-                        _cpu._reg[3] = (UInt32)Math.Abs((Int32)_cpu._reg[0]);
+                        Int32 number = (Int32)_cpu.Reg[0];
+                        Int32 denom = (Int32)_cpu.Reg[1];
+                        _cpu.Reg[0] = (UInt32)(number / denom);
+                        _cpu.Reg[1] = (UInt32)(number % denom);
+                        _cpu.Reg[3] = (UInt32)Math.Abs((Int32)_cpu.Reg[0]);
                         break;
                     }
 
