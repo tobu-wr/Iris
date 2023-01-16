@@ -627,6 +627,11 @@ namespace Iris
             };
         }
 
+        private static UInt32 Not(UInt32 value)
+        {
+            return ~value & 1;
+        }
+
         private static UInt32 CarryFrom(UInt64 result)
         {
             return (result > 0xffff_ffff) ? 1u : 0u;
@@ -1386,7 +1391,7 @@ namespace Iris
 
             cpu.SetFlag(Flags.N, aluOut >> 31);
             cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
-            cpu.SetFlag(Flags.C, ~BorrowFrom(cpu._reg[rn], shifterOperand) & 1);
+            cpu.SetFlag(Flags.C, Not(BorrowFrom(cpu._reg[rn], shifterOperand)));
             cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(cpu._reg[rn], shifterOperand, aluOut));
         }
 
@@ -1728,7 +1733,7 @@ namespace Iris
                 {
                     cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
                     cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
-                    cpu.SetFlag(Flags.C, ~BorrowFrom(shifterOperand, regRn) & 1);
+                    cpu.SetFlag(Flags.C, Not(BorrowFrom(shifterOperand, regRn)));
                     cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(shifterOperand, regRn, cpu._reg[rd]));
                 }
             }
@@ -1741,7 +1746,7 @@ namespace Iris
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
 
-            UInt64 rightOperand = (UInt64)cpu._reg[rn] + (UInt64)(~cpu.GetFlag(Flags.C) & 1);
+            UInt64 rightOperand = (UInt64)cpu._reg[rn] + (UInt64)Not(cpu.GetFlag(Flags.C));
             cpu.ARM_SetReg(rd, shifterOperand - (UInt32)rightOperand);
 
             UInt32 s = (instruction >> 20) & 1;
@@ -1756,7 +1761,7 @@ namespace Iris
                 {
                     cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
                     cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
-                    cpu.SetFlag(Flags.C, ~BorrowFrom(shifterOperand, rightOperand) & 1);
+                    cpu.SetFlag(Flags.C, Not(BorrowFrom(shifterOperand, rightOperand)));
                     cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(shifterOperand, (UInt32)rightOperand, cpu._reg[rd]));
                 }
             }
@@ -1770,7 +1775,7 @@ namespace Iris
             UInt32 rd = (instruction >> 12) & 0b1111;
 
             UInt32 regRn = cpu._reg[rn];
-            UInt64 rightOperand = (UInt64)shifterOperand + (UInt64)(~cpu.GetFlag(Flags.C) & 1);
+            UInt64 rightOperand = (UInt64)shifterOperand + (UInt64)Not(cpu.GetFlag(Flags.C));
             cpu.ARM_SetReg(rd, regRn - (UInt32)rightOperand);
 
             UInt32 s = (instruction >> 20) & 1;
@@ -1785,7 +1790,7 @@ namespace Iris
                 {
                     cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
                     cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
-                    cpu.SetFlag(Flags.C, ~BorrowFrom(regRn, rightOperand) & 1);
+                    cpu.SetFlag(Flags.C, Not(BorrowFrom(regRn, rightOperand)));
                     cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(regRn, (UInt32)rightOperand, cpu._reg[rd]));
                 }
             }
@@ -1896,7 +1901,7 @@ namespace Iris
                 {
                     cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
                     cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
-                    cpu.SetFlag(Flags.C, ~BorrowFrom(regRn, shifterOperand) & 1);
+                    cpu.SetFlag(Flags.C, Not(BorrowFrom(regRn, shifterOperand)));
                     cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(regRn, shifterOperand, cpu._reg[rd]));
                 }
             }
@@ -2244,7 +2249,7 @@ namespace Iris
             UInt32 aluOut = cpu._reg[rn] - imm;
             cpu.SetFlag(Flags.N, aluOut >> 31);
             cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
-            cpu.SetFlag(Flags.C, ~BorrowFrom(cpu._reg[rn], imm) & 1);
+            cpu.SetFlag(Flags.C, Not(BorrowFrom(cpu._reg[rn], imm)));
             cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(cpu._reg[rn], imm, aluOut));
         }
 
@@ -2256,7 +2261,7 @@ namespace Iris
             UInt32 aluOut = cpu._reg[rn] - cpu._reg[rm];
             cpu.SetFlag(Flags.N, aluOut >> 31);
             cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
-            cpu.SetFlag(Flags.C, ~BorrowFrom(cpu._reg[rn], cpu._reg[rm]) & 1);
+            cpu.SetFlag(Flags.C, Not(BorrowFrom(cpu._reg[rn], cpu._reg[rm])));
             cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(cpu._reg[rn], cpu._reg[rm], aluOut));
         }
 
@@ -2270,7 +2275,7 @@ namespace Iris
             UInt32 aluOut = cpu._reg[(h1 << 3) | rn] - cpu._reg[(h2 << 3) | rm];
             cpu.SetFlag(Flags.N, aluOut >> 31);
             cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
-            cpu.SetFlag(Flags.C, ~BorrowFrom(cpu._reg[(h1 << 3) | rn], cpu._reg[(h2 << 3) | rm]) & 1);
+            cpu.SetFlag(Flags.C, Not(BorrowFrom(cpu._reg[(h1 << 3) | rn], cpu._reg[(h2 << 3) | rm])));
             cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(cpu._reg[(h1 << 3) | rn], cpu._reg[(h2 << 3) | rm], aluOut));
         }
 
@@ -2576,7 +2581,7 @@ namespace Iris
             cpu._reg[rd] = 0 - regRm;
             cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
             cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
-            cpu.SetFlag(Flags.C, ~BorrowFrom(0, regRm) & 1);
+            cpu.SetFlag(Flags.C, Not(BorrowFrom(0, regRm)));
             cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(0, regRm, cpu._reg[rd]));
         }
 
@@ -2669,11 +2674,11 @@ namespace Iris
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             UInt32 regRd = cpu._reg[rd];
-            UInt64 rightOperand = (UInt64)cpu._reg[rm] + (UInt64)(~cpu.GetFlag(Flags.C) & 1);
+            UInt64 rightOperand = (UInt64)cpu._reg[rm] + (UInt64)Not(cpu.GetFlag(Flags.C));
             cpu._reg[rd] = regRd - (UInt32)rightOperand;
             cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
             cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
-            cpu.SetFlag(Flags.C, ~BorrowFrom(regRd, rightOperand) & 1);
+            cpu.SetFlag(Flags.C, Not(BorrowFrom(regRd, rightOperand)));
             cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(regRd, (UInt32)rightOperand, cpu._reg[rd]));
         }
 
@@ -2789,7 +2794,7 @@ namespace Iris
             cpu._reg[rd] = regRn - imm;
             cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
             cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
-            cpu.SetFlag(Flags.C, ~BorrowFrom(regRn, imm) & 1);
+            cpu.SetFlag(Flags.C, Not(BorrowFrom(regRn, imm)));
             cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(regRn, imm, cpu._reg[rd]));
         }
 
@@ -2802,7 +2807,7 @@ namespace Iris
             cpu._reg[rd] -= imm;
             cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
             cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
-            cpu.SetFlag(Flags.C, ~BorrowFrom(regRd, imm) & 1);
+            cpu.SetFlag(Flags.C, Not(BorrowFrom(regRd, imm)));
             cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(regRd, imm, cpu._reg[rd]));
         }
 
@@ -2817,7 +2822,7 @@ namespace Iris
             cpu._reg[rd] = regRn - regRm;
             cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
             cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
-            cpu.SetFlag(Flags.C, ~BorrowFrom(regRn, regRm) & 1);
+            cpu.SetFlag(Flags.C, Not(BorrowFrom(regRn, regRm)));
             cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(regRn, regRm, cpu._reg[rd]));
         }
 
