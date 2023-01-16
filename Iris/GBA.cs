@@ -84,19 +84,19 @@ namespace Iris
 
         public Byte ReadMemory8(UInt32 address)
         {
-            if (0x0200_0000 <= address && address < 0x0300_0000)
+            if (address is (>= 0x0200_0000 and < 0x0300_0000))
             {
                 UInt32 offset = address - 0x0200_0000;
                 if (offset < _externalWRAM.Length)
                     return _externalWRAM[offset];
             }
-            else if (0x0300_0000 <= address && address < 0x0400_0000)
+            else if (address is (>= 0x0300_0000 and < 0x0400_0000))
             {
                 UInt32 offset = address - 0x0300_0000;
                 if (offset < _internalWRAM.Length)
                     return _internalWRAM[offset];
             }
-            else if (0x0400_0000 <= address && address < 0x0500_0000)
+            else if (address is (>= 0x0400_0000 and < 0x0500_0000))
             {
                 UInt32 offset = address - 0x0400_0000;
                 switch (offset)
@@ -182,16 +182,16 @@ namespace Iris
                         return 0;
                 }
             }
-            else if (0x0800_0000 <= address && address < 0x0A00_0000)
+            else if (address is (>= 0x0800_0000 and < 0x0A00_0000))
             {
-                if (_rom == null)
+                if (_rom is null)
                     throw new Exception("GBA: No ROM loaded");
 
                 UInt32 offset = address - 0x0800_0000;
                 if (offset < _rom.Length)
                     return _rom[offset];
             }
-            else if (0x0e00_0000 <= address && address < 0x0e01_0000)
+            else if (address is (>= 0x0e00_0000 and < 0x0e01_0000))
             {
                 // TODO: implement SRAM
                 return 0;
@@ -214,7 +214,7 @@ namespace Iris
 
         public void WriteMemory8(UInt32 address, Byte value)
         {
-            if (0x0200_0000 <= address && address < 0x0300_0000)
+            if (address is (>= 0x0200_0000 and < 0x0300_0000))
             {
                 UInt32 offset = address - 0x0200_0000;
                 if (offset < _externalWRAM.Length)
@@ -222,7 +222,7 @@ namespace Iris
                 else
                     throw new Exception(string.Format("GBA: Invalid write to address 0x{0:x8}", address));
             }
-            else if (0x0300_0000 <= address && address < 0x0400_0000)
+            else if (address is (>= 0x0300_0000 and < 0x0400_0000))
             {
                 UInt32 offset = address - 0x0300_0000;
                 if (offset < _internalWRAM.Length)
@@ -230,7 +230,7 @@ namespace Iris
                 else
                     throw new Exception(string.Format("GBA: Invalid write to address 0x{0:x8}", address));
             }
-            else if (0x0400_0000 <= address && address < 0x0500_0000)
+            else if (address is (>= 0x0400_0000 and < 0x0500_0000))
             {
                 UInt32 offset = address - 0x0400_0000;
                 switch (offset)
@@ -533,7 +533,7 @@ namespace Iris
                         throw new Exception(string.Format("GBA: Invalid write to address 0x{0:x8}", address));
                 }
             }
-            else if (0x0500_0000 <= address && address < 0x0600_0000)
+            else if (address is (>= 0x0500_0000 and < 0x0600_0000))
             {
                 UInt32 offset = address - 0x0500_0000;
                 if (offset < _ppu.PaletteRAM.Length)
@@ -541,7 +541,7 @@ namespace Iris
                 else
                     throw new Exception(string.Format("GBA: Invalid write to address 0x{0:x8}", address));
             }
-            else if (0x0600_0000 <= address && address < 0x0700_0000)
+            else if (address is (>= 0x0600_0000 and < 0x0700_0000))
             {
                 UInt32 offset = address - 0x0600_0000;
                 if (offset < _ppu.VRAM.Length)
@@ -549,7 +549,7 @@ namespace Iris
                 else
                     throw new Exception(string.Format("GBA: Invalid write to address 0x{0:x8}", address));
             }
-            else if (0x0e00_0000 <= address && address < 0x0e01_0000)
+            else if (address is (>= 0x0e00_0000 and < 0x0e01_0000))
             {
                 // TODO: implement SRAM
             }
