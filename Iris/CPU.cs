@@ -629,7 +629,7 @@ namespace Iris
             return (result > 0xffff_ffff) ? 1u : 0u;
         }
 
-        private static UInt32 BorrowFrom(UInt32 leftOperand, UInt32 rightOperand)
+        private static UInt32 BorrowFrom(UInt32 leftOperand, UInt64 rightOperand)
         {
             return (leftOperand < rightOperand) ? 1u : 0u;
         }
@@ -1756,8 +1756,8 @@ namespace Iris
             UInt32 rd = (instruction >> 12) & 0b1111;
 
             UInt32 regRn = cpu._reg[rn];
-            UInt32 rightOperand = shifterOperand + (~cpu.GetFlag(Flags.C) & 1);
-            cpu.ARM_SetReg(rd, regRn - rightOperand);
+            UInt64 rightOperand = (UInt64)shifterOperand + (UInt64)(~cpu.GetFlag(Flags.C) & 1);
+            cpu.ARM_SetReg(rd, regRn - (UInt32)rightOperand);
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
@@ -1772,7 +1772,7 @@ namespace Iris
                     cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
                     cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
                     cpu.SetFlag(Flags.C, ~BorrowFrom(regRn, rightOperand) & 1);
-                    cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(regRn, rightOperand, cpu._reg[rd]));
+                    cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(regRn, (UInt32)rightOperand, cpu._reg[rd]));
                 }
             }
         }
@@ -2655,12 +2655,12 @@ namespace Iris
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             UInt32 regRd = cpu._reg[rd];
-            UInt32 rightOperand = cpu._reg[rm] + (~cpu.GetFlag(Flags.C) & 1);
-            cpu._reg[rd] = regRd - rightOperand;
+            UInt64 rightOperand = (UInt64)cpu._reg[rm] + (UInt64)(~cpu.GetFlag(Flags.C) & 1);
+            cpu._reg[rd] = regRd - (UInt32)rightOperand;
             cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
             cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
             cpu.SetFlag(Flags.C, ~BorrowFrom(regRd, rightOperand) & 1);
-            cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(regRd, rightOperand, cpu._reg[rd]));
+            cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(regRd, (UInt32)rightOperand, cpu._reg[rd]));
         }
 
         private static void THUMB_STMIA(CPU cpu, UInt16 instruction)
