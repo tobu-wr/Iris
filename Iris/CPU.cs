@@ -2278,16 +2278,24 @@ namespace Iris
             UInt32 startAddress = cpu._reg[rn];
             UInt32 address = startAddress;
 
-            for (var i = 0; i <= 7; ++i)
+            if (registerList != 0)
             {
-                if (((registerList >> i) & 1) == 1)
+                for (var i = 0; i <= 7; ++i)
                 {
-                    cpu._reg[i] = cpu._callbacks.ReadMemory32(address);
-                    address += 4;
+                    if (((registerList >> i) & 1) == 1)
+                    {
+                        cpu._reg[i] = cpu._callbacks.ReadMemory32(address);
+                        address += 4;
+                    }
                 }
-            }
 
-            cpu._reg[rn] += NumberOfSetBitsIn(registerList, 8) * 4;
+                cpu._reg[rn] += NumberOfSetBitsIn(registerList, 8) * 4;
+            }
+            else
+            {
+                cpu.THUMB_SetPC(cpu._callbacks.ReadMemory32(address));
+                cpu._reg[rn] += 0x40;
+            }
         }
 
         private static void THUMB_LDR1(CPU cpu, UInt16 instruction)
@@ -2661,16 +2669,24 @@ namespace Iris
             UInt32 startAddress = cpu._reg[rn];
             UInt32 address = startAddress;
 
-            for (var i = 0; i <= 7; ++i)
+            if (registerList != 0)
             {
-                if (((registerList >> i) & 1) == 1)
+                for (var i = 0; i <= 7; ++i)
                 {
-                    cpu._callbacks.WriteMemory32(address, cpu._reg[i]);
-                    address += 4;
+                    if (((registerList >> i) & 1) == 1)
+                    {
+                        cpu._callbacks.WriteMemory32(address, cpu._reg[i]);
+                        address += 4;
+                    }
                 }
-            }
 
-            cpu._reg[rn] += NumberOfSetBitsIn(registerList, 8) * 4;
+                cpu._reg[rn] += NumberOfSetBitsIn(registerList, 8) * 4;
+            }
+            else
+            {
+                cpu._callbacks.WriteMemory32(address, cpu._reg[PC] + 2);
+                cpu._reg[rn] += 0x40;
+            }
         }
 
         private static void THUMB_STR1(CPU cpu, UInt16 instruction)
