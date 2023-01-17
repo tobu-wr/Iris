@@ -646,16 +646,6 @@ namespace Iris
             return (value >> ((int)rotateAmount & 0x1f)) | (value << (32 - ((int)rotateAmount & 0x1f)));
         }
 
-        private static UInt32 LogicalShiftLeft(UInt32 value, UInt32 shiftAmount)
-        {
-            return value << (int)shiftAmount;
-        }
-
-        private static UInt32 LogicalShiftRight(UInt32 value, UInt32 shiftAmount)
-        {
-            return value >> (int)shiftAmount;
-        }
-
         private static UInt32 ArithmeticShiftRight(UInt32 value, UInt32 shiftAmount)
         {
             return (UInt32)((Int32)value >> (int)shiftAmount);
@@ -664,11 +654,6 @@ namespace Iris
         private static UInt32 SignExtend(UInt32 value, int size)
         {
             return ((value >> (size - 1)) == 1) ? value | (0xffff_ffff << size) : value;
-        }
-
-        private static UInt32 SignExtend30(UInt32 value)
-        {
-            return SignExtend(value, 24) & 0x3fff_ffff;
         }
 
         private static UInt32 NumberOfSetBitsIn(UInt32 value, int size)
@@ -688,11 +673,6 @@ namespace Iris
             return _cpsr & ModeMask;
         }
 
-        private bool InPrivilegedMode()
-        {
-            return GetMode() != UserMode;
-        }
-
         private bool CurrentModeHasSPSR()
         {
             return GetMode() switch
@@ -700,6 +680,11 @@ namespace Iris
                 UserMode or SystemMode => false,
                 _ => true,
             };
+        }
+
+        private static UInt32 SignExtend30(UInt32 value)
+        {
+            return SignExtend(value, 24) & 0x3fff_ffff;
         }
 
         private void ARM_SetPC(UInt32 value)
@@ -752,7 +737,7 @@ namespace Iris
                             }
                             else
                             {
-                                shifterOperand = LogicalShiftLeft(_reg[rm], shiftImm);
+                                shifterOperand = _reg[rm] << (int)shiftImm;
                                 shifterCarryOut = (_reg[rm] >> (32 - (int)shiftImm)) & 1;
                             }
                             break;
@@ -764,7 +749,7 @@ namespace Iris
                             }
                             else
                             {
-                                shifterOperand = LogicalShiftRight(_reg[rm], shiftImm);
+                                shifterOperand = _reg[rm] >> (int)shiftImm;
                                 shifterCarryOut = (_reg[rm] >> ((int)shiftImm - 1)) & 1;
                             }
                             break;
@@ -787,7 +772,7 @@ namespace Iris
                         case 0b11: // Rotate right
                             if (shiftImm == 0)
                             {
-                                shifterOperand = LogicalShiftLeft(GetFlag(Flags.C), 31) | LogicalShiftRight(_reg[rm], 1);
+                                shifterOperand = (GetFlag(Flags.C) << 31) | (_reg[rm] >> 1);
                                 shifterCarryOut = _reg[rm] & 1;
                             }
                             else
@@ -813,7 +798,7 @@ namespace Iris
                             }
                             else if (regRs < 32)
                             {
-                                shifterOperand = LogicalShiftLeft(regRm, regRs);
+                                shifterOperand = regRm << (int)regRs;
                                 shifterCarryOut = (regRm >> (32 - (int)regRs)) & 1;
                             }
                             else if (regRs == 32)
@@ -835,7 +820,7 @@ namespace Iris
                             }
                             else if (regRs < 32)
                             {
-                                shifterOperand = LogicalShiftRight(regRm, regRs);
+                                shifterOperand = regRm >> (int)regRs;
                                 shifterCarryOut = (regRm >> ((int)regRs - 1)) & 1;
                             }
                             else if (regRs == 32)
@@ -979,13 +964,13 @@ namespace Iris
                         switch (shift)
                         {
                             case 0b00: // LSL
-                                index = LogicalShiftLeft(_reg[rm], shiftImm);
+                                index = _reg[rm] << (int)shiftImm;
                                 break;
                             case 0b01: // LSR
                                 if (shiftImm == 0)
                                     index = 0;
                                 else
-                                    index = LogicalShiftRight(_reg[rm], shiftImm);
+                                    index = _reg[rm] >> (int)shiftImm;
                                 break;
                             case 0b10: // ASR
                                 if (shiftImm == 0)
@@ -1002,7 +987,7 @@ namespace Iris
                                 break;
                             case 0b11:
                                 if (shiftImm == 0) // RRX
-                                    index = LogicalShiftLeft(GetFlag(Flags.C), 31) | LogicalShiftRight(_reg[rm], 1);
+                                    index = (GetFlag(Flags.C) << 31) | (_reg[rm] >> 1);
                                 else // ROR
                                     index = RotateRight(_reg[rm], shiftImm);
                                 break;
@@ -1019,13 +1004,13 @@ namespace Iris
                         switch (shift)
                         {
                             case 0b00: // LSL
-                                index = LogicalShiftLeft(_reg[rm], shiftImm);
+                                index = _reg[rm] << (int)shiftImm;
                                 break;
                             case 0b01: // LSR
                                 if (shiftImm == 0)
                                     index = 0;
                                 else
-                                    index = LogicalShiftRight(_reg[rm], shiftImm);
+                                    index = _reg[rm] >> (int)shiftImm;
                                 break;
                             case 0b10: // ASR
                                 if (shiftImm == 0)
@@ -1042,7 +1027,7 @@ namespace Iris
                                 break;
                             case 0b11:
                                 if (shiftImm == 0) // RRX
-                                    index = LogicalShiftLeft(GetFlag(Flags.C), 31) | LogicalShiftRight(_reg[rm], 1);
+                                    index = (GetFlag(Flags.C) << 31) | (_reg[rm] >> 1);
                                 else // ROR
                                     index = RotateRight(_reg[rm], shiftImm);
                                 break;
@@ -1059,13 +1044,13 @@ namespace Iris
                         switch (shift)
                         {
                             case 0b00: // LSL
-                                index = LogicalShiftLeft(_reg[rm], shiftImm);
+                                index = (_reg[rm] << (int)shiftImm);
                                 break;
                             case 0b01: // LSR
                                 if (shiftImm == 0)
                                     index = 0;
                                 else
-                                    index = LogicalShiftRight(_reg[rm], shiftImm);
+                                    index = (_reg[rm] >> (int)shiftImm);
                                 break;
                             case 0b10: // ASR
                                 if (shiftImm == 0)
@@ -1082,7 +1067,7 @@ namespace Iris
                                 break;
                             case 0b11:
                                 if (shiftImm == 0) // RRX
-                                    index = LogicalShiftLeft(GetFlag(Flags.C), 31) | LogicalShiftRight(_reg[rm], 1);
+                                    index = (GetFlag(Flags.C) << 31) | (_reg[rm] >> 1);
                                 else // ROR
                                     index = RotateRight(_reg[rm], shiftImm);
                                 break;
@@ -1614,7 +1599,7 @@ namespace Iris
             if (r == 0)
             {
                 UInt32 mask;
-                if (cpu.InPrivilegedMode())
+                if (cpu.GetMode() != UserMode)
                     mask = byteMask & (UserMask | PrivMask);
                 else
                     mask = byteMask & UserMask;
