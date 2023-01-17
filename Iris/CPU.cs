@@ -355,12 +355,10 @@ namespace Iris
         private const UInt32 LR = 14;
         private const UInt32 PC = 15;
 
-        // exposed registers
         private readonly UInt32[] _reg = new UInt32[16];
         private UInt32 _cpsr;
         private UInt32 _spsr;
 
-        // banked registers
         private UInt32 _reg8, _reg9, _reg10, _reg11, _reg12, _reg13, _reg14;
         private UInt32 _reg13_svc, _reg14_svc;
         private UInt32 _reg13_abt, _reg14_abt;
@@ -372,7 +370,10 @@ namespace Iris
         private readonly ICallbacks _callbacks;
         private UInt32 _nextInstructionAddress;
 
-        internal UInt32[] Reg => _reg;
+        internal UInt32[] Reg
+        {
+            get => _reg;
+        }
 
         internal UInt32 CPSR
         {
@@ -627,9 +628,20 @@ namespace Iris
             };
         }
 
-        private static UInt32 Not(UInt32 flag) => ~flag & 1;
-        private static UInt32 CarryFrom(UInt64 result) => (result > 0xffff_ffff) ? 1u : 0u;
-        private static UInt32 BorrowFrom(UInt32 leftOperand, UInt64 rightOperand) => (leftOperand < rightOperand) ? 1u : 0u;
+        private static UInt32 Not(UInt32 flag)
+        {
+            return ~flag & 1;
+        }
+
+        private static UInt32 CarryFrom(UInt64 result)
+        {
+            return (result > 0xffff_ffff) ? 1u : 0u;
+        }
+
+        private static UInt32 BorrowFrom(UInt32 leftOperand, UInt64 rightOperand)
+        {
+            return (leftOperand < rightOperand) ? 1u : 0u;
+        }
 
         private static UInt32 OverflowFrom_Addition(UInt32 leftOperand, UInt32 rightOperand, UInt32 result)
         {
@@ -659,8 +671,10 @@ namespace Iris
         private static UInt32 NumberOfSetBitsIn(UInt32 value, int size)
         {
             UInt32 count = 0;
+
             for (var i = 0; i < size; ++i)
                 count += (value >> i) & 1;
+
             return count;
         }
 
@@ -668,23 +682,18 @@ namespace Iris
         //                               ARM
         // ********************************************************************
 
-        private UInt32 GetMode()
-        {
-            return _cpsr & ModeMask;
-        }
-
         private bool CurrentModeHasSPSR()
         {
-            return GetMode() switch
+            return (_cpsr & ModeMask) switch
             {
                 UserMode or SystemMode => false,
                 _ => true,
             };
         }
 
-        private static UInt32 SignExtend30(UInt32 value)
+        private static UInt32 SignExtend30(UInt32 value, int size)
         {
-            return SignExtend(value, 24) & 0x3fff_ffff;
+            return SignExtend(value, size) & 0x3fff_ffff;
         }
 
         private void ARM_SetPC(UInt32 value)
@@ -1298,7 +1307,7 @@ namespace Iris
         private static void ARM_B(CPU cpu, UInt32 instruction)
         {
             UInt32 imm = instruction & 0xff_ffff;
-            cpu.ARM_SetPC(cpu._reg[PC] + (SignExtend30(imm) << 2));
+            cpu.ARM_SetPC(cpu._reg[PC] + (SignExtend30(imm, 24) << 2));
         }
 
         private static void ARM_BL(CPU cpu, UInt32 instruction)
@@ -1306,7 +1315,7 @@ namespace Iris
             cpu._reg[LR] = cpu._nextInstructionAddress;
 
             UInt32 imm = instruction & 0xff_ffff;
-            cpu.ARM_SetPC(cpu._reg[PC] + (SignExtend30(imm) << 2));
+            cpu.ARM_SetPC(cpu._reg[PC] + (SignExtend30(imm, 24) << 2));
         }
 
         private static void ARM_BIC(CPU cpu, UInt32 instruction)
@@ -1599,7 +1608,7 @@ namespace Iris
             if (r == 0)
             {
                 UInt32 mask;
-                if (cpu.GetMode() != UserMode)
+                if ((cpu._cpsr & ModeMask) != UserMode)
                     mask = byteMask & (UserMask | PrivMask);
                 else
                     mask = byteMask & UserMask;
