@@ -2079,10 +2079,10 @@ namespace Iris
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
 
-            UInt32 d = (UInt32)((h1 << 3) | rd);
-            UInt32 m = (UInt32)((h2 << 3) | rm);
+            UInt32 hrd = (UInt32)((h1 << 3) | rd);
+            UInt32 hrm = (UInt32)((h2 << 3) | rm);
 
-            cpu.THUMB_SetReg(d, cpu._reg[d] + cpu._reg[m]);
+            cpu.THUMB_SetReg(hrd, cpu._reg[hrd] + cpu._reg[hrm]);
         }
 
         private static void THUMB_ADD5(CPU cpu, UInt16 instruction)
@@ -2575,10 +2575,10 @@ namespace Iris
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
 
-            UInt16 d = (UInt16)((h1 << 3) | rd);
-            UInt16 m = (UInt16)((h2 << 3) | rm);
+            UInt16 hrd = (UInt16)((h1 << 3) | rd);
+            UInt16 hrm = (UInt16)((h2 << 3) | rm);
 
-            cpu.THUMB_SetReg(d, cpu._reg[m]);
+            cpu.THUMB_SetReg(hrd, cpu._reg[hrm]);
         }
 
         private static void THUMB_MUL(CPU cpu, UInt16 instruction)
