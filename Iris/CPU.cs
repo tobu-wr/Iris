@@ -274,10 +274,10 @@ namespace Iris
                 0b1101 => (GetFlag(Flags.Z) == 1) || (GetFlag(Flags.N) != GetFlag(Flags.V)),
                 // AL
                 0b1110 => true,
-                // UNPREDICTABLE
+                // unconditional
                 0b1111 => true,
                 // should never happen
-                _ => throw new NotImplementedException(),
+                _ => throw new Exception(string.Format("CPU: Wrong condition code {0}", cond)),
             };
         }
 
@@ -298,12 +298,14 @@ namespace Iris
 
         private static UInt32 OverflowFrom_Addition(UInt32 leftOperand, UInt32 rightOperand, UInt32 result)
         {
-            return (((leftOperand >> 31) == (rightOperand >> 31)) && ((leftOperand >> 31) != (result >> 31))) ? 1u : 0u;
+            return (((leftOperand >> 31) == (rightOperand >> 31))
+                 && ((leftOperand >> 31) != (result >> 31))) ? 1u : 0u;
         }
 
         private static UInt32 OverflowFrom_Subtraction(UInt32 leftOperand, UInt32 rightOperand, UInt32 result)
         {
-            return (((leftOperand >> 31) != (rightOperand >> 31)) && ((leftOperand >> 31) != (result >> 31))) ? 1u : 0u;
+            return (((leftOperand >> 31) != (rightOperand >> 31))
+                 && ((leftOperand >> 31) != (result >> 31))) ? 1u : 0u;
         }
 
         private static UInt32 RotateRight(UInt32 value, UInt32 rotateAmount)
