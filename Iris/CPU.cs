@@ -68,9 +68,9 @@ namespace Iris
 
         internal void Step()
         {
-            if (((_cpsr >> 5) & 1) == 0) // ARM state
+            if (((_cpsr >> 5) & 1) == 0)
                 ARM_Step();
-            else // THUMB state
+            else
                 THUMB_Step();
         }
 
