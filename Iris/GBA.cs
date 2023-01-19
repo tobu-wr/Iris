@@ -45,6 +45,7 @@ namespace Iris
         {
             _cpu.Reg[13] = 0x0300_7f00;
             _cpu.CPSR = 0b1101_1111;
+            _cpu.SPSR_fiq = 0b1_0000;
             _cpu.NextInstructionAddress = 0x0800_0000;
 
             _KEYINPUT = 0x03ff;
