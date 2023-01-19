@@ -180,14 +180,14 @@
 
         private void ARM_Step()
         {
-            UInt32 instruction = _callbacks.ReadMemory32(_nextInstructionAddress);
-            _nextInstructionAddress += 4;
+            UInt32 instruction = _callbacks.ReadMemory32(NextInstructionAddress);
+            NextInstructionAddress += 4;
 
             UInt32 cond = (instruction >> 28) & 0b1111;
 
             if (ConditionPassed(cond))
             {
-                _reg[PC] = _nextInstructionAddress + 4;
+                Reg[PC] = NextInstructionAddress + 4;
 
                 foreach (ARM_InstructionListEntry entry in ARM_InstructionList)
                 {
@@ -198,13 +198,13 @@
                     }
                 }
 
-                throw new Exception(string.Format("CPU: Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, _nextInstructionAddress - 4));
+                throw new Exception(string.Format("CPU: Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, NextInstructionAddress - 4));
             }
         }
 
         private bool CurrentModeHasSPSR()
         {
-            return (_cpsr & ModeMask) switch
+            return (CPSR & ModeMask) switch
             {
                 UserMode or SystemMode => false,
                 _ => true,
@@ -218,8 +218,8 @@
 
         private void ARM_SetPC(UInt32 value)
         {
-            _reg[PC] = value;
-            _nextInstructionAddress = value;
+            Reg[PC] = value;
+            NextInstructionAddress = value;
         }
 
         private void ARM_SetReg(UInt32 i, UInt32 value)
@@ -227,7 +227,7 @@
             if (i == PC)
                 ARM_SetPC(value);
             else
-                _reg[i] = value;
+                Reg[i] = value;
         }
 
         // Addressing mode 1
@@ -261,53 +261,53 @@
                         case 0b00: // Logical shift left
                             if (shiftImm == 0)
                             {
-                                shifterOperand = _reg[rm];
+                                shifterOperand = Reg[rm];
                                 shifterCarryOut = GetFlag(Flags.C);
                             }
                             else
                             {
-                                shifterOperand = _reg[rm] << (int)shiftImm;
-                                shifterCarryOut = (_reg[rm] >> (32 - (int)shiftImm)) & 1;
+                                shifterOperand = Reg[rm] << (int)shiftImm;
+                                shifterCarryOut = (Reg[rm] >> (32 - (int)shiftImm)) & 1;
                             }
                             break;
                         case 0b01: // Logical shift right
                             if (shiftImm == 0)
                             {
                                 shifterOperand = 0;
-                                shifterCarryOut = _reg[rm] >> 31;
+                                shifterCarryOut = Reg[rm] >> 31;
                             }
                             else
                             {
-                                shifterOperand = _reg[rm] >> (int)shiftImm;
-                                shifterCarryOut = (_reg[rm] >> ((int)shiftImm - 1)) & 1;
+                                shifterOperand = Reg[rm] >> (int)shiftImm;
+                                shifterCarryOut = (Reg[rm] >> ((int)shiftImm - 1)) & 1;
                             }
                             break;
                         case 0b10: // Arithmetic shift right
                             if (shiftImm == 0)
                             {
-                                if ((_reg[rm] >> 31) == 0)
+                                if ((Reg[rm] >> 31) == 0)
                                     shifterOperand = 0;
                                 else
                                     shifterOperand = 0xffff_ffff;
 
-                                shifterCarryOut = _reg[rm] >> 31;
+                                shifterCarryOut = Reg[rm] >> 31;
                             }
                             else
                             {
-                                shifterOperand = ArithmeticShiftRight(_reg[rm], shiftImm);
-                                shifterCarryOut = (_reg[rm] >> ((int)shiftImm - 1)) & 1;
+                                shifterOperand = ArithmeticShiftRight(Reg[rm], shiftImm);
+                                shifterCarryOut = (Reg[rm] >> ((int)shiftImm - 1)) & 1;
                             }
                             break;
                         case 0b11: // Rotate right
                             if (shiftImm == 0)
                             {
-                                shifterOperand = (GetFlag(Flags.C) << 31) | (_reg[rm] >> 1);
-                                shifterCarryOut = _reg[rm] & 1;
+                                shifterOperand = (GetFlag(Flags.C) << 31) | (Reg[rm] >> 1);
+                                shifterCarryOut = Reg[rm] & 1;
                             }
                             else
                             {
-                                shifterOperand = RotateRight(_reg[rm], shiftImm);
-                                shifterCarryOut = (_reg[rm] >> ((int)shiftImm - 1)) & 1;
+                                shifterOperand = RotateRight(Reg[rm], shiftImm);
+                                shifterCarryOut = (Reg[rm] >> ((int)shiftImm - 1)) & 1;
                             }
                             break;
                     }
@@ -315,8 +315,8 @@
                 else if (((instruction >> 7) & 1) == 0) // Register shifts
                 {
                     UInt32 rs = (instruction >> 8) & 0b1111;
-                    UInt32 regRm = (rm == PC) ? _reg[PC] + 4 : _reg[rm];
-                    UInt32 regRs = _reg[rs] & 0xff;
+                    UInt32 regRm = (rm == PC) ? Reg[PC] + 4 : Reg[rm];
+                    UInt32 regRs = Reg[rs] & 0xff;
                     switch (shift)
                     {
                         case 0b00: // Logical shift left
@@ -426,26 +426,26 @@
                 UInt32 offset = instruction & 0xfff;
                 if (p == 0) // Post-indexed
                 {
-                    address = _reg[rn];
+                    address = Reg[rn];
 
                     if (u == 1)
-                        ARM_SetReg(rn, _reg[rn] + offset);
+                        ARM_SetReg(rn, Reg[rn] + offset);
                     else
-                        ARM_SetReg(rn, _reg[rn] - offset);
+                        ARM_SetReg(rn, Reg[rn] - offset);
                 }
                 else if (w == 0) // Offset
                 {
                     if (u == 1)
-                        address = _reg[rn] + offset;
+                        address = Reg[rn] + offset;
                     else
-                        address = _reg[rn] - offset;
+                        address = Reg[rn] - offset;
                 }
                 else // Pre-indexed
                 {
                     if (u == 1)
-                        address = _reg[rn] + offset;
+                        address = Reg[rn] + offset;
                     else
-                        address = _reg[rn] - offset;
+                        address = Reg[rn] - offset;
 
                     ARM_SetReg(rn, address);
                 }
@@ -459,26 +459,26 @@
                 {
                     if (p == 0) // Post-indexed
                     {
-                        address = _reg[rn];
+                        address = Reg[rn];
 
                         if (u == 1)
-                            ARM_SetReg(rn, _reg[rn] + _reg[rm]);
+                            ARM_SetReg(rn, Reg[rn] + Reg[rm]);
                         else
-                            ARM_SetReg(rn, _reg[rn] - _reg[rm]);
+                            ARM_SetReg(rn, Reg[rn] - Reg[rm]);
                     }
                     else if (w == 0) // Offset
                     {
                         if (u == 1)
-                            address = _reg[rn] + _reg[rm];
+                            address = Reg[rn] + Reg[rm];
                         else
-                            address = _reg[rn] - _reg[rm];
+                            address = Reg[rn] - Reg[rm];
                     }
                     else // Pre-indexed
                     {
                         if (u == 1)
-                            address = _reg[rn] + _reg[rm];
+                            address = Reg[rn] + Reg[rm];
                         else
-                            address = _reg[rn] - _reg[rm];
+                            address = Reg[rn] - Reg[rm];
 
                         ARM_SetReg(rn, address);
                     }
@@ -487,45 +487,45 @@
                 {
                     if (p == 0) // Post-indexed
                     {
-                        address = _reg[rn];
+                        address = Reg[rn];
 
                         UInt32 index = 0;
                         switch (shift)
                         {
                             case 0b00: // LSL
-                                index = _reg[rm] << (int)shiftImm;
+                                index = Reg[rm] << (int)shiftImm;
                                 break;
                             case 0b01: // LSR
                                 if (shiftImm == 0)
                                     index = 0;
                                 else
-                                    index = _reg[rm] >> (int)shiftImm;
+                                    index = Reg[rm] >> (int)shiftImm;
                                 break;
                             case 0b10: // ASR
                                 if (shiftImm == 0)
                                 {
-                                    if ((_reg[rm] >> 31) == 1)
+                                    if ((Reg[rm] >> 31) == 1)
                                         index = 0xffff_ffff;
                                     else
                                         index = 0;
                                 }
                                 else
                                 {
-                                    index = ArithmeticShiftRight(_reg[rm], shiftImm);
+                                    index = ArithmeticShiftRight(Reg[rm], shiftImm);
                                 }
                                 break;
                             case 0b11:
                                 if (shiftImm == 0) // RRX
-                                    index = (GetFlag(Flags.C) << 31) | (_reg[rm] >> 1);
+                                    index = (GetFlag(Flags.C) << 31) | (Reg[rm] >> 1);
                                 else // ROR
-                                    index = RotateRight(_reg[rm], shiftImm);
+                                    index = RotateRight(Reg[rm], shiftImm);
                                 break;
                         }
 
                         if (u == 1)
-                            ARM_SetReg(rn, _reg[rn] + index);
+                            ARM_SetReg(rn, Reg[rn] + index);
                         else
-                            ARM_SetReg(rn, _reg[rn] - index);
+                            ARM_SetReg(rn, Reg[rn] - index);
                     }
                     else if (w == 0) // Offset
                     {
@@ -533,39 +533,39 @@
                         switch (shift)
                         {
                             case 0b00: // LSL
-                                index = _reg[rm] << (int)shiftImm;
+                                index = Reg[rm] << (int)shiftImm;
                                 break;
                             case 0b01: // LSR
                                 if (shiftImm == 0)
                                     index = 0;
                                 else
-                                    index = _reg[rm] >> (int)shiftImm;
+                                    index = Reg[rm] >> (int)shiftImm;
                                 break;
                             case 0b10: // ASR
                                 if (shiftImm == 0)
                                 {
-                                    if ((_reg[rm] >> 31) == 1)
+                                    if ((Reg[rm] >> 31) == 1)
                                         index = 0xffff_ffff;
                                     else
                                         index = 0;
                                 }
                                 else
                                 {
-                                    index = ArithmeticShiftRight(_reg[rm], shiftImm);
+                                    index = ArithmeticShiftRight(Reg[rm], shiftImm);
                                 }
                                 break;
                             case 0b11:
                                 if (shiftImm == 0) // RRX
-                                    index = (GetFlag(Flags.C) << 31) | (_reg[rm] >> 1);
+                                    index = (GetFlag(Flags.C) << 31) | (Reg[rm] >> 1);
                                 else // ROR
-                                    index = RotateRight(_reg[rm], shiftImm);
+                                    index = RotateRight(Reg[rm], shiftImm);
                                 break;
                         }
 
                         if (u == 1)
-                            address = _reg[rn] + index;
+                            address = Reg[rn] + index;
                         else
-                            address = _reg[rn] - index;
+                            address = Reg[rn] - index;
                     }
                     else // Pre-indexed
                     {
@@ -573,39 +573,39 @@
                         switch (shift)
                         {
                             case 0b00: // LSL
-                                index = (_reg[rm] << (int)shiftImm);
+                                index = (Reg[rm] << (int)shiftImm);
                                 break;
                             case 0b01: // LSR
                                 if (shiftImm == 0)
                                     index = 0;
                                 else
-                                    index = (_reg[rm] >> (int)shiftImm);
+                                    index = (Reg[rm] >> (int)shiftImm);
                                 break;
                             case 0b10: // ASR
                                 if (shiftImm == 0)
                                 {
-                                    if ((_reg[rm] >> 31) == 1)
+                                    if ((Reg[rm] >> 31) == 1)
                                         index = 0xffff_ffff;
                                     else
                                         index = 0;
                                 }
                                 else
                                 {
-                                    index = ArithmeticShiftRight(_reg[rm], shiftImm);
+                                    index = ArithmeticShiftRight(Reg[rm], shiftImm);
                                 }
                                 break;
                             case 0b11:
                                 if (shiftImm == 0) // RRX
-                                    index = (GetFlag(Flags.C) << 31) | (_reg[rm] >> 1);
+                                    index = (GetFlag(Flags.C) << 31) | (Reg[rm] >> 1);
                                 else // ROR
-                                    index = RotateRight(_reg[rm], shiftImm);
+                                    index = RotateRight(Reg[rm], shiftImm);
                                 break;
                         }
 
                         if (u == 1)
-                            address = _reg[rn] + index;
+                            address = Reg[rn] + index;
                         else
-                            address = _reg[rn] - index;
+                            address = Reg[rn] - index;
 
                         ARM_SetReg(rn, address);
                     }
@@ -635,26 +635,26 @@
                 UInt32 offset = (immH << 4) | immL;
                 if (p == 0) // Post-indexed
                 {
-                    address = _reg[rn];
+                    address = Reg[rn];
 
                     if (u == 1)
-                        ARM_SetReg(rn, _reg[rn] + offset);
+                        ARM_SetReg(rn, Reg[rn] + offset);
                     else
-                        ARM_SetReg(rn, _reg[rn] - offset);
+                        ARM_SetReg(rn, Reg[rn] - offset);
                 }
                 else if (w == 0) // Offset
                 {
                     if (u == 1)
-                        address = _reg[rn] + offset;
+                        address = Reg[rn] + offset;
                     else
-                        address = _reg[rn] - offset;
+                        address = Reg[rn] - offset;
                 }
                 else // Pre-indexed
                 {
                     if (u == 1)
-                        address = _reg[rn] + offset;
+                        address = Reg[rn] + offset;
                     else
-                        address = _reg[rn] - offset;
+                        address = Reg[rn] - offset;
 
                     ARM_SetReg(rn, address);
                 }
@@ -670,9 +670,9 @@
                 {
                     UInt32 rm = instruction & 0b1111;
                     if (u == 1)
-                        address = _reg[rn] + _reg[rm];
+                        address = Reg[rn] + Reg[rm];
                     else
-                        address = _reg[rn] - _reg[rm];
+                        address = Reg[rn] - Reg[rm];
                 }
                 else // Pre-indexed
                 {
@@ -702,32 +702,32 @@
             UInt32 value;
             if (u == 1) // increment
             {
-                value = _reg[rn] + (NumberOfSetBitsIn(registerList, 16) * 4);
+                value = Reg[rn] + (NumberOfSetBitsIn(registerList, 16) * 4);
 
                 if (p == 0) // after
                 {
-                    startAddress = _reg[rn];
+                    startAddress = Reg[rn];
                     endAddress = value - 4;
                 }
                 else // before
                 {
-                    startAddress = _reg[rn] + 4;
+                    startAddress = Reg[rn] + 4;
                     endAddress = value;
                 }
             }
             else // decrement
             {
-                value = _reg[rn] - (NumberOfSetBitsIn(registerList, 16) * 4);
+                value = Reg[rn] - (NumberOfSetBitsIn(registerList, 16) * 4);
 
                 if (p == 0) // after
                 {
                     startAddress = value + 4;
-                    endAddress = _reg[rn];
+                    endAddress = Reg[rn];
                 }
                 else // before
                 {
                     startAddress = value;
-                    endAddress = _reg[rn] - 4;
+                    endAddress = Reg[rn] - 4;
                 }
             }
 
@@ -745,7 +745,7 @@
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
 
-            UInt32 regRn = cpu._reg[rn];
+            UInt32 regRn = cpu.Reg[rn];
             UInt64 rightOperand = (UInt64)shifterOperand + (UInt64)cpu.GetFlag(Flags.C);
             UInt64 result = (UInt64)regRn + rightOperand;
             cpu.ARM_SetReg(rd, (UInt32)result);
@@ -760,10 +760,10 @@
                 }
                 else
                 {
-                    cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
                     cpu.SetFlag(Flags.C, CarryFrom(result));
-                    cpu.SetFlag(Flags.V, OverflowFrom_Addition(regRn, (UInt32)rightOperand, cpu._reg[rd]));
+                    cpu.SetFlag(Flags.V, OverflowFrom_Addition(regRn, (UInt32)rightOperand, cpu.Reg[rd]));
                 }
             }
         }
@@ -777,7 +777,7 @@
             UInt32 rd = (instruction >> 12) & 0b1111;
             UInt32 r = (instruction >> 4) & 1;
 
-            UInt32 regRn = ((rn == PC) && (i == 0) && (r == 1)) ? cpu._reg[PC] + 4 : cpu._reg[rn];
+            UInt32 regRn = ((rn == PC) && (i == 0) && (r == 1)) ? cpu.Reg[PC] + 4 : cpu.Reg[rn];
             UInt64 result = (UInt64)regRn + (UInt64)shifterOperand;
             cpu.ARM_SetReg(rd, (UInt32)result);
 
@@ -791,10 +791,10 @@
                 }
                 else
                 {
-                    cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
                     cpu.SetFlag(Flags.C, CarryFrom(result));
-                    cpu.SetFlag(Flags.V, OverflowFrom_Addition(regRn, shifterOperand, cpu._reg[rd]));
+                    cpu.SetFlag(Flags.V, OverflowFrom_Addition(regRn, shifterOperand, cpu.Reg[rd]));
                 }
             }
         }
@@ -805,7 +805,7 @@
 
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
-            cpu.ARM_SetReg(rd, cpu._reg[rn] & shifterOperand);
+            cpu.ARM_SetReg(rd, cpu.Reg[rn] & shifterOperand);
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
@@ -817,8 +817,8 @@
                 }
                 else
                 {
-                    cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
                     cpu.SetFlag(Flags.C, shifterCarryOut);
                 }
             }
@@ -827,15 +827,15 @@
         private static void ARM_B(CPU cpu, UInt32 instruction)
         {
             UInt32 imm = instruction & 0xff_ffff;
-            cpu.ARM_SetPC(cpu._reg[PC] + (SignExtend30(imm, 24) << 2));
+            cpu.ARM_SetPC(cpu.Reg[PC] + (SignExtend30(imm, 24) << 2));
         }
 
         private static void ARM_BL(CPU cpu, UInt32 instruction)
         {
-            cpu._reg[LR] = cpu._nextInstructionAddress;
+            cpu.Reg[LR] = cpu.NextInstructionAddress;
 
             UInt32 imm = instruction & 0xff_ffff;
-            cpu.ARM_SetPC(cpu._reg[PC] + (SignExtend30(imm, 24) << 2));
+            cpu.ARM_SetPC(cpu.Reg[PC] + (SignExtend30(imm, 24) << 2));
         }
 
         private static void ARM_BIC(CPU cpu, UInt32 instruction)
@@ -844,7 +844,7 @@
 
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
-            cpu.ARM_SetReg(rd, cpu._reg[rn] & ~shifterOperand);
+            cpu.ARM_SetReg(rd, cpu.Reg[rn] & ~shifterOperand);
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
@@ -856,8 +856,8 @@
                 }
                 else
                 {
-                    cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
                     cpu.SetFlag(Flags.C, shifterCarryOut);
                 }
             }
@@ -866,8 +866,8 @@
         private static void ARM_BX(CPU cpu, UInt32 instruction)
         {
             UInt32 rm = instruction & 0b1111;
-            cpu.SetCPSR((cpu._cpsr & ~(1u << 5)) | ((cpu._reg[rm] & 1) << 5));
-            cpu.ARM_SetPC(cpu._reg[rm] & 0xffff_fffe);
+            cpu.SetCPSR((cpu.CPSR & ~(1u << 5)) | ((cpu.Reg[rm] & 1) << 5));
+            cpu.ARM_SetPC(cpu.Reg[rm] & 0xffff_fffe);
         }
 
         private static void ARM_CMN(CPU cpu, UInt32 instruction)
@@ -876,13 +876,13 @@
 
             UInt32 rn = (instruction >> 16) & 0b1111;
 
-            UInt64 result = (UInt64)cpu._reg[rn] + (UInt64)shifterOperand;
+            UInt64 result = (UInt64)cpu.Reg[rn] + (UInt64)shifterOperand;
             UInt32 aluOut = (UInt32)result;
 
             cpu.SetFlag(Flags.N, aluOut >> 31);
             cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
             cpu.SetFlag(Flags.C, CarryFrom(result));
-            cpu.SetFlag(Flags.V, OverflowFrom_Addition(cpu._reg[rn], shifterOperand, aluOut));
+            cpu.SetFlag(Flags.V, OverflowFrom_Addition(cpu.Reg[rn], shifterOperand, aluOut));
         }
 
         private static void ARM_CMP(CPU cpu, UInt32 instruction)
@@ -890,12 +890,12 @@
             var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
 
             UInt32 rn = (instruction >> 16) & 0b1111;
-            UInt32 aluOut = cpu._reg[rn] - shifterOperand;
+            UInt32 aluOut = cpu.Reg[rn] - shifterOperand;
 
             cpu.SetFlag(Flags.N, aluOut >> 31);
             cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
-            cpu.SetFlag(Flags.C, Not(BorrowFrom(cpu._reg[rn], shifterOperand)));
-            cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(cpu._reg[rn], shifterOperand, aluOut));
+            cpu.SetFlag(Flags.C, Not(BorrowFrom(cpu.Reg[rn], shifterOperand)));
+            cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(cpu.Reg[rn], shifterOperand, aluOut));
         }
 
         private static void ARM_EOR(CPU cpu, UInt32 instruction)
@@ -904,7 +904,7 @@
 
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
-            cpu.ARM_SetReg(rd, cpu._reg[rn] ^ shifterOperand);
+            cpu.ARM_SetReg(rd, cpu.Reg[rn] ^ shifterOperand);
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
@@ -916,8 +916,8 @@
                 }
                 else
                 {
-                    cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
                     cpu.SetFlag(Flags.C, shifterCarryOut);
                 }
             }
@@ -934,7 +934,7 @@
             {
                 if (((registerList >> i) & 1) == 1)
                 {
-                    cpu._reg[i] = cpu._callbacks.ReadMemory32(address);
+                    cpu.Reg[i] = cpu._callbacks.ReadMemory32(address);
                     address += 4;
                 }
             }
@@ -961,28 +961,28 @@
                     switch (i)
                     {
                         case 8:
-                            cpu._reg8 = value;
+                            cpu.Reg8 = value;
                             break;
                         case 9:
-                            cpu._reg9 = value;
+                            cpu.Reg9 = value;
                             break;
                         case 10:
-                            cpu._reg10 = value;
+                            cpu.Reg10 = value;
                             break;
                         case 11:
-                            cpu._reg11 = value;
+                            cpu.Reg11 = value;
                             break;
                         case 12:
-                            cpu._reg12 = value;
+                            cpu.Reg12 = value;
                             break;
                         case 13:
-                            cpu._reg13 = value;
+                            cpu.Reg13 = value;
                             break;
                         case 14:
-                            cpu._reg14 = value;
+                            cpu.Reg14 = value;
                             break;
                         default:
-                            cpu._reg[i] = value;
+                            cpu.Reg[i] = value;
                             break;
                     }
 
@@ -1000,7 +1000,7 @@
             if (rd == PC)
                 cpu.ARM_SetPC(data & 0xffff_fffc);
             else
-                cpu._reg[rd] = data;
+                cpu.Reg[rd] = data;
         }
 
         private static void ARM_LDRB(CPU cpu, UInt32 instruction)
@@ -1044,7 +1044,7 @@
             UInt32 rn = (instruction >> 12) & 0b1111;
             UInt32 rs = (instruction >> 8) & 0b1111;
             UInt32 rm = instruction & 0b1111;
-            cpu.ARM_SetReg(rd, (cpu._reg[rm] * cpu._reg[rs]) + cpu._reg[rn]);
+            cpu.ARM_SetReg(rd, (cpu.Reg[rm] * cpu.Reg[rs]) + cpu.Reg[rn]);
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
@@ -1056,8 +1056,8 @@
                 }
                 else
                 {
-                    cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
                 }
             }
         }
@@ -1079,8 +1079,8 @@
                 }
                 else
                 {
-                    cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
                     cpu.SetFlag(Flags.C, shifterCarryOut);
                 }
             }
@@ -1092,9 +1092,9 @@
             UInt32 rd = (instruction >> 12) & 0b1111;
 
             if (r == 1)
-                cpu.ARM_SetReg(rd, cpu._spsr);
+                cpu.ARM_SetReg(rd, cpu.SPSR);
             else
-                cpu.ARM_SetReg(rd, cpu._cpsr);
+                cpu.ARM_SetReg(rd, cpu.CPSR);
         }
 
         private static void ARM_MSR(CPU cpu, UInt32 instruction)
@@ -1111,7 +1111,7 @@
             else
             {
                 UInt32 rm = instruction & 0b1111;
-                operand = cpu._reg[rm];
+                operand = cpu.Reg[rm];
             }
 
             UInt32 fieldMask = (instruction >> 16) & 0b1111;
@@ -1128,17 +1128,17 @@
             if (r == 0)
             {
                 UInt32 mask;
-                if ((cpu._cpsr & ModeMask) != UserMode)
+                if ((cpu.CPSR & ModeMask) != UserMode)
                     mask = byteMask & (UserMask | PrivMask);
                 else
                     mask = byteMask & UserMask;
 
-                cpu.SetCPSR((cpu._cpsr & ~mask) | (operand & mask));
+                cpu.SetCPSR((cpu.CPSR & ~mask) | (operand & mask));
             }
             else if (cpu.CurrentModeHasSPSR())
             {
                 UInt32 mask = byteMask & (UserMask | PrivMask | StateMask);
-                cpu._spsr = (cpu._spsr & ~mask) | (operand & mask);
+                cpu.SPSR = (cpu.SPSR & ~mask) | (operand & mask);
             }
         }
 
@@ -1147,7 +1147,7 @@
             UInt32 rd = (instruction >> 16) & 0b1111;
             UInt32 rs = (instruction >> 8) & 0b1111;
             UInt32 rm = instruction & 0b1111;
-            cpu.ARM_SetReg(rd, cpu._reg[rm] * cpu._reg[rs]);
+            cpu.ARM_SetReg(rd, cpu.Reg[rm] * cpu.Reg[rs]);
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
@@ -1159,8 +1159,8 @@
                 }
                 else
                 {
-                    cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
                 }
             }
         }
@@ -1182,8 +1182,8 @@
                 }
                 else
                 {
-                    cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
                     cpu.SetFlag(Flags.C, shifterCarryOut);
                 }
             }
@@ -1195,7 +1195,7 @@
 
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
-            cpu.ARM_SetReg(rd, cpu._reg[rn] | shifterOperand);
+            cpu.ARM_SetReg(rd, cpu.Reg[rn] | shifterOperand);
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
@@ -1207,8 +1207,8 @@
                 }
                 else
                 {
-                    cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
                     cpu.SetFlag(Flags.C, shifterCarryOut);
                 }
             }
@@ -1221,7 +1221,7 @@
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
 
-            UInt32 regRn = cpu._reg[rn];
+            UInt32 regRn = cpu.Reg[rn];
             cpu.ARM_SetReg(rd, shifterOperand - regRn);
 
             UInt32 s = (instruction >> 20) & 1;
@@ -1234,10 +1234,10 @@
                 }
                 else
                 {
-                    cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
                     cpu.SetFlag(Flags.C, Not(BorrowFrom(shifterOperand, regRn)));
-                    cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(shifterOperand, regRn, cpu._reg[rd]));
+                    cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(shifterOperand, regRn, cpu.Reg[rd]));
                 }
             }
         }
@@ -1249,7 +1249,7 @@
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
 
-            UInt64 rightOperand = (UInt64)cpu._reg[rn] + (UInt64)Not(cpu.GetFlag(Flags.C));
+            UInt64 rightOperand = (UInt64)cpu.Reg[rn] + (UInt64)Not(cpu.GetFlag(Flags.C));
             cpu.ARM_SetReg(rd, shifterOperand - (UInt32)rightOperand);
 
             UInt32 s = (instruction >> 20) & 1;
@@ -1262,10 +1262,10 @@
                 }
                 else
                 {
-                    cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
                     cpu.SetFlag(Flags.C, Not(BorrowFrom(shifterOperand, rightOperand)));
-                    cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(shifterOperand, (UInt32)rightOperand, cpu._reg[rd]));
+                    cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(shifterOperand, (UInt32)rightOperand, cpu.Reg[rd]));
                 }
             }
         }
@@ -1277,7 +1277,7 @@
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
 
-            UInt32 regRn = cpu._reg[rn];
+            UInt32 regRn = cpu.Reg[rn];
             UInt64 rightOperand = (UInt64)shifterOperand + (UInt64)Not(cpu.GetFlag(Flags.C));
             cpu.ARM_SetReg(rd, regRn - (UInt32)rightOperand);
 
@@ -1291,10 +1291,10 @@
                 }
                 else
                 {
-                    cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
                     cpu.SetFlag(Flags.C, Not(BorrowFrom(regRn, rightOperand)));
-                    cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(regRn, (UInt32)rightOperand, cpu._reg[rd]));
+                    cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(regRn, (UInt32)rightOperand, cpu.Reg[rd]));
                 }
             }
         }
@@ -1306,16 +1306,16 @@
             UInt32 rs = (instruction >> 8) & 0b1111;
             UInt32 rm = instruction & 0b1111;
 
-            Int64 result = (Int64)(Int32)cpu._reg[rm] * (Int64)(Int32)cpu._reg[rs];
-            UInt64 resultLo = (UInt64)(UInt32)result + (UInt64)cpu._reg[rdLo];
+            Int64 result = (Int64)(Int32)cpu.Reg[rm] * (Int64)(Int32)cpu.Reg[rs];
+            UInt64 resultLo = (UInt64)(UInt32)result + (UInt64)cpu.Reg[rdLo];
             cpu.ARM_SetReg(rdLo, (UInt32)resultLo);
-            cpu.ARM_SetReg(rdHi, cpu._reg[rdHi] + (UInt32)(result >> 32) + CarryFrom(resultLo));
+            cpu.ARM_SetReg(rdHi, cpu.Reg[rdHi] + (UInt32)(result >> 32) + CarryFrom(resultLo));
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
             {
-                cpu.SetFlag(Flags.N, cpu._reg[rdHi] >> 31);
-                cpu.SetFlag(Flags.Z, (cpu._reg[rdHi] == 0 && cpu._reg[rdLo] == 0) ? 1u : 0u);
+                cpu.SetFlag(Flags.N, cpu.Reg[rdHi] >> 31);
+                cpu.SetFlag(Flags.Z, (cpu.Reg[rdHi] == 0 && cpu.Reg[rdLo] == 0) ? 1u : 0u);
             }
         }
 
@@ -1326,22 +1326,22 @@
             UInt32 rs = (instruction >> 8) & 0b1111;
             UInt32 rm = instruction & 0b1111;
 
-            Int64 result = (Int64)(Int32)cpu._reg[rm] * (Int64)(Int32)cpu._reg[rs];
+            Int64 result = (Int64)(Int32)cpu.Reg[rm] * (Int64)(Int32)cpu.Reg[rs];
             cpu.ARM_SetReg(rdHi, (UInt32)(result >> 32));
             cpu.ARM_SetReg(rdLo, (UInt32)result);
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
             {
-                cpu.SetFlag(Flags.N, cpu._reg[rdHi] >> 31);
-                cpu.SetFlag(Flags.Z, (cpu._reg[rdHi] == 0 && cpu._reg[rdLo] == 0) ? 1u : 0u);
+                cpu.SetFlag(Flags.N, cpu.Reg[rdHi] >> 31);
+                cpu.SetFlag(Flags.Z, (cpu.Reg[rdHi] == 0 && cpu.Reg[rdLo] == 0) ? 1u : 0u);
             }
         }
 
         private static void ARM_STM1(CPU cpu, UInt32 instruction)
         {
             UInt32 rn = (instruction >> 16) & 0b1111;
-            UInt32 regRn = cpu._reg[rn];
+            UInt32 regRn = cpu.Reg[rn];
 
             var (startAddress, _) = cpu.GetAddress_Multiple(instruction);
 
@@ -1352,7 +1352,7 @@
             {
                 if (((registerList >> i) & 1) == 1)
                 {
-                    cpu._callbacks.WriteMemory32(address, (i == rn) ? regRn : cpu._reg[i]);
+                    cpu._callbacks.WriteMemory32(address, (i == rn) ? regRn : cpu.Reg[i]);
                     address += 4;
                 }
             }
@@ -1363,7 +1363,7 @@
             UInt32 address = cpu.GetAddress(instruction);
 
             UInt32 rd = (instruction >> 12) & 0b1111;
-            cpu._callbacks.WriteMemory32(address, cpu._reg[rd]);
+            cpu._callbacks.WriteMemory32(address, cpu.Reg[rd]);
         }
 
         private static void ARM_STRB(CPU cpu, UInt32 instruction)
@@ -1371,7 +1371,7 @@
             UInt32 address = cpu.GetAddress(instruction);
 
             UInt32 rd = (instruction >> 12) & 0b1111;
-            cpu._callbacks.WriteMemory8(address, (Byte)cpu._reg[rd]);
+            cpu._callbacks.WriteMemory8(address, (Byte)cpu.Reg[rd]);
         }
 
         private static void ARM_STRH(CPU cpu, UInt32 instruction)
@@ -1379,7 +1379,7 @@
             UInt32 address = cpu.GetAddress_Misc(instruction);
 
             UInt32 rd = (instruction >> 12) & 0b1111;
-            cpu._callbacks.WriteMemory16(address, (UInt16)cpu._reg[rd]);
+            cpu._callbacks.WriteMemory16(address, (UInt16)cpu.Reg[rd]);
         }
 
         private static void ARM_SUB(CPU cpu, UInt32 instruction)
@@ -1389,7 +1389,7 @@
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
 
-            UInt32 regRn = cpu._reg[rn];
+            UInt32 regRn = cpu.Reg[rn];
             cpu.ARM_SetReg(rd, regRn - shifterOperand);
 
             UInt32 s = (instruction >> 20) & 1;
@@ -1398,14 +1398,14 @@
                 if (rd == PC)
                 {
                     if (cpu.CurrentModeHasSPSR())
-                        cpu.SetCPSR(cpu._spsr);
+                        cpu.SetCPSR(cpu.SPSR);
                 }
                 else
                 {
-                    cpu.SetFlag(Flags.N, cpu._reg[rd] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu._reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
+                    cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
                     cpu.SetFlag(Flags.C, Not(BorrowFrom(regRn, shifterOperand)));
-                    cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(regRn, shifterOperand, cpu._reg[rd]));
+                    cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(regRn, shifterOperand, cpu.Reg[rd]));
                 }
             }
         }
@@ -1422,9 +1422,9 @@
             UInt32 rd = (instruction >> 12) & 0b1111;
             UInt32 rm = instruction & 0b1111;
 
-            UInt32 address = cpu._reg[rn];
+            UInt32 address = cpu.Reg[rn];
             UInt32 temp = RotateRight(cpu._callbacks.ReadMemory32(address), 8 * (address & 0b11));
-            cpu._callbacks.WriteMemory32(address, cpu._reg[rm]);
+            cpu._callbacks.WriteMemory32(address, cpu.Reg[rm]);
             cpu.ARM_SetReg(rd, temp);
         }
 
@@ -1434,9 +1434,9 @@
             UInt32 rd = (instruction >> 12) & 0b1111;
             UInt32 rm = instruction & 0b1111;
 
-            UInt32 address = cpu._reg[rn];
+            UInt32 address = cpu.Reg[rn];
             Byte temp = cpu._callbacks.ReadMemory8(address);
-            cpu._callbacks.WriteMemory8(address, (Byte)cpu._reg[rm]);
+            cpu._callbacks.WriteMemory8(address, (Byte)cpu.Reg[rm]);
             cpu.ARM_SetReg(rd, temp);
         }
 
@@ -1445,7 +1445,7 @@
             var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
 
             UInt32 rn = (instruction >> 16) & 0b1111;
-            UInt32 aluOut = cpu._reg[rn] ^ shifterOperand;
+            UInt32 aluOut = cpu.Reg[rn] ^ shifterOperand;
 
             cpu.SetFlag(Flags.N, aluOut >> 31);
             cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
@@ -1457,7 +1457,7 @@
             var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
 
             UInt32 rn = (instruction >> 16) & 0b1111;
-            UInt32 aluOut = cpu._reg[rn] & shifterOperand;
+            UInt32 aluOut = cpu.Reg[rn] & shifterOperand;
 
             cpu.SetFlag(Flags.N, aluOut >> 31);
             cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
@@ -1471,16 +1471,16 @@
             UInt32 rs = (instruction >> 8) & 0b1111;
             UInt32 rm = instruction & 0b1111;
 
-            UInt64 result = (UInt64)cpu._reg[rm] * (UInt64)cpu._reg[rs];
-            UInt64 resultLo = (UInt64)(UInt32)result + (UInt64)cpu._reg[rdLo];
+            UInt64 result = (UInt64)cpu.Reg[rm] * (UInt64)cpu.Reg[rs];
+            UInt64 resultLo = (UInt64)(UInt32)result + (UInt64)cpu.Reg[rdLo];
             cpu.ARM_SetReg(rdLo, (UInt32)resultLo);
-            cpu.ARM_SetReg(rdHi, cpu._reg[rdHi] + (UInt32)(result >> 32) + CarryFrom(resultLo));
+            cpu.ARM_SetReg(rdHi, cpu.Reg[rdHi] + (UInt32)(result >> 32) + CarryFrom(resultLo));
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
             {
-                cpu.SetFlag(Flags.N, cpu._reg[rdHi] >> 31);
-                cpu.SetFlag(Flags.Z, (cpu._reg[rdHi] == 0 && cpu._reg[rdLo] == 0) ? 1u : 0u);
+                cpu.SetFlag(Flags.N, cpu.Reg[rdHi] >> 31);
+                cpu.SetFlag(Flags.Z, (cpu.Reg[rdHi] == 0 && cpu.Reg[rdLo] == 0) ? 1u : 0u);
             }
         }
 
@@ -1491,15 +1491,15 @@
             UInt32 rs = (instruction >> 8) & 0b1111;
             UInt32 rm = instruction & 0b1111;
 
-            UInt64 result = (UInt64)cpu._reg[rm] * (UInt64)cpu._reg[rs];
+            UInt64 result = (UInt64)cpu.Reg[rm] * (UInt64)cpu.Reg[rs];
             cpu.ARM_SetReg(rdHi, (UInt32)(result >> 32));
             cpu.ARM_SetReg(rdLo, (UInt32)result);
 
             UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
             {
-                cpu.SetFlag(Flags.N, cpu._reg[rdHi] >> 31);
-                cpu.SetFlag(Flags.Z, (cpu._reg[rdHi] == 0 && cpu._reg[rdLo] == 0) ? 1u : 0u);
+                cpu.SetFlag(Flags.N, cpu.Reg[rdHi] >> 31);
+                cpu.SetFlag(Flags.Z, (cpu.Reg[rdHi] == 0 && cpu.Reg[rdLo] == 0) ? 1u : 0u);
             }
         }
     }
