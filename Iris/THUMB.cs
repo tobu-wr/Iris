@@ -485,6 +485,8 @@
 
             if (registerList != 0)
             {
+                cpu._reg[rn] += NumberOfSetBitsIn(registerList, 8) * 4;
+
                 for (var i = 0; i <= 7; ++i)
                 {
                     if (((registerList >> i) & 1) == 1)
@@ -493,8 +495,6 @@
                         address += 4;
                     }
                 }
-
-                cpu._reg[rn] += NumberOfSetBitsIn(registerList, 8) * 4;
             }
             else
             {
@@ -802,7 +802,6 @@
             UInt16 registerList = (UInt16)(instruction & 0xff);
 
             UInt32 startAddress = cpu._reg[SP];
-            UInt32 endAddress = cpu._reg[SP] + 4 * (r + NumberOfSetBitsIn(registerList, 8));
             UInt32 address = startAddress;
 
             for (var i = 0; i <= 7; ++i)
@@ -820,7 +819,7 @@
                 cpu.THUMB_SetPC(value & 0xffff_fffe);
             }
 
-            cpu._reg[SP] = endAddress;
+            cpu._reg[SP] += 4 * (r + NumberOfSetBitsIn(registerList, 8));
         }
 
         private static void THUMB_PUSH(CPU cpu, UInt16 instruction)
@@ -891,7 +890,8 @@
             UInt16 registerList = (UInt16)(instruction & 0xff);
 
             UInt32 regRn = cpu._reg[rn];
-            UInt32 startAddress = cpu._reg[rn];
+
+            UInt32 startAddress = regRn;
             UInt32 address = startAddress;
 
             if (registerList != 0)
