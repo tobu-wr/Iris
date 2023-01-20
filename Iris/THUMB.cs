@@ -510,8 +510,8 @@
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             UInt32 address = cpu.Reg[rn] + (imm * 4u);
-            UInt32 data = cpu._callbacks.ReadMemory32(address);
-            cpu.Reg[rd] = RotateRight(data, 8 * (address & 0b11));
+            UInt32 data = RotateRight(cpu._callbacks.ReadMemory32(address), 8 * (address & 0b11));
+            cpu.Reg[rd] = data;
         }
 
         private static void THUMB_LDR2(CPU cpu, UInt16 instruction)
@@ -521,8 +521,8 @@
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             UInt32 address = cpu.Reg[rn] + cpu.Reg[rm];
-            UInt32 data = cpu._callbacks.ReadMemory32(address);
-            cpu.Reg[rd] = RotateRight(data, 8 * (address & 0b11));
+            UInt32 data = RotateRight(cpu._callbacks.ReadMemory32(address), 8 * (address & 0b11));
+            cpu.Reg[rd] = data;
         }
 
         private static void THUMB_LDR3(CPU cpu, UInt16 instruction)
@@ -541,8 +541,8 @@
             UInt16 imm = (UInt16)(instruction & 0xff);
 
             UInt32 address = cpu.Reg[SP] + (imm * 4u);
-            UInt32 data = cpu._callbacks.ReadMemory32(address);
-            cpu.Reg[rd] = RotateRight(data, 8 * (address & 0b11));
+            UInt32 data = RotateRight(cpu._callbacks.ReadMemory32(address), 8 * (address & 0b11));
+            cpu.Reg[rd] = data;
         }
 
         private static void THUMB_LDRB1(CPU cpu, UInt16 instruction)
@@ -574,8 +574,8 @@
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             UInt32 address = cpu.Reg[rn] + (imm * 2u);
-            UInt16 data = cpu._callbacks.ReadMemory16(address);
-            cpu.Reg[rd] = RotateRight(data, 8 * (address & 1));
+            UInt32 data = RotateRight(cpu._callbacks.ReadMemory16(address), 8 * (address & 1));
+            cpu.Reg[rd] = data;
         }
 
         private static void THUMB_LDRH2(CPU cpu, UInt16 instruction)
@@ -585,8 +585,8 @@
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             UInt32 address = cpu.Reg[rn] + cpu.Reg[rm];
-            UInt16 data = cpu._callbacks.ReadMemory16(address);
-            cpu.Reg[rd] = RotateRight(data, 8 * (address & 1));
+            UInt32 data = RotateRight(cpu._callbacks.ReadMemory16(address), 8 * (address & 1));
+            cpu.Reg[rd] = data;
         }
 
         private static void THUMB_LDRSB(CPU cpu, UInt16 instruction)
