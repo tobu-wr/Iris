@@ -241,8 +241,7 @@
                 UInt32 rotateImm = (instruction >> 8) & 0b1111;
                 UInt32 imm = instruction & 0xff;
 
-                UInt32 rotateAmount = rotateImm * 2;
-                shifterOperand = RotateRight(imm, rotateAmount);
+                shifterOperand = RotateRight(imm, rotateImm * 2);
 
                 if (rotateImm == 0)
                     shifterCarryOut = GetFlag(Flags.C);
@@ -253,9 +252,11 @@
             {
                 UInt32 shift = (instruction >> 5) & 0b11;
                 UInt32 rm = instruction & 0b1111;
+
                 if (((instruction >> 4) & 1) == 0) // Immediate shifts
                 {
                     UInt32 shiftImm = (instruction >> 7) & 0b1_1111;
+
                     switch (shift)
                     {
                         case 0b00: // Logical shift left
@@ -315,8 +316,10 @@
                 else if (((instruction >> 7) & 1) == 0) // Register shifts
                 {
                     UInt32 rs = (instruction >> 8) & 0b1111;
+
                     UInt32 regRm = (rm == PC) ? Reg[PC] + 4 : Reg[rm];
                     UInt32 regRs = Reg[rs] & 0xff;
+
                     switch (shift)
                     {
                         case 0b00: // Logical shift left
@@ -415,15 +418,17 @@
         // Addressing mode 2
         private UInt32 GetAddress(UInt32 instruction)
         {
-            UInt32 address;
-
             UInt32 p = (instruction >> 24) & 1;
             UInt32 u = (instruction >> 23) & 1;
             UInt32 w = (instruction >> 21) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
+
+            UInt32 address;
+
             if (((instruction >> 25) & 1) == 0) // Immediate
             {
                 UInt32 offset = instruction & 0xfff;
+
                 if (p == 0) // Post-indexed
                 {
                     address = Reg[rn];
@@ -455,7 +460,8 @@
                 UInt32 shiftImm = (instruction >> 7) & 0b1_1111;
                 UInt32 shift = (instruction >> 5) & 0b11;
                 UInt32 rm = instruction & 0b1111;
-                if ((shiftImm == 0) && shift == 0) // Register
+
+                if ((shiftImm == 0) && (shift == 0)) // Register
                 {
                     if (p == 0) // Post-indexed
                     {
@@ -485,11 +491,12 @@
                 }
                 else // Scaled register
                 {
+                    UInt32 index = 0;
+
                     if (p == 0) // Post-indexed
                     {
                         address = Reg[rn];
 
-                        UInt32 index = 0;
                         switch (shift)
                         {
                             case 0b00: // LSL
@@ -529,7 +536,6 @@
                     }
                     else if (w == 0) // Offset
                     {
-                        UInt32 index = 0;
                         switch (shift)
                         {
                             case 0b00: // LSL
@@ -569,7 +575,6 @@
                     }
                     else // Pre-indexed
                     {
-                        UInt32 index = 0;
                         switch (shift)
                         {
                             case 0b00: // LSL
@@ -622,17 +627,20 @@
         // Addressing mode 3
         private UInt32 GetAddress_Misc(UInt32 instruction)
         {
-            UInt32 address = 0;
-
             UInt32 p = (instruction >> 24) & 1;
             UInt32 u = (instruction >> 23) & 1;
             UInt32 w = (instruction >> 21) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
+
+            UInt32 address = 0;
+
             if (((instruction >> 22) & 1) == 1) // Immediate
             {
                 UInt32 immH = (instruction >> 8) & 0b1111;
                 UInt32 immL = instruction & 0b1111;
+
                 UInt32 offset = (immH << 4) | immL;
+
                 if (p == 0) // Post-indexed
                 {
                     address = Reg[rn];
@@ -669,6 +677,7 @@
                 else if (w == 0) // Offset
                 {
                     UInt32 rm = instruction & 0b1111;
+
                     if (u == 1)
                         address = Reg[rn] + Reg[rm];
                     else
@@ -691,15 +700,17 @@
         // Addressing mode 4
         private (UInt32 startAddress, UInt32 endAddress) GetAddress_Multiple(UInt32 instruction)
         {
-            UInt32 startAddress;
-            UInt32 endAddress;
-
             UInt32 p = (instruction >> 24) & 1;
             UInt32 u = (instruction >> 23) & 1;
+            UInt32 w = (instruction >> 21) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 registerList = instruction & 0xffff;
 
+            UInt32 startAddress;
+            UInt32 endAddress;
+
             UInt32 value;
+
             if (u == 1) // increment
             {
                 value = Reg[rn] + (NumberOfSetBitsIn(registerList, 16) * 4);
@@ -731,7 +742,6 @@
                 }
             }
 
-            UInt32 w = (instruction >> 21) & 1;
             if (w == 1)
                 ARM_SetReg(rn, value);
 
@@ -740,17 +750,18 @@
 
         private static void ARM_ADC(CPU cpu, UInt32 instruction)
         {
-            var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
-
+            UInt32 s = (instruction >> 20) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
 
-            UInt32 regRn = cpu.Reg[rn];
+            var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
+
+            UInt32 leftOperand = cpu.Reg[rn];
             UInt64 rightOperand = (UInt64)shifterOperand + (UInt64)cpu.GetFlag(Flags.C);
-            UInt64 result = (UInt64)regRn + rightOperand;
+
+            UInt64 result = (UInt64)leftOperand + rightOperand;
             cpu.ARM_SetReg(rd, (UInt32)result);
 
-            UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
             {
                 if (rd == PC)
@@ -763,25 +774,27 @@
                     cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
                     cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
                     cpu.SetFlag(Flags.C, CarryFrom(result));
-                    cpu.SetFlag(Flags.V, OverflowFrom_Addition(regRn, (UInt32)rightOperand, cpu.Reg[rd]));
+                    cpu.SetFlag(Flags.V, OverflowFrom_Addition(leftOperand, (UInt32)rightOperand, cpu.Reg[rd]));
                 }
             }
         }
 
         private static void ARM_ADD(CPU cpu, UInt32 instruction)
         {
-            var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
-
             UInt32 i = (instruction >> 25) & 1;
+            UInt32 s = (instruction >> 20) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
             UInt32 r = (instruction >> 4) & 1;
 
-            UInt32 regRn = ((rn == PC) && (i == 0) && (r == 1)) ? cpu.Reg[PC] + 4 : cpu.Reg[rn];
-            UInt64 result = (UInt64)regRn + (UInt64)shifterOperand;
+            var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
+
+            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? cpu.Reg[PC] + 4 : cpu.Reg[rn];
+            UInt32 rightOperand = shifterOperand;
+
+            UInt64 result = (UInt64)leftOperand + (UInt64)rightOperand;
             cpu.ARM_SetReg(rd, (UInt32)result);
 
-            UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
             {
                 if (rd == PC)
@@ -794,20 +807,21 @@
                     cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
                     cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
                     cpu.SetFlag(Flags.C, CarryFrom(result));
-                    cpu.SetFlag(Flags.V, OverflowFrom_Addition(regRn, shifterOperand, cpu.Reg[rd]));
+                    cpu.SetFlag(Flags.V, OverflowFrom_Addition(leftOperand, rightOperand, cpu.Reg[rd]));
                 }
             }
         }
 
         private static void ARM_AND(CPU cpu, UInt32 instruction)
         {
-            var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
-
+            UInt32 s = (instruction >> 20) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
+
+            var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
+
             cpu.ARM_SetReg(rd, cpu.Reg[rn] & shifterOperand);
 
-            UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
             {
                 if (rd == PC)
@@ -827,26 +841,28 @@
         private static void ARM_B(CPU cpu, UInt32 instruction)
         {
             UInt32 imm = instruction & 0xff_ffff;
+
             cpu.ARM_SetPC(cpu.Reg[PC] + (SignExtend30(imm, 24) << 2));
         }
 
         private static void ARM_BL(CPU cpu, UInt32 instruction)
         {
-            cpu.Reg[LR] = cpu.NextInstructionAddress;
-
             UInt32 imm = instruction & 0xff_ffff;
+
+            cpu.Reg[LR] = cpu.NextInstructionAddress;
             cpu.ARM_SetPC(cpu.Reg[PC] + (SignExtend30(imm, 24) << 2));
         }
 
         private static void ARM_BIC(CPU cpu, UInt32 instruction)
         {
-            var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
-
+            UInt32 s = (instruction >> 20) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
+
+            var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
+
             cpu.ARM_SetReg(rd, cpu.Reg[rn] & ~shifterOperand);
 
-            UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
             {
                 if (rd == PC)
@@ -866,47 +882,56 @@
         private static void ARM_BX(CPU cpu, UInt32 instruction)
         {
             UInt32 rm = instruction & 0b1111;
+
             cpu.SetCPSR((cpu.CPSR & ~(1u << 5)) | ((cpu.Reg[rm] & 1) << 5));
             cpu.ARM_SetPC(cpu.Reg[rm] & 0xffff_fffe);
         }
 
         private static void ARM_CMN(CPU cpu, UInt32 instruction)
         {
-            var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
-
             UInt32 rn = (instruction >> 16) & 0b1111;
 
-            UInt64 result = (UInt64)cpu.Reg[rn] + (UInt64)shifterOperand;
+            var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
+
+            UInt32 leftOperand = cpu.Reg[rn];
+            UInt32 rightOperand = shifterOperand;
+
+            UInt64 result = (UInt64)leftOperand + (UInt64)rightOperand;
             UInt32 aluOut = (UInt32)result;
 
             cpu.SetFlag(Flags.N, aluOut >> 31);
             cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
             cpu.SetFlag(Flags.C, CarryFrom(result));
-            cpu.SetFlag(Flags.V, OverflowFrom_Addition(cpu.Reg[rn], shifterOperand, aluOut));
+            cpu.SetFlag(Flags.V, OverflowFrom_Addition(leftOperand, rightOperand, aluOut));
         }
 
         private static void ARM_CMP(CPU cpu, UInt32 instruction)
         {
+            UInt32 rn = (instruction >> 16) & 0b1111;
+
             var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
 
-            UInt32 rn = (instruction >> 16) & 0b1111;
-            UInt32 aluOut = cpu.Reg[rn] - shifterOperand;
+            UInt32 leftOperand = cpu.Reg[rn];
+            UInt32 rightOperand = shifterOperand;
+
+            UInt32 aluOut = leftOperand - rightOperand;
 
             cpu.SetFlag(Flags.N, aluOut >> 31);
             cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
-            cpu.SetFlag(Flags.C, Not(BorrowFrom(cpu.Reg[rn], shifterOperand)));
-            cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(cpu.Reg[rn], shifterOperand, aluOut));
+            cpu.SetFlag(Flags.C, Not(BorrowFrom(leftOperand, rightOperand)));
+            cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(leftOperand, rightOperand, aluOut));
         }
 
         private static void ARM_EOR(CPU cpu, UInt32 instruction)
         {
-            var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
-
+            UInt32 s = (instruction >> 20) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
+
+            var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
+
             cpu.ARM_SetReg(rd, cpu.Reg[rn] ^ shifterOperand);
 
-            UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
             {
                 if (rd == PC)
@@ -925,11 +950,12 @@
 
         private static void ARM_LDM1(CPU cpu, UInt32 instruction)
         {
+            UInt32 registerList = instruction & 0xffff;
+
             var (startAddress, _) = cpu.GetAddress_Multiple(instruction);
 
             UInt32 address = startAddress;
 
-            UInt32 registerList = instruction & 0xffff;
             for (var i = 0; i <= 14; ++i)
             {
                 if (((registerList >> i) & 1) == 1)
@@ -948,16 +974,18 @@
 
         private static void ARM_LDM2(CPU cpu, UInt32 instruction)
         {
+            UInt32 registerList = instruction & 0x7fff;
+
             var (startAddress, _) = cpu.GetAddress_Multiple(instruction);
 
             UInt32 address = startAddress;
 
-            UInt32 registerList = instruction & 0x7fff;
             for (var i = 0; i <= 14; ++i)
             {
                 if (((registerList >> i) & 1) == 1)
                 {
                     UInt32 value = cpu._callbacks.ReadMemory32(address);
+
                     switch (i)
                     {
                         case 8:
@@ -993,10 +1021,11 @@
 
         private static void ARM_LDR(CPU cpu, UInt32 instruction)
         {
-            UInt32 address = cpu.GetAddress(instruction);
-
-            UInt32 data = RotateRight(cpu._callbacks.ReadMemory32(address), 8 * (address & 0b11));
             UInt32 rd = (instruction >> 12) & 0b1111;
+
+            UInt32 address = cpu.GetAddress(instruction);
+            UInt32 data = RotateRight(cpu._callbacks.ReadMemory32(address), 8 * (address & 0b11));
+
             if (rd == PC)
                 cpu.ARM_SetPC(data & 0xffff_fffc);
             else
@@ -1005,48 +1034,51 @@
 
         private static void ARM_LDRB(CPU cpu, UInt32 instruction)
         {
-            UInt32 address = cpu.GetAddress(instruction);
-
             UInt32 rd = (instruction >> 12) & 0b1111;
-            cpu.ARM_SetReg(rd, cpu._callbacks.ReadMemory8(address));
+
+            UInt32 address = cpu.GetAddress(instruction);
+            Byte data = cpu._callbacks.ReadMemory8(address);
+            cpu.ARM_SetReg(rd, data);
         }
 
         private static void ARM_LDRH(CPU cpu, UInt32 instruction)
         {
-            UInt32 address = cpu.GetAddress_Misc(instruction);
-
-            UInt16 data = cpu._callbacks.ReadMemory16(address);
             UInt32 rd = (instruction >> 12) & 0b1111;
+
+            UInt32 address = cpu.GetAddress_Misc(instruction);
+            UInt16 data = cpu._callbacks.ReadMemory16(address);
             cpu.ARM_SetReg(rd, data);
         }
 
         private static void ARM_LDRSB(CPU cpu, UInt32 instruction)
         {
-            UInt32 address = cpu.GetAddress_Misc(instruction);
-
-            Byte data = cpu._callbacks.ReadMemory8(address);
             UInt32 rd = (instruction >> 12) & 0b1111;
+
+            UInt32 address = cpu.GetAddress_Misc(instruction);
+            Byte data = cpu._callbacks.ReadMemory8(address);
             cpu.ARM_SetReg(rd, SignExtend(data, 8));
         }
 
         private static void ARM_LDRSH(CPU cpu, UInt32 instruction)
         {
+            UInt32 rd = (instruction >> 12) & 0b1111;
+
             UInt32 address = cpu.GetAddress_Misc(instruction);
 
             UInt16 data = cpu._callbacks.ReadMemory16(address);
-            UInt32 rd = (instruction >> 12) & 0b1111;
             cpu.ARM_SetReg(rd, SignExtend(data, 16));
         }
 
         private static void ARM_MLA(CPU cpu, UInt32 instruction)
         {
+            UInt32 s = (instruction >> 20) & 1;
             UInt32 rd = (instruction >> 16) & 0b1111;
             UInt32 rn = (instruction >> 12) & 0b1111;
             UInt32 rs = (instruction >> 8) & 0b1111;
             UInt32 rm = instruction & 0b1111;
+
             cpu.ARM_SetReg(rd, (cpu.Reg[rm] * cpu.Reg[rs]) + cpu.Reg[rn]);
 
-            UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
             {
                 if (rd == PC)
@@ -1064,12 +1096,13 @@
 
         private static void ARM_MOV(CPU cpu, UInt32 instruction)
         {
+            UInt32 s = (instruction >> 20) & 1;
+            UInt32 rd = (instruction >> 12) & 0b1111;
+
             var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
 
-            UInt32 rd = (instruction >> 12) & 0b1111;
             cpu.ARM_SetReg(rd, shifterOperand);
 
-            UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
             {
                 if (rd == PC)
@@ -1099,22 +1132,25 @@
 
         private static void ARM_MSR(CPU cpu, UInt32 instruction)
         {
+            UInt32 r = (instruction >> 22) & 1;
+            UInt32 fieldMask = (instruction >> 16) & 0b1111;
+
             UInt32 operand;
+
             if (((instruction >> 25) & 1) == 1)
             {
                 UInt32 rotateImm = (instruction >> 8) & 0b1111;
                 UInt32 imm = instruction & 0xff;
 
-                UInt32 rotateAmount = 2 * rotateImm;
-                operand = RotateRight(imm, rotateAmount);
+                operand = RotateRight(imm, 2 * rotateImm);
             }
             else
             {
                 UInt32 rm = instruction & 0b1111;
+
                 operand = cpu.Reg[rm];
             }
 
-            UInt32 fieldMask = (instruction >> 16) & 0b1111;
             UInt32 byteMask = (UInt32)((((fieldMask >> 0) & 1) == 1) ? 0x0000_00ff : 0)
                             | (UInt32)((((fieldMask >> 1) & 1) == 1) ? 0x0000_ff00 : 0)
                             | (UInt32)((((fieldMask >> 2) & 1) == 1) ? 0x00ff_0000 : 0)
@@ -1124,7 +1160,6 @@
             const UInt32 PrivMask = 0x0000_000f;
             const UInt32 StateMask = 0x0000_0020;
 
-            UInt32 r = (instruction >> 22) & 1;
             if (r == 0)
             {
                 UInt32 mask;
@@ -1144,12 +1179,13 @@
 
         private static void ARM_MUL(CPU cpu, UInt32 instruction)
         {
+            UInt32 s = (instruction >> 20) & 1;
             UInt32 rd = (instruction >> 16) & 0b1111;
             UInt32 rs = (instruction >> 8) & 0b1111;
             UInt32 rm = instruction & 0b1111;
+
             cpu.ARM_SetReg(rd, cpu.Reg[rm] * cpu.Reg[rs]);
 
-            UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
             {
                 if (rd == PC)
@@ -1167,12 +1203,13 @@
 
         private static void ARM_MVN(CPU cpu, UInt32 instruction)
         {
+            UInt32 s = (instruction >> 20) & 1;
+            UInt32 rd = (instruction >> 12) & 0b1111;
+
             var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
 
-            UInt32 rd = (instruction >> 12) & 0b1111;
             cpu.ARM_SetReg(rd, ~shifterOperand);
 
-            UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
             {
                 if (rd == PC)
@@ -1191,13 +1228,14 @@
 
         private static void ARM_ORR(CPU cpu, UInt32 instruction)
         {
-            var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
-
+            UInt32 s = (instruction >> 20) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
+
+            var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
+
             cpu.ARM_SetReg(rd, cpu.Reg[rn] | shifterOperand);
 
-            UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
             {
                 if (rd == PC)
@@ -1216,15 +1254,15 @@
 
         private static void ARM_RSB(CPU cpu, UInt32 instruction)
         {
-            var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
-
+            UInt32 s = (instruction >> 20) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
+
+            var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
 
             UInt32 regRn = cpu.Reg[rn];
             cpu.ARM_SetReg(rd, shifterOperand - regRn);
 
-            UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
             {
                 if (rd == PC)
@@ -1244,15 +1282,15 @@
 
         private static void ARM_RSC(CPU cpu, UInt32 instruction)
         {
-            var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
-
+            UInt32 s = (instruction >> 20) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
+
+            var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
 
             UInt64 rightOperand = (UInt64)cpu.Reg[rn] + (UInt64)Not(cpu.GetFlag(Flags.C));
             cpu.ARM_SetReg(rd, shifterOperand - (UInt32)rightOperand);
 
-            UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
             {
                 if (rd == PC)
@@ -1272,16 +1310,16 @@
 
         private static void ARM_SBC(CPU cpu, UInt32 instruction)
         {
-            var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
-
+            UInt32 s = (instruction >> 20) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
+
+            var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
 
             UInt32 regRn = cpu.Reg[rn];
             UInt64 rightOperand = (UInt64)shifterOperand + (UInt64)Not(cpu.GetFlag(Flags.C));
             cpu.ARM_SetReg(rd, regRn - (UInt32)rightOperand);
 
-            UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
             {
                 if (rd == PC)
@@ -1301,6 +1339,7 @@
 
         private static void ARM_SMLAL(CPU cpu, UInt32 instruction)
         {
+            UInt32 s = (instruction >> 20) & 1;
             UInt32 rdHi = (instruction >> 16) & 0b1111;
             UInt32 rdLo = (instruction >> 12) & 0b1111;
             UInt32 rs = (instruction >> 8) & 0b1111;
@@ -1311,7 +1350,6 @@
             cpu.ARM_SetReg(rdLo, (UInt32)resultLo);
             cpu.ARM_SetReg(rdHi, cpu.Reg[rdHi] + (UInt32)(result >> 32) + CarryFrom(resultLo));
 
-            UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
             {
                 cpu.SetFlag(Flags.N, cpu.Reg[rdHi] >> 31);
@@ -1321,6 +1359,7 @@
 
         private static void ARM_SMULL(CPU cpu, UInt32 instruction)
         {
+            UInt32 s = (instruction >> 20) & 1;
             UInt32 rdHi = (instruction >> 16) & 0b1111;
             UInt32 rdLo = (instruction >> 12) & 0b1111;
             UInt32 rs = (instruction >> 8) & 0b1111;
@@ -1330,7 +1369,6 @@
             cpu.ARM_SetReg(rdHi, (UInt32)(result >> 32));
             cpu.ARM_SetReg(rdLo, (UInt32)result);
 
-            UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
             {
                 cpu.SetFlag(Flags.N, cpu.Reg[rdHi] >> 31);
@@ -1341,13 +1379,14 @@
         private static void ARM_STM1(CPU cpu, UInt32 instruction)
         {
             UInt32 rn = (instruction >> 16) & 0b1111;
+            UInt32 registerList = instruction & 0xffff;
+
             UInt32 regRn = cpu.Reg[rn];
 
             var (startAddress, _) = cpu.GetAddress_Multiple(instruction);
 
             UInt32 address = startAddress;
 
-            UInt32 registerList = instruction & 0xffff;
             for (var i = 0; i <= 15; ++i)
             {
                 if (((registerList >> i) & 1) == 1)
@@ -1360,39 +1399,42 @@
 
         private static void ARM_STR(CPU cpu, UInt32 instruction)
         {
+            UInt32 rd = (instruction >> 12) & 0b1111;
+
             UInt32 address = cpu.GetAddress(instruction);
 
-            UInt32 rd = (instruction >> 12) & 0b1111;
             cpu._callbacks.WriteMemory32(address, cpu.Reg[rd]);
         }
 
         private static void ARM_STRB(CPU cpu, UInt32 instruction)
         {
+            UInt32 rd = (instruction >> 12) & 0b1111;
+
             UInt32 address = cpu.GetAddress(instruction);
 
-            UInt32 rd = (instruction >> 12) & 0b1111;
             cpu._callbacks.WriteMemory8(address, (Byte)cpu.Reg[rd]);
         }
 
         private static void ARM_STRH(CPU cpu, UInt32 instruction)
         {
+            UInt32 rd = (instruction >> 12) & 0b1111;
+
             UInt32 address = cpu.GetAddress_Misc(instruction);
 
-            UInt32 rd = (instruction >> 12) & 0b1111;
             cpu._callbacks.WriteMemory16(address, (UInt16)cpu.Reg[rd]);
         }
 
         private static void ARM_SUB(CPU cpu, UInt32 instruction)
         {
-            var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
-
+            UInt32 s = (instruction >> 20) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
+
+            var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
 
             UInt32 regRn = cpu.Reg[rn];
             cpu.ARM_SetReg(rd, regRn - shifterOperand);
 
-            UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
             {
                 if (rd == PC)
@@ -1413,6 +1455,7 @@
         private static void ARM_SWI(CPU cpu, UInt32 instruction)
         {
             UInt32 imm = instruction & 0xff_ffff;
+
             cpu._callbacks.HandleSWI(imm);
         }
 
@@ -1442,9 +1485,10 @@
 
         private static void ARM_TEQ(CPU cpu, UInt32 instruction)
         {
+            UInt32 rn = (instruction >> 16) & 0b1111;
+
             var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
 
-            UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 aluOut = cpu.Reg[rn] ^ shifterOperand;
 
             cpu.SetFlag(Flags.N, aluOut >> 31);
@@ -1454,9 +1498,10 @@
 
         private static void ARM_TST(CPU cpu, UInt32 instruction)
         {
+            UInt32 rn = (instruction >> 16) & 0b1111;
+
             var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
 
-            UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 aluOut = cpu.Reg[rn] & shifterOperand;
 
             cpu.SetFlag(Flags.N, aluOut >> 31);
@@ -1466,6 +1511,7 @@
 
         private static void ARM_UMLAL(CPU cpu, UInt32 instruction)
         {
+            UInt32 s = (instruction >> 20) & 1;
             UInt32 rdHi = (instruction >> 16) & 0b1111;
             UInt32 rdLo = (instruction >> 12) & 0b1111;
             UInt32 rs = (instruction >> 8) & 0b1111;
@@ -1476,7 +1522,6 @@
             cpu.ARM_SetReg(rdLo, (UInt32)resultLo);
             cpu.ARM_SetReg(rdHi, cpu.Reg[rdHi] + (UInt32)(result >> 32) + CarryFrom(resultLo));
 
-            UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
             {
                 cpu.SetFlag(Flags.N, cpu.Reg[rdHi] >> 31);
@@ -1486,6 +1531,7 @@
 
         private static void ARM_UMULL(CPU cpu, UInt32 instruction)
         {
+            UInt32 s = (instruction >> 20) & 1;
             UInt32 rdHi = (instruction >> 16) & 0b1111;
             UInt32 rdLo = (instruction >> 12) & 0b1111;
             UInt32 rs = (instruction >> 8) & 0b1111;
@@ -1495,7 +1541,6 @@
             cpu.ARM_SetReg(rdHi, (UInt32)(result >> 32));
             cpu.ARM_SetReg(rdLo, (UInt32)result);
 
-            UInt32 s = (instruction >> 20) & 1;
             if (s == 1)
             {
                 cpu.SetFlag(Flags.N, cpu.Reg[rdHi] >> 31);
