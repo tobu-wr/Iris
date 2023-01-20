@@ -294,11 +294,7 @@
             if (imm == 0)
             {
                 cpu.SetFlag(Flags.C, cpu.Reg[rm] >> 31);
-
-                if ((cpu.Reg[rm] >> 31) == 0)
-                    cpu.Reg[rd] = 0;
-                else
-                    cpu.Reg[rd] = 0xffff_ffff;
+                cpu.Reg[rd] = ((cpu.Reg[rm] >> 31) == 0) ? 0 : 0xffff_ffff;
             }
             else
             {
@@ -329,11 +325,7 @@
             else
             {
                 cpu.SetFlag(Flags.C, cpu.Reg[rd] >> 31);
-
-                if ((cpu.Reg[rd] >> 31) == 0)
-                    cpu.Reg[rd] = 0;
-                else
-                    cpu.Reg[rd] = 0xffff_ffff;
+                cpu.Reg[rd] = ((cpu.Reg[rd] >> 31) == 0) ? 0 : 0xffff_ffff;
             }
 
             cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
