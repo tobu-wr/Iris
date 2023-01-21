@@ -293,14 +293,14 @@ namespace Iris
                  && ((leftOperand >> 31) != (result >> 31))) ? 1u : 0u;
         }
 
-        private static UInt32 RotateRight(UInt32 value, UInt32 rotateAmount)
+        private static UInt32 RotateRight(UInt32 value, int rotateAmount)
         {
-            return (value >> ((int)rotateAmount & 0x1f)) | (value << (32 - ((int)rotateAmount & 0x1f)));
+            return (value >> (rotateAmount & 0x1f)) | (value << (32 - (rotateAmount & 0x1f)));
         }
 
-        private static UInt32 ArithmeticShiftRight(UInt32 value, UInt32 shiftAmount)
+        private static UInt32 ArithmeticShiftRight(UInt32 value, int shiftAmount)
         {
-            return (UInt32)((Int32)value >> (int)shiftAmount);
+            return (UInt32)((Int32)value >> shiftAmount);
         }
 
         private static UInt32 SignExtend(UInt32 value, int size)
