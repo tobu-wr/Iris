@@ -291,15 +291,17 @@
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
 
-            if (imm == 0)
+            int shiftAmount = imm;
+
+            if (shiftAmount == 0)
             {
                 cpu.SetFlag(Flags.C, cpu.Reg[rm] >> 31);
                 cpu.Reg[rd] = ((cpu.Reg[rm] >> 31) == 0) ? 0 : 0xffff_ffff;
             }
             else
             {
-                cpu.SetFlag(Flags.C, (cpu.Reg[rm] >> (imm - 1)) & 1);
-                cpu.Reg[rd] = ArithmeticShiftRight(cpu.Reg[rm], imm);
+                cpu.SetFlag(Flags.C, (cpu.Reg[rm] >> (shiftAmount - 1)) & 1);
+                cpu.Reg[rd] = ArithmeticShiftRight(cpu.Reg[rm], shiftAmount);
             }
 
             cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
@@ -311,16 +313,16 @@
             UInt16 rs = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
 
-            UInt32 regRs = cpu.Reg[rs] & 0xff;
+            int shiftAmount = (int)(cpu.Reg[rs] & 0xff);
 
-            if (regRs == 0)
+            if (shiftAmount == 0)
             {
                 // nothing to do
             }
-            else if (regRs < 32)
+            else if (shiftAmount < 32)
             {
-                cpu.SetFlag(Flags.C, (cpu.Reg[rd] >> ((int)regRs - 1)) & 1);
-                cpu.Reg[rd] = ArithmeticShiftRight(cpu.Reg[rd], regRs);
+                cpu.SetFlag(Flags.C, (cpu.Reg[rd] >> (shiftAmount - 1)) & 1);
+                cpu.Reg[rd] = ArithmeticShiftRight(cpu.Reg[rd], shiftAmount);
             }
             else
             {
@@ -370,10 +372,10 @@
             }
             else if (h == 0b11)
             {
-                // save _nextInstructionAddress because it's "invalidated" by THUMB_SetPC
+                // save NextInstructionAddress because it's invalidated by THUMB_SetPC
                 UInt32 nextInstructionAddress = cpu.NextInstructionAddress;
 
-                cpu.THUMB_SetPC(cpu.Reg[LR] + ((UInt32)offset << 1));
+                cpu.THUMB_SetPC(cpu.Reg[LR] + (UInt32)(offset << 1));
                 cpu.Reg[LR] = nextInstructionAddress | 1;
             }
         }
@@ -383,10 +385,9 @@
             UInt16 h2 = (UInt16)((instruction >> 6) & 1);
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
 
-            UInt32 regRm = cpu.Reg[(h2 << 3) | rm];
-
-            cpu.SetCPSR((cpu.CPSR & ~(1u << 5)) | ((regRm & 1) << 5));
-            cpu.THUMB_SetPC(regRm & 0xffff_fffe);
+            UInt32 address = cpu.Reg[(h2 << 3) | rm];
+            cpu.SetCPSR((cpu.CPSR & ~(1u << 5)) | ((address & 1) << 5));
+            cpu.THUMB_SetPC(address & 0xffff_fffe);
         }
 
         private static void THUMB_CMN(CPU cpu, UInt16 instruction)
@@ -502,7 +503,7 @@
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             UInt32 address = cpu.Reg[rn] + (imm * 4u);
-            UInt32 data = RotateRight(cpu._callbacks.ReadMemory32(address), 8 * (address & 0b11));
+            UInt32 data = RotateRight(cpu._callbacks.ReadMemory32(address), (int)(8 * (address & 0b11)));
             cpu.Reg[rd] = data;
         }
 
@@ -513,7 +514,7 @@
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             UInt32 address = cpu.Reg[rn] + cpu.Reg[rm];
-            UInt32 data = RotateRight(cpu._callbacks.ReadMemory32(address), 8 * (address & 0b11));
+            UInt32 data = RotateRight(cpu._callbacks.ReadMemory32(address), (int)(8 * (address & 0b11)));
             cpu.Reg[rd] = data;
         }
 
@@ -533,7 +534,7 @@
             UInt16 imm = (UInt16)(instruction & 0xff);
 
             UInt32 address = cpu.Reg[SP] + (imm * 4u);
-            UInt32 data = RotateRight(cpu._callbacks.ReadMemory32(address), 8 * (address & 0b11));
+            UInt32 data = RotateRight(cpu._callbacks.ReadMemory32(address), (int)(8 * (address & 0b11)));
             cpu.Reg[rd] = data;
         }
 
@@ -566,7 +567,7 @@
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             UInt32 address = cpu.Reg[rn] + (imm * 2u);
-            UInt32 data = RotateRight(cpu._callbacks.ReadMemory16(address), 8 * (address & 1));
+            UInt32 data = RotateRight(cpu._callbacks.ReadMemory16(address), (int)(8 * (address & 1)));
             cpu.Reg[rd] = data;
         }
 
@@ -577,7 +578,7 @@
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             UInt32 address = cpu.Reg[rn] + cpu.Reg[rm];
-            UInt32 data = RotateRight(cpu._callbacks.ReadMemory16(address), 8 * (address & 1));
+            UInt32 data = RotateRight(cpu._callbacks.ReadMemory16(address), (int)(8 * (address & 1)));
             cpu.Reg[rd] = data;
         }
 
@@ -618,14 +619,16 @@
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
 
-            if (imm == 0)
+            int shiftAmount = imm;
+
+            if (shiftAmount == 0)
             {
                 cpu.Reg[rd] = cpu.Reg[rm];
             }
             else
             {
-                cpu.SetFlag(Flags.C, (cpu.Reg[rm] >> (32 - imm)) & 1);
-                cpu.Reg[rd] = cpu.Reg[rm] << imm;
+                cpu.SetFlag(Flags.C, (cpu.Reg[rm] >> (32 - shiftAmount)) & 1);
+                cpu.Reg[rd] = cpu.Reg[rm] << shiftAmount;
             }
 
             cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
@@ -637,18 +640,18 @@
             UInt16 rs = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
 
-            UInt32 regRs = cpu.Reg[rs] & 0xff;
+            int shiftAmount = (int)(cpu.Reg[rs] & 0xff);
 
-            if (regRs == 0)
+            if (shiftAmount == 0)
             {
                 // nothing to do
             }
-            else if (regRs < 32)
+            else if (shiftAmount < 32)
             {
-                cpu.SetFlag(Flags.C, (cpu.Reg[rd] >> (32 - (int)regRs)) & 1);
-                cpu.Reg[rd] = cpu.Reg[rd] << (int)regRs;
+                cpu.SetFlag(Flags.C, (cpu.Reg[rd] >> (32 - shiftAmount)) & 1);
+                cpu.Reg[rd] = cpu.Reg[rd] << shiftAmount;
             }
-            else if (regRs == 32)
+            else if (shiftAmount == 32)
             {
                 cpu.SetFlag(Flags.C, cpu.Reg[rd] & 1);
                 cpu.Reg[rd] = 0;
@@ -669,15 +672,17 @@
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
 
-            if (imm == 0)
+            int shiftAmount = imm;
+
+            if (shiftAmount == 0)
             {
                 cpu.SetFlag(Flags.C, cpu.Reg[rm] >> 31);
                 cpu.Reg[rd] = 0;
             }
             else
             {
-                cpu.SetFlag(Flags.C, (cpu.Reg[rm] >> (imm - 1)) & 1);
-                cpu.Reg[rd] = cpu.Reg[rm] >> imm;
+                cpu.SetFlag(Flags.C, (cpu.Reg[rm] >> (shiftAmount - 1)) & 1);
+                cpu.Reg[rd] = cpu.Reg[rm] >> shiftAmount;
             }
 
             cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
@@ -689,18 +694,18 @@
             UInt16 rs = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
 
-            UInt32 regRs = cpu.Reg[rs] & 0xff;
+            int shiftAmount = (int)(cpu.Reg[rs] & 0xff);
 
-            if (regRs == 0)
+            if (shiftAmount == 0)
             {
                 // nothing to do
             }
-            else if (regRs < 32)
+            else if (shiftAmount < 32)
             {
-                cpu.SetFlag(Flags.C, (cpu.Reg[rd] >> ((int)regRs - 1)) & 1);
-                cpu.Reg[rd] = cpu.Reg[rd] >> (int)regRs;
+                cpu.SetFlag(Flags.C, (cpu.Reg[rd] >> (shiftAmount - 1)) & 1);
+                cpu.Reg[rd] = cpu.Reg[rd] >> shiftAmount;
             }
-            else if (regRs == 32)
+            else if (shiftAmount == 32)
             {
                 cpu.SetFlag(Flags.C, cpu.Reg[rd] >> 31);
                 cpu.Reg[rd] = 0;
@@ -842,18 +847,20 @@
             UInt16 rs = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
 
-            if ((cpu.Reg[rs] & 0xff) == 0)
+            int rotateAmount = (int)(cpu.Reg[rs] & 0xff);
+
+            if (rotateAmount == 0)
             {
                 // nothing to do
             }
-            else if ((cpu.Reg[rs] & 0b1_1111) == 0)
+            else if ((rotateAmount & 0b1_1111) == 0)
             {
                 cpu.SetFlag(Flags.C, cpu.Reg[rd] >> 31);
             }
             else
             {
-                cpu.SetFlag(Flags.C, (cpu.Reg[rd] >> ((int)(cpu.Reg[rs] & 0b1_1111) - 1)) & 1);
-                cpu.Reg[rd] = RotateRight(cpu.Reg[rd], cpu.Reg[rs] & 0b1_1111);
+                cpu.SetFlag(Flags.C, (cpu.Reg[rd] >> ((rotateAmount & 0b1_1111) - 1)) & 1);
+                cpu.Reg[rd] = RotateRight(cpu.Reg[rd], rotateAmount & 0b1_1111);
             }
 
             cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
@@ -881,9 +888,7 @@
             UInt16 rn = (UInt16)((instruction >> 8) & 0b111);
             UInt16 registerList = (UInt16)(instruction & 0xff);
 
-            UInt32 regRn = cpu.Reg[rn];
-
-            UInt32 startAddress = regRn;
+            UInt32 startAddress = cpu.Reg[rn];
             UInt32 address = startAddress;
 
             if (registerList != 0)
@@ -895,7 +900,7 @@
                     if (((registerList >> i) & 1) == 1)
                     {
                         if ((i == rn) && (registerList & ~(0xffff_ffff << i)) == 0)
-                            cpu._callbacks.WriteMemory32(address, regRn);
+                            cpu._callbacks.WriteMemory32(address, startAddress);
                         else
                             cpu._callbacks.WriteMemory32(address, cpu.Reg[i]);
 
