@@ -847,20 +847,18 @@
             UInt16 rs = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
 
-            int rotateAmount = (int)(cpu.Reg[rs] & 0xff);
-
-            if (rotateAmount == 0)
+            if ((cpu.Reg[rs] & 0xff) == 0)
             {
                 // nothing to do
             }
-            else if ((rotateAmount & 0b1_1111) == 0)
+            else if ((cpu.Reg[rs] & 0b1_1111) == 0)
             {
                 cpu.SetFlag(Flags.C, cpu.Reg[rd] >> 31);
             }
             else
             {
-                cpu.SetFlag(Flags.C, (cpu.Reg[rd] >> ((rotateAmount & 0b1_1111) - 1)) & 1);
-                cpu.Reg[rd] = RotateRight(cpu.Reg[rd], rotateAmount & 0b1_1111);
+                cpu.SetFlag(Flags.C, (cpu.Reg[rd] >> (int)((cpu.Reg[rs] & 0b1_1111) - 1)) & 1);
+                cpu.Reg[rd] = RotateRight(cpu.Reg[rd], (int)(cpu.Reg[rs] & 0b1_1111));
             }
 
             cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 
 namespace Iris
 {
@@ -243,7 +244,7 @@ namespace Iris
                 UInt32 rotateImm = (instruction >> 8) & 0b1111;
                 UInt32 imm = instruction & 0xff;
 
-                shifterOperand = RotateRight(imm, rotateImm * 2);
+                shifterOperand = RotateRight(imm, (int)(rotateImm * 2));
                 shifterCarryOut = (rotateImm == 0) ? GetFlag(Flags.C) : (shifterOperand >> 31);
             }
             else
@@ -255,54 +256,57 @@ namespace Iris
                 {
                     UInt32 shiftImm = (instruction >> 7) & 0b1_1111;
 
+                    UInt32 value = Reg[rm];
+                    int shiftAmount = (int)shiftImm;
+
                     switch (shift)
                     {
                         case 0b00: // Logical shift left
-                            if (shiftImm == 0)
+                            if (shiftAmount == 0)
                             {
-                                shifterOperand = Reg[rm];
+                                shifterOperand = value;
                                 shifterCarryOut = GetFlag(Flags.C);
                             }
                             else
                             {
-                                shifterOperand = Reg[rm] << (int)shiftImm;
-                                shifterCarryOut = (Reg[rm] >> (32 - (int)shiftImm)) & 1;
+                                shifterOperand = value << shiftAmount;
+                                shifterCarryOut = (value >> (32 - shiftAmount)) & 1;
                             }
                             break;
                         case 0b01: // Logical shift right
-                            if (shiftImm == 0)
+                            if (shiftAmount == 0)
                             {
                                 shifterOperand = 0;
-                                shifterCarryOut = Reg[rm] >> 31;
+                                shifterCarryOut = value >> 31;
                             }
                             else
                             {
-                                shifterOperand = Reg[rm] >> (int)shiftImm;
-                                shifterCarryOut = (Reg[rm] >> ((int)shiftImm - 1)) & 1;
+                                shifterOperand = value >> shiftAmount;
+                                shifterCarryOut = (value >> (shiftAmount - 1)) & 1;
                             }
                             break;
                         case 0b10: // Arithmetic shift right
-                            if (shiftImm == 0)
+                            if (shiftAmount == 0)
                             {
-                                shifterOperand = ((Reg[rm] >> 31) == 0) ? 0 : 0xffff_ffff;
-                                shifterCarryOut = Reg[rm] >> 31;
+                                shifterOperand = ((value >> 31) == 0) ? 0 : 0xffff_ffff;
+                                shifterCarryOut = value >> 31;
                             }
                             else
                             {
-                                shifterOperand = ArithmeticShiftRight(Reg[rm], shiftImm);
-                                shifterCarryOut = (Reg[rm] >> ((int)shiftImm - 1)) & 1;
+                                shifterOperand = ArithmeticShiftRight(value, shiftAmount);
+                                shifterCarryOut = (value >> (shiftAmount - 1)) & 1;
                             }
                             break;
                         case 0b11: // Rotate right
-                            if (shiftImm == 0)
+                            if (shiftAmount == 0)
                             {
-                                shifterOperand = (GetFlag(Flags.C) << 31) | (Reg[rm] >> 1);
-                                shifterCarryOut = Reg[rm] & 1;
+                                shifterOperand = (GetFlag(Flags.C) << 31) | (value >> 1);
+                                shifterCarryOut = value & 1;
                             }
                             else
                             {
-                                shifterOperand = RotateRight(Reg[rm], shiftImm);
-                                shifterCarryOut = (Reg[rm] >> ((int)shiftImm - 1)) & 1;
+                                shifterOperand = RotateRight(value, shiftAmount);
+                                shifterCarryOut = (value >> (shiftAmount - 1)) & 1;
                             }
                             break;
                     }
@@ -311,26 +315,26 @@ namespace Iris
                 {
                     UInt32 rs = (instruction >> 8) & 0b1111;
 
-                    UInt32 regRm = (rm == PC) ? Reg[PC] + 4 : Reg[rm];
-                    UInt32 regRs = Reg[rs] & 0xff;
+                    UInt32 value = (rm == PC) ? Reg[PC] + 4 : Reg[rm];
+                    int shiftAmount = (int)(Reg[rs] & 0xff);
 
                     switch (shift)
                     {
                         case 0b00: // Logical shift left
-                            if (regRs == 0)
+                            if (shiftAmount == 0)
                             {
-                                shifterOperand = regRm;
+                                shifterOperand = value;
                                 shifterCarryOut = GetFlag(Flags.C);
                             }
-                            else if (regRs < 32)
+                            else if (shiftAmount < 32)
                             {
-                                shifterOperand = regRm << (int)regRs;
-                                shifterCarryOut = (regRm >> (32 - (int)regRs)) & 1;
+                                shifterOperand = value << shiftAmount;
+                                shifterCarryOut = (value >> (32 - shiftAmount)) & 1;
                             }
-                            else if (regRs == 32)
+                            else if (shiftAmount == 32)
                             {
                                 shifterOperand = 0;
-                                shifterCarryOut = regRm & 1;
+                                shifterCarryOut = value & 1;
                             }
                             else
                             {
@@ -339,20 +343,20 @@ namespace Iris
                             }
                             break;
                         case 0b01: // Logical shift right
-                            if (regRs == 0)
+                            if (shiftAmount == 0)
                             {
-                                shifterOperand = regRm;
+                                shifterOperand = value;
                                 shifterCarryOut = GetFlag(Flags.C);
                             }
-                            else if (regRs < 32)
+                            else if (shiftAmount < 32)
                             {
-                                shifterOperand = regRm >> (int)regRs;
-                                shifterCarryOut = (regRm >> ((int)regRs - 1)) & 1;
+                                shifterOperand = value >> shiftAmount;
+                                shifterCarryOut = (value >> (shiftAmount - 1)) & 1;
                             }
-                            else if (regRs == 32)
+                            else if (shiftAmount == 32)
                             {
                                 shifterOperand = 0;
-                                shifterCarryOut = regRm >> 31;
+                                shifterCarryOut = value >> 31;
                             }
                             else
                             {
@@ -361,37 +365,37 @@ namespace Iris
                             }
                             break;
                         case 0b10: // Arithmetic shift right
-                            if (regRs == 0)
+                            if (shiftAmount == 0)
                             {
-                                shifterOperand = regRm;
+                                shifterOperand = value;
                                 shifterCarryOut = GetFlag(Flags.C);
                             }
-                            else if (regRs < 32)
+                            else if (shiftAmount < 32)
                             {
-                                shifterOperand = ArithmeticShiftRight(regRm, regRs);
-                                shifterCarryOut = (regRm >> ((int)regRs - 1)) & 1;
+                                shifterOperand = ArithmeticShiftRight(value, shiftAmount);
+                                shifterCarryOut = (value >> (shiftAmount - 1)) & 1;
                             }
                             else
                             {
-                                shifterOperand = ((regRm >> 31) == 0) ? 0 : 0xffff_ffff;
-                                shifterCarryOut = regRm >> 31;
+                                shifterOperand = ((value >> 31) == 0) ? 0 : 0xffff_ffff;
+                                shifterCarryOut = value >> 31;
                             }
                             break;
                         case 0b11: // Rotate right
-                            if (regRs == 0)
+                            if (shiftAmount == 0)
                             {
-                                shifterOperand = regRm;
+                                shifterOperand = value;
                                 shifterCarryOut = GetFlag(Flags.C);
                             }
-                            else if ((regRs & 0b1_1111) == 0)
+                            else if ((shiftAmount & 0b1_1111) == 0)
                             {
-                                shifterOperand = regRm;
-                                shifterCarryOut = regRm >> 31;
+                                shifterOperand = value;
+                                shifterCarryOut = value >> 31;
                             }
                             else
                             {
-                                shifterOperand = RotateRight(regRm, regRs & 0b1_1111);
-                                shifterCarryOut = (regRm >> ((int)(regRs & 0b1_1111) - 1)) & 1;
+                                shifterOperand = RotateRight(value, shiftAmount & 0b1_1111);
+                                shifterCarryOut = (value >> ((shiftAmount & 0b1_1111) - 1)) & 1;
                             }
                             break;
                     }
@@ -448,13 +452,13 @@ namespace Iris
                             if (shiftImm == 0)
                                 index = ((Reg[rm] >> 31) == 1) ? 0xffff_ffff : 0;
                             else
-                                index = ArithmeticShiftRight(Reg[rm], shiftImm);
+                                index = ArithmeticShiftRight(Reg[rm], (int)shiftImm);
                             break;
                         case 0b11:
                             if (shiftImm == 0) // RRX
                                 index = (GetFlag(Flags.C) << 31) | (Reg[rm] >> 1);
                             else // ROR
-                                index = RotateRight(Reg[rm], shiftImm);
+                                index = RotateRight(Reg[rm], (int)shiftImm);
                             break;
                     }
                 }
@@ -494,7 +498,7 @@ namespace Iris
             UInt32 w = (instruction >> 21) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
 
-            UInt32 address = 0;
+            UInt32 index;
 
             if (((instruction >> 22) & 1) == 1) // Immediate
             {
@@ -502,58 +506,36 @@ namespace Iris
                 UInt32 immL = instruction & 0b1111;
 
                 UInt32 offset = (immH << 4) | immL;
-
-                if (p == 0) // Post-indexed
-                {
-                    address = Reg[rn];
-
-                    if (u == 1)
-                        ARM_SetReg(rn, Reg[rn] + offset);
-                    else
-                        ARM_SetReg(rn, Reg[rn] - offset);
-                }
-                else if (w == 0) // Offset
-                {
-                    if (u == 1)
-                        address = Reg[rn] + offset;
-                    else
-                        address = Reg[rn] - offset;
-                }
-                else // Pre-indexed
-                {
-                    if (u == 1)
-                        address = Reg[rn] + offset;
-                    else
-                        address = Reg[rn] - offset;
-
-                    ARM_SetReg(rn, address);
-                }
+                index = offset;
             }
             else if (((instruction >> 8) & 0b1111) == 0) // Register
             {
-                if (p == 0) // Post-indexed
-                {
-                    Console.WriteLine("CPU: encoding unimplemented");
-                    Environment.Exit(1);
-                }
-                else if (w == 0) // Offset
-                {
-                    UInt32 rm = instruction & 0b1111;
+                UInt32 rm = instruction & 0b1111;
 
-                    if (u == 1)
-                        address = Reg[rn] + Reg[rm];
-                    else
-                        address = Reg[rn] - Reg[rm];
-                }
-                else // Pre-indexed
-                {
-                    Console.WriteLine("CPU: encoding unimplemented");
-                    Environment.Exit(1);
-                }
+                index = Reg[rm];
             }
             else
             {
                 throw new Exception("CPU: Wrong addressing mode 3 encoding");
+            }
+
+            UInt32 regRnIndexed = (u == 1) ? (Reg[rn] + index) : (Reg[rn] - index);
+
+            UInt32 address;
+
+            if (p == 0) // Post-indexed
+            {
+                address = Reg[rn];
+                ARM_SetReg(rn, regRnIndexed);
+            }
+            else if (w == 0) // Offset
+            {
+                address = regRnIndexed;
+            }
+            else // Pre-indexed
+            {
+                address = regRnIndexed;
+                ARM_SetReg(rn, address);
             }
 
             return address;
@@ -884,7 +866,7 @@ namespace Iris
             UInt32 rd = (instruction >> 12) & 0b1111;
 
             UInt32 address = cpu.GetAddress(instruction);
-            UInt32 data = RotateRight(cpu._callbacks.ReadMemory32(address), 8 * (address & 0b11));
+            UInt32 data = RotateRight(cpu._callbacks.ReadMemory32(address), (int)(8 * (address & 0b11)));
 
             if (rd == PC)
                 cpu.ARM_SetPC(data & 0xffff_fffc);
@@ -998,7 +980,7 @@ namespace Iris
                 UInt32 rotateImm = (instruction >> 8) & 0b1111;
                 UInt32 imm = instruction & 0xff;
 
-                operand = RotateRight(imm, 2 * rotateImm);
+                operand = RotateRight(imm, (int)(2 * rotateImm));
             }
             else
             {
@@ -1326,7 +1308,7 @@ namespace Iris
             UInt32 rd = (instruction >> 12) & 0b1111;
             UInt32 rm = instruction & 0b1111;
 
-            UInt32 temp = RotateRight(cpu._callbacks.ReadMemory32(cpu.Reg[rn]), 8 * (cpu.Reg[rn] & 0b11));
+            UInt32 temp = RotateRight(cpu._callbacks.ReadMemory32(cpu.Reg[rn]), (int)(8 * (cpu.Reg[rn] & 0b11)));
             cpu._callbacks.WriteMemory32(cpu.Reg[rn], cpu.Reg[rm]);
             cpu.ARM_SetReg(rd, temp);
         }
