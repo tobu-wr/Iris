@@ -54,6 +54,10 @@ namespace Iris
             new(0x0ff0_f090, 0x0150_0000, ARM_CMP), // I bit is 0, bit[7] is 0 and bit[4] is 0
             new(0x0ff0_f090, 0x0150_0080, ARM_CMP), // I bit is 0, bit[7] is 1 and bit[4] is 0
             new(0x0ff0_f090, 0x0150_0010, ARM_CMP), // I bit is 0, bit[7] is 0 and bit[4] is 1
+            new(0x0ff0_f000, 0x0350_f000, ARM_CMP), // I bit is 1
+            new(0x0ff0_f090, 0x0150_f000, ARM_CMP), // I bit is 0, bit[7] is 0 and bit[4] is 0
+            new(0x0ff0_f090, 0x0150_f080, ARM_CMP), // I bit is 0, bit[7] is 1 and bit[4] is 0
+            new(0x0ff0_f090, 0x0150_f010, ARM_CMP), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
             // EOR
             new(0x0fe0_0000, 0x0220_0000, ARM_EOR), // I bit is 1
