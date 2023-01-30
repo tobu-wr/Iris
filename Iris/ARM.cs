@@ -239,7 +239,9 @@ namespace Iris
             UInt32 shifterOperand = 0;
             UInt32 shifterCarryOut = 0;
 
-            if (((instruction >> 25) & 1) == 1) // 32-bit immediate
+            UInt32 i = (instruction >> 25) & 1;
+
+            if (i == 1) // 32-bit immediate
             {
                 UInt32 rotateImm = (instruction >> 8) & 0b1111;
                 UInt32 imm = instruction & 0xff;
@@ -250,9 +252,10 @@ namespace Iris
             else
             {
                 UInt32 shift = (instruction >> 5) & 0b11;
+                UInt32 r = (instruction >> 4) & 1;
                 UInt32 rm = instruction & 0b1111;
 
-                if (((instruction >> 4) & 1) == 0) // Immediate shifts
+                if (r == 0) // Immediate shifts
                 {
                     UInt32 shiftImm = (instruction >> 7) & 0b1_1111;
 
@@ -311,7 +314,7 @@ namespace Iris
                             break;
                     }
                 }
-                else if (((instruction >> 7) & 1) == 0) // Register shifts
+                else // Register shifts
                 {
                     UInt32 rs = (instruction >> 8) & 0b1111;
 
@@ -400,10 +403,6 @@ namespace Iris
                             break;
                     }
                 }
-                else
-                {
-                    throw new Exception("CPU: Wrong addressing mode 1 encoding");
-                }
             }
 
             return (shifterOperand, shifterCarryOut);
@@ -412,6 +411,7 @@ namespace Iris
         // Addressing mode 2
         private UInt32 GetAddress(UInt32 instruction)
         {
+            UInt32 i = (instruction >> 25) & 1;
             UInt32 p = (instruction >> 24) & 1;
             UInt32 u = (instruction >> 23) & 1;
             UInt32 w = (instruction >> 21) & 1;
@@ -419,13 +419,13 @@ namespace Iris
 
             UInt32 index = 0;
 
-            if (((instruction >> 25) & 1) == 0) // Immediate
+            if (i == 0) // Immediate
             {
                 UInt32 offset = instruction & 0xfff;
 
                 index = offset;
             }
-            else if (((instruction >> 4) & 1) == 0)
+            else
             {
                 UInt32 shiftImm = (instruction >> 7) & 0b1_1111;
                 UInt32 shift = (instruction >> 5) & 0b11;
@@ -463,10 +463,6 @@ namespace Iris
                     }
                 }
             }
-            else
-            {
-                throw new Exception("CPU: Wrong addressing mode 2 encoding");
-            }
 
             UInt32 regRnIndexed = (u == 1) ? (Reg[rn] + index) : (Reg[rn] - index);
 
@@ -495,12 +491,13 @@ namespace Iris
         {
             UInt32 p = (instruction >> 24) & 1;
             UInt32 u = (instruction >> 23) & 1;
+            UInt32 i = (instruction >> 22) & 1;
             UInt32 w = (instruction >> 21) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
 
             UInt32 index;
 
-            if (((instruction >> 22) & 1) == 1) // Immediate
+            if (i == 1) // Immediate
             {
                 UInt32 immH = (instruction >> 8) & 0b1111;
                 UInt32 immL = instruction & 0b1111;
@@ -508,15 +505,11 @@ namespace Iris
                 UInt32 offset = (immH << 4) | immL;
                 index = offset;
             }
-            else if (((instruction >> 8) & 0b1111) == 0) // Register
+            else // Register
             {
                 UInt32 rm = instruction & 0b1111;
 
                 index = Reg[rm];
-            }
-            else
-            {
-                throw new Exception("CPU: Wrong addressing mode 3 encoding");
             }
 
             UInt32 regRnIndexed = (u == 1) ? (Reg[rn] + index) : (Reg[rn] - index);

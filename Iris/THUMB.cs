@@ -897,7 +897,7 @@
                 {
                     if (((registerList >> i) & 1) == 1)
                     {
-                        if ((i == rn) && (registerList & ~(0xffff_ffff << i)) == 0)
+                        if ((i == rn) && ((registerList & ~(0xffff_ffff << i)) == 0))
                             cpu._callbacks.WriteMemory32(address, startAddress);
                         else
                             cpu._callbacks.WriteMemory32(address, cpu.Reg[i]);
