@@ -749,6 +749,7 @@ namespace Iris
         private static void ARM_CMP(CPU cpu, UInt32 instruction)
         {
             UInt32 rn = (instruction >> 16) & 0b1111;
+            UInt32 rd = (instruction >> 12) & 0b1111;
 
             var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
 
@@ -757,10 +758,18 @@ namespace Iris
 
             UInt32 aluOut = leftOperand - rightOperand;
 
-            cpu.SetFlag(Flags.N, aluOut >> 31);
-            cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
-            cpu.SetFlag(Flags.C, Not(BorrowFrom(leftOperand, rightOperand)));
-            cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(leftOperand, rightOperand, aluOut));
+            if (rd == PC)
+            {
+                cpu.ARM_SetPC(aluOut & 0x0fff_fffc);
+                cpu.SetCPSR((cpu.CPSR & 0x0fff_fffc) | (aluOut & 0xf000_0003));
+            }
+            else
+            {
+                cpu.SetFlag(Flags.N, aluOut >> 31);
+                cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
+                cpu.SetFlag(Flags.C, Not(BorrowFrom(leftOperand, rightOperand)));
+                cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(leftOperand, rightOperand, aluOut));
+            }
         }
 
         private static void ARM_EOR(CPU cpu, UInt32 instruction)
