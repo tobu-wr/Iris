@@ -83,6 +83,7 @@
 
             // MOV
             new(0xf800, 0x2000, THUMB_MOV1),
+            //new(0xffc0, 0x1c00, THUMB_MOV2),
             new(0xff00, 0x4600, THUMB_MOV3),
 
             // MUL
@@ -130,6 +131,9 @@
             new(0xf800, 0x3800, THUMB_SUB2),
             new(0xfe00, 0x1a00, THUMB_SUB3),
             new(0xff80, 0xb080, THUMB_SUB4),
+
+            // SWI
+            //new(0xff00, 0xdf00, THUMB_SWI),
 
             // TST
             new(0xffc0, 0x4200, THUMB_TST),
