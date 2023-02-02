@@ -209,14 +209,14 @@ namespace Iris
             }
         }
 
-        private bool CurrentModeHasSPSR()
-        {
-            return (CPSR & ModeMask) switch
-            {
-                UserMode or SystemMode => false,
-                _ => true,
-            };
-        }
+        //private bool CurrentModeHasSPSR()
+        //{
+        //    return (CPSR & ModeMask) switch
+        //    {
+        //        UserMode or SystemMode => false,
+        //        _ => true,
+        //    };
+        //}
 
         private static UInt32 SignExtend30(UInt32 value, int size)
         {
@@ -1015,7 +1015,7 @@ namespace Iris
 
                 cpu.SetCPSR((cpu.CPSR & ~mask) | (operand & mask));
             }
-            else if (cpu.CurrentModeHasSPSR())
+            else
             {
                 UInt32 mask = byteMask & (UserMask | PrivMask | StateMask);
                 cpu.SPSR = (cpu.SPSR & ~mask) | (operand & mask);
@@ -1252,7 +1252,7 @@ namespace Iris
             UInt32 rd = (instruction >> 12) & 0b1111;
 
             UInt32 address = cpu.GetAddress(instruction);
-            cpu._callbacks.WriteMemory32(address, cpu.Reg[rd]);
+            cpu._callbacks.WriteMemory32(address, (rd == PC) ? cpu.Reg[PC] + 4 : cpu.Reg[rd]);
         }
 
         private static void ARM_STRB(CPU cpu, UInt32 instruction)
@@ -1288,8 +1288,7 @@ namespace Iris
             {
                 if (rd == PC)
                 {
-                    if (cpu.CurrentModeHasSPSR())
-                        cpu.SetCPSR(cpu.SPSR);
+                    cpu.SetCPSR(cpu.SPSR);
                 }
                 else
                 {
