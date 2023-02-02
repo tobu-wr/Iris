@@ -607,8 +607,7 @@ namespace Iris
             {
                 if (rd == PC)
                 {
-                    Console.WriteLine("ADC: S field partially implemented");
-                    Environment.Exit(1);
+                    cpu.SetCPSR(cpu.SPSR);
                 }
                 else
                 {
@@ -640,8 +639,7 @@ namespace Iris
             {
                 if (rd == PC)
                 {
-                    Console.WriteLine("ADD: S field partially implemented");
-                    Environment.Exit(1);
+                    cpu.SetCPSR(cpu.SPSR);
                 }
                 else
                 {
@@ -667,8 +665,7 @@ namespace Iris
             {
                 if (rd == PC)
                 {
-                    Console.WriteLine("AND: S field partially implemented");
-                    Environment.Exit(1);
+                    cpu.SetCPSR(cpu.SPSR);
                 }
                 else
                 {
@@ -708,8 +705,7 @@ namespace Iris
             {
                 if (rd == PC)
                 {
-                    Console.WriteLine("BIC: S field partially implemented");
-                    Environment.Exit(1);
+                    cpu.SetCPSR(cpu.SPSR);
                 }
                 else
                 {
@@ -786,8 +782,7 @@ namespace Iris
             {
                 if (rd == PC)
                 {
-                    Console.WriteLine("EOR: S field partially implemented");
-                    Environment.Exit(1);
+                    cpu.SetCPSR(cpu.SPSR);
                 }
                 else
                 {
@@ -928,16 +923,8 @@ namespace Iris
 
             if (s == 1)
             {
-                if (rd == PC)
-                {
-                    Console.WriteLine("MLA: S field partially implemented");
-                    Environment.Exit(1);
-                }
-                else
-                {
-                    cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
-                }
+                cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
+                cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
             }
         }
 
@@ -954,8 +941,7 @@ namespace Iris
             {
                 if (rd == PC)
                 {
-                    Console.WriteLine("MOV: S field partially implemented");
-                    Environment.Exit(1);
+                    cpu.SetCPSR(cpu.SPSR);
                 }
                 else
                 {
@@ -1033,16 +1019,8 @@ namespace Iris
 
             if (s == 1)
             {
-                if (rd == PC)
-                {
-                    Console.WriteLine("MUL: S field partially implemented");
-                    Environment.Exit(1);
-                }
-                else
-                {
-                    cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
-                }
+                cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
+                cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
             }
         }
 
@@ -1059,8 +1037,7 @@ namespace Iris
             {
                 if (rd == PC)
                 {
-                    Console.WriteLine("MVN: S field partially implemented");
-                    Environment.Exit(1);
+                    cpu.SetCPSR(cpu.SPSR);
                 }
                 else
                 {
@@ -1085,8 +1062,7 @@ namespace Iris
             {
                 if (rd == PC)
                 {
-                    Console.WriteLine("ORR: S field partially implemented");
-                    Environment.Exit(1);
+                    cpu.SetCPSR(cpu.SPSR);
                 }
                 else
                 {
@@ -1114,8 +1090,7 @@ namespace Iris
             {
                 if (rd == PC)
                 {
-                    Console.WriteLine("RSC: S field partially implemented");
-                    Environment.Exit(1);
+                    cpu.SetCPSR(cpu.SPSR);
                 }
                 else
                 {
@@ -1144,8 +1119,7 @@ namespace Iris
             {
                 if (rd == PC)
                 {
-                    Console.WriteLine("RSC: S field partially implemented");
-                    Environment.Exit(1);
+                    cpu.SetCPSR(cpu.SPSR);
                 }
                 else
                 {
@@ -1174,8 +1148,7 @@ namespace Iris
             {
                 if (rd == PC)
                 {
-                    Console.WriteLine("SBC: S field partially implemented");
-                    Environment.Exit(1);
+                    cpu.SetCPSR(cpu.SPSR);
                 }
                 else
                 {
