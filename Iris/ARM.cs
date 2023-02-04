@@ -1224,8 +1224,9 @@ namespace Iris
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
+            UInt32 data = (rd == PC) ? cpu.Reg[PC] + 4 : cpu.Reg[rd];
             UInt32 address = cpu.GetAddress(instruction);
-            cpu._callbacks.WriteMemory32(address, (rd == PC) ? cpu.Reg[PC] + 4 : cpu.Reg[rd]);
+            cpu._callbacks.WriteMemory32(address, data);
         }
 
         private static void ARM_STRB(CPU cpu, UInt32 instruction)
