@@ -86,7 +86,13 @@ namespace Iris
 
         public Byte ReadMemory8(UInt32 address)
         {
-            if (address is >= 0x0200_0000 and < 0x0300_0000)
+            address &= 0x0fff_ffff;
+            if (address is >= 0x0000_0000 and < 0x0000_4000)
+            {
+                // BIOS
+                return 0;
+            }
+            else if (address is >= 0x0200_0000 and < 0x0300_0000)
             {
                 UInt32 offset = address - 0x0200_0000;
                 if (offset < _externalWRAM.Length)
@@ -209,13 +215,13 @@ namespace Iris
 
         public UInt16 ReadMemory16(UInt32 address)
         {
-            address &= 0xffff_fffe;
+            address &= 0x0fff_fffe;
             return (UInt16)((ReadMemory8(address + 1) << 8) | ReadMemory8(address));
         }
 
         public UInt32 ReadMemory32(UInt32 address)
         {
-            address &= 0xffff_fffc;
+            address &= 0x0fff_fffc;
             return (UInt32)((ReadMemory16(address + 2) << 16) | ReadMemory16(address));
         }
 
