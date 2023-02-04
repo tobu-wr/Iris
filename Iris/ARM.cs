@@ -141,6 +141,7 @@ namespace Iris
 
             // STM
             new(0x0e50_0000, 0x0800_0000, ARM_STM1),
+            new(0x0e70_0000, 0x0840_0000, ARM_STM2),
 
             // STR
             new(0x0c50_0000, 0x0400_0000, ARM_STR),
@@ -795,24 +796,33 @@ namespace Iris
 
         private static void ARM_LDM1(CPU cpu, UInt32 instruction)
         {
+            UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 registerList = instruction & 0xffff;
 
             var (startAddress, _) = cpu.GetAddress_Multiple(instruction);
             UInt32 address = startAddress;
 
-            for (var i = 0; i <= 14; ++i)
+            if (registerList != 0)
             {
-                if (((registerList >> i) & 1) == 1)
+                for (var i = 0; i <= 14; ++i)
                 {
-                    cpu.Reg[i] = cpu._callbacks.ReadMemory32(address);
-                    address += 4;
+                    if (((registerList >> i) & 1) == 1)
+                    {
+                        cpu.Reg[i] = cpu._callbacks.ReadMemory32(address);
+                        address += 4;
+                    }
+                }
+
+                if (((registerList >> 15) & 1) == 1)
+                {
+                    UInt32 value = cpu._callbacks.ReadMemory32(address);
+                    cpu.ARM_SetPC(value & 0xffff_fffc);
                 }
             }
-
-            if (((registerList >> 15) & 1) == 1)
+            else
             {
-                UInt32 value = cpu._callbacks.ReadMemory32(address);
-                cpu.ARM_SetPC(value & 0xffff_fffc);
+                cpu.ARM_SetPC(cpu._callbacks.ReadMemory32(address));
+                cpu.Reg[rn] += 0x40;
             }
         }
 
@@ -889,7 +899,7 @@ namespace Iris
             UInt32 rd = (instruction >> 12) & 0b1111;
 
             UInt32 address = cpu.GetAddress_Misc(instruction);
-            UInt16 data = cpu._callbacks.ReadMemory16(address);
+            UInt32 data = RotateRight(cpu._callbacks.ReadMemory16(address), (int)(8 * (address & 1)));
             cpu.ARM_SetReg(rd, data);
         }
 
@@ -907,8 +917,17 @@ namespace Iris
             UInt32 rd = (instruction >> 12) & 0b1111;
 
             UInt32 address = cpu.GetAddress_Misc(instruction);
-            UInt16 data = cpu._callbacks.ReadMemory16(address);
-            cpu.ARM_SetReg(rd, SignExtend(data, 16));
+
+            if ((address & 1) == 1)
+            {
+                Byte data = cpu._callbacks.ReadMemory8(address);
+                cpu.ARM_SetReg(rd, SignExtend(data, 8));
+            }
+            else
+            {
+                UInt16 data = cpu._callbacks.ReadMemory16(address);
+                cpu.ARM_SetReg(rd, SignExtend(data, 16));
+            }
         }
 
         private static void ARM_MLA(CPU cpu, UInt32 instruction)
@@ -1210,11 +1229,55 @@ namespace Iris
             var (startAddress, _) = cpu.GetAddress_Multiple(instruction);
             UInt32 address = startAddress;
 
+            if (registerList != 0)
+            {
+                for (var i = 0; i <= 14; ++i)
+                {
+                    if (((registerList >> i) & 1) == 1)
+                    {
+                        if ((i == rn) && ((registerList & ~(0xffff << i)) == 0))
+                            cpu._callbacks.WriteMemory32(address, regRn);
+                        else
+                            cpu._callbacks.WriteMemory32(address, cpu.Reg[i]);
+
+                        address += 4;
+                    }
+                }
+
+                if (((registerList >> 15) & 1) == 1)
+                    cpu._callbacks.WriteMemory32(address, cpu.Reg[PC] + 4);
+            }
+            else
+            {
+                cpu._callbacks.WriteMemory32(address, cpu.Reg[PC] + 4);
+                cpu.Reg[rn] += 0x40;
+            }
+        }
+
+        private static void ARM_STM2(CPU cpu, UInt32 instruction)
+        {
+            UInt32 registerList = instruction & 0xffff;
+
+            var (startAddress, _) = cpu.GetAddress_Multiple(instruction);
+            UInt32 address = startAddress;
+
             for (var i = 0; i <= 15; ++i)
             {
                 if (((registerList >> i) & 1) == 1)
                 {
-                    cpu._callbacks.WriteMemory32(address, (i == rn) ? regRn : cpu.Reg[i]);
+                    UInt32 value = i switch
+                    {
+                        8 => cpu.Reg8,
+                        9 => cpu.Reg9,
+                        10 => cpu.Reg10,
+                        11 => cpu.Reg11,
+                        12 => cpu.Reg12,
+                        13 => cpu.Reg13,
+                        14 => cpu.Reg14,
+                        _ => cpu.Reg[i],
+                    };
+
+                    cpu._callbacks.WriteMemory32(address, value);
                     address += 4;
                 }
             }
@@ -1241,8 +1304,9 @@ namespace Iris
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
+            UInt16 data = (UInt16)cpu.Reg[rd];
             UInt32 address = cpu.GetAddress_Misc(instruction);
-            cpu._callbacks.WriteMemory16(address, (UInt16)cpu.Reg[rd]);
+            cpu._callbacks.WriteMemory16(address, data);
         }
 
         private static void ARM_SUB(CPU cpu, UInt32 instruction)
