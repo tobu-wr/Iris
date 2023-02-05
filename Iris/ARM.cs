@@ -48,6 +48,10 @@ namespace Iris
             new(0x0ff0_f090, 0x0170_0000, ARM_CMN), // I bit is 0, bit[7] is 0 and bit[4] is 0
             new(0x0ff0_f090, 0x0170_0080, ARM_CMN), // I bit is 0, bit[7] is 1 and bit[4] is 0
             new(0x0ff0_f090, 0x0170_0010, ARM_CMN), // I bit is 0, bit[7] is 0 and bit[4] is 1
+            new(0x0ff0_f000, 0x0370_f000, ARM_CMN), // I bit is 1
+            new(0x0ff0_f090, 0x0170_f000, ARM_CMN), // I bit is 0, bit[7] is 0 and bit[4] is 0
+            new(0x0ff0_f090, 0x0170_f080, ARM_CMN), // I bit is 0, bit[7] is 1 and bit[4] is 0
+            new(0x0ff0_f090, 0x0170_f010, ARM_CMN), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
             // CMP
             new(0x0ff0_f000, 0x0350_0000, ARM_CMP), // I bit is 1
@@ -172,12 +176,20 @@ namespace Iris
             new(0x0ff0_f090, 0x0130_0000, ARM_TEQ), // I bit is 0, bit[7] is 0 and bit[4] is 0
             new(0x0ff0_f090, 0x0130_0080, ARM_TEQ), // I bit is 0, bit[7] is 1 and bit[4] is 0
             new(0x0ff0_f090, 0x0130_0010, ARM_TEQ), // I bit is 0, bit[7] is 0 and bit[4] is 1
+            new(0x0ff0_f000, 0x0330_f000, ARM_TEQ), // I bit is 1
+            new(0x0ff0_f090, 0x0130_f000, ARM_TEQ), // I bit is 0, bit[7] is 0 and bit[4] is 0
+            new(0x0ff0_f090, 0x0130_f080, ARM_TEQ), // I bit is 0, bit[7] is 1 and bit[4] is 0
+            new(0x0ff0_f090, 0x0130_f010, ARM_TEQ), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
             // TST
             new(0x0ff0_f000, 0x0310_0000, ARM_TST), // I bit is 1
             new(0x0ff0_f090, 0x0110_0000, ARM_TST), // I bit is 0, bit[7] is 0 and bit[4] is 0
             new(0x0ff0_f090, 0x0110_0080, ARM_TST), // I bit is 0, bit[7] is 1 and bit[4] is 0
             new(0x0ff0_f090, 0x0110_0010, ARM_TST), // I bit is 0, bit[7] is 0 and bit[4] is 1
+            new(0x0ff0_f000, 0x0310_f000, ARM_TST), // I bit is 1
+            new(0x0ff0_f090, 0x0110_f000, ARM_TST), // I bit is 0, bit[7] is 0 and bit[4] is 0
+            new(0x0ff0_f090, 0x0110_f080, ARM_TST), // I bit is 0, bit[7] is 1 and bit[4] is 0
+            new(0x0ff0_f090, 0x0110_f010, ARM_TST), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
             // UMLAL
             new(0x0fe0_00f0, 0x00a0_0090, ARM_UMLAL),
@@ -209,15 +221,6 @@ namespace Iris
                 throw new Exception(string.Format("CPU: Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, NextInstructionAddress - 4));
             }
         }
-
-        //private bool CurrentModeHasSPSR()
-        //{
-        //    return (CPSR & ModeMask) switch
-        //    {
-        //        UserMode or SystemMode => false,
-        //        _ => true,
-        //    };
-        //}
 
         private static UInt32 SignExtend30(UInt32 value, int size)
         {
@@ -730,6 +733,7 @@ namespace Iris
         private static void ARM_CMN(CPU cpu, UInt32 instruction)
         {
             UInt32 rn = (instruction >> 16) & 0b1111;
+            UInt32 rd = (instruction >> 12) & 0b1111;
 
             var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
 
@@ -739,10 +743,18 @@ namespace Iris
             UInt64 result = (UInt64)leftOperand + (UInt64)rightOperand;
             UInt32 aluOut = (UInt32)result;
 
-            cpu.SetFlag(Flags.N, aluOut >> 31);
-            cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
-            cpu.SetFlag(Flags.C, CarryFrom(result));
-            cpu.SetFlag(Flags.V, OverflowFrom_Addition(leftOperand, rightOperand, aluOut));
+            if (rd == PC)
+            {
+                cpu.SetCPSR((cpu.CPSR & 0x0fff_fffc) | (aluOut & 0xf000_0003));
+                cpu.ARM_SetPC(aluOut & 0x0fff_fffc);
+            }
+            else
+            {
+                cpu.SetFlag(Flags.N, aluOut >> 31);
+                cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
+                cpu.SetFlag(Flags.C, CarryFrom(result));
+                cpu.SetFlag(Flags.V, OverflowFrom_Addition(leftOperand, rightOperand, aluOut));
+            }
         }
 
         private static void ARM_CMP(CPU cpu, UInt32 instruction)
@@ -759,8 +771,8 @@ namespace Iris
 
             if (rd == PC)
             {
-                cpu.ARM_SetPC(aluOut & 0x0fff_fffc);
                 cpu.SetCPSR((cpu.CPSR & 0x0fff_fffc) | (aluOut & 0xf000_0003));
+                cpu.ARM_SetPC(aluOut & 0x0fff_fffc);
             }
             else
             {
@@ -1370,27 +1382,45 @@ namespace Iris
         private static void ARM_TEQ(CPU cpu, UInt32 instruction)
         {
             UInt32 rn = (instruction >> 16) & 0b1111;
+            UInt32 rd = (instruction >> 12) & 0b1111;
 
             var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
 
             UInt32 aluOut = cpu.Reg[rn] ^ shifterOperand;
 
-            cpu.SetFlag(Flags.N, aluOut >> 31);
-            cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
-            cpu.SetFlag(Flags.C, shifterCarryOut);
+            if (rd == PC)
+            {
+                cpu.SetCPSR((cpu.CPSR & 0x0fff_fffc) | (aluOut & 0xf000_0003));
+                cpu.ARM_SetPC(aluOut & 0x0fff_fffc);
+            }
+            else
+            {
+                cpu.SetFlag(Flags.N, aluOut >> 31);
+                cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
+                cpu.SetFlag(Flags.C, shifterCarryOut);
+            }
         }
 
         private static void ARM_TST(CPU cpu, UInt32 instruction)
         {
             UInt32 rn = (instruction >> 16) & 0b1111;
+            UInt32 rd = (instruction >> 12) & 0b1111;
 
             var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
 
             UInt32 aluOut = cpu.Reg[rn] & shifterOperand;
 
-            cpu.SetFlag(Flags.N, aluOut >> 31);
-            cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
-            cpu.SetFlag(Flags.C, shifterCarryOut);
+            if (rd == PC)
+            {
+                cpu.SetCPSR((cpu.CPSR & 0x0fff_fffc) | (aluOut & 0xf000_0003));
+                cpu.ARM_SetPC(aluOut & 0x0fff_fffc);
+            }
+            else
+            {
+                cpu.SetFlag(Flags.N, aluOut >> 31);
+                cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
+                cpu.SetFlag(Flags.C, shifterCarryOut);
+            }
         }
 
         private static void ARM_UMLAL(CPU cpu, UInt32 instruction)
