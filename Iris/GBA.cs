@@ -92,17 +92,25 @@ namespace Iris
                 // BIOS
                 return 0;
             }
-            else if (address is >= 0x0200_0000 and < 0x0300_0000)
+            else if (address is >= 0x0000_4000 and < 0x0200_0000)
+            {
+                // unused
+                return 0;
+            }
+            else if (address is >= 0x0200_0000 and < 0x0204_0000)
             {
                 UInt32 offset = address - 0x0200_0000;
-                if (offset < _externalWRAM.Length)
-                    return _externalWRAM[offset];
+                return _externalWRAM[offset];
             }
-            else if (address is >= 0x0300_0000 and < 0x0400_0000)
+            else if (address is >= 0x0300_0000 and < 0x0300_8000)
             {
                 UInt32 offset = address - 0x0300_0000;
-                if (offset < _internalWRAM.Length)
-                    return _internalWRAM[offset];
+                return _internalWRAM[offset];
+            }
+            else if (address is >= 0x0300_8000 and < 0x0400_0000)
+            {
+                // unused
+                return 0;
             }
             else if (address is >= 0x0400_0000 and < 0x0500_0000)
             {
@@ -113,6 +121,11 @@ namespace Iris
                         return (Byte)_ppu.DISPCNT;
                     case 0x001:
                         return (Byte)(_ppu.DISPCNT >> 8);
+
+                    case 0x002:
+                    case 0x003:
+                        // undocumented - green swap
+                        return 0;
 
                     case 0x004:
                         return (Byte)_ppu.DISPSTAT;
@@ -214,6 +227,12 @@ namespace Iris
                         Console.WriteLine("GBA: Read from IME register unimplemented");
                         return 0;
                 }
+            }
+            else if (address is >= 0x0600_0000 and < 0x0601_8000)
+            {
+                UInt32 offset = address - 0x0600_0000;
+                if (offset < _ppu.VRAM.Length)
+                    return _ppu.VRAM[offset];
             }
             else if (address is >= 0x0800_0000 and < 0x0a00_0000)
             {
