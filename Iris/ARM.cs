@@ -551,11 +551,13 @@ namespace Iris
             UInt32 startAddress;
             UInt32 endAddress;
 
+            UInt32 increment = (registerList != 0) ? (NumberOfSetBitsIn(registerList, 16) * 4) : 0x40;
+
             UInt32 value;
 
             if (u == 1) // increment
             {
-                value = Reg[rn] + (NumberOfSetBitsIn(registerList, 16) * 4);
+                value = Reg[rn] + increment;
 
                 if (p == 0) // after
                 {
@@ -570,7 +572,7 @@ namespace Iris
             }
             else // decrement
             {
-                value = Reg[rn] - (NumberOfSetBitsIn(registerList, 16) * 4);
+                value = Reg[rn] - increment;
 
                 if (p == 0) // after
                 {
@@ -822,7 +824,6 @@ namespace Iris
             else
             {
                 cpu.ARM_SetPC(cpu._callbacks.ReadMemory32(address));
-                cpu.Reg[rn] += 0x40;
             }
         }
 
@@ -1250,7 +1251,6 @@ namespace Iris
             else
             {
                 cpu._callbacks.WriteMemory32(address, cpu.Reg[PC] + 4);
-                cpu.Reg[rn] += 0x40;
             }
         }
 
