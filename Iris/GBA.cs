@@ -164,6 +164,26 @@ namespace Iris
                         Console.WriteLine("GBA: Read from DMA3CNT_H register unimplemented");
                         return 0;
 
+                    case 0x102:
+                    case 0x103:
+                        Console.WriteLine("GBA: Read from TM0CNT_H register unimplemented");
+                        return 0;
+
+                    case 0x106:
+                    case 0x107:
+                        Console.WriteLine("GBA: Read from TM1CNT_H register unimplemented");
+                        return 0;
+
+                    case 0x10a:
+                    case 0x10b:
+                        Console.WriteLine("GBA: Read from TM2CNT_H register unimplemented");
+                        return 0;
+
+                    case 0x10e:
+                    case 0x10f:
+                        Console.WriteLine("GBA: Read from TM3CNT_H register unimplemented");
+                        return 0;
+
                     case 0x128:
                     case 0x129:
                         Console.WriteLine("GBA: Read from SIOCNT register unimplemented");
@@ -357,6 +377,11 @@ namespace Iris
                         Console.WriteLine("GBA: Write to WINOUT register unimplemented");
                         break;
 
+                    case 0x04c:
+                    case 0x04d:
+                        Console.WriteLine("GBA: Write to MOSAIC register unimplemented");
+                        break;
+
                     case 0x050:
                     case 0x051:
                         Console.WriteLine("GBA: Write to BLDCNT register unimplemented");
@@ -365,6 +390,11 @@ namespace Iris
                     case 0x052:
                     case 0x053:
                         Console.WriteLine("GBA: Write to BLDALPHA register unimplemented");
+                        break;
+
+                    case 0x054:
+                    case 0x055:
+                        Console.WriteLine("GBA: Write to BLDY register unimplemented");
                         break;
 
                     case 0x062:
@@ -492,6 +522,26 @@ namespace Iris
                         Console.WriteLine("GBA: Write to TM0CNT_H register unimplemented");
                         break;
 
+                    case 0x104:
+                    case 0x105:
+                        Console.WriteLine("GBA: Write to TM1CNT_L register unimplemented");
+                        break;
+
+                    case 0x106:
+                    case 0x107:
+                        Console.WriteLine("GBA: Write to TM1CNT_H register unimplemented");
+                        break;
+
+                    case 0x108:
+                    case 0x109:
+                        Console.WriteLine("GBA: Write to TM2CNT_L register unimplemented");
+                        break;
+
+                    case 0x10a:
+                    case 0x10b:
+                        Console.WriteLine("GBA: Write to TM2CNT_H register unimplemented");
+                        break;
+
                     case 0x10c:
                     case 0x10d:
                         Console.WriteLine("GBA: Write to TM3CNT_L register unimplemented");
@@ -502,6 +552,26 @@ namespace Iris
                         Console.WriteLine("GBA: Write to TM3CNT_H register unimplemented");
                         break;
 
+                    case 0x120:
+                    case 0x121:
+                        Console.WriteLine("GBA: Write to SIODATA32_L/SIOMULTI0 register unimplemented");
+                        break;
+
+                    case 0x122:
+                    case 0x123:
+                        Console.WriteLine("GBA: Write to SIODATA32_H/SIOMULTI1 register unimplemented");
+                        break;
+
+                    case 0x124:
+                    case 0x125:
+                        Console.WriteLine("GBA: Write to SIOMULTI2 register unimplemented");
+                        break;
+
+                    case 0x126:
+                    case 0x127:
+                        Console.WriteLine("GBA: Write to SIOMULTI3 register unimplemented");
+                        break;
+
                     case 0x128:
                     case 0x129:
                         Console.WriteLine("GBA: Write to SIOCNT register unimplemented");
@@ -510,6 +580,16 @@ namespace Iris
                     case 0x12a:
                     case 0x12b:
                         Console.WriteLine("GBA: Write to SIODATA8 register unimplemented");
+                        break;
+
+                    case 0x130:
+                    case 0x131:
+                        Console.WriteLine("GBA: Write to KEYINPUT register unimplemented");
+                        break;
+
+                    case 0x132:
+                    case 0x133:
+                        Console.WriteLine("GBA: Write to KEYCNT register unimplemented");
                         break;
 
                     case 0x134:
