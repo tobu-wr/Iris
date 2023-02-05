@@ -391,7 +391,7 @@
 
             UInt32 address = cpu.Reg[(h2 << 3) | rm];
             cpu.SetCPSR((cpu.CPSR & ~(1u << 5)) | ((address & 1) << 5));
-            cpu.THUMB_SetPC(address & 0xffff_fffe);
+            cpu.THUMB_SetPC(address);
         }
 
         private static void THUMB_CMN(CPU cpu, UInt16 instruction)
@@ -477,8 +477,7 @@
             UInt16 rn = (UInt16)((instruction >> 8) & 0b111);
             UInt16 registerList = (UInt16)(instruction & 0xff);
 
-            UInt32 startAddress = cpu.Reg[rn];
-            UInt32 address = startAddress;
+            UInt32 address = cpu.Reg[rn];
 
             if (registerList != 0)
             {
@@ -815,7 +814,7 @@
             }
 
             if (r == 1)
-                cpu.THUMB_SetPC(cpu._callbacks.ReadMemory32(address) & 0xffff_fffe);
+                cpu.THUMB_SetPC(cpu._callbacks.ReadMemory32(address));
 
             cpu.Reg[SP] += 4 * (r + NumberOfSetBitsIn(registerList, 8));
         }
@@ -887,8 +886,8 @@
             UInt16 rn = (UInt16)((instruction >> 8) & 0b111);
             UInt16 registerList = (UInt16)(instruction & 0xff);
 
-            UInt32 startAddress = cpu.Reg[rn];
-            UInt32 address = startAddress;
+            UInt32 regRn = cpu.Reg[rn];
+            UInt32 address = regRn;
 
             if (registerList != 0)
             {
@@ -899,7 +898,7 @@
                     if (((registerList >> i) & 1) == 1)
                     {
                         if ((i == rn) && ((registerList & ~(0xff << i)) == 0))
-                            cpu._callbacks.WriteMemory32(address, startAddress);
+                            cpu._callbacks.WriteMemory32(address, regRn);
                         else
                             cpu._callbacks.WriteMemory32(address, cpu.Reg[i]);
 
