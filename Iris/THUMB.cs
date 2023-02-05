@@ -379,7 +379,7 @@
                 // save NextInstructionAddress because it's invalidated by THUMB_SetPC
                 UInt32 nextInstructionAddress = cpu.NextInstructionAddress;
 
-                cpu.THUMB_SetPC(cpu.Reg[LR] + ((UInt32)offset << 1));
+                cpu.THUMB_SetPC(cpu.Reg[LR] + (UInt32)(offset << 1));
                 cpu.Reg[LR] = nextInstructionAddress | 1;
             }
         }
@@ -526,7 +526,7 @@
             UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
             UInt16 imm = (UInt16)(instruction & 0xff);
 
-            UInt32 address = (cpu.Reg[PC] & 0xffff_fffc) + (imm * 4u);
+            UInt32 address = cpu.Reg[PC] + (imm * 4u);
             UInt32 data = cpu._callbacks.ReadMemory32(address);
             cpu.Reg[rd] = data;
         }
