@@ -801,8 +801,8 @@
             UInt16 r = (UInt16)((instruction >> 8) & 1);
             UInt16 registerList = (UInt16)(instruction & 0xff);
 
-            UInt32 startAddress = cpu.Reg[SP];
-            UInt32 address = startAddress;
+            UInt32 address = cpu.Reg[SP];
+            cpu.Reg[SP] += 4 * (r + NumberOfSetBitsIn(registerList, 8));
 
             for (var i = 0; i <= 7; ++i)
             {
@@ -815,8 +815,6 @@
 
             if (r == 1)
                 cpu.THUMB_SetPC(cpu._callbacks.ReadMemory32(address));
-
-            cpu.Reg[SP] += 4 * (r + NumberOfSetBitsIn(registerList, 8));
         }
 
         private static void THUMB_PUSH(CPU cpu, UInt16 instruction)
@@ -824,8 +822,8 @@
             UInt16 r = (UInt16)((instruction >> 8) & 1);
             UInt16 registerList = (UInt16)(instruction & 0xff);
 
-            UInt32 startAddress = cpu.Reg[SP] - 4 * (r + NumberOfSetBitsIn(registerList, 8));
-            UInt32 address = startAddress;
+            cpu.Reg[SP] -= 4 * (r + NumberOfSetBitsIn(registerList, 8));
+            UInt32 address = cpu.Reg[SP];
 
             for (var i = 0; i <= 7; ++i)
             {
@@ -838,8 +836,6 @@
 
             if (r == 1)
                 cpu._callbacks.WriteMemory32(address, cpu.Reg[LR]);
-
-            cpu.Reg[SP] = startAddress;
         }
 
         private static void THUMB_ROR(CPU cpu, UInt16 instruction)
