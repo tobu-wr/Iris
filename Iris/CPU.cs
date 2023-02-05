@@ -74,6 +74,21 @@ namespace Iris
                 THUMB_Step();
         }
 
+        private void SetPC(UInt32 value)
+        {
+            value &= 0xffff_fffe;
+            Reg[PC] = value;
+            NextInstructionAddress = value;
+        }
+
+        private void SetReg(UInt32 i, UInt32 value)
+        {
+            if (i == PC)
+                SetPC(value);
+            else
+                Reg[i] = value;
+        }
+
         private void SetCPSR(UInt32 value)
         {
             UInt32 previousMode = CPSR & ModeMask;

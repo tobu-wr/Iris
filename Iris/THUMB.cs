@@ -157,21 +157,6 @@
             throw new Exception(string.Format("CPU: Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, NextInstructionAddress - 2));
         }
 
-        private void THUMB_SetPC(UInt32 value)
-        {
-            value &= 0xffff_fffe;
-            Reg[PC] = value;
-            NextInstructionAddress = value;
-        }
-
-        private void THUMB_SetReg(UInt32 i, UInt32 value)
-        {
-            if (i == PC)
-                THUMB_SetPC(value);
-            else
-                Reg[i] = value;
-        }
-
         private static void THUMB_ADC(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
@@ -252,7 +237,7 @@
             UInt32 hrd = (UInt32)((h1 << 3) | rd);
             UInt32 hrm = (UInt32)((h2 << 3) | rm);
 
-            cpu.THUMB_SetReg(hrd, cpu.Reg[hrd] + cpu.Reg[hrm]);
+            cpu.SetReg(hrd, cpu.Reg[hrd] + cpu.Reg[hrm]);
         }
 
         private static void THUMB_ADD5(CPU cpu, UInt16 instruction)
@@ -344,14 +329,14 @@
             UInt16 imm = (UInt16)(instruction & 0xff);
 
             if (cpu.ConditionPassed(cond))
-                cpu.THUMB_SetPC(cpu.Reg[PC] + (SignExtend(imm, 8) << 1));
+                cpu.SetPC(cpu.Reg[PC] + (SignExtend(imm, 8) << 1));
         }
 
         private static void THUMB_B2(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)(instruction & 0x7ff);
 
-            cpu.THUMB_SetPC(cpu.Reg[PC] + (SignExtend(imm, 11) << 1));
+            cpu.SetPC(cpu.Reg[PC] + (SignExtend(imm, 11) << 1));
         }
 
         private static void THUMB_BIC(CPU cpu, UInt16 instruction)
@@ -376,10 +361,10 @@
             }
             else if (h == 0b11)
             {
-                // save NextInstructionAddress because it's invalidated by THUMB_SetPC
+                // save NextInstructionAddress because it's invalidated by SetPC
                 UInt32 nextInstructionAddress = cpu.NextInstructionAddress;
 
-                cpu.THUMB_SetPC(cpu.Reg[LR] + (UInt32)(offset << 1));
+                cpu.SetPC(cpu.Reg[LR] + (UInt32)(offset << 1));
                 cpu.Reg[LR] = nextInstructionAddress | 1;
             }
         }
@@ -391,7 +376,7 @@
 
             UInt32 address = cpu.Reg[(h2 << 3) | rm];
             cpu.SetCPSR((cpu.CPSR & ~(1u << 5)) | ((address & 1) << 5));
-            cpu.THUMB_SetPC(address);
+            cpu.SetPC(address);
         }
 
         private static void THUMB_CMN(CPU cpu, UInt16 instruction)
@@ -479,7 +464,12 @@
 
             UInt32 address = cpu.Reg[rn];
 
-            if (registerList != 0)
+            if (registerList == 0)
+            {
+                cpu.Reg[rn] += 0x40;
+                cpu.SetPC(cpu._callbacks.ReadMemory32(address));
+            }
+            else
             {
                 cpu.Reg[rn] += NumberOfSetBitsIn(registerList, 8) * 4;
 
@@ -491,11 +481,6 @@
                         address += 4;
                     }
                 }
-            }
-            else
-            {
-                cpu.THUMB_SetPC(cpu._callbacks.ReadMemory32(address));
-                cpu.Reg[rn] += 0x40;
             }
         }
 
@@ -744,7 +729,7 @@
             UInt16 hrd = (UInt16)((h1 << 3) | rd);
             UInt16 hrm = (UInt16)((h2 << 3) | rm);
 
-            cpu.THUMB_SetReg(hrd, cpu.Reg[hrm]);
+            cpu.SetReg(hrd, cpu.Reg[hrm]);
         }
 
         private static void THUMB_MUL(CPU cpu, UInt16 instruction)
@@ -814,7 +799,7 @@
             }
 
             if (r == 1)
-                cpu.THUMB_SetPC(cpu._callbacks.ReadMemory32(address));
+                cpu.SetPC(cpu._callbacks.ReadMemory32(address));
         }
 
         private static void THUMB_PUSH(CPU cpu, UInt16 instruction)
@@ -885,7 +870,12 @@
             UInt32 regRn = cpu.Reg[rn];
             UInt32 address = regRn;
 
-            if (registerList != 0)
+            if (registerList == 0)
+            {
+                cpu.Reg[rn] += 0x40;
+                cpu._callbacks.WriteMemory32(address, cpu.Reg[PC] + 2);
+            }
+            else
             {
                 cpu.Reg[rn] += NumberOfSetBitsIn(registerList, 8) * 4;
 
@@ -901,11 +891,6 @@
                         address += 4;
                     }
                 }
-            }
-            else
-            {
-                cpu._callbacks.WriteMemory32(address, cpu.Reg[PC] + 2);
-                cpu.Reg[rn] += 0x40;
             }
         }
 
