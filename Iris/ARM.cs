@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Iris
 {
@@ -743,10 +744,15 @@ namespace Iris
 
             if (rd == PC)
             {
-                UInt32 mask = ((cpu.CPSR & ModeMask) == UserMode) ? 0xf000_0000 : 0xf000_0003;
-                cpu.SetCPSR((cpu.CPSR & ~mask) | (aluOut & mask));
-
-                cpu.SetPC(aluOut & 0x0fff_fffc);
+                if ((cpu.CPSR & ModeMask) == UserMode)
+                {
+                    const UInt32 mask = 0xf000_0000;
+                    cpu.CPSR = (cpu.CPSR & ~mask) | (aluOut & mask);
+                }
+                else
+                {
+                    cpu.SetCPSR((cpu.CPSR & ~0xf000_00c3) | (aluOut & 0xf000_0003) | (((aluOut >> 26) & 0b11) << 6));
+                }
             }
             else
             {
@@ -773,8 +779,15 @@ namespace Iris
 
             if (rd == PC)
             {
-                cpu.SetCPSR((cpu.CPSR & 0x0fff_fffc) | (aluOut & 0xf000_0003));
-                cpu.SetPC(aluOut & 0x0fff_fffc);
+                if ((cpu.CPSR & ModeMask) == UserMode)
+                {
+                    const UInt32 mask = 0xf000_0000;
+                    cpu.CPSR = (cpu.CPSR & ~mask) | (aluOut & mask);
+                }
+                else
+                {
+                    cpu.SetCPSR((cpu.CPSR & ~0xf000_00c3) | (aluOut & 0xf000_0003) | (((aluOut >> 26) & 0b11) << 6));
+                }
             }
             else
             {
@@ -1416,8 +1429,15 @@ namespace Iris
 
             if (rd == PC)
             {
-                cpu.SetCPSR((cpu.CPSR & 0x0fff_fffc) | (aluOut & 0xf000_0003));
-                cpu.SetPC(aluOut & 0x0fff_fffc);
+                if ((cpu.CPSR & ModeMask) == UserMode)
+                {
+                    const UInt32 mask = 0xf000_0000;
+                    cpu.CPSR = (cpu.CPSR & ~mask) | (aluOut & mask);
+                }
+                else
+                {
+                    cpu.SetCPSR((cpu.CPSR & ~0xf000_00c3) | (aluOut & 0xf000_0003) | (((aluOut >> 26) & 0b11) << 6));
+                }
             }
             else
             {
@@ -1443,8 +1463,15 @@ namespace Iris
 
             if (rd == PC)
             {
-                cpu.SetCPSR((cpu.CPSR & 0x0fff_fffc) | (aluOut & 0xf000_0003));
-                cpu.SetPC(aluOut & 0x0fff_fffc);
+                if ((cpu.CPSR & ModeMask) == UserMode)
+                {
+                    const UInt32 mask = 0xf000_0000;
+                    cpu.CPSR = (cpu.CPSR & ~mask) | (aluOut & mask);
+                }
+                else
+                {
+                    cpu.SetCPSR((cpu.CPSR & ~0xf000_00c3) | (aluOut & 0xf000_0003) | (((aluOut >> 26) & 0b11) << 6));
+                }
             }
             else
             {
