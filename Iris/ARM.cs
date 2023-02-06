@@ -581,13 +581,15 @@ namespace Iris
 
         private static void ARM_ADC(CPU cpu, UInt32 instruction)
         {
+            UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
+            UInt32 r = (instruction >> 4) & 1;
 
             var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
 
-            UInt32 leftOperand = cpu.Reg[rn];
+            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? cpu.Reg[PC] + 4 : cpu.Reg[rn];
             UInt64 rightOperand = (UInt64)shifterOperand + (UInt64)cpu.GetFlag(Flags.C);
 
             UInt64 result = (UInt64)leftOperand + rightOperand;
@@ -643,13 +645,18 @@ namespace Iris
 
         private static void ARM_AND(CPU cpu, UInt32 instruction)
         {
+            UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
+            UInt32 r = (instruction >> 4) & 1;
 
             var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
 
-            cpu.SetReg(rd, cpu.Reg[rn] & shifterOperand);
+            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? cpu.Reg[PC] + 4 : cpu.Reg[rn];
+            UInt32 rightOperand = shifterOperand;
+
+            cpu.SetReg(rd, leftOperand & rightOperand);
 
             if (s == 1)
             {
@@ -683,13 +690,18 @@ namespace Iris
 
         private static void ARM_BIC(CPU cpu, UInt32 instruction)
         {
+            UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
+            UInt32 r = (instruction >> 4) & 1;
 
             var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
 
-            cpu.SetReg(rd, cpu.Reg[rn] & ~shifterOperand);
+            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? cpu.Reg[PC] + 4 : cpu.Reg[rn];
+            UInt32 rightOperand = shifterOperand;
+
+            cpu.SetReg(rd, leftOperand & ~rightOperand);
 
             if (s == 1)
             {
@@ -716,12 +728,14 @@ namespace Iris
 
         private static void ARM_CMN(CPU cpu, UInt32 instruction)
         {
+            UInt32 i = (instruction >> 25) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
+            UInt32 r = (instruction >> 4) & 1;
 
             var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
 
-            UInt32 leftOperand = cpu.Reg[rn];
+            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? cpu.Reg[PC] + 4 : cpu.Reg[rn];
             UInt32 rightOperand = shifterOperand;
 
             UInt64 result = (UInt64)leftOperand + (UInt64)rightOperand;
@@ -745,12 +759,14 @@ namespace Iris
 
         private static void ARM_CMP(CPU cpu, UInt32 instruction)
         {
+            UInt32 i = (instruction >> 25) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
+            UInt32 r = (instruction >> 4) & 1;
 
             var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
 
-            UInt32 leftOperand = cpu.Reg[rn];
+            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? cpu.Reg[PC] + 4 : cpu.Reg[rn];
             UInt32 rightOperand = shifterOperand;
 
             UInt32 aluOut = leftOperand - rightOperand;
@@ -771,13 +787,18 @@ namespace Iris
 
         private static void ARM_EOR(CPU cpu, UInt32 instruction)
         {
+            UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
+            UInt32 r = (instruction >> 4) & 1;
 
             var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
 
-            cpu.SetReg(rd, cpu.Reg[rn] ^ shifterOperand);
+            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? cpu.Reg[PC] + 4 : cpu.Reg[rn];
+            UInt32 rightOperand = shifterOperand;
+
+            cpu.SetReg(rd, leftOperand ^ rightOperand);
 
             if (s == 1)
             {
@@ -1068,13 +1089,18 @@ namespace Iris
 
         private static void ARM_ORR(CPU cpu, UInt32 instruction)
         {
+            UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
+            UInt32 r = (instruction >> 4) & 1;
 
             var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
 
-            cpu.SetReg(rd, cpu.Reg[rn] | shifterOperand);
+            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? cpu.Reg[PC] + 4 : cpu.Reg[rn];
+            UInt32 rightOperand = shifterOperand;
+
+            cpu.SetReg(rd, leftOperand | rightOperand);
 
             if (s == 1)
             {
@@ -1093,14 +1119,16 @@ namespace Iris
 
         private static void ARM_RSB(CPU cpu, UInt32 instruction)
         {
+            UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
+            UInt32 r = (instruction >> 4) & 1;
 
             var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
 
             UInt32 leftOperand = shifterOperand;
-            UInt32 rightOperand = cpu.Reg[rn];
+            UInt32 rightOperand = ((rn == PC) && (i == 0) && (r == 1)) ? cpu.Reg[PC] + 4 : cpu.Reg[rn];
 
             cpu.SetReg(rd, leftOperand - rightOperand);
 
@@ -1122,14 +1150,17 @@ namespace Iris
 
         private static void ARM_RSC(CPU cpu, UInt32 instruction)
         {
+            UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
+            UInt32 r = (instruction >> 4) & 1;
 
             var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
 
             UInt32 leftOperand = shifterOperand;
-            UInt64 rightOperand = (UInt64)cpu.Reg[rn] + (UInt64)Not(cpu.GetFlag(Flags.C));
+            UInt64 rightOperand = (UInt64)(((rn == PC) && (i == 0) && (r == 1)) ? cpu.Reg[PC] + 4 : cpu.Reg[rn])
+                                + (UInt64)Not(cpu.GetFlag(Flags.C));
 
             cpu.SetReg(rd, leftOperand - (UInt32)rightOperand);
 
@@ -1151,13 +1182,15 @@ namespace Iris
 
         private static void ARM_SBC(CPU cpu, UInt32 instruction)
         {
+            UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
+            UInt32 r = (instruction >> 4) & 1;
 
             var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
 
-            UInt32 leftOperand = cpu.Reg[rn];
+            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? cpu.Reg[PC] + 4 : cpu.Reg[rn];
             UInt64 rightOperand = (UInt64)shifterOperand + (UInt64)Not(cpu.GetFlag(Flags.C));
 
             cpu.SetReg(rd, leftOperand - (UInt32)rightOperand);
@@ -1309,13 +1342,15 @@ namespace Iris
 
         private static void ARM_SUB(CPU cpu, UInt32 instruction)
         {
+            UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
+            UInt32 r = (instruction >> 4) & 1;
 
             var (shifterOperand, _) = cpu.GetShifterOperand(instruction);
 
-            UInt32 leftOperand = cpu.Reg[rn];
+            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? cpu.Reg[PC] + 4 : cpu.Reg[rn];
             UInt32 rightOperand = shifterOperand;
 
             cpu.SetReg(rd, leftOperand - rightOperand);
@@ -1367,12 +1402,17 @@ namespace Iris
 
         private static void ARM_TEQ(CPU cpu, UInt32 instruction)
         {
+            UInt32 i = (instruction >> 25) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
+            UInt32 r = (instruction >> 4) & 1;
 
             var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
 
-            UInt32 aluOut = cpu.Reg[rn] ^ shifterOperand;
+            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? cpu.Reg[PC] + 4 : cpu.Reg[rn];
+            UInt32 rightOperand = shifterOperand;
+
+            UInt32 aluOut = leftOperand ^ rightOperand;
 
             if (rd == PC)
             {
@@ -1389,12 +1429,17 @@ namespace Iris
 
         private static void ARM_TST(CPU cpu, UInt32 instruction)
         {
+            UInt32 i = (instruction >> 25) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
+            UInt32 r = (instruction >> 4) & 1;
 
             var (shifterOperand, shifterCarryOut) = cpu.GetShifterOperand(instruction);
 
-            UInt32 aluOut = cpu.Reg[rn] & shifterOperand;
+            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? cpu.Reg[PC] + 4 : cpu.Reg[rn];
+            UInt32 rightOperand = shifterOperand;
+
+            UInt32 aluOut = leftOperand & rightOperand;
 
             if (rd == PC)
             {
