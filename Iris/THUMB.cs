@@ -375,7 +375,7 @@
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
 
             UInt32 address = cpu.Reg[(h2 << 3) | rm];
-            cpu.SetCPSR((cpu.CPSR & ~(1u << 5)) | ((address & 1) << 5));
+            cpu.CPSR = (cpu.CPSR & ~(1u << 5)) | ((address & 1) << 5);
             cpu.SetPC(address);
         }
 
