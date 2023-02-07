@@ -520,7 +520,7 @@
             UInt16 imm = (UInt16)(instruction & 0xff);
 
             UInt32 address = cpu.Reg[PC] + (imm * 4u);
-            UInt32 data = RotateRight(cpu._callbacks.ReadMemory32(address), (int)(8 * (address & 0b11)));
+            UInt32 data = cpu._callbacks.ReadMemory32(address);
             cpu.Reg[rd] = data;
         }
 
