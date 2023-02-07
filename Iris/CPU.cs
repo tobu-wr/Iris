@@ -76,7 +76,6 @@ namespace Iris
 
         private void SetPC(UInt32 value)
         {
-            value &= 0xffff_fffe;
             Reg[PC] = value;
             NextInstructionAddress = value;
         }

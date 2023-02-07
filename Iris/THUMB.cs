@@ -157,6 +157,14 @@
             throw new Exception(string.Format("CPU: Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, NextInstructionAddress - 2));
         }
 
+        private void THUMB_SetReg(UInt32 i, UInt32 value)
+        {
+            if (i == PC)
+                SetPC(value & 0xffff_fffe);
+            else
+                Reg[i] = value;
+        }
+
         private static void THUMB_ADC(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
@@ -237,7 +245,7 @@
             UInt32 hrd = (UInt32)((h1 << 3) | rd);
             UInt32 hrm = (UInt32)((h2 << 3) | rm);
 
-            cpu.SetReg(hrd, cpu.Reg[hrd] + cpu.Reg[hrm]);
+            cpu.THUMB_SetReg(hrd, cpu.Reg[hrd] + cpu.Reg[hrm]);
         }
 
         private static void THUMB_ADD5(CPU cpu, UInt16 instruction)
@@ -376,7 +384,7 @@
 
             UInt32 address = cpu.Reg[(h2 << 3) | rm];
             cpu.CPSR = (cpu.CPSR & ~(1u << 5)) | ((address & 1) << 5);
-            cpu.SetPC(address);
+            cpu.SetPC(address & 0xffff_fffe);
         }
 
         private static void THUMB_CMN(CPU cpu, UInt16 instruction)
@@ -729,7 +737,7 @@
             UInt16 hrd = (UInt16)((h1 << 3) | rd);
             UInt16 hrm = (UInt16)((h2 << 3) | rm);
 
-            cpu.SetReg(hrd, cpu.Reg[hrm]);
+            cpu.THUMB_SetReg(hrd, cpu.Reg[hrm]);
         }
 
         private static void THUMB_MUL(CPU cpu, UInt16 instruction)
@@ -799,7 +807,7 @@
             }
 
             if (r == 1)
-                cpu.SetPC(cpu._callbacks.ReadMemory32(address));
+                cpu.SetPC(cpu._callbacks.ReadMemory32(address) & 0xffff_fffe);
         }
 
         private static void THUMB_PUSH(CPU cpu, UInt16 instruction)
@@ -867,8 +875,7 @@
             UInt16 rn = (UInt16)((instruction >> 8) & 0b111);
             UInt16 registerList = (UInt16)(instruction & 0xff);
 
-            UInt32 regRn = cpu.Reg[rn];
-            UInt32 address = regRn;
+            UInt32 address = cpu.Reg[rn];
 
             if (registerList == 0)
             {
@@ -877,6 +884,7 @@
             }
             else
             {
+                UInt32 oldRegRn = cpu.Reg[rn];
                 cpu.Reg[rn] += NumberOfSetBitsIn(registerList, 8) * 4;
 
                 for (var i = 0; i <= 7; ++i)
@@ -884,7 +892,7 @@
                     if (((registerList >> i) & 1) == 1)
                     {
                         if ((i == rn) && ((registerList & ~(0xff << i)) == 0))
-                            cpu._callbacks.WriteMemory32(address, regRn);
+                            cpu._callbacks.WriteMemory32(address, oldRegRn);
                         else
                             cpu._callbacks.WriteMemory32(address, cpu.Reg[i]);
 
