@@ -475,7 +475,7 @@
             if (registerList == 0)
             {
                 cpu.Reg[rn] += 0x40;
-                cpu.SetPC(cpu._callbacks.ReadMemory32(address));
+                cpu.SetPC(cpu._callbacks.ReadMemory32(address) & 0xffff_fffe);
             }
             else
             {
@@ -520,7 +520,7 @@
             UInt16 imm = (UInt16)(instruction & 0xff);
 
             UInt32 address = cpu.Reg[PC] + (imm * 4u);
-            UInt32 data = cpu._callbacks.ReadMemory32(address);
+            UInt32 data = RotateRight(cpu._callbacks.ReadMemory32(address), (int)(8 * (address & 0b11)));
             cpu.Reg[rd] = data;
         }
 
