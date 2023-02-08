@@ -249,10 +249,10 @@
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
 
-            UInt32 hrd = (UInt32)((h1 << 3) | rd);
-            UInt32 hrm = (UInt32)((h2 << 3) | rm);
+            rd |= (UInt16)(h1 << 3);
+            rm |= (UInt16)(h2 << 3);
 
-            cpu.THUMB_SetReg(hrd, cpu.Reg[hrd] + cpu.Reg[hrm]);
+            cpu.THUMB_SetReg(rd, cpu.Reg[rd] + cpu.Reg[rm]);
         }
 
         private static void THUMB_ADD5(CPU cpu, UInt16 instruction)
@@ -389,9 +389,10 @@
             UInt16 h2 = (UInt16)((instruction >> 6) & 1);
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
 
-            UInt32 address = cpu.Reg[(h2 << 3) | rm];
-            cpu.CPSR = (cpu.CPSR & ~(1u << 5)) | ((address & 1) << 5);
-            cpu.THUMB_SetPC(address);
+            rm |= (UInt16)(h2 << 3);
+
+            cpu.CPSR = (cpu.CPSR & ~(1u << 5)) | ((cpu.Reg[rm] & 1) << 5);
+            cpu.THUMB_SetPC(cpu.Reg[rm]);
         }
 
         private static void THUMB_CMN(CPU cpu, UInt16 instruction)
@@ -450,8 +451,11 @@
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rn = (UInt16)(instruction & 0b111);
 
-            UInt32 leftOperand = cpu.Reg[(h1 << 3) | rn];
-            UInt32 rightOperand = cpu.Reg[(h2 << 3) | rm];
+            rn |= (UInt16)(h1 << 3);
+            rm |= (UInt16)(h2 << 3);
+
+            UInt32 leftOperand = cpu.Reg[rn];
+            UInt32 rightOperand = cpu.Reg[rm];
 
             UInt32 aluOut = leftOperand - rightOperand;
 
@@ -741,10 +745,10 @@
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
 
-            UInt16 hrd = (UInt16)((h1 << 3) | rd);
-            UInt16 hrm = (UInt16)((h2 << 3) | rm);
+            rd |= (UInt16)(h1 << 3);
+            rm |= (UInt16)(h2 << 3);
 
-            cpu.THUMB_SetReg(hrd, cpu.Reg[hrm]);
+            cpu.THUMB_SetReg(rd, cpu.Reg[rm]);
         }
 
         private static void THUMB_MUL(CPU cpu, UInt16 instruction)
