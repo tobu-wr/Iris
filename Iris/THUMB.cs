@@ -157,10 +157,17 @@
             throw new Exception(string.Format("CPU: Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, NextInstructionAddress - 2));
         }
 
+        private void THUMB_SetPC(UInt32 value)
+        {
+            value &= 0xffff_fffe;
+            Reg[PC] = value;
+            NextInstructionAddress = value;
+        }
+
         private void THUMB_SetReg(UInt32 i, UInt32 value)
         {
             if (i == PC)
-                SetPC(value & 0xffff_fffe);
+                THUMB_SetPC(value);
             else
                 Reg[i] = value;
         }
@@ -337,14 +344,14 @@
             UInt16 imm = (UInt16)(instruction & 0xff);
 
             if (cpu.ConditionPassed(cond))
-                cpu.SetPC(cpu.Reg[PC] + (SignExtend(imm, 8) << 1));
+                cpu.THUMB_SetPC(cpu.Reg[PC] + (SignExtend(imm, 8) << 1));
         }
 
         private static void THUMB_B2(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)(instruction & 0x7ff);
 
-            cpu.SetPC(cpu.Reg[PC] + (SignExtend(imm, 11) << 1));
+            cpu.THUMB_SetPC(cpu.Reg[PC] + (SignExtend(imm, 11) << 1));
         }
 
         private static void THUMB_BIC(CPU cpu, UInt16 instruction)
@@ -369,10 +376,10 @@
             }
             else if (h == 0b11)
             {
-                // save NextInstructionAddress because it's invalidated by SetPC
+                // save NextInstructionAddress because it's invalidated by THUMB_SetPC
                 UInt32 nextInstructionAddress = cpu.NextInstructionAddress;
 
-                cpu.SetPC(cpu.Reg[LR] + (UInt32)(offset << 1));
+                cpu.THUMB_SetPC(cpu.Reg[LR] + (UInt32)(offset << 1));
                 cpu.Reg[LR] = nextInstructionAddress | 1;
             }
         }
@@ -384,7 +391,7 @@
 
             UInt32 address = cpu.Reg[(h2 << 3) | rm];
             cpu.CPSR = (cpu.CPSR & ~(1u << 5)) | ((address & 1) << 5);
-            cpu.SetPC(address & 0xffff_fffe);
+            cpu.THUMB_SetPC(address);
         }
 
         private static void THUMB_CMN(CPU cpu, UInt16 instruction)
@@ -475,7 +482,7 @@
             if (registerList == 0)
             {
                 cpu.Reg[rn] += 0x40;
-                cpu.SetPC(cpu._callbacks.ReadMemory32(address) & 0xffff_fffe);
+                cpu.THUMB_SetPC(cpu._callbacks.ReadMemory32(address));
             }
             else
             {
@@ -807,7 +814,7 @@
             }
 
             if (r == 1)
-                cpu.SetPC(cpu._callbacks.ReadMemory32(address) & 0xffff_fffe);
+                cpu.THUMB_SetPC(cpu._callbacks.ReadMemory32(address));
         }
 
         private static void THUMB_PUSH(CPU cpu, UInt16 instruction)
