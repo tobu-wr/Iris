@@ -1,16 +1,4 @@
-﻿using Microsoft.VisualBasic.FileIO;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Net;
-using System.Reflection;
-using System.Security.Policy;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-
-namespace Iris
+﻿namespace Iris
 {
     internal sealed partial class CPU
     {
@@ -72,20 +60,6 @@ namespace Iris
                 ARM_Step();
             else
                 THUMB_Step();
-        }
-
-        private void SetPC(UInt32 value)
-        {
-            Reg[PC] = value;
-            NextInstructionAddress = value;
-        }
-
-        private void SetReg(UInt32 i, UInt32 value)
-        {
-            if (i == PC)
-                SetPC(value);
-            else
-                Reg[i] = value;
         }
 
         private void SetCPSR(UInt32 value)
@@ -307,11 +281,6 @@ namespace Iris
                  && ((leftOperand >> 31) != (result >> 31))) ? 1u : 0u;
         }
 
-        private static UInt32 RotateRight(UInt32 value, int rotateAmount)
-        {
-            return (value >> (rotateAmount & 0x1f)) | (value << (32 - (rotateAmount & 0x1f)));
-        }
-
         private static UInt32 ArithmeticShiftRight(UInt32 value, int shiftAmount)
         {
             return (UInt32)((Int32)value >> shiftAmount);
@@ -320,16 +289,6 @@ namespace Iris
         private static UInt32 SignExtend(UInt32 value, int size)
         {
             return ((value >> (size - 1)) == 1) ? value | (0xffff_ffff << size) : value;
-        }
-
-        private static UInt32 NumberOfSetBitsIn(UInt32 value, int size)
-        {
-            UInt32 count = 0;
-
-            for (var i = 0; i < size; ++i)
-                count += (value >> i) & 1;
-
-            return count;
         }
     }
 }
