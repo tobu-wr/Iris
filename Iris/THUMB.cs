@@ -492,7 +492,7 @@ namespace Iris
             }
             else
             {
-                cpu.Reg[rn] += NumberOfSetBitsIn(registerList, 8) * 4;
+                cpu.Reg[rn] += (UInt32)BitOperations.PopCount(registerList) * 4;
 
                 for (var i = 0; i <= 7; ++i)
                 {
@@ -808,7 +808,7 @@ namespace Iris
             UInt16 registerList = (UInt16)(instruction & 0xff);
 
             UInt32 address = cpu.Reg[SP];
-            cpu.Reg[SP] += 4 * (r + NumberOfSetBitsIn(registerList, 8));
+            cpu.Reg[SP] += 4 * (r + (UInt32)BitOperations.PopCount(registerList));
 
             for (var i = 0; i <= 7; ++i)
             {
@@ -828,7 +828,7 @@ namespace Iris
             UInt16 r = (UInt16)((instruction >> 8) & 1);
             UInt16 registerList = (UInt16)(instruction & 0xff);
 
-            cpu.Reg[SP] -= 4 * (r + NumberOfSetBitsIn(registerList, 8));
+            cpu.Reg[SP] -= 4 * (r + (UInt32)BitOperations.PopCount(registerList));
             UInt32 address = cpu.Reg[SP];
 
             for (var i = 0; i <= 7; ++i)
@@ -898,7 +898,7 @@ namespace Iris
             else
             {
                 UInt32 oldRegRn = cpu.Reg[rn];
-                cpu.Reg[rn] += NumberOfSetBitsIn(registerList, 8) * 4;
+                cpu.Reg[rn] += (UInt32)BitOperations.PopCount(registerList) * 4;
 
                 for (var i = 0; i <= 7; ++i)
                 {
