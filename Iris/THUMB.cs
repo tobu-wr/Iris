@@ -1,4 +1,6 @@
-﻿namespace Iris
+﻿using System.Numerics;
+
+namespace Iris
 {
     internal sealed partial class CPU
     {
@@ -510,7 +512,7 @@
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             UInt32 address = cpu.Reg[rn] + (imm * 4u);
-            UInt32 data = RotateRight(cpu._callbacks.ReadMemory32(address), (int)(8 * (address & 0b11)));
+            UInt32 data = BitOperations.RotateRight(cpu._callbacks.ReadMemory32(address), (int)(8 * (address & 0b11)));
             cpu.Reg[rd] = data;
         }
 
@@ -521,7 +523,7 @@
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             UInt32 address = cpu.Reg[rn] + cpu.Reg[rm];
-            UInt32 data = RotateRight(cpu._callbacks.ReadMemory32(address), (int)(8 * (address & 0b11)));
+            UInt32 data = BitOperations.RotateRight(cpu._callbacks.ReadMemory32(address), (int)(8 * (address & 0b11)));
             cpu.Reg[rd] = data;
         }
 
@@ -541,7 +543,7 @@
             UInt16 imm = (UInt16)(instruction & 0xff);
 
             UInt32 address = cpu.Reg[SP] + (imm * 4u);
-            UInt32 data = RotateRight(cpu._callbacks.ReadMemory32(address), (int)(8 * (address & 0b11)));
+            UInt32 data = BitOperations.RotateRight(cpu._callbacks.ReadMemory32(address), (int)(8 * (address & 0b11)));
             cpu.Reg[rd] = data;
         }
 
@@ -574,7 +576,7 @@
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             UInt32 address = cpu.Reg[rn] + (imm * 2u);
-            UInt32 data = RotateRight(cpu._callbacks.ReadMemory16(address), (int)(8 * (address & 1)));
+            UInt32 data = BitOperations.RotateRight(cpu._callbacks.ReadMemory16(address), (int)(8 * (address & 1)));
             cpu.Reg[rd] = data;
         }
 
@@ -585,7 +587,7 @@
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             UInt32 address = cpu.Reg[rn] + cpu.Reg[rm];
-            UInt32 data = RotateRight(cpu._callbacks.ReadMemory16(address), (int)(8 * (address & 1)));
+            UInt32 data = BitOperations.RotateRight(cpu._callbacks.ReadMemory16(address), (int)(8 * (address & 1)));
             cpu.Reg[rd] = data;
         }
 
@@ -858,7 +860,7 @@
             else
             {
                 cpu.SetFlag(Flags.C, (cpu.Reg[rd] >> (int)((cpu.Reg[rs] & 0b1_1111) - 1)) & 1);
-                cpu.Reg[rd] = RotateRight(cpu.Reg[rd], (int)(cpu.Reg[rs] & 0b1_1111));
+                cpu.Reg[rd] = BitOperations.RotateRight(cpu.Reg[rd], (int)(cpu.Reg[rs] & 0b1_1111));
             }
 
             cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
