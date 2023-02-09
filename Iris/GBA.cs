@@ -137,6 +137,26 @@ namespace Iris
                     case 0x007:
                         return (Byte)(_ppu.VCOUNT >> 8);
 
+                    case 0x008:
+                    case 0x009:
+                        Console.WriteLine("GBA: Read from BG0CNT register unimplemented");
+                        return 0;
+
+                    case 0x00a:
+                    case 0x00b:
+                        Console.WriteLine("GBA: Read from BG1CNT register unimplemented");
+                        return 0;
+
+                    case 0x00c:
+                    case 0x00d:
+                        Console.WriteLine("GBA: Read from BG2CNT register unimplemented");
+                        return 0;
+
+                    case 0x00e:
+                    case 0x00f:
+                        Console.WriteLine("GBA: Read from BG3CNT register unimplemented");
+                        return 0;
+
                     case 0x050:
                     case 0x051:
                         Console.WriteLine("GBA: Read from BLDCNT register unimplemented");
