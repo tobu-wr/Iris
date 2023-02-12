@@ -1048,8 +1048,10 @@ namespace Iris
 
             if (r == 0)
             {
-                UInt32 mask = ((cpu.CPSR & ModeMask) == UserMode) ? (byteMask & 0xf000_0000) : (byteMask & 0xf000_00cf);
-                cpu.SetCPSR((cpu.CPSR & ~mask) | (operand & mask));
+                if ((cpu.CPSR & ModeMask) == UserMode)
+                    cpu.CPSR = (cpu.CPSR & ~0xf000_0000) | (operand & 0xf000_0000);
+                else
+                    cpu.SetCPSR((cpu.CPSR & ~0xf000_00cf) | (operand & 0xf000_00cf));
             }
             else
             {
@@ -1370,18 +1372,18 @@ namespace Iris
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
-            Byte data = (Byte)((rd == PC) ? (cpu.Reg[PC] + 4) : cpu.Reg[rd]);
+            UInt32 data = (rd == PC) ? (cpu.Reg[PC] + 4) : cpu.Reg[rd];
             UInt32 address = cpu.GetAddress(instruction);
-            cpu._callbacks.WriteMemory8(address, data);
+            cpu._callbacks.WriteMemory8(address, (Byte)data);
         }
 
         private static void ARM_STRH(CPU cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
-            UInt16 data = (UInt16)((rd == PC) ? (cpu.Reg[PC] + 4) : cpu.Reg[rd]);
+            UInt32 data = (rd == PC) ? (cpu.Reg[PC] + 4) : cpu.Reg[rd];
             UInt32 address = cpu.GetAddress_Misc(instruction);
-            cpu._callbacks.WriteMemory16(address, data);
+            cpu._callbacks.WriteMemory16(address, (UInt16)data);
         }
 
         private static void ARM_SUB(CPU cpu, UInt32 instruction)
