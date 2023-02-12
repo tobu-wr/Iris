@@ -35,7 +35,7 @@
         private const UInt32 PC = 15;
 
         internal readonly UInt32[] Reg = new UInt32[16];
-        internal UInt32 CPSR;
+        internal UInt32 CPSR = 0b1_0000;
         internal UInt32 SPSR;
 
         internal UInt32 Reg8, Reg9, Reg10, Reg11, Reg12, Reg13, Reg14;
@@ -67,7 +67,7 @@
             UInt32 previousMode = CPSR & ModeMask;
             UInt32 newMode = value & ModeMask;
 
-            CPSR = value;
+            CPSR = value | 0b1_0000;
 
             if (previousMode != newMode)
             {
