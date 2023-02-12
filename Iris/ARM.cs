@@ -881,25 +881,25 @@ namespace Iris
                         switch (i)
                         {
                             case 8:
-                                cpu.Reg8 = value;
+                                cpu.Reg8_usr = value;
                                 break;
                             case 9:
-                                cpu.Reg9 = value;
+                                cpu.Reg9_usr = value;
                                 break;
                             case 10:
-                                cpu.Reg10 = value;
+                                cpu.Reg10_usr = value;
                                 break;
                             case 11:
-                                cpu.Reg11 = value;
+                                cpu.Reg11_usr = value;
                                 break;
                             case 12:
-                                cpu.Reg12 = value;
+                                cpu.Reg12_usr = value;
                                 break;
                             case 13:
-                                cpu.Reg13 = value;
+                                cpu.Reg13_usr = value;
                                 break;
                             case 14:
-                                cpu.Reg14 = value;
+                                cpu.Reg14_usr = value;
                                 break;
                             default:
                                 cpu.Reg[i] = value;
@@ -1308,14 +1308,13 @@ namespace Iris
 
             UInt32 oldRegRn = rn switch
             {
-                8 => cpu.Reg8,
-                9 => cpu.Reg9,
-                10 => cpu.Reg10,
-                11 => cpu.Reg11,
-                12 => cpu.Reg12,
-                13 => cpu.Reg13,
-                14 => cpu.Reg14,
-                PC => cpu.Reg[PC] + 4,
+                8 => cpu.Reg8_usr,
+                9 => cpu.Reg9_usr,
+                10 => cpu.Reg10_usr,
+                11 => cpu.Reg11_usr,
+                12 => cpu.Reg12_usr,
+                13 => cpu.Reg13_usr,
+                14 => cpu.Reg14_usr,
                 _ => cpu.Reg[rn],
             };
 
@@ -1329,26 +1328,37 @@ namespace Iris
             }
             else
             {
-                for (var i = 0; i <= 15; ++i)
+                for (var i = 0; i <= 14; ++i)
                 {
                     if (((registerList >> i) & 1) == 1)
                     {
-                        UInt32 value = i switch
+                        if ((i == rn) && ((registerList & ~(0xffff << i)) == 0))
                         {
-                            8 => cpu.Reg8,
-                            9 => cpu.Reg9,
-                            10 => cpu.Reg10,
-                            11 => cpu.Reg11,
-                            12 => cpu.Reg12,
-                            13 => cpu.Reg13,
-                            14 => cpu.Reg14,
-                            _ => cpu.Reg[i],
-                        };
+                            cpu._callbacks.WriteMemory32(address, oldRegRn);
+                        }
+                        else
+                        {
+                            UInt32 value = i switch
+                            {
+                                8 => cpu.Reg8_usr,
+                                9 => cpu.Reg9_usr,
+                                10 => cpu.Reg10_usr,
+                                11 => cpu.Reg11_usr,
+                                12 => cpu.Reg12_usr,
+                                13 => cpu.Reg13_usr,
+                                14 => cpu.Reg14_usr,
+                                _ => cpu.Reg[i],
+                            };
 
-                        cpu._callbacks.WriteMemory32(address, value);
+                            cpu._callbacks.WriteMemory32(address, value);
+                        }
+
                         address += 4;
                     }
                 }
+
+                if (((registerList >> 15) & 1) == 1)
+                    cpu._callbacks.WriteMemory32(address, cpu.Reg[PC] + 4);
             }
         }
 

@@ -38,7 +38,7 @@
         internal UInt32 CPSR = 0b1_0000;
         internal UInt32 SPSR;
 
-        internal UInt32 Reg8, Reg9, Reg10, Reg11, Reg12, Reg13, Reg14;
+        internal UInt32 Reg8_usr, Reg9_usr, Reg10_usr, Reg11_usr, Reg12_usr, Reg13_usr, Reg14_usr;
         internal UInt32 Reg13_svc, Reg14_svc;
         internal UInt32 Reg13_abt, Reg14_abt;
         internal UInt32 Reg13_und, Reg14_und;
@@ -77,50 +77,50 @@
                 {
                     case UserMode:
                     case SystemMode:
-                        Reg8 = Reg[8];
-                        Reg9 = Reg[9];
-                        Reg10 = Reg[10];
-                        Reg11 = Reg[11];
-                        Reg12 = Reg[12];
-                        Reg13 = Reg[13];
-                        Reg14 = Reg[14];
+                        Reg8_usr = Reg[8];
+                        Reg9_usr = Reg[9];
+                        Reg10_usr = Reg[10];
+                        Reg11_usr = Reg[11];
+                        Reg12_usr = Reg[12];
+                        Reg13_usr = Reg[13];
+                        Reg14_usr = Reg[14];
                         break;
                     case SupervisorMode:
-                        Reg8 = Reg[8];
-                        Reg9 = Reg[9];
-                        Reg10 = Reg[10];
-                        Reg11 = Reg[11];
-                        Reg12 = Reg[12];
+                        Reg8_usr = Reg[8];
+                        Reg9_usr = Reg[9];
+                        Reg10_usr = Reg[10];
+                        Reg11_usr = Reg[11];
+                        Reg12_usr = Reg[12];
                         Reg13_svc = Reg[13];
                         Reg14_svc = Reg[14];
                         SPSR_svc = SPSR;
                         break;
                     case AbortMode:
-                        Reg8 = Reg[8];
-                        Reg9 = Reg[9];
-                        Reg10 = Reg[10];
-                        Reg11 = Reg[11];
-                        Reg12 = Reg[12];
+                        Reg8_usr = Reg[8];
+                        Reg9_usr = Reg[9];
+                        Reg10_usr = Reg[10];
+                        Reg11_usr = Reg[11];
+                        Reg12_usr = Reg[12];
                         Reg13_abt = Reg[13];
                         Reg14_abt = Reg[14];
                         SPSR_abt = SPSR;
                         break;
                     case UndefinedMode:
-                        Reg8 = Reg[8];
-                        Reg9 = Reg[9];
-                        Reg10 = Reg[10];
-                        Reg11 = Reg[11];
-                        Reg12 = Reg[12];
+                        Reg8_usr = Reg[8];
+                        Reg9_usr = Reg[9];
+                        Reg10_usr = Reg[10];
+                        Reg11_usr = Reg[11];
+                        Reg12_usr = Reg[12];
                         Reg13_und = Reg[13];
                         Reg14_und = Reg[14];
                         SPSR_und = SPSR;
                         break;
                     case InterruptMode:
-                        Reg8 = Reg[8];
-                        Reg9 = Reg[9];
-                        Reg10 = Reg[10];
-                        Reg11 = Reg[11];
-                        Reg12 = Reg[12];
+                        Reg8_usr = Reg[8];
+                        Reg9_usr = Reg[9];
+                        Reg10_usr = Reg[10];
+                        Reg11_usr = Reg[11];
+                        Reg12_usr = Reg[12];
                         Reg13_irq = Reg[13];
                         Reg14_irq = Reg[14];
                         SPSR_irq = SPSR;
@@ -142,50 +142,50 @@
                 {
                     case UserMode:
                     case SystemMode:
-                        Reg[8] = Reg8;
-                        Reg[9] = Reg9;
-                        Reg[10] = Reg10;
-                        Reg[11] = Reg11;
-                        Reg[12] = Reg12;
-                        Reg[13] = Reg13;
-                        Reg[14] = Reg14;
+                        Reg[8] = Reg8_usr;
+                        Reg[9] = Reg9_usr;
+                        Reg[10] = Reg10_usr;
+                        Reg[11] = Reg11_usr;
+                        Reg[12] = Reg12_usr;
+                        Reg[13] = Reg13_usr;
+                        Reg[14] = Reg14_usr;
                         break;
                     case SupervisorMode:
-                        Reg[8] = Reg8;
-                        Reg[9] = Reg9;
-                        Reg[10] = Reg10;
-                        Reg[11] = Reg11;
-                        Reg[12] = Reg12;
+                        Reg[8] = Reg8_usr;
+                        Reg[9] = Reg9_usr;
+                        Reg[10] = Reg10_usr;
+                        Reg[11] = Reg11_usr;
+                        Reg[12] = Reg12_usr;
                         Reg[13] = Reg13_svc;
                         Reg[14] = Reg14_svc;
                         SPSR = SPSR_svc;
                         break;
                     case AbortMode:
-                        Reg[8] = Reg8;
-                        Reg[9] = Reg9;
-                        Reg[10] = Reg10;
-                        Reg[11] = Reg11;
-                        Reg[12] = Reg12;
+                        Reg[8] = Reg8_usr;
+                        Reg[9] = Reg9_usr;
+                        Reg[10] = Reg10_usr;
+                        Reg[11] = Reg11_usr;
+                        Reg[12] = Reg12_usr;
                         Reg[13] = Reg13_abt;
                         Reg[14] = Reg14_abt;
                         SPSR = SPSR_abt;
                         break;
                     case UndefinedMode:
-                        Reg[8] = Reg8;
-                        Reg[9] = Reg9;
-                        Reg[10] = Reg10;
-                        Reg[11] = Reg11;
-                        Reg[12] = Reg12;
+                        Reg[8] = Reg8_usr;
+                        Reg[9] = Reg9_usr;
+                        Reg[10] = Reg10_usr;
+                        Reg[11] = Reg11_usr;
+                        Reg[12] = Reg12_usr;
                         Reg[13] = Reg13_und;
                         Reg[14] = Reg14_und;
                         SPSR = SPSR_und;
                         break;
                     case InterruptMode:
-                        Reg[8] = Reg8;
-                        Reg[9] = Reg9;
-                        Reg[10] = Reg10;
-                        Reg[11] = Reg11;
-                        Reg[12] = Reg12;
+                        Reg[8] = Reg8_usr;
+                        Reg[9] = Reg9_usr;
+                        Reg[10] = Reg10_usr;
+                        Reg[11] = Reg11_usr;
+                        Reg[12] = Reg12_usr;
                         Reg[13] = Reg13_irq;
                         Reg[14] = Reg14_irq;
                         SPSR = SPSR_irq;
