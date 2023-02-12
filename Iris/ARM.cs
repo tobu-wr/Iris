@@ -1049,9 +1049,15 @@ namespace Iris
             if (r == 0)
             {
                 if ((cpu.CPSR & ModeMask) == UserMode)
-                    cpu.CPSR = (cpu.CPSR & ~0xf000_0000) | (operand & 0xf000_0000);
+                {
+                    UInt32 mask = byteMask & 0xf000_0000;
+                    cpu.CPSR = (cpu.CPSR & ~mask) | (operand & mask);
+                }
                 else
-                    cpu.SetCPSR((cpu.CPSR & ~0xf000_00cf) | (operand & 0xf000_00cf));
+                {
+                    UInt32 mask = byteMask & 0xf000_00cf;
+                    cpu.SetCPSR((cpu.CPSR & ~mask) | (operand & mask));
+                }
             }
             else
             {
