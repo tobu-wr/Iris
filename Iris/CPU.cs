@@ -56,7 +56,8 @@
 
         internal void Step()
         {
-            if (((CPSR >> 5) & 1) == 0)
+            UInt32 t = (CPSR >> 5) & 1;
+            if (t == 0)
                 ARM_Step();
             else
                 THUMB_Step();
