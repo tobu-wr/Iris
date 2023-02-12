@@ -1046,19 +1046,14 @@ namespace Iris
                             | (UInt32)((((fieldMask >> 2) & 1) == 1) ? 0x00ff_0000 : 0)
                             | (UInt32)((((fieldMask >> 3) & 1) == 1) ? 0xff00_0000 : 0);
 
-            const UInt32 UserMask = 0xf000_0000;
-            const UInt32 PrivMask = 0x0000_000f;
-            const UInt32 StateMask = 0x0000_0020;
-
             if (r == 0)
             {
-                UInt32 mask = ((cpu.CPSR & ModeMask) == UserMode) ? (byteMask & UserMask) : (byteMask & (UserMask | PrivMask));
+                UInt32 mask = ((cpu.CPSR & ModeMask) == UserMode) ? (byteMask & 0xf000_0000) : (byteMask & 0xf000_00cf);
                 cpu.SetCPSR((cpu.CPSR & ~mask) | (operand & mask));
             }
             else
             {
-                UInt32 mask = byteMask & (UserMask | PrivMask | StateMask);
-                cpu.SPSR = (cpu.SPSR & ~mask) | (operand & mask);
+                cpu.SPSR = operand;
             }
         }
 
