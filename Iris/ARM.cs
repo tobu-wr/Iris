@@ -71,6 +71,7 @@ namespace Iris
             // LDM
             new(0x0e50_0000, 0x0810_0000, ARM_LDM1),
             new(0x0e50_8000, 0x0850_0000, ARM_LDM2),
+            //new(0x0e50_8000, 0x0850_8000, ARM_LDM3),
 
             // LDR
             new(0x0c50_0000, 0x0410_0000, ARM_LDR),
@@ -1045,12 +1046,12 @@ namespace Iris
             {
                 if ((cpu.CPSR & ModeMask) == UserMode)
                 {
-                    UInt32 mask = byteMask & 0xf000_0000;
+                    UInt32 mask = byteMask & 0xff00_0000;
                     cpu.CPSR = (cpu.CPSR & ~mask) | (operand & mask);
                 }
                 else
                 {
-                    UInt32 mask = byteMask & 0xf000_00cf;
+                    UInt32 mask = byteMask;
                     cpu.SetCPSR((cpu.CPSR & ~mask) | (operand & mask));
                 }
             }
