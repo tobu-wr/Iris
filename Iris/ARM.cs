@@ -235,11 +235,6 @@ namespace Iris
                 Reg[i] = value;
         }
 
-        private static UInt32 SignExtend30(UInt32 value, int size)
-        {
-            return SignExtend(value, size) & 0x3fff_ffff;
-        }
-
         // Addressing mode 1
         private (UInt32 shifterOperand, UInt32 shifterCarryOut) GetShifterOperand(UInt32 instruction)
         {
@@ -690,7 +685,7 @@ namespace Iris
         {
             UInt32 imm = instruction & 0xff_ffff;
 
-            cpu.ARM_SetPC(cpu.Reg[PC] + (SignExtend30(imm, 24) << 2));
+            cpu.ARM_SetPC(cpu.Reg[PC] + (SignExtend(imm, 24) << 2));
         }
 
         private static void ARM_BL(CPU cpu, UInt32 instruction)
@@ -698,7 +693,7 @@ namespace Iris
             UInt32 imm = instruction & 0xff_ffff;
 
             cpu.Reg[LR] = cpu.NextInstructionAddress;
-            cpu.ARM_SetPC(cpu.Reg[PC] + (SignExtend30(imm, 24) << 2));
+            cpu.ARM_SetPC(cpu.Reg[PC] + (SignExtend(imm, 24) << 2));
         }
 
         private static void ARM_BIC(CPU cpu, UInt32 instruction)
