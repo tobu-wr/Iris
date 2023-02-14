@@ -30,9 +30,9 @@
         private const UInt32 InterruptMode = 0b1_0010;
         private const UInt32 FastInterruptMode = 0b1_0001;
 
-        private const UInt32 SP = 13;
-        private const UInt32 LR = 14;
-        private const UInt32 PC = 15;
+        internal const UInt32 SP = 13;
+        internal const UInt32 LR = 14;
+        internal const UInt32 PC = 15;
 
         internal readonly UInt32[] Reg = new UInt32[16];
         internal UInt32 CPSR = 0b1_0000;

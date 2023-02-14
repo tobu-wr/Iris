@@ -37,11 +37,30 @@
 
         internal void Init()
         {
-            _cpu.Reg[13] = 0x0300_7f00;
-            _cpu.Reg13_fiq = 0x0300_7f00;
-            _cpu.CPSR = 0b1101_1111;
-            _cpu.SPSR_fiq = 0b1_0000;
-            _cpu.NextInstructionAddress = 0x0800_0000;
+            const UInt32 ROMAddress = 0x0800_0000;
+
+            for (int i = 0; i <= 12; ++i)
+                _cpu.Reg[i] = 0;
+
+            _cpu.Reg[CPU.SP] = 0x0300_7f00;
+            _cpu.Reg[CPU.LR] = ROMAddress;
+            _cpu.Reg[CPU.PC] = ROMAddress;
+
+            _cpu.Reg13_svc = 0x0300_7fe0;
+            _cpu.Reg13_irq = 0x0300_7fa0;
+
+            _cpu.Reg14_svc = 0;
+            _cpu.Reg14_irq = 0;
+
+            _cpu.SPSR_svc = 0;
+            _cpu.SPSR_irq = 0;
+
+            _cpu.CPSR = 0x1f;
+
+            _cpu.NextInstructionAddress = ROMAddress;
+
+            for (UInt32 address = 0x0300_7e00; address < 0x0300_8000; address += 4)
+                WriteMemory32(address, 0);
 
             _KEYINPUT = 0x03ff;
         }
