@@ -58,6 +58,7 @@
             _cpu.CPSR = 0x1f;
 
             _cpu.NextInstructionAddress = ROMAddress;
+            _cpu.InterruptPending = false;
 
             for (UInt32 address = 0x0300_7e00; address < 0x0300_8000; address += 4)
                 WriteMemory32(address, 0);
@@ -738,6 +739,11 @@
                     Console.WriteLine("GBA: Unknown BIOS function 0x{0:x2}", function);
                     break;
             }
+        }
+
+        public void HandleInterrupt()
+        {
+            throw new NotImplementedException("GBA: unhandled interrupt");
         }
     }
 }
