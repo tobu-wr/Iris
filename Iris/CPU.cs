@@ -11,6 +11,7 @@
             void WriteMemory16(UInt32 address, UInt16 value);
             void WriteMemory32(UInt32 address, UInt32 value);
             void HandleSWI(UInt32 value);
+            void HandleInterrupt();
         }
 
         private enum Flags
@@ -48,6 +49,7 @@
 
         private readonly ICallbacks _callbacks;
         internal UInt32 NextInstructionAddress;
+        internal bool InterruptPending;
 
         internal CPU(ICallbacks callbacks)
         {
@@ -56,11 +58,22 @@
 
         internal void Step()
         {
-            UInt32 t = (CPSR >> 5) & 1;
-            if (t == 0)
-                ARM_Step();
+            if (InterruptPending)
+            {
+                UInt32 i = (CPSR >> 7) & 1;
+
+                if (i == 0)
+                    _callbacks.HandleInterrupt();
+            }
             else
-                THUMB_Step();
+            {
+                UInt32 t = (CPSR >> 5) & 1;
+
+                if (t == 0)
+                    ARM_Step();
+                else
+                    THUMB_Step();
+            }
         }
 
         private void SetCPSR(UInt32 value)
