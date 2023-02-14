@@ -1037,27 +1037,26 @@ namespace Iris
                 operand = cpu.Reg[rm];
             }
 
-            UInt32 byteMask = (UInt32)((((fieldMask >> 0) & 1) == 1) ? 0x0000_00ff : 0)
-                            | (UInt32)((((fieldMask >> 1) & 1) == 1) ? 0x0000_ff00 : 0)
-                            | (UInt32)((((fieldMask >> 2) & 1) == 1) ? 0x00ff_0000 : 0)
-                            | (UInt32)((((fieldMask >> 3) & 1) == 1) ? 0xff00_0000 : 0);
+            UInt32 mask = (UInt32)((((fieldMask >> 0) & 1) == 1) ? 0x0000_00ff : 0)
+                        | (UInt32)((((fieldMask >> 1) & 1) == 1) ? 0x0000_ff00 : 0)
+                        | (UInt32)((((fieldMask >> 2) & 1) == 1) ? 0x00ff_0000 : 0)
+                        | (UInt32)((((fieldMask >> 3) & 1) == 1) ? 0xff00_0000 : 0);
 
             if (r == 0)
             {
                 if ((cpu.CPSR & ModeMask) == UserMode)
                 {
-                    UInt32 mask = byteMask & 0xff00_0000;
+                    mask &= 0xff00_0000;
                     cpu.CPSR = (cpu.CPSR & ~mask) | (operand & mask);
                 }
                 else
                 {
-                    UInt32 mask = byteMask;
                     cpu.SetCPSR((cpu.CPSR & ~mask) | (operand & mask));
                 }
             }
             else
             {
-                cpu.SPSR = operand;
+                cpu.SPSR = (cpu.SPSR & ~mask) | (operand & mask);
             }
         }
 
