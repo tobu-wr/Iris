@@ -19,13 +19,37 @@
         private const int KB = 1024;
 
         private Byte[]? _rom;
+        private Byte[] _sram = new byte[64 * KB];
         private readonly Byte[] _externalWRAM = new Byte[256 * KB];
         private readonly Byte[] _internalWRAM = new Byte[32 * KB];
 
         private readonly CPU _cpu;
         private readonly PPU _ppu;
 
+        private UInt16 _SOUNDCNT_H = 0;
+        private UInt16 _SOUNDCNT_X = 0;
+        private UInt16 _SOUNDBIAS = 0;
+        private UInt16 _DMA0CNT_H = 0;
+        private UInt16 _DMA1SAD_L = 0;
+        private UInt16 _DMA1SAD_H = 0;
+        private UInt16 _DMA1DAD_L = 0;
+        private UInt16 _DMA1DAD_H = 0;
+        private UInt16 _DMA1CNT_L = 0;
+        private UInt16 _DMA1CNT_H = 0;
+        private UInt16 _DMA2SAD_H = 0;
+        private UInt16 _DMA2CNT_L = 0;
+        private UInt16 _DMA2CNT_H = 0;
+        private UInt16 _DMA3CNT_H = 0;
+        private UInt16 _TM0CNT_H = 0;
+        private UInt16 _TM1CNT_H = 0;
+        private UInt16 _TM2CNT_H = 0;
+        private UInt16 _TM3CNT_H = 0;
+        private UInt16 _SIOCNT = 0;
         private UInt16 _KEYINPUT = 0x03ff;
+        private UInt16 _KEYCNT = 0;
+        private UInt16 _IE = 0;
+        private UInt16 _WAITCNT = 0;
+        private UInt16 _IME = 0;
 
         private bool _running = false;
 
@@ -63,7 +87,30 @@
             for (UInt32 address = 0x0300_7e00; address < 0x0300_8000; address += 4)
                 WriteMemory32(address, 0);
 
+            _SOUNDCNT_H = 0;
+            _SOUNDCNT_X = 0;
+            _SOUNDBIAS = 0;
+            _DMA0CNT_H = 0;
+            _DMA1SAD_L = 0;
+            _DMA1SAD_H = 0;
+            _DMA1DAD_L = 0;
+            _DMA1DAD_H = 0;
+            _DMA1CNT_L = 0;
+            _DMA1CNT_H = 0;
+            _DMA2SAD_H = 0;
+            _DMA2CNT_L = 0;
+            _DMA2CNT_H = 0;
+            _DMA3CNT_H = 0;
+            _TM0CNT_H = 0;
+            _TM1CNT_H = 0;
+            _TM2CNT_H = 0;
+            _TM3CNT_H = 0;
+            _SIOCNT = 0;
             _KEYINPUT = 0x03ff;
+            _KEYCNT = 0;
+            _IE = 0;
+            _WAITCNT = 0;
+            _IME = 0;
         }
 
         internal void LoadROM(string filename)
@@ -176,64 +223,64 @@
                         return 0;
 
                     case 0x088:
+                        return (Byte)_SOUNDBIAS;
                     case 0x089:
-                        Console.WriteLine("GBA: Read from SOUNDBIAS register unimplemented");
-                        return 0;
+                        return (Byte)(_SOUNDBIAS >> 8);
 
                     case 0x0ba:
+                        return (Byte)_DMA0CNT_H;
                     case 0x0bb:
-                        Console.WriteLine("GBA: Read from DMA0CNT_H register unimplemented");
-                        return 0;
+                        return (Byte)(_DMA0CNT_H >> 8);
 
                     case 0x0c4:
+                        return (Byte)_DMA1CNT_L;
                     case 0x0c5:
-                        Console.WriteLine("GBA: Read from DMA1CNT_L register unimplemented");
-                        return 0;
+                        return (Byte)(_DMA1CNT_L >> 8);
 
                     case 0x0c6:
+                        return (Byte)_DMA1CNT_H;
                     case 0x0c7:
-                        Console.WriteLine("GBA: Read from DMA1CNT_H register unimplemented");
-                        return 0;
+                        return (Byte)(_DMA1CNT_H >> 8);
 
                     case 0x0d0:
+                        return (Byte)_DMA2CNT_L;
                     case 0x0d1:
-                        Console.WriteLine("GBA: Read from DMA2CNT_L register unimplemented");
-                        return 0;
+                        return (Byte)(_DMA2CNT_L >> 8);
 
                     case 0x0d2:
+                        return (Byte)_DMA2CNT_H;
                     case 0x0d3:
-                        Console.WriteLine("GBA: Read from DMA2CNT_H register unimplemented");
-                        return 0;
+                        return (Byte)(_DMA2CNT_H >> 8);
 
                     case 0x0de:
+                        return (Byte)_DMA3CNT_H;
                     case 0x0df:
-                        Console.WriteLine("GBA: Read from DMA3CNT_H register unimplemented");
-                        return 0;
+                        return (Byte)(_DMA3CNT_H >> 8);
 
                     case 0x102:
+                        return (Byte)_TM0CNT_H;
                     case 0x103:
-                        Console.WriteLine("GBA: Read from TM0CNT_H register unimplemented");
-                        return 0;
+                        return (Byte)(_TM0CNT_H >> 8);
 
                     case 0x106:
+                        return (Byte)_TM1CNT_H;
                     case 0x107:
-                        Console.WriteLine("GBA: Read from TM1CNT_H register unimplemented");
-                        return 0;
+                        return (Byte)(_TM1CNT_H >> 8);
 
                     case 0x10a:
+                        return (Byte)_TM2CNT_H;
                     case 0x10b:
-                        Console.WriteLine("GBA: Read from TM2CNT_H register unimplemented");
-                        return 0;
+                        return (Byte)(_TM2CNT_H >> 8);
 
                     case 0x10e:
+                        return (Byte)_TM3CNT_H;
                     case 0x10f:
-                        Console.WriteLine("GBA: Read from TM3CNT_H register unimplemented");
-                        return 0;
+                        return (Byte)(_TM3CNT_H >> 8);
 
                     case 0x128:
+                        return (Byte)_SIOCNT;
                     case 0x129:
-                        Console.WriteLine("GBA: Read from SIOCNT register unimplemented");
-                        return 0;
+                        return (Byte)(_SIOCNT >> 8);
 
                     case 0x130:
                         return (Byte)_KEYINPUT;
@@ -241,24 +288,24 @@
                         return (Byte)(_KEYINPUT >> 8);
 
                     case 0x132:
+                        return (Byte)_KEYCNT;
                     case 0x133:
-                        Console.WriteLine("GBA: Read from KEYCNT register unimplemented");
-                        return 0;
+                        return (Byte)(_KEYCNT >> 8);
 
                     case 0x200:
+                        return (Byte)_IE;
                     case 0x201:
-                        Console.WriteLine("GBA: Read from IE register unimplemented");
-                        return 0;
+                        return (Byte)(_IE >> 8);
 
                     case 0x204:
+                        return (Byte)_WAITCNT;
                     case 0x205:
-                        Console.WriteLine("GBA: Read from WAITCNT register unimplemented");
-                        return 0;
+                        return (Byte)(_WAITCNT >> 8);
 
                     case 0x208:
+                        return (Byte)_IME;
                     case 0x209:
-                        Console.WriteLine("GBA: Read from IME register unimplemented");
-                        return 0;
+                        return (Byte)(_IME >> 8);
                 }
             }
             else if (address is >= 0x0600_0000 and < 0x0601_8000)
@@ -278,8 +325,8 @@
             }
             else if (address is >= 0x0e00_0000 and < 0x0e01_0000)
             {
-                // TODO: implement SRAM
-                return 0;
+                UInt32 offset = address - 0x0e00_0000;
+                return _sram[offset];
             }
 
             throw new Exception(string.Format("GBA: Invalid read from address 0x{0:x8}", address));
@@ -490,48 +537,73 @@
                         break;
 
                     case 0x082:
+                        _SOUNDCNT_H = (UInt16)((_SOUNDCNT_H & 0xff00) | value);
+                        break;
                     case 0x083:
-                        Console.WriteLine("GBA: Write to SOUNDCNT_H register unimplemented");
+                        _SOUNDCNT_H = (UInt16)((_SOUNDCNT_H & 0x00ff) | (value << 8));
                         break;
 
                     case 0x084:
+                        _SOUNDCNT_X = (UInt16)((_SOUNDCNT_X & 0xff00) | value);
+                        break;
                     case 0x085:
-                        Console.WriteLine("GBA: Write to SOUNDCNT_X register unimplemented");
+                        _SOUNDCNT_X = (UInt16)((_SOUNDCNT_X & 0x00ff) | (value << 8));
                         break;
 
                     case 0x088:
+                        _SOUNDBIAS = (UInt16)((_SOUNDBIAS & 0xff00) | value);
+                        break;
                     case 0x089:
-                        Console.WriteLine("GBA: Write to SOUNDBIAS register unimplemented");
+                        _SOUNDBIAS = (UInt16)((_SOUNDBIAS & 0x00ff) | (value << 8));
                         break;
 
                     case 0x0ba:
+                        _DMA0CNT_H = (UInt16)((_DMA0CNT_H & 0xff00) | value);
+                        break;
                     case 0x0bb:
-                        Console.WriteLine("GBA: Write to DMA0CNT_H register unimplemented");
+                        _DMA0CNT_H = (UInt16)((_DMA0CNT_H & 0x00ff) | (value << 8));
                         break;
 
                     case 0x0bc:
+                        _DMA1SAD_L = (UInt16)((_DMA1SAD_L & 0xff00) | value);
+                        break;
                     case 0x0bd:
-                        Console.WriteLine("GBA: Write to DMA1SAD_L register unimplemented");
+                        _DMA1SAD_L = (UInt16)((_DMA1SAD_L & 0x00ff) | (value << 8));
                         break;
 
                     case 0x0be:
+                        _DMA1SAD_H = (UInt16)((_DMA1SAD_H & 0xff00) | value);
+                        break;
                     case 0x0bf:
-                        Console.WriteLine("GBA: Write to DMA1SAD_H register unimplemented");
+                        _DMA1SAD_H = (UInt16)((_DMA1SAD_H & 0x00ff) | (value << 8));
                         break;
 
                     case 0x0c0:
+                        _DMA1DAD_L = (UInt16)((_DMA1DAD_L & 0xff00) | value);
+                        break;
                     case 0x0c1:
-                        Console.WriteLine("GBA: Write to DMA1DAD_L register unimplemented");
+                        _DMA1DAD_L = (UInt16)((_DMA1DAD_L & 0x00ff) | (value << 8));
                         break;
 
                     case 0x0c2:
+                        _DMA1DAD_H = (UInt16)((_DMA1DAD_H & 0xff00) | value);
+                        break;
                     case 0x0c3:
-                        Console.WriteLine("GBA: Write to DMA1DAD_H register unimplemented");
+                        _DMA1DAD_H = (UInt16)((_DMA1DAD_H & 0x00ff) | (value << 8));
+                        break;
+
+                    case 0x0c4:
+                        _DMA1CNT_L = (UInt16)((_DMA1CNT_L & 0xff00) | value);
+                        break;
+                    case 0x0c5:
+                        _DMA1CNT_L = (UInt16)((_DMA1CNT_L & 0x00ff) | (value << 8));
                         break;
 
                     case 0x0c6:
+                        _DMA1CNT_H = (UInt16)((_DMA1CNT_H & 0xff00) | value);
+                        break;
                     case 0x0c7:
-                        Console.WriteLine("GBA: Write to DMA1CNT_H register unimplemented");
+                        _DMA1CNT_H = (UInt16)((_DMA1CNT_H & 0x00ff) | (value << 8));
                         break;
 
                     case 0x0c8:
@@ -540,8 +612,10 @@
                         break;
 
                     case 0x0ca:
+                        _DMA2SAD_H = (UInt16)((_DMA2SAD_H & 0xff00) | value);
+                        break;
                     case 0x0cb:
-                        Console.WriteLine("GBA: Write to DMA2SAD_H register unimplemented");
+                        _DMA2SAD_H = (UInt16)((_DMA2SAD_H & 0x00ff) | (value << 8));
                         break;
 
                     case 0x0cc:
@@ -554,14 +628,25 @@
                         Console.WriteLine("GBA: Write to DMA2DAD_H register unimplemented");
                         break;
 
+                    case 0x0d0:
+                        _DMA2CNT_L = (UInt16)((_DMA2CNT_L & 0xff00) | value);
+                        break;
+                    case 0x0d1:
+                        _DMA2CNT_L = (UInt16)((_DMA2CNT_L & 0x00ff) | (value << 8));
+                        break;
+
                     case 0x0d2:
+                        _DMA2CNT_H = (UInt16)((_DMA2CNT_H & 0xff00) | value);
+                        break;
                     case 0x0d3:
-                        Console.WriteLine("GBA: Write to DMA2CNT_H register unimplemented");
+                        _DMA2CNT_H = (UInt16)((_DMA2CNT_H & 0x00ff) | (value << 8));
                         break;
 
                     case 0x0de:
+                        _DMA3CNT_H = (UInt16)((_DMA3CNT_H & 0xff00) | value);
+                        break;
                     case 0x0df:
-                        Console.WriteLine("GBA: Write to DMA3CNT_H register unimplemented");
+                        _DMA3CNT_H = (UInt16)((_DMA3CNT_H & 0x00ff) | (value << 8));
                         break;
 
                     case 0x100:
@@ -570,8 +655,10 @@
                         break;
 
                     case 0x102:
+                        _TM0CNT_H = (UInt16)((_TM0CNT_H & 0xff00) | value);
+                        break;
                     case 0x103:
-                        Console.WriteLine("GBA: Write to TM0CNT_H register unimplemented");
+                        _TM0CNT_H = (UInt16)((_TM0CNT_H & 0x00ff) | (value << 8));
                         break;
 
                     case 0x104:
@@ -580,8 +667,10 @@
                         break;
 
                     case 0x106:
+                        _TM1CNT_H = (UInt16)((_TM1CNT_H & 0xff00) | value);
+                        break;
                     case 0x107:
-                        Console.WriteLine("GBA: Write to TM1CNT_H register unimplemented");
+                        _TM1CNT_H = (UInt16)((_TM1CNT_H & 0x00ff) | (value << 8));
                         break;
 
                     case 0x108:
@@ -590,8 +679,10 @@
                         break;
 
                     case 0x10a:
+                        _TM2CNT_H = (UInt16)((_TM2CNT_H & 0xff00) | value);
+                        break;
                     case 0x10b:
-                        Console.WriteLine("GBA: Write to TM2CNT_H register unimplemented");
+                        _TM2CNT_H = (UInt16)((_TM2CNT_H & 0x00ff) | (value << 8));
                         break;
 
                     case 0x10c:
@@ -600,8 +691,10 @@
                         break;
 
                     case 0x10e:
+                        _TM3CNT_H = (UInt16)((_TM3CNT_H & 0xff00) | value);
+                        break;
                     case 0x10f:
-                        Console.WriteLine("GBA: Write to TM3CNT_H register unimplemented");
+                        _TM3CNT_H = (UInt16)((_TM3CNT_H & 0x00ff) | (value << 8));
                         break;
 
                     case 0x120:
@@ -625,8 +718,10 @@
                         break;
 
                     case 0x128:
+                        _SIOCNT = (UInt16)((_SIOCNT & 0xff00) | value);
+                        break;
                     case 0x129:
-                        Console.WriteLine("GBA: Write to SIOCNT register unimplemented");
+                        _SIOCNT = (UInt16)((_SIOCNT & 0x00ff) | (value << 8));
                         break;
 
                     case 0x12a:
@@ -640,8 +735,10 @@
                         break;
 
                     case 0x132:
+                        _KEYCNT = (UInt16)((_KEYCNT & 0xff00) | value);
+                        break;
                     case 0x133:
-                        Console.WriteLine("GBA: Write to KEYCNT register unimplemented");
+                        _KEYCNT = (UInt16)((_KEYCNT & 0x00ff) | (value << 8));
                         break;
 
                     case 0x134:
@@ -650,8 +747,10 @@
                         break;
 
                     case 0x200:
+                        _IE = (UInt16)((_IE & 0xff00) | value);
+                        break;
                     case 0x201:
-                        Console.WriteLine("GBA: Write to IE register unimplemented");
+                        _IE = (UInt16)((_IE & 0x00ff) | (value << 8));
                         break;
 
                     case 0x202:
@@ -660,13 +759,17 @@
                         break;
 
                     case 0x204:
+                        _WAITCNT = (UInt16)((_WAITCNT & 0xff00) | value);
+                        break;
                     case 0x205:
-                        Console.WriteLine("GBA: Write to WAITCNT register unimplemented");
+                        _WAITCNT = (UInt16)((_WAITCNT & 0x00ff) | (value << 8));
                         break;
 
                     case 0x208:
+                        _IME = (UInt16)((_IME & 0xff00) | value);
+                        break;
                     case 0x209:
-                        Console.WriteLine("GBA: Write to IME register unimplemented");
+                        _IME = (UInt16)((_IME & 0x00ff) | (value << 8));
                         break;
 
                     case 0x20a:
@@ -696,11 +799,12 @@
             }
             else if (address is >= 0x0e00_0000 and < 0x0e01_0000)
             {
-                // TODO: implement SRAM
+                UInt32 offset = address - 0x0e00_0000;
+                _sram[offset] = value;
             }
             else
             {
-                //throw new Exception(string.Format("GBA: Invalid write to address 0x{0:x8}", address));
+                throw new Exception(string.Format("GBA: Invalid write to address 0x{0:x8}", address));
             }
         }
 
@@ -743,7 +847,7 @@
 
         public void HandleInterrupt()
         {
-            throw new NotImplementedException("GBA: unhandled interrupt");
+            throw new NotImplementedException("GBA: Unhandled interrupt");
         }
     }
 }
