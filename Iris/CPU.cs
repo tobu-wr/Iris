@@ -58,12 +58,11 @@
 
         internal void Step()
         {
-            if (InterruptPending)
-            {
-                UInt32 i = (CPSR >> 7) & 1;
+            UInt32 i = (CPSR >> 7) & 1;
 
-                if (i == 0)
-                    _callbacks.HandleInterrupt();
+            if (InterruptPending && (i == 0))
+            {
+                _callbacks.HandleInterrupt();
             }
             else
             {
