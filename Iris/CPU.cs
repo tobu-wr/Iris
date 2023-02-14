@@ -248,8 +248,8 @@
                 0b1101 => (GetFlag(Flags.Z) == 1) || (GetFlag(Flags.N) != GetFlag(Flags.V)),
                 // AL
                 0b1110 => true,
-                // unconditional
-                0b1111 => true,
+                // NV
+                0b1111 => false,
                 // should never happen
                 _ => throw new Exception(string.Format("CPU: Wrong condition code {0}", cond)),
             };
