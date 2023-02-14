@@ -32,7 +32,7 @@ namespace Iris
 
         public void Step()
         {
-            VCOUNT = (UInt16)(_cycleCounter % HorizontalLineWidth);
+            VCOUNT = (UInt16)(_cycleCounter / HorizontalLineWidth);
 
             if (_cycleCounter == HorizontalLineWidth * ScreenHeight)
             {
