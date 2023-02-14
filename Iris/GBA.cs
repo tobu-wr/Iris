@@ -68,7 +68,6 @@
         internal void LoadROM(string filename)
         {
             _rom = File.ReadAllBytes(filename);
-            Init();
         }
 
         internal bool IsRunning()
@@ -94,7 +93,7 @@
         internal void SetKeyStatus(Keys key, bool pressed)
         {
             int mask = 1 << (int)key;
-            _KEYINPUT = pressed ? (UInt16)(_KEYINPUT & ~mask) : (UInt16)(_KEYINPUT | mask);
+            _KEYINPUT = (UInt16)(pressed ? (_KEYINPUT & ~mask) : (_KEYINPUT | mask));
         }
 
         public Byte ReadMemory8(UInt32 address)

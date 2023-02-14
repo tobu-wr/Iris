@@ -87,6 +87,7 @@ namespace Iris
             try
             {
                 _gba.LoadROM(fileName);
+                _gba.Init();
                 return true;
             }
             catch
