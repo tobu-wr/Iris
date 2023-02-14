@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Iris
+﻿namespace Iris
 {
     internal sealed class GBA : CPU.ICallbacks
     {
-        public enum Keys
+        internal enum Keys
         {
             A = 0,
             B = 1,
@@ -35,13 +29,13 @@ namespace Iris
 
         private bool _running = false;
 
-        public GBA(IRenderer renderer)
+        internal GBA(IRenderer renderer)
         {
             _cpu = new(this);
             _ppu = new(renderer);
         }
 
-        public void Init()
+        internal void Init()
         {
             _cpu.Reg[13] = 0x0300_7f00;
             _cpu.Reg13_fiq = 0x0300_7f00;
@@ -52,18 +46,18 @@ namespace Iris
             _KEYINPUT = 0x03ff;
         }
 
-        public void LoadROM(string filename)
+        internal void LoadROM(string filename)
         {
             _rom = File.ReadAllBytes(filename);
             Init();
         }
 
-        public bool IsRunning()
+        internal bool IsRunning()
         {
             return _running;
         }
 
-        public void Run()
+        internal void Run()
         {
             _running = true;
             while (_running)
@@ -73,12 +67,12 @@ namespace Iris
             }
         }
 
-        public void Pause()
+        internal void Pause()
         {
             _running = false;
         }
 
-        public void SetKeyStatus(Keys key, bool pressed)
+        internal void SetKeyStatus(Keys key, bool pressed)
         {
             int mask = 1 << (int)key;
             _KEYINPUT = pressed ? (UInt16)(_KEYINPUT & ~mask) : (UInt16)(_KEYINPUT | mask);
@@ -708,6 +702,7 @@ namespace Iris
         public void HandleSWI(UInt32 value)
         {
             Byte function = (Byte)((value >> 16) & 0xff);
+
             switch (function)
             {
                 // Div
