@@ -4,7 +4,10 @@
     {
         private void BIOS_Init()
         {
-            // TODO
+            const UInt32 ROMAddress = 0x0800_0000;
+
+            _cpu.Reg[CPU.Core.PC] = ROMAddress;
+            _cpu.NextInstructionAddress = ROMAddress;
         }
 
         private void HandleSWI(UInt32 value)

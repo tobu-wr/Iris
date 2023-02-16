@@ -19,7 +19,8 @@ namespace Iris.UserInterface
             { Keys.Q, Emulation.GBA.Core.Keys.L},
         };
 
-        private readonly Emulation.GBA.Core _gba;
+        private readonly Emulation.GBA.Core _GBA;
+        private readonly Emulation.NDS.Core _NDS;
 
         private int _frameCount = 0;
         private readonly System.Timers.Timer _performanceUpdateTimer = new(1000);
@@ -27,7 +28,9 @@ namespace Iris.UserInterface
         internal MainWindow(string[] args)
         {
             InitializeComponent();
-            _gba = new(DrawFrame);
+
+            _GBA = new(DrawFrame);
+            _NDS = new(DrawFrame);
 
             _performanceUpdateTimer.Elapsed += new ElapsedEventHandler(PerformanceUpdateTimer_Elapsed);
 
@@ -74,8 +77,8 @@ namespace Iris.UserInterface
         {
             try
             {
-                _gba.LoadROM(fileName);
-                _gba.Init();
+                _GBA.LoadROM(fileName);
+                _GBA.Init();
                 return true;
             }
             catch
@@ -95,12 +98,12 @@ namespace Iris.UserInterface
             {
                 try
                 {
-                    _gba.Run();
+                    _GBA.Run();
                 }
                 catch (Exception ex)
                 {
                     Pause();
-                    _gba.Init();
+                    _GBA.Init();
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             });
@@ -113,7 +116,7 @@ namespace Iris.UserInterface
             runToolStripMenuItem.Enabled = true;
             pauseToolStripMenuItem.Enabled = false;
             toolStripStatusLabel1.Text = "Paused";
-            _gba.Pause();
+            _GBA.Pause();
 
             _performanceUpdateTimer.Stop();
             toolStripStatusLabel2.Text = "FPS: 0";
@@ -122,7 +125,7 @@ namespace Iris.UserInterface
 
         private void LoadROMToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            bool running = _gba.IsRunning();
+            bool running = _GBA.IsRunning();
             if (running)
                 Pause();
 
@@ -146,7 +149,7 @@ namespace Iris.UserInterface
 
         private void LoadStateToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            bool running = _gba.IsRunning();
+            bool running = _GBA.IsRunning();
             if (running)
                 Pause();
 
@@ -162,7 +165,7 @@ namespace Iris.UserInterface
 
         private void SaveStateToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            bool running = _gba.IsRunning();
+            bool running = _GBA.IsRunning();
             if (running)
                 Pause();
 
@@ -193,11 +196,11 @@ namespace Iris.UserInterface
 
         private void RestartToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            bool running = _gba.IsRunning();
+            bool running = _GBA.IsRunning();
             if (running)
                 Pause();
 
-            _gba.Init();
+            _GBA.Init();
 
             if (running)
                 Run();
@@ -206,13 +209,13 @@ namespace Iris.UserInterface
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
             if (KeyMapping.TryGetValue(e.KeyCode, out Emulation.GBA.Core.Keys value))
-                _gba.SetKeyStatus(value, true);
+                _GBA.SetKeyStatus(value, true);
         }
 
         private void MainWindow_KeyUp(object sender, KeyEventArgs e)
         {
             if (KeyMapping.TryGetValue(e.KeyCode, out Emulation.GBA.Core.Keys value))
-                _gba.SetKeyStatus(value, false);
+                _GBA.SetKeyStatus(value, false);
         }
 
         private void PerformanceUpdateTimer_Elapsed(object? sender, ElapsedEventArgs e)
