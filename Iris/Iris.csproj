@@ -9,4 +9,8 @@
     <TieredPGO>true</TieredPGO>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="UserInterface\" />
+  </ItemGroup>
+
 </Project>

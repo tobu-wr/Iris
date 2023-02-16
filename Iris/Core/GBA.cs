@@ -1,4 +1,4 @@
-﻿namespace Iris
+﻿namespace Iris.Core
 {
     internal sealed class GBA
     {
@@ -18,38 +18,38 @@
 
         private const int KB = 1024;
 
-        private Byte[]? _rom;
-        private readonly Byte[] _sram = new byte[64 * KB];
-        private readonly Byte[] _externalWRAM = new Byte[256 * KB];
-        private readonly Byte[] _internalWRAM = new Byte[32 * KB];
+        private byte[]? _rom;
+        private readonly byte[] _sram = new byte[64 * KB];
+        private readonly byte[] _externalWRAM = new byte[256 * KB];
+        private readonly byte[] _internalWRAM = new byte[32 * KB];
 
         private readonly CPU _cpu;
         private readonly PPU _ppu;
 
-        private UInt16 _SOUNDCNT_H = 0;
-        private UInt16 _SOUNDCNT_X = 0;
-        private UInt16 _SOUNDBIAS = 0;
-        private UInt16 _DMA0CNT_H = 0;
-        private UInt16 _DMA1SAD_L = 0;
-        private UInt16 _DMA1SAD_H = 0;
-        private UInt16 _DMA1DAD_L = 0;
-        private UInt16 _DMA1DAD_H = 0;
-        private UInt16 _DMA1CNT_L = 0;
-        private UInt16 _DMA1CNT_H = 0;
-        private UInt16 _DMA2SAD_H = 0;
-        private UInt16 _DMA2CNT_L = 0;
-        private UInt16 _DMA2CNT_H = 0;
-        private UInt16 _DMA3CNT_H = 0;
-        private UInt16 _TM0CNT_H = 0;
-        private UInt16 _TM1CNT_H = 0;
-        private UInt16 _TM2CNT_H = 0;
-        private UInt16 _TM3CNT_H = 0;
-        private UInt16 _SIOCNT = 0;
-        private UInt16 _KEYINPUT = 0x03ff;
-        private UInt16 _KEYCNT = 0;
-        private UInt16 _IE = 0;
-        private UInt16 _WAITCNT = 0;
-        private UInt16 _IME = 0;
+        private ushort _SOUNDCNT_H = 0;
+        private ushort _SOUNDCNT_X = 0;
+        private ushort _SOUNDBIAS = 0;
+        private ushort _DMA0CNT_H = 0;
+        private ushort _DMA1SAD_L = 0;
+        private ushort _DMA1SAD_H = 0;
+        private ushort _DMA1DAD_L = 0;
+        private ushort _DMA1DAD_H = 0;
+        private ushort _DMA1CNT_L = 0;
+        private ushort _DMA1CNT_H = 0;
+        private ushort _DMA2SAD_H = 0;
+        private ushort _DMA2CNT_L = 0;
+        private ushort _DMA2CNT_H = 0;
+        private ushort _DMA3CNT_H = 0;
+        private ushort _TM0CNT_H = 0;
+        private ushort _TM1CNT_H = 0;
+        private ushort _TM2CNT_H = 0;
+        private ushort _TM3CNT_H = 0;
+        private ushort _SIOCNT = 0;
+        private ushort _KEYINPUT = 0x03ff;
+        private ushort _KEYCNT = 0;
+        private ushort _IE = 0;
+        private ushort _WAITCNT = 0;
+        private ushort _IME = 0;
 
         private bool _running = false;
 
@@ -73,7 +73,7 @@
 
         internal void Init()
         {
-            const UInt32 ROMAddress = 0x0800_0000;
+            const uint ROMAddress = 0x0800_0000;
 
             for (int i = 0; i <= 12; ++i)
                 _cpu.Reg[i] = 0;
@@ -96,7 +96,7 @@
             _cpu.NextInstructionAddress = ROMAddress;
             _cpu.IRQPending = false;
 
-            for (UInt32 address = 0x0300_7e00; address < 0x0300_8000; address += 4)
+            for (uint address = 0x0300_7e00; address < 0x0300_8000; address += 4)
                 WriteMemory32(address, 0);
 
             _SOUNDCNT_H = 0;
@@ -153,10 +153,10 @@
         internal void SetKeyStatus(Keys key, bool pressed)
         {
             int mask = 1 << (int)key;
-            _KEYINPUT = (UInt16)(pressed ? (_KEYINPUT & ~mask) : (_KEYINPUT | mask));
+            _KEYINPUT = (ushort)(pressed ? _KEYINPUT & ~mask : _KEYINPUT | mask);
         }
 
-        public Byte ReadMemory8(UInt32 address)
+        public byte ReadMemory8(uint address)
         {
             address &= 0x0fff_ffff;
             if (address is >= 0x0000_0000 and < 0x0000_4000)
@@ -171,12 +171,12 @@
             }
             else if (address is >= 0x0200_0000 and < 0x0204_0000)
             {
-                UInt32 offset = address - 0x0200_0000;
+                uint offset = address - 0x0200_0000;
                 return _externalWRAM[offset];
             }
             else if (address is >= 0x0300_0000 and < 0x0300_8000)
             {
-                UInt32 offset = address - 0x0300_0000;
+                uint offset = address - 0x0300_0000;
                 return _internalWRAM[offset];
             }
             else if (address is >= 0x0300_8000 and < 0x0400_0000)
@@ -186,13 +186,13 @@
             }
             else if (address is >= 0x0400_0000 and < 0x0500_0000)
             {
-                UInt32 offset = address - 0x0400_0000;
+                uint offset = address - 0x0400_0000;
                 switch (offset)
                 {
                     case 0x000:
-                        return (Byte)_ppu.DISPCNT;
+                        return (byte)_ppu.DISPCNT;
                     case 0x001:
-                        return (Byte)(_ppu.DISPCNT >> 8);
+                        return (byte)(_ppu.DISPCNT >> 8);
 
                     case 0x002:
                     case 0x003:
@@ -200,14 +200,14 @@
                         return 0;
 
                     case 0x004:
-                        return (Byte)_ppu.DISPSTAT;
+                        return (byte)_ppu.DISPSTAT;
                     case 0x005:
-                        return (Byte)(_ppu.DISPSTAT >> 8);
+                        return (byte)(_ppu.DISPSTAT >> 8);
 
                     case 0x006:
-                        return (Byte)_ppu.VCOUNT;
+                        return (byte)_ppu.VCOUNT;
                     case 0x007:
-                        return (Byte)(_ppu.VCOUNT >> 8);
+                        return (byte)(_ppu.VCOUNT >> 8);
 
                     case 0x008:
                     case 0x009:
@@ -235,94 +235,94 @@
                         return 0;
 
                     case 0x088:
-                        return (Byte)_SOUNDBIAS;
+                        return (byte)_SOUNDBIAS;
                     case 0x089:
-                        return (Byte)(_SOUNDBIAS >> 8);
+                        return (byte)(_SOUNDBIAS >> 8);
 
                     case 0x0ba:
-                        return (Byte)_DMA0CNT_H;
+                        return (byte)_DMA0CNT_H;
                     case 0x0bb:
-                        return (Byte)(_DMA0CNT_H >> 8);
+                        return (byte)(_DMA0CNT_H >> 8);
 
                     case 0x0c4:
-                        return (Byte)_DMA1CNT_L;
+                        return (byte)_DMA1CNT_L;
                     case 0x0c5:
-                        return (Byte)(_DMA1CNT_L >> 8);
+                        return (byte)(_DMA1CNT_L >> 8);
 
                     case 0x0c6:
-                        return (Byte)_DMA1CNT_H;
+                        return (byte)_DMA1CNT_H;
                     case 0x0c7:
-                        return (Byte)(_DMA1CNT_H >> 8);
+                        return (byte)(_DMA1CNT_H >> 8);
 
                     case 0x0d0:
-                        return (Byte)_DMA2CNT_L;
+                        return (byte)_DMA2CNT_L;
                     case 0x0d1:
-                        return (Byte)(_DMA2CNT_L >> 8);
+                        return (byte)(_DMA2CNT_L >> 8);
 
                     case 0x0d2:
-                        return (Byte)_DMA2CNT_H;
+                        return (byte)_DMA2CNT_H;
                     case 0x0d3:
-                        return (Byte)(_DMA2CNT_H >> 8);
+                        return (byte)(_DMA2CNT_H >> 8);
 
                     case 0x0de:
-                        return (Byte)_DMA3CNT_H;
+                        return (byte)_DMA3CNT_H;
                     case 0x0df:
-                        return (Byte)(_DMA3CNT_H >> 8);
+                        return (byte)(_DMA3CNT_H >> 8);
 
                     case 0x102:
-                        return (Byte)_TM0CNT_H;
+                        return (byte)_TM0CNT_H;
                     case 0x103:
-                        return (Byte)(_TM0CNT_H >> 8);
+                        return (byte)(_TM0CNT_H >> 8);
 
                     case 0x106:
-                        return (Byte)_TM1CNT_H;
+                        return (byte)_TM1CNT_H;
                     case 0x107:
-                        return (Byte)(_TM1CNT_H >> 8);
+                        return (byte)(_TM1CNT_H >> 8);
 
                     case 0x10a:
-                        return (Byte)_TM2CNT_H;
+                        return (byte)_TM2CNT_H;
                     case 0x10b:
-                        return (Byte)(_TM2CNT_H >> 8);
+                        return (byte)(_TM2CNT_H >> 8);
 
                     case 0x10e:
-                        return (Byte)_TM3CNT_H;
+                        return (byte)_TM3CNT_H;
                     case 0x10f:
-                        return (Byte)(_TM3CNT_H >> 8);
+                        return (byte)(_TM3CNT_H >> 8);
 
                     case 0x128:
-                        return (Byte)_SIOCNT;
+                        return (byte)_SIOCNT;
                     case 0x129:
-                        return (Byte)(_SIOCNT >> 8);
+                        return (byte)(_SIOCNT >> 8);
 
                     case 0x130:
-                        return (Byte)_KEYINPUT;
+                        return (byte)_KEYINPUT;
                     case 0x131:
-                        return (Byte)(_KEYINPUT >> 8);
+                        return (byte)(_KEYINPUT >> 8);
 
                     case 0x132:
-                        return (Byte)_KEYCNT;
+                        return (byte)_KEYCNT;
                     case 0x133:
-                        return (Byte)(_KEYCNT >> 8);
+                        return (byte)(_KEYCNT >> 8);
 
                     case 0x200:
-                        return (Byte)_IE;
+                        return (byte)_IE;
                     case 0x201:
-                        return (Byte)(_IE >> 8);
+                        return (byte)(_IE >> 8);
 
                     case 0x204:
-                        return (Byte)_WAITCNT;
+                        return (byte)_WAITCNT;
                     case 0x205:
-                        return (Byte)(_WAITCNT >> 8);
+                        return (byte)(_WAITCNT >> 8);
 
                     case 0x208:
-                        return (Byte)_IME;
+                        return (byte)_IME;
                     case 0x209:
-                        return (Byte)(_IME >> 8);
+                        return (byte)(_IME >> 8);
                 }
             }
             else if (address is >= 0x0600_0000 and < 0x0601_8000)
             {
-                UInt32 offset = address - 0x0600_0000;
+                uint offset = address - 0x0600_0000;
                 if (offset < _ppu.VRAM.Length)
                     return _ppu.VRAM[offset];
             }
@@ -331,36 +331,36 @@
                 if (_rom is null)
                     throw new Exception("GBA: No ROM loaded");
 
-                UInt32 offset = address - 0x0800_0000;
+                uint offset = address - 0x0800_0000;
                 if (offset < _rom.Length)
                     return _rom[offset];
             }
             else if (address is >= 0x0e00_0000 and < 0x0e01_0000)
             {
-                UInt32 offset = address - 0x0e00_0000;
+                uint offset = address - 0x0e00_0000;
                 return _sram[offset];
             }
 
             throw new Exception(string.Format("GBA: Invalid read from address 0x{0:x8}", address));
         }
 
-        public UInt16 ReadMemory16(UInt32 address)
+        public ushort ReadMemory16(uint address)
         {
             address &= 0x0fff_fffe;
-            return (UInt16)((ReadMemory8(address + 1) << 8) | ReadMemory8(address));
+            return (ushort)(ReadMemory8(address + 1) << 8 | ReadMemory8(address));
         }
 
-        public UInt32 ReadMemory32(UInt32 address)
+        public uint ReadMemory32(uint address)
         {
             address &= 0x0fff_fffc;
-            return (UInt32)((ReadMemory16(address + 2) << 16) | ReadMemory16(address));
+            return (uint)(ReadMemory16(address + 2) << 16 | ReadMemory16(address));
         }
 
-        public void WriteMemory8(UInt32 address, Byte value)
+        public void WriteMemory8(uint address, byte value)
         {
             if (address is >= 0x0200_0000 and < 0x0300_0000)
             {
-                UInt32 offset = address - 0x0200_0000;
+                uint offset = address - 0x0200_0000;
                 if (offset < _externalWRAM.Length)
                     _externalWRAM[offset] = value;
                 else
@@ -368,7 +368,7 @@
             }
             else if (address is >= 0x0300_0000 and < 0x0400_0000)
             {
-                UInt32 offset = address - 0x0300_0000;
+                uint offset = address - 0x0300_0000;
                 if (offset < _internalWRAM.Length)
                     _internalWRAM[offset] = value;
                 else
@@ -376,14 +376,14 @@
             }
             else if (address is >= 0x0400_0000 and < 0x0500_0000)
             {
-                UInt32 offset = address - 0x0400_0000;
+                uint offset = address - 0x0400_0000;
                 switch (offset)
                 {
                     case 0x000:
-                        _ppu.DISPCNT = (UInt16)((_ppu.DISPCNT & 0xff00) | value);
+                        _ppu.DISPCNT = (ushort)(_ppu.DISPCNT & 0xff00 | value);
                         break;
                     case 0x001:
-                        _ppu.DISPCNT = (UInt16)((_ppu.DISPCNT & 0x00ff) | (value << 8));
+                        _ppu.DISPCNT = (ushort)(_ppu.DISPCNT & 0x00ff | value << 8);
                         break;
 
                     case 0x002:
@@ -392,10 +392,10 @@
                         break; // ignore
 
                     case 0x004:
-                        _ppu.DISPSTAT = (UInt16)((_ppu.DISPSTAT & 0xff00) | value);
+                        _ppu.DISPSTAT = (ushort)(_ppu.DISPSTAT & 0xff00 | value);
                         break;
                     case 0x005:
-                        _ppu.DISPSTAT = (UInt16)((_ppu.DISPSTAT & 0x00ff) | (value << 8));
+                        _ppu.DISPSTAT = (ushort)(_ppu.DISPSTAT & 0x00ff | value << 8);
                         break;
 
                     case 0x008:
@@ -549,73 +549,73 @@
                         break;
 
                     case 0x082:
-                        _SOUNDCNT_H = (UInt16)((_SOUNDCNT_H & 0xff00) | value);
+                        _SOUNDCNT_H = (ushort)(_SOUNDCNT_H & 0xff00 | value);
                         break;
                     case 0x083:
-                        _SOUNDCNT_H = (UInt16)((_SOUNDCNT_H & 0x00ff) | (value << 8));
+                        _SOUNDCNT_H = (ushort)(_SOUNDCNT_H & 0x00ff | value << 8);
                         break;
 
                     case 0x084:
-                        _SOUNDCNT_X = (UInt16)((_SOUNDCNT_X & 0xff00) | value);
+                        _SOUNDCNT_X = (ushort)(_SOUNDCNT_X & 0xff00 | value);
                         break;
                     case 0x085:
-                        _SOUNDCNT_X = (UInt16)((_SOUNDCNT_X & 0x00ff) | (value << 8));
+                        _SOUNDCNT_X = (ushort)(_SOUNDCNT_X & 0x00ff | value << 8);
                         break;
 
                     case 0x088:
-                        _SOUNDBIAS = (UInt16)((_SOUNDBIAS & 0xff00) | value);
+                        _SOUNDBIAS = (ushort)(_SOUNDBIAS & 0xff00 | value);
                         break;
                     case 0x089:
-                        _SOUNDBIAS = (UInt16)((_SOUNDBIAS & 0x00ff) | (value << 8));
+                        _SOUNDBIAS = (ushort)(_SOUNDBIAS & 0x00ff | value << 8);
                         break;
 
                     case 0x0ba:
-                        _DMA0CNT_H = (UInt16)((_DMA0CNT_H & 0xff00) | value);
+                        _DMA0CNT_H = (ushort)(_DMA0CNT_H & 0xff00 | value);
                         break;
                     case 0x0bb:
-                        _DMA0CNT_H = (UInt16)((_DMA0CNT_H & 0x00ff) | (value << 8));
+                        _DMA0CNT_H = (ushort)(_DMA0CNT_H & 0x00ff | value << 8);
                         break;
 
                     case 0x0bc:
-                        _DMA1SAD_L = (UInt16)((_DMA1SAD_L & 0xff00) | value);
+                        _DMA1SAD_L = (ushort)(_DMA1SAD_L & 0xff00 | value);
                         break;
                     case 0x0bd:
-                        _DMA1SAD_L = (UInt16)((_DMA1SAD_L & 0x00ff) | (value << 8));
+                        _DMA1SAD_L = (ushort)(_DMA1SAD_L & 0x00ff | value << 8);
                         break;
 
                     case 0x0be:
-                        _DMA1SAD_H = (UInt16)((_DMA1SAD_H & 0xff00) | value);
+                        _DMA1SAD_H = (ushort)(_DMA1SAD_H & 0xff00 | value);
                         break;
                     case 0x0bf:
-                        _DMA1SAD_H = (UInt16)((_DMA1SAD_H & 0x00ff) | (value << 8));
+                        _DMA1SAD_H = (ushort)(_DMA1SAD_H & 0x00ff | value << 8);
                         break;
 
                     case 0x0c0:
-                        _DMA1DAD_L = (UInt16)((_DMA1DAD_L & 0xff00) | value);
+                        _DMA1DAD_L = (ushort)(_DMA1DAD_L & 0xff00 | value);
                         break;
                     case 0x0c1:
-                        _DMA1DAD_L = (UInt16)((_DMA1DAD_L & 0x00ff) | (value << 8));
+                        _DMA1DAD_L = (ushort)(_DMA1DAD_L & 0x00ff | value << 8);
                         break;
 
                     case 0x0c2:
-                        _DMA1DAD_H = (UInt16)((_DMA1DAD_H & 0xff00) | value);
+                        _DMA1DAD_H = (ushort)(_DMA1DAD_H & 0xff00 | value);
                         break;
                     case 0x0c3:
-                        _DMA1DAD_H = (UInt16)((_DMA1DAD_H & 0x00ff) | (value << 8));
+                        _DMA1DAD_H = (ushort)(_DMA1DAD_H & 0x00ff | value << 8);
                         break;
 
                     case 0x0c4:
-                        _DMA1CNT_L = (UInt16)((_DMA1CNT_L & 0xff00) | value);
+                        _DMA1CNT_L = (ushort)(_DMA1CNT_L & 0xff00 | value);
                         break;
                     case 0x0c5:
-                        _DMA1CNT_L = (UInt16)((_DMA1CNT_L & 0x00ff) | (value << 8));
+                        _DMA1CNT_L = (ushort)(_DMA1CNT_L & 0x00ff | value << 8);
                         break;
 
                     case 0x0c6:
-                        _DMA1CNT_H = (UInt16)((_DMA1CNT_H & 0xff00) | value);
+                        _DMA1CNT_H = (ushort)(_DMA1CNT_H & 0xff00 | value);
                         break;
                     case 0x0c7:
-                        _DMA1CNT_H = (UInt16)((_DMA1CNT_H & 0x00ff) | (value << 8));
+                        _DMA1CNT_H = (ushort)(_DMA1CNT_H & 0x00ff | value << 8);
                         break;
 
                     case 0x0c8:
@@ -624,10 +624,10 @@
                         break;
 
                     case 0x0ca:
-                        _DMA2SAD_H = (UInt16)((_DMA2SAD_H & 0xff00) | value);
+                        _DMA2SAD_H = (ushort)(_DMA2SAD_H & 0xff00 | value);
                         break;
                     case 0x0cb:
-                        _DMA2SAD_H = (UInt16)((_DMA2SAD_H & 0x00ff) | (value << 8));
+                        _DMA2SAD_H = (ushort)(_DMA2SAD_H & 0x00ff | value << 8);
                         break;
 
                     case 0x0cc:
@@ -641,24 +641,24 @@
                         break;
 
                     case 0x0d0:
-                        _DMA2CNT_L = (UInt16)((_DMA2CNT_L & 0xff00) | value);
+                        _DMA2CNT_L = (ushort)(_DMA2CNT_L & 0xff00 | value);
                         break;
                     case 0x0d1:
-                        _DMA2CNT_L = (UInt16)((_DMA2CNT_L & 0x00ff) | (value << 8));
+                        _DMA2CNT_L = (ushort)(_DMA2CNT_L & 0x00ff | value << 8);
                         break;
 
                     case 0x0d2:
-                        _DMA2CNT_H = (UInt16)((_DMA2CNT_H & 0xff00) | value);
+                        _DMA2CNT_H = (ushort)(_DMA2CNT_H & 0xff00 | value);
                         break;
                     case 0x0d3:
-                        _DMA2CNT_H = (UInt16)((_DMA2CNT_H & 0x00ff) | (value << 8));
+                        _DMA2CNT_H = (ushort)(_DMA2CNT_H & 0x00ff | value << 8);
                         break;
 
                     case 0x0de:
-                        _DMA3CNT_H = (UInt16)((_DMA3CNT_H & 0xff00) | value);
+                        _DMA3CNT_H = (ushort)(_DMA3CNT_H & 0xff00 | value);
                         break;
                     case 0x0df:
-                        _DMA3CNT_H = (UInt16)((_DMA3CNT_H & 0x00ff) | (value << 8));
+                        _DMA3CNT_H = (ushort)(_DMA3CNT_H & 0x00ff | value << 8);
                         break;
 
                     case 0x100:
@@ -667,10 +667,10 @@
                         break;
 
                     case 0x102:
-                        _TM0CNT_H = (UInt16)((_TM0CNT_H & 0xff00) | value);
+                        _TM0CNT_H = (ushort)(_TM0CNT_H & 0xff00 | value);
                         break;
                     case 0x103:
-                        _TM0CNT_H = (UInt16)((_TM0CNT_H & 0x00ff) | (value << 8));
+                        _TM0CNT_H = (ushort)(_TM0CNT_H & 0x00ff | value << 8);
                         break;
 
                     case 0x104:
@@ -679,10 +679,10 @@
                         break;
 
                     case 0x106:
-                        _TM1CNT_H = (UInt16)((_TM1CNT_H & 0xff00) | value);
+                        _TM1CNT_H = (ushort)(_TM1CNT_H & 0xff00 | value);
                         break;
                     case 0x107:
-                        _TM1CNT_H = (UInt16)((_TM1CNT_H & 0x00ff) | (value << 8));
+                        _TM1CNT_H = (ushort)(_TM1CNT_H & 0x00ff | value << 8);
                         break;
 
                     case 0x108:
@@ -691,10 +691,10 @@
                         break;
 
                     case 0x10a:
-                        _TM2CNT_H = (UInt16)((_TM2CNT_H & 0xff00) | value);
+                        _TM2CNT_H = (ushort)(_TM2CNT_H & 0xff00 | value);
                         break;
                     case 0x10b:
-                        _TM2CNT_H = (UInt16)((_TM2CNT_H & 0x00ff) | (value << 8));
+                        _TM2CNT_H = (ushort)(_TM2CNT_H & 0x00ff | value << 8);
                         break;
 
                     case 0x10c:
@@ -703,10 +703,10 @@
                         break;
 
                     case 0x10e:
-                        _TM3CNT_H = (UInt16)((_TM3CNT_H & 0xff00) | value);
+                        _TM3CNT_H = (ushort)(_TM3CNT_H & 0xff00 | value);
                         break;
                     case 0x10f:
-                        _TM3CNT_H = (UInt16)((_TM3CNT_H & 0x00ff) | (value << 8));
+                        _TM3CNT_H = (ushort)(_TM3CNT_H & 0x00ff | value << 8);
                         break;
 
                     case 0x120:
@@ -730,10 +730,10 @@
                         break;
 
                     case 0x128:
-                        _SIOCNT = (UInt16)((_SIOCNT & 0xff00) | value);
+                        _SIOCNT = (ushort)(_SIOCNT & 0xff00 | value);
                         break;
                     case 0x129:
-                        _SIOCNT = (UInt16)((_SIOCNT & 0x00ff) | (value << 8));
+                        _SIOCNT = (ushort)(_SIOCNT & 0x00ff | value << 8);
                         break;
 
                     case 0x12a:
@@ -747,10 +747,10 @@
                         break;
 
                     case 0x132:
-                        _KEYCNT = (UInt16)((_KEYCNT & 0xff00) | value);
+                        _KEYCNT = (ushort)(_KEYCNT & 0xff00 | value);
                         break;
                     case 0x133:
-                        _KEYCNT = (UInt16)((_KEYCNT & 0x00ff) | (value << 8));
+                        _KEYCNT = (ushort)(_KEYCNT & 0x00ff | value << 8);
                         break;
 
                     case 0x134:
@@ -759,10 +759,10 @@
                         break;
 
                     case 0x200:
-                        _IE = (UInt16)((_IE & 0xff00) | value);
+                        _IE = (ushort)(_IE & 0xff00 | value);
                         break;
                     case 0x201:
-                        _IE = (UInt16)((_IE & 0x00ff) | (value << 8));
+                        _IE = (ushort)(_IE & 0x00ff | value << 8);
                         break;
 
                     case 0x202:
@@ -771,17 +771,17 @@
                         break;
 
                     case 0x204:
-                        _WAITCNT = (UInt16)((_WAITCNT & 0xff00) | value);
+                        _WAITCNT = (ushort)(_WAITCNT & 0xff00 | value);
                         break;
                     case 0x205:
-                        _WAITCNT = (UInt16)((_WAITCNT & 0x00ff) | (value << 8));
+                        _WAITCNT = (ushort)(_WAITCNT & 0x00ff | value << 8);
                         break;
 
                     case 0x208:
-                        _IME = (UInt16)((_IME & 0xff00) | value);
+                        _IME = (ushort)(_IME & 0xff00 | value);
                         break;
                     case 0x209:
-                        _IME = (UInt16)((_IME & 0x00ff) | (value << 8));
+                        _IME = (ushort)(_IME & 0x00ff | value << 8);
                         break;
 
                     case 0x20a:
@@ -795,7 +795,7 @@
             }
             else if (address is >= 0x0500_0000 and < 0x0600_0000)
             {
-                UInt32 offset = address - 0x0500_0000;
+                uint offset = address - 0x0500_0000;
                 if (offset < _ppu.PaletteRAM.Length)
                     _ppu.PaletteRAM[offset] = value;
                 else
@@ -803,7 +803,7 @@
             }
             else if (address is >= 0x0600_0000 and < 0x0700_0000)
             {
-                UInt32 offset = address - 0x0600_0000;
+                uint offset = address - 0x0600_0000;
                 if (offset < _ppu.VRAM.Length)
                     _ppu.VRAM[offset] = value;
                 else
@@ -811,7 +811,7 @@
             }
             else if (address is >= 0x0e00_0000 and < 0x0e01_0000)
             {
-                UInt32 offset = address - 0x0e00_0000;
+                uint offset = address - 0x0e00_0000;
                 _sram[offset] = value;
             }
             else
@@ -820,34 +820,34 @@
             }
         }
 
-        public void WriteMemory16(UInt32 address, UInt16 value)
+        public void WriteMemory16(uint address, ushort value)
         {
             address &= 0xffff_fffe;
-            WriteMemory8(address + 1, (Byte)(value >> 8));
-            WriteMemory8(address, (Byte)value);
+            WriteMemory8(address + 1, (byte)(value >> 8));
+            WriteMemory8(address, (byte)value);
         }
 
-        public void WriteMemory32(UInt32 address, UInt32 value)
+        public void WriteMemory32(uint address, uint value)
         {
             address &= 0xffff_fffc;
-            WriteMemory16(address + 2, (UInt16)(value >> 16));
-            WriteMemory16(address, (UInt16)value);
+            WriteMemory16(address + 2, (ushort)(value >> 16));
+            WriteMemory16(address, (ushort)value);
         }
 
-        public void HandleSWI(UInt32 value)
+        public void HandleSWI(uint value)
         {
-            Byte function = (Byte)((value >> 16) & 0xff);
+            byte function = (byte)(value >> 16 & 0xff);
 
             switch (function)
             {
                 // Div
                 case 0x06:
                     {
-                        Int32 number = (Int32)_cpu.Reg[0];
-                        Int32 denom = (Int32)_cpu.Reg[1];
-                        _cpu.Reg[0] = (UInt32)(number / denom);
-                        _cpu.Reg[1] = (UInt32)(number % denom);
-                        _cpu.Reg[3] = (UInt32)Math.Abs((Int32)_cpu.Reg[0]);
+                        int number = (int)_cpu.Reg[0];
+                        int denom = (int)_cpu.Reg[1];
+                        _cpu.Reg[0] = (uint)(number / denom);
+                        _cpu.Reg[1] = (uint)(number % denom);
+                        _cpu.Reg[3] = (uint)Math.Abs((int)_cpu.Reg[0]);
                         break;
                     }
 

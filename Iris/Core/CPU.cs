@@ -1,4 +1,4 @@
-﻿namespace Iris
+﻿namespace Iris.Core
 {
     internal sealed partial class CPU
     {
@@ -10,13 +10,13 @@
 
         internal struct CallbackInterface
         {
-            internal delegate Byte ReadMemory8_Delegate(UInt32 address);
-            internal delegate UInt16 ReadMemory16_Delegate(UInt32 address);
-            internal delegate UInt32 ReadMemory32_Delegate(UInt32 address);
-            internal delegate void WriteMemory8_Delegate(UInt32 address, Byte value);
-            internal delegate void WriteMemory16_Delegate(UInt32 address, UInt16 value);
-            internal delegate void WriteMemory32_Delegate(UInt32 address, UInt32 value);
-            internal delegate void HandleSWI_Delegate(UInt32 value);
+            internal delegate byte ReadMemory8_Delegate(uint address);
+            internal delegate ushort ReadMemory16_Delegate(uint address);
+            internal delegate uint ReadMemory32_Delegate(uint address);
+            internal delegate void WriteMemory8_Delegate(uint address, byte value);
+            internal delegate void WriteMemory16_Delegate(uint address, ushort value);
+            internal delegate void WriteMemory32_Delegate(uint address, uint value);
+            internal delegate void HandleSWI_Delegate(uint value);
             internal delegate void HandleIRQ_Delegate();
 
             internal ReadMemory8_Delegate ReadMemory8;
@@ -37,35 +37,35 @@
             N = 31
         };
 
-        private const UInt32 ModeMask = 0b1_1111;
-        private const UInt32 UserMode = 0b1_0000;
-        private const UInt32 SystemMode = 0b1_1111;
-        private const UInt32 SupervisorMode = 0b1_0011;
-        private const UInt32 AbortMode = 0b1_0111;
-        private const UInt32 UndefinedMode = 0b1_1011;
-        private const UInt32 InterruptMode = 0b1_0010;
-        private const UInt32 FastInterruptMode = 0b1_0001;
+        private const uint ModeMask = 0b1_1111;
+        private const uint UserMode = 0b1_0000;
+        private const uint SystemMode = 0b1_1111;
+        private const uint SupervisorMode = 0b1_0011;
+        private const uint AbortMode = 0b1_0111;
+        private const uint UndefinedMode = 0b1_1011;
+        private const uint InterruptMode = 0b1_0010;
+        private const uint FastInterruptMode = 0b1_0001;
 
-        internal const UInt32 SP = 13;
-        internal const UInt32 LR = 14;
-        internal const UInt32 PC = 15;
+        internal const uint SP = 13;
+        internal const uint LR = 14;
+        internal const uint PC = 15;
 
-        internal readonly UInt32[] Reg = new UInt32[16];
-        internal UInt32 CPSR = 0b1_0000;
-        internal UInt32 SPSR;
+        internal readonly uint[] Reg = new uint[16];
+        internal uint CPSR = 0b1_0000;
+        internal uint SPSR;
 
-        internal UInt32 Reg8_usr, Reg9_usr, Reg10_usr, Reg11_usr, Reg12_usr, Reg13_usr, Reg14_usr;
-        internal UInt32 Reg13_svc, Reg14_svc;
-        internal UInt32 Reg13_abt, Reg14_abt;
-        internal UInt32 Reg13_und, Reg14_und;
-        internal UInt32 Reg13_irq, Reg14_irq;
-        internal UInt32 Reg8_fiq, Reg9_fiq, Reg10_fiq, Reg11_fiq, Reg12_fiq, Reg13_fiq, Reg14_fiq;
-        internal UInt32 SPSR_svc, SPSR_abt, SPSR_und, SPSR_irq, SPSR_fiq;
+        internal uint Reg8_usr, Reg9_usr, Reg10_usr, Reg11_usr, Reg12_usr, Reg13_usr, Reg14_usr;
+        internal uint Reg13_svc, Reg14_svc;
+        internal uint Reg13_abt, Reg14_abt;
+        internal uint Reg13_und, Reg14_und;
+        internal uint Reg13_irq, Reg14_irq;
+        internal uint Reg8_fiq, Reg9_fiq, Reg10_fiq, Reg11_fiq, Reg12_fiq, Reg13_fiq, Reg14_fiq;
+        internal uint SPSR_svc, SPSR_abt, SPSR_und, SPSR_irq, SPSR_fiq;
 
         private readonly Architecture _architecture;
         private readonly CallbackInterface _callbackInterface;
 
-        internal UInt32 NextInstructionAddress;
+        internal uint NextInstructionAddress;
         internal bool IRQPending;
 
         internal CPU(Architecture architecture, CallbackInterface callbacks)
@@ -76,14 +76,14 @@
 
         internal void Step()
         {
-            UInt32 i = (CPSR >> 7) & 1;
+            uint i = CPSR >> 7 & 1;
 
-            if (IRQPending && (i == 0))
+            if (IRQPending && i == 0)
             {
                 _callbackInterface.HandleIRQ();
             }
 
-            UInt32 t = (CPSR >> 5) & 1;
+            uint t = CPSR >> 5 & 1;
 
             if (t == 0)
                 ARM_Step();
@@ -91,10 +91,10 @@
                 THUMB_Step();
         }
 
-        private void SetCPSR(UInt32 value)
+        private void SetCPSR(uint value)
         {
-            UInt32 previousMode = CPSR & ModeMask;
-            UInt32 newMode = value & ModeMask;
+            uint previousMode = CPSR & ModeMask;
+            uint newMode = value & ModeMask;
 
             CPSR = value | 0b1_0000;
 
@@ -232,17 +232,17 @@
             }
         }
 
-        private UInt32 GetFlag(Flags flag)
+        private uint GetFlag(Flags flag)
         {
-            return (CPSR >> (int)flag) & 1;
+            return CPSR >> (int)flag & 1;
         }
 
-        private void SetFlag(Flags flag, UInt32 value)
+        private void SetFlag(Flags flag, uint value)
         {
-            CPSR = (CPSR & ~(1u << (int)flag)) | (value << (int)flag);
+            CPSR = CPSR & ~(1u << (int)flag) | value << (int)flag;
         }
 
-        private bool ConditionPassed(UInt32 cond)
+        private bool ConditionPassed(uint cond)
         {
             return cond switch
             {
@@ -263,17 +263,17 @@
                 // VC
                 0b0111 => GetFlag(Flags.V) == 0,
                 // HI
-                0b1000 => (GetFlag(Flags.C) == 1) && (GetFlag(Flags.Z) == 0),
+                0b1000 => GetFlag(Flags.C) == 1 && GetFlag(Flags.Z) == 0,
                 // LS
-                0b1001 => (GetFlag(Flags.C) == 0) || (GetFlag(Flags.Z) == 1),
+                0b1001 => GetFlag(Flags.C) == 0 || GetFlag(Flags.Z) == 1,
                 // GE
                 0b1010 => GetFlag(Flags.N) == GetFlag(Flags.V),
                 // LT
                 0b1011 => GetFlag(Flags.N) != GetFlag(Flags.V),
                 // GT
-                0b1100 => (GetFlag(Flags.Z) == 0) && (GetFlag(Flags.N) == GetFlag(Flags.V)),
+                0b1100 => GetFlag(Flags.Z) == 0 && GetFlag(Flags.N) == GetFlag(Flags.V),
                 // LE
-                0b1101 => (GetFlag(Flags.Z) == 1) || (GetFlag(Flags.N) != GetFlag(Flags.V)),
+                0b1101 => GetFlag(Flags.Z) == 1 || GetFlag(Flags.N) != GetFlag(Flags.V),
                 // AL
                 0b1110 => true,
                 // NV
@@ -283,41 +283,41 @@
             };
         }
 
-        private static UInt32 Not(UInt32 flag)
+        private static uint Not(uint flag)
         {
             return ~flag & 1;
         }
 
-        private static UInt32 CarryFrom(UInt64 result)
+        private static uint CarryFrom(ulong result)
         {
-            return (result > 0xffff_ffff) ? 1u : 0u;
+            return result > 0xffff_ffff ? 1u : 0u;
         }
 
-        private static UInt32 BorrowFrom(UInt32 leftOperand, UInt64 rightOperand)
+        private static uint BorrowFrom(uint leftOperand, ulong rightOperand)
         {
-            return (leftOperand < rightOperand) ? 1u : 0u;
+            return leftOperand < rightOperand ? 1u : 0u;
         }
 
-        private static UInt32 OverflowFrom_Addition(UInt32 leftOperand, UInt32 rightOperand, UInt32 result)
+        private static uint OverflowFrom_Addition(uint leftOperand, uint rightOperand, uint result)
         {
-            return (((leftOperand >> 31) == (rightOperand >> 31))
-                 && ((leftOperand >> 31) != (result >> 31))) ? 1u : 0u;
+            return leftOperand >> 31 == rightOperand >> 31
+                 && leftOperand >> 31 != result >> 31 ? 1u : 0u;
         }
 
-        private static UInt32 OverflowFrom_Subtraction(UInt32 leftOperand, UInt32 rightOperand, UInt32 result)
+        private static uint OverflowFrom_Subtraction(uint leftOperand, uint rightOperand, uint result)
         {
-            return (((leftOperand >> 31) != (rightOperand >> 31))
-                 && ((leftOperand >> 31) != (result >> 31))) ? 1u : 0u;
+            return leftOperand >> 31 != rightOperand >> 31
+                 && leftOperand >> 31 != result >> 31 ? 1u : 0u;
         }
 
-        private static UInt32 ArithmeticShiftRight(UInt32 value, int shiftAmount)
+        private static uint ArithmeticShiftRight(uint value, int shiftAmount)
         {
-            return (UInt32)((Int32)value >> shiftAmount);
+            return (uint)((int)value >> shiftAmount);
         }
 
-        private static UInt32 SignExtend(UInt32 value, int size)
+        private static uint SignExtend(uint value, int size)
         {
-            return ((value >> (size - 1)) == 1) ? value | (0xffff_ffff << size) : value;
+            return value >> size - 1 == 1 ? value | 0xffff_ffff << size : value;
         }
     }
 }
