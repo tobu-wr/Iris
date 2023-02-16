@@ -2,31 +2,7 @@
 {
     internal sealed partial class Core
     {
-        private void HandleSWI(UInt32 value)
-        {
-            Byte function = (Byte)((value >> 16) & 0xff);
-
-            switch (function)
-            {
-                case 0x00:
-                    SoftReset();
-                    break;
-
-                case 0x06:
-                    Div();
-                    break;
-
-                default:
-                    throw new Exception(string.Format("Emulation.GBA.Core: Unknown BIOS function 0x{0:x2}", function));
-            }
-        }
-
-        private void HandleIRQ()
-        {
-            throw new NotImplementedException("Emulation.GBA.Core: HandleIRQ unimplemented");
-        }
-
-        private void SoftReset()
+        private void BIOS_Init()
         {
             const UInt32 ROMAddress = 0x0800_0000;
 
@@ -52,6 +28,26 @@
 
             for (UInt32 address = 0x0300_7e00; address < 0x0300_8000; address += 4)
                 WriteMemory32(address, 0);
+        }
+
+        private void HandleSWI(UInt32 value)
+        {
+            Byte function = (Byte)((value >> 16) & 0xff);
+
+            switch (function)
+            {
+                case 0x06:
+                    Div();
+                    break;
+
+                default:
+                    throw new Exception(string.Format("Emulation.GBA.Core: Unknown BIOS function 0x{0:x2}", function));
+            }
+        }
+
+        private void HandleIRQ()
+        {
+            throw new NotImplementedException("Emulation.GBA.Core: HandleIRQ unimplemented");
         }
 
         private void Div()
