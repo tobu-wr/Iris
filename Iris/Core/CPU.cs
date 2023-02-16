@@ -317,7 +317,7 @@
 
         private static UInt32 SignExtend(UInt32 value, int size)
         {
-            return ((value >> (size - 1)) == 1) ? value | (0xffff_ffff << size) : value;
+            return ((value >> (size - 1)) == 1) ? (value | (0xffff_ffff << size)) : value;
         }
     }
 }
