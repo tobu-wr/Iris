@@ -494,7 +494,7 @@ namespace Iris.Core
             {
                 cpu.Reg[rn] += (UInt32)BitOperations.PopCount(registerList) * 4;
 
-                for (var i = 0; i <= 7; ++i)
+                for (int i = 0; i <= 7; ++i)
                 {
                     if (((registerList >> i) & 1) == 1)
                     {
@@ -810,7 +810,7 @@ namespace Iris.Core
             UInt32 address = cpu.Reg[SP];
             cpu.Reg[SP] += 4 * (r + (UInt32)BitOperations.PopCount(registerList));
 
-            for (var i = 0; i <= 7; ++i)
+            for (int i = 0; i <= 7; ++i)
             {
                 if (((registerList >> i) & 1) == 1)
                 {
@@ -831,7 +831,7 @@ namespace Iris.Core
             cpu.Reg[SP] -= 4 * (r + (UInt32)BitOperations.PopCount(registerList));
             UInt32 address = cpu.Reg[SP];
 
-            for (var i = 0; i <= 7; ++i)
+            for (int i = 0; i <= 7; ++i)
             {
                 if (((registerList >> i) & 1) == 1)
                 {
@@ -900,7 +900,7 @@ namespace Iris.Core
                 UInt32 oldRegRn = cpu.Reg[rn];
                 cpu.Reg[rn] += (UInt32)BitOperations.PopCount(registerList) * 4;
 
-                for (var i = 0; i <= 7; ++i)
+                for (int i = 0; i <= 7; ++i)
                 {
                     if (((registerList >> i) & 1) == 1)
                     {
