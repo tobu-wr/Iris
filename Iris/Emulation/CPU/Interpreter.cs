@@ -1,6 +1,6 @@
 ﻿namespace Iris.Core
 {
-    internal sealed partial class CPU
+    internal sealed partial class Interpreter
     {
         internal enum Architecture
         {
@@ -68,7 +68,7 @@
         internal UInt32 NextInstructionAddress;
         internal bool IRQPending;
 
-        internal CPU(Architecture architecture, CallbackInterface callbacks)
+        internal Interpreter(Architecture architecture, CallbackInterface callbacks)
         {
             _architecture = architecture;
             _callbackInterface = callbacks;
