@@ -16,12 +16,14 @@
         private const UInt32 HorizontalLineWidth = 308;
         private const UInt32 HorizontalLineCount = 228;
 
-        private readonly IRenderer _renderer;
+        internal delegate void DrawFrame_Delegate(UInt16[] frameBuffer);
+        private readonly DrawFrame_Delegate _drawFrameCallback;
+
         private UInt32 _cycleCounter = 0;
 
-        internal PPU(IRenderer renderer)
+        internal PPU(DrawFrame_Delegate drawFrameCallback)
         {
-            _renderer = renderer;
+            _drawFrameCallback = drawFrameCallback;
         }
 
         internal void Step()
@@ -51,7 +53,7 @@
                                     rendererFrameBuffer[i] = color;
                                 }
 
-                                _renderer.DrawFrame(rendererFrameBuffer);
+                                _drawFrameCallback(rendererFrameBuffer);
                             }
                             break;
                         }

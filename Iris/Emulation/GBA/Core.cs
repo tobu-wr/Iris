@@ -46,7 +46,7 @@
 
         private bool _running = false;
 
-        internal Core(IRenderer renderer)
+        internal Core(PPU.DrawFrame_Delegate drawFrameCallback)
         {
             CPU.Core.CallbackInterface cpuCallbackInterface = new()
             {
@@ -61,7 +61,7 @@
             };
 
             _cpu = new(CPU.Core.Architecture.ARMv4T, cpuCallbackInterface);
-            _ppu = new(renderer);
+            _ppu = new(drawFrameCallback);
         }
 
         internal void Init()
