@@ -25,9 +25,9 @@
             _ppu = new(drawFrameCallback);
         }
 
-        internal void Init()
+        internal void Reset()
         {
-            BIOS_Init();
+            BIOS_Reset();
 
             _cpu.IRQPending = false;
         }

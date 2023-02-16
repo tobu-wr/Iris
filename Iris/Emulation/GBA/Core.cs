@@ -64,9 +64,9 @@
             _ppu = new(drawFrameCallback);
         }
 
-        internal void Init()
+        internal void Reset()
         {
-            BIOS_Init();
+            BIOS_Reset();
 
             _SOUNDCNT_H = 0;
             _SOUNDCNT_X = 0;

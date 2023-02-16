@@ -78,7 +78,7 @@ namespace Iris.UserInterface
             try
             {
                 _GBA.LoadROM(fileName);
-                _GBA.Init();
+                _GBA.Reset();
                 return true;
             }
             catch
@@ -103,7 +103,7 @@ namespace Iris.UserInterface
                 catch (Exception ex)
                 {
                     Pause();
-                    _GBA.Init();
+                    _GBA.Reset();
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             });
@@ -200,7 +200,7 @@ namespace Iris.UserInterface
             if (running)
                 Pause();
 
-            _GBA.Init();
+            _GBA.Reset();
 
             if (running)
                 Run();

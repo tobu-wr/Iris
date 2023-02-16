@@ -2,7 +2,7 @@
 {
     internal sealed partial class Core
     {
-        private void BIOS_Init()
+        private void BIOS_Reset()
         {
             const UInt32 ROMAddress = 0x0800_0000;
 
