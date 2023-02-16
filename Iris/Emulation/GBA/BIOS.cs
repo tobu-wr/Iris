@@ -8,6 +8,10 @@
 
             switch (function)
             {
+                case 0x00:
+                    SoftReset();
+                    break;
+
                 case 0x06:
                     Div();
                     break;
