@@ -143,7 +143,7 @@ namespace Iris
 
         private void THUMB_Step()
         {
-            UInt16 instruction = _callbacks.ReadMemory16(NextInstructionAddress);
+            UInt16 instruction = _callbackInterface.ReadMemory16(NextInstructionAddress);
             NextInstructionAddress += 2;
             Reg[PC] = NextInstructionAddress + 2;
 
@@ -488,7 +488,7 @@ namespace Iris
             if (registerList == 0)
             {
                 cpu.Reg[rn] += 0x40;
-                cpu.THUMB_SetPC(cpu._callbacks.ReadMemory32(address));
+                cpu.THUMB_SetPC(cpu._callbackInterface.ReadMemory32(address));
             }
             else
             {
@@ -498,7 +498,7 @@ namespace Iris
                 {
                     if (((registerList >> i) & 1) == 1)
                     {
-                        cpu.Reg[i] = cpu._callbacks.ReadMemory32(address);
+                        cpu.Reg[i] = cpu._callbackInterface.ReadMemory32(address);
                         address += 4;
                     }
                 }
@@ -512,7 +512,7 @@ namespace Iris
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             UInt32 address = cpu.Reg[rn] + (imm * 4u);
-            UInt32 data = BitOperations.RotateRight(cpu._callbacks.ReadMemory32(address), (int)(8 * (address & 0b11)));
+            UInt32 data = BitOperations.RotateRight(cpu._callbackInterface.ReadMemory32(address), (int)(8 * (address & 0b11)));
             cpu.Reg[rd] = data;
         }
 
@@ -523,7 +523,7 @@ namespace Iris
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             UInt32 address = cpu.Reg[rn] + cpu.Reg[rm];
-            UInt32 data = BitOperations.RotateRight(cpu._callbacks.ReadMemory32(address), (int)(8 * (address & 0b11)));
+            UInt32 data = BitOperations.RotateRight(cpu._callbackInterface.ReadMemory32(address), (int)(8 * (address & 0b11)));
             cpu.Reg[rd] = data;
         }
 
@@ -533,7 +533,7 @@ namespace Iris
             UInt16 imm = (UInt16)(instruction & 0xff);
 
             UInt32 address = cpu.Reg[PC] + (imm * 4u);
-            UInt32 data = cpu._callbacks.ReadMemory32(address);
+            UInt32 data = cpu._callbackInterface.ReadMemory32(address);
             cpu.Reg[rd] = data;
         }
 
@@ -543,7 +543,7 @@ namespace Iris
             UInt16 imm = (UInt16)(instruction & 0xff);
 
             UInt32 address = cpu.Reg[SP] + (imm * 4u);
-            UInt32 data = BitOperations.RotateRight(cpu._callbacks.ReadMemory32(address), (int)(8 * (address & 0b11)));
+            UInt32 data = BitOperations.RotateRight(cpu._callbackInterface.ReadMemory32(address), (int)(8 * (address & 0b11)));
             cpu.Reg[rd] = data;
         }
 
@@ -554,7 +554,7 @@ namespace Iris
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             UInt32 address = cpu.Reg[rn] + imm;
-            Byte data = cpu._callbacks.ReadMemory8(address);
+            Byte data = cpu._callbackInterface.ReadMemory8(address);
             cpu.Reg[rd] = data;
         }
 
@@ -565,7 +565,7 @@ namespace Iris
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             UInt32 address = cpu.Reg[rn] + cpu.Reg[rm];
-            Byte data = cpu._callbacks.ReadMemory8(address);
+            Byte data = cpu._callbackInterface.ReadMemory8(address);
             cpu.Reg[rd] = data;
         }
 
@@ -576,7 +576,7 @@ namespace Iris
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             UInt32 address = cpu.Reg[rn] + (imm * 2u);
-            UInt32 data = BitOperations.RotateRight(cpu._callbacks.ReadMemory16(address), (int)(8 * (address & 1)));
+            UInt32 data = BitOperations.RotateRight(cpu._callbackInterface.ReadMemory16(address), (int)(8 * (address & 1)));
             cpu.Reg[rd] = data;
         }
 
@@ -587,7 +587,7 @@ namespace Iris
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             UInt32 address = cpu.Reg[rn] + cpu.Reg[rm];
-            UInt32 data = BitOperations.RotateRight(cpu._callbacks.ReadMemory16(address), (int)(8 * (address & 1)));
+            UInt32 data = BitOperations.RotateRight(cpu._callbackInterface.ReadMemory16(address), (int)(8 * (address & 1)));
             cpu.Reg[rd] = data;
         }
 
@@ -598,7 +598,7 @@ namespace Iris
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             UInt32 address = cpu.Reg[rn] + cpu.Reg[rm];
-            Byte data = cpu._callbacks.ReadMemory8(address);
+            Byte data = cpu._callbackInterface.ReadMemory8(address);
             cpu.Reg[rd] = SignExtend(data, 8);
         }
 
@@ -612,12 +612,12 @@ namespace Iris
 
             if ((address & 1) == 1)
             {
-                Byte data = cpu._callbacks.ReadMemory8(address);
+                Byte data = cpu._callbackInterface.ReadMemory8(address);
                 cpu.Reg[rd] = SignExtend(data, 8);
             }
             else
             {
-                UInt16 data = cpu._callbacks.ReadMemory16(address);
+                UInt16 data = cpu._callbackInterface.ReadMemory16(address);
                 cpu.Reg[rd] = SignExtend(data, 16);
             }
         }
@@ -814,13 +814,13 @@ namespace Iris
             {
                 if (((registerList >> i) & 1) == 1)
                 {
-                    cpu.Reg[i] = cpu._callbacks.ReadMemory32(address);
+                    cpu.Reg[i] = cpu._callbackInterface.ReadMemory32(address);
                     address += 4;
                 }
             }
 
             if (r == 1)
-                cpu.THUMB_SetPC(cpu._callbacks.ReadMemory32(address));
+                cpu.THUMB_SetPC(cpu._callbackInterface.ReadMemory32(address));
         }
 
         private static void THUMB_PUSH(CPU cpu, UInt16 instruction)
@@ -835,13 +835,13 @@ namespace Iris
             {
                 if (((registerList >> i) & 1) == 1)
                 {
-                    cpu._callbacks.WriteMemory32(address, cpu.Reg[i]);
+                    cpu._callbackInterface.WriteMemory32(address, cpu.Reg[i]);
                     address += 4;
                 }
             }
 
             if (r == 1)
-                cpu._callbacks.WriteMemory32(address, cpu.Reg[LR]);
+                cpu._callbackInterface.WriteMemory32(address, cpu.Reg[LR]);
         }
 
         private static void THUMB_ROR(CPU cpu, UInt16 instruction)
@@ -893,7 +893,7 @@ namespace Iris
             if (registerList == 0)
             {
                 cpu.Reg[rn] += 0x40;
-                cpu._callbacks.WriteMemory32(address, cpu.Reg[PC] + 2);
+                cpu._callbackInterface.WriteMemory32(address, cpu.Reg[PC] + 2);
             }
             else
             {
@@ -905,9 +905,9 @@ namespace Iris
                     if (((registerList >> i) & 1) == 1)
                     {
                         if ((i == rn) && ((registerList & ~(0xff << i)) == 0))
-                            cpu._callbacks.WriteMemory32(address, oldRegRn);
+                            cpu._callbackInterface.WriteMemory32(address, oldRegRn);
                         else
-                            cpu._callbacks.WriteMemory32(address, cpu.Reg[i]);
+                            cpu._callbackInterface.WriteMemory32(address, cpu.Reg[i]);
 
                         address += 4;
                     }
@@ -922,7 +922,7 @@ namespace Iris
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             UInt32 address = cpu.Reg[rn] + (imm * 4u);
-            cpu._callbacks.WriteMemory32(address, cpu.Reg[rd]);
+            cpu._callbackInterface.WriteMemory32(address, cpu.Reg[rd]);
         }
 
         private static void THUMB_STR2(CPU cpu, UInt16 instruction)
@@ -932,7 +932,7 @@ namespace Iris
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             UInt32 address = cpu.Reg[rn] + cpu.Reg[rm];
-            cpu._callbacks.WriteMemory32(address, cpu.Reg[rd]);
+            cpu._callbackInterface.WriteMemory32(address, cpu.Reg[rd]);
         }
 
         private static void THUMB_STR3(CPU cpu, UInt16 instruction)
@@ -941,7 +941,7 @@ namespace Iris
             UInt16 imm = (UInt16)(instruction & 0xff);
 
             UInt32 address = cpu.Reg[SP] + (imm * 4u);
-            cpu._callbacks.WriteMemory32(address, cpu.Reg[rd]);
+            cpu._callbackInterface.WriteMemory32(address, cpu.Reg[rd]);
         }
 
         private static void THUMB_STRB1(CPU cpu, UInt16 instruction)
@@ -951,7 +951,7 @@ namespace Iris
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             UInt32 address = cpu.Reg[rn] + imm;
-            cpu._callbacks.WriteMemory8(address, (Byte)cpu.Reg[rd]);
+            cpu._callbackInterface.WriteMemory8(address, (Byte)cpu.Reg[rd]);
         }
 
         private static void THUMB_STRB2(CPU cpu, UInt16 instruction)
@@ -961,7 +961,7 @@ namespace Iris
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             UInt32 address = cpu.Reg[rn] + cpu.Reg[rm];
-            cpu._callbacks.WriteMemory8(address, (Byte)cpu.Reg[rd]);
+            cpu._callbackInterface.WriteMemory8(address, (Byte)cpu.Reg[rd]);
         }
 
         private static void THUMB_STRH1(CPU cpu, UInt16 instruction)
@@ -971,7 +971,7 @@ namespace Iris
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             UInt32 address = cpu.Reg[rn] + (imm * 2u);
-            cpu._callbacks.WriteMemory16(address, (UInt16)cpu.Reg[rd]);
+            cpu._callbackInterface.WriteMemory16(address, (UInt16)cpu.Reg[rd]);
         }
 
         private static void THUMB_STRH2(CPU cpu, UInt16 instruction)
@@ -981,7 +981,7 @@ namespace Iris
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             UInt32 address = cpu.Reg[rn] + cpu.Reg[rm];
-            cpu._callbacks.WriteMemory16(address, (UInt16)cpu.Reg[rd]);
+            cpu._callbackInterface.WriteMemory16(address, (UInt16)cpu.Reg[rd]);
         }
 
         private static void THUMB_SUB1(CPU cpu, UInt16 instruction)

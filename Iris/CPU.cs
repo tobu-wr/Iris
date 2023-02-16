@@ -2,16 +2,25 @@
 {
     internal sealed partial class CPU
     {
-        internal interface ICallbacks
+        internal struct CallbackInterface
         {
-            Byte ReadMemory8(UInt32 address);
-            UInt16 ReadMemory16(UInt32 address);
-            UInt32 ReadMemory32(UInt32 address);
-            void WriteMemory8(UInt32 address, Byte value);
-            void WriteMemory16(UInt32 address, UInt16 value);
-            void WriteMemory32(UInt32 address, UInt32 value);
-            void HandleSWI(UInt32 value);
-            void HandleInterrupt();
+            internal delegate Byte ReadMemory8_Delegate(UInt32 address);
+            internal delegate UInt16 ReadMemory16_Delegate(UInt32 address);
+            internal delegate UInt32 ReadMemory32_Delegate(UInt32 address);
+            internal delegate void WriteMemory8_Delegate(UInt32 address, Byte value);
+            internal delegate void WriteMemory16_Delegate(UInt32 address, UInt16 value);
+            internal delegate void WriteMemory32_Delegate(UInt32 address, UInt32 value);
+            internal delegate void HandleSWI_Delegate(UInt32 value);
+            internal delegate void HandleInterrupt_Delegate();
+
+            internal ReadMemory8_Delegate ReadMemory8;
+            internal ReadMemory16_Delegate ReadMemory16;
+            internal ReadMemory32_Delegate ReadMemory32;
+            internal WriteMemory8_Delegate WriteMemory8;
+            internal WriteMemory16_Delegate WriteMemory16;
+            internal WriteMemory32_Delegate WriteMemory32;
+            internal HandleSWI_Delegate HandleSWI;
+            internal HandleInterrupt_Delegate HandleInterrupt;
         }
 
         private enum Flags
@@ -47,13 +56,13 @@
         internal UInt32 Reg8_fiq, Reg9_fiq, Reg10_fiq, Reg11_fiq, Reg12_fiq, Reg13_fiq, Reg14_fiq;
         internal UInt32 SPSR_svc, SPSR_abt, SPSR_und, SPSR_irq, SPSR_fiq;
 
-        private readonly ICallbacks _callbacks;
+        private readonly CallbackInterface _callbackInterface;
         internal UInt32 NextInstructionAddress;
         internal bool InterruptPending;
 
-        internal CPU(ICallbacks callbacks)
+        internal CPU(CallbackInterface callbacks)
         {
-            _callbacks = callbacks;
+            _callbackInterface = callbacks;
         }
 
         internal void Step()
@@ -62,7 +71,7 @@
 
             if (InterruptPending && (i == 0))
             {
-                _callbacks.HandleInterrupt();
+                _callbackInterface.HandleInterrupt();
             }
 
             UInt32 t = (CPSR >> 5) & 1;

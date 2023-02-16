@@ -1,6 +1,6 @@
 ﻿namespace Iris
 {
-    internal sealed class GBA : CPU.ICallbacks
+    internal sealed class GBA
     {
         internal enum Keys
         {
@@ -55,7 +55,19 @@
 
         internal GBA(IRenderer renderer)
         {
-            _cpu = new(this);
+            CPU.CallbackInterface cpuCallbackInterface = new()
+            {
+                ReadMemory8 = ReadMemory8,
+                ReadMemory16 = ReadMemory16,
+                ReadMemory32 = ReadMemory32,
+                WriteMemory8 = WriteMemory8,
+                WriteMemory16 = WriteMemory16,
+                WriteMemory32 = WriteMemory32,
+                HandleSWI = HandleSWI,
+                HandleInterrupt = HandleInterrupt
+            };
+
+            _cpu = new(cpuCallbackInterface);
             _ppu = new(renderer);
         }
 
