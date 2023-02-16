@@ -64,7 +64,7 @@
                 WriteMemory16 = WriteMemory16,
                 WriteMemory32 = WriteMemory32,
                 HandleSWI = HandleSWI,
-                HandleInterrupt = HandleInterrupt
+                HandleIRQ = HandleIRQ
             };
 
             _cpu = new(cpuCallbackInterface);
@@ -94,7 +94,7 @@
             _cpu.CPSR = 0x1f;
 
             _cpu.NextInstructionAddress = ROMAddress;
-            _cpu.InterruptPending = false;
+            _cpu.IRQPending = false;
 
             for (UInt32 address = 0x0300_7e00; address < 0x0300_8000; address += 4)
                 WriteMemory32(address, 0);
@@ -857,7 +857,7 @@
             }
         }
 
-        public void HandleInterrupt()
+        public void HandleIRQ()
         {
             throw new NotImplementedException("GBA: Unhandled interrupt");
         }

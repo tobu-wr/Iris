@@ -11,7 +11,7 @@
             internal delegate void WriteMemory16_Delegate(UInt32 address, UInt16 value);
             internal delegate void WriteMemory32_Delegate(UInt32 address, UInt32 value);
             internal delegate void HandleSWI_Delegate(UInt32 value);
-            internal delegate void HandleInterrupt_Delegate();
+            internal delegate void HandleIRQ_Delegate();
 
             internal ReadMemory8_Delegate ReadMemory8;
             internal ReadMemory16_Delegate ReadMemory16;
@@ -20,7 +20,7 @@
             internal WriteMemory16_Delegate WriteMemory16;
             internal WriteMemory32_Delegate WriteMemory32;
             internal HandleSWI_Delegate HandleSWI;
-            internal HandleInterrupt_Delegate HandleInterrupt;
+            internal HandleIRQ_Delegate HandleIRQ;
         }
 
         private enum Flags
@@ -58,7 +58,7 @@
 
         private readonly CallbackInterface _callbackInterface;
         internal UInt32 NextInstructionAddress;
-        internal bool InterruptPending;
+        internal bool IRQPending;
 
         internal CPU(CallbackInterface callbacks)
         {
@@ -69,9 +69,9 @@
         {
             UInt32 i = (CPSR >> 7) & 1;
 
-            if (InterruptPending && (i == 0))
+            if (IRQPending && (i == 0))
             {
-                _callbackInterface.HandleInterrupt();
+                _callbackInterface.HandleIRQ();
             }
 
             UInt32 t = (CPSR >> 5) & 1;
