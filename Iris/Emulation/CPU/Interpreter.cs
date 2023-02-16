@@ -279,7 +279,7 @@
                 // NV
                 0b1111 => false,
                 // should never happen
-                _ => throw new Exception(string.Format("CPU: Wrong condition code {0}", cond)),
+                _ => throw new Exception(string.Format("Emulation.CPU.Interpreter: Wrong condition code {0}", cond)),
             };
         }
 

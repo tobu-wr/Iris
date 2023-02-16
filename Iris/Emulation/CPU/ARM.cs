@@ -218,7 +218,7 @@ namespace Iris.Emulation.CPU
                     }
                 }
 
-                throw new Exception(string.Format("ARM: Unknown instruction 0x{0:x8} at address 0x{1:x8}", instruction, NextInstructionAddress - 4));
+                throw new Exception(string.Format("Emulation.CPU.Interpreter: Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, NextInstructionAddress - 4));
             }
         }
 
