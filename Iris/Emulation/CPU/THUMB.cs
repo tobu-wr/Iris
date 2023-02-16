@@ -39,7 +39,7 @@ namespace Iris.Emulation.CPU
             new(0xf000, 0xf000, THUMB_BL),
 
             // BX
-            new(0xff87, 0x4700, THUMB_BX),
+            new(0xff80, 0x4700, THUMB_BX),
 
             // CMN
             new(0xffc0, 0x42c0, THUMB_CMN),
