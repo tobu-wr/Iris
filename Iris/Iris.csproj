@@ -9,8 +9,4 @@
     <TieredPGO>true</TieredPGO>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="Emulation\NDS\" />
-  </ItemGroup>
-
 </Project>
