@@ -156,7 +156,7 @@ namespace Iris.Emulation.CPU
                 }
             }
 
-            throw new Exception(string.Format("Emulation.CPU.Interpreter: Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, NextInstructionAddress - 2));
+            throw new Exception(string.Format("Emulation.CPU.Core: Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, NextInstructionAddress - 2));
         }
 
         private void THUMB_SetPC(UInt32 value)
