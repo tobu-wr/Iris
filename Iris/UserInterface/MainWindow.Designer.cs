@@ -1,8 +1,8 @@
 ﻿using System.Drawing.Drawing2D;
 
-namespace Iris
+namespace Iris.UserInterface
 {
-    public class CustomPictureBox : PictureBox
+    internal sealed class CustomPictureBox : PictureBox
     {
         protected override void OnPaint(PaintEventArgs e)
         {
@@ -12,7 +12,7 @@ namespace Iris
         }
     }
 
-    partial class MainWindow
+    internal sealed partial class MainWindow
     {
         /// <summary>
         /// Required designer variable.
@@ -55,7 +55,7 @@ namespace Iris
             this.emulationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.runToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pauseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.pictureBox1 = new Iris.CustomPictureBox();
+            this.pictureBox1 = new CustomPictureBox();
             this.restartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();

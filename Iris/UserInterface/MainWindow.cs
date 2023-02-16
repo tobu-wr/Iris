@@ -1,34 +1,33 @@
-﻿using Iris.Core;
-using System.Drawing.Imaging;
+﻿using System.Drawing.Imaging;
 using System.Timers;
 
-namespace Iris
+namespace Iris.UserInterface
 {
-    public partial class MainWindow : Form, IRenderer
+    internal sealed partial class MainWindow : Form
     {
-        private static readonly Dictionary<Keys, GBA.Keys> KeyMapping = new()
+        private static readonly Dictionary<Keys, Emulation.GBA.Core.Keys> KeyMapping = new()
         {
-            { Keys.A, GBA.Keys.A },
-            { Keys.Z, GBA.Keys.B},
-            { Keys.Space, GBA.Keys.Select},
-            { Keys.Enter, GBA.Keys.Start},
-            { Keys.Right, GBA.Keys.Right},
-            { Keys.Left, GBA.Keys.Left},
-            { Keys.Up, GBA.Keys.Up},
-            { Keys.Down, GBA.Keys.Down},
-            { Keys.S, GBA.Keys.R},
-            { Keys.Q, GBA.Keys.L},
+            { Keys.A, Emulation.GBA.Core.Keys.A },
+            { Keys.Z, Emulation.GBA.Core.Keys.B},
+            { Keys.Space, Emulation.GBA.Core.Keys.Select},
+            { Keys.Enter, Emulation.GBA.Core.Keys.Start},
+            { Keys.Right, Emulation.GBA.Core.Keys.Right},
+            { Keys.Left, Emulation.GBA.Core.Keys.Left},
+            { Keys.Up, Emulation.GBA.Core.Keys.Up},
+            { Keys.Down, Emulation.GBA.Core.Keys.Down},
+            { Keys.S, Emulation.GBA.Core.Keys.R},
+            { Keys.Q, Emulation.GBA.Core.Keys.L},
         };
 
-        private readonly GBA _gba;
+        private readonly Emulation.GBA.Core _gba;
 
         private int _frameCount = 0;
         private readonly System.Timers.Timer _performanceUpdateTimer = new(1000);
 
-        public MainWindow(string[] args)
+        internal MainWindow(string[] args)
         {
             InitializeComponent();
-            _gba = new(this);
+            _gba = new(DrawFrame);
 
             _performanceUpdateTimer.Elapsed += new ElapsedEventHandler(PerformanceUpdateTimer_Elapsed);
 
@@ -43,7 +42,7 @@ namespace Iris
             }
         }
 
-        public void DrawFrame(UInt16[] frameBuffer)
+        private void DrawFrame(UInt16[] frameBuffer)
         {
             const int ScreenWidth = 240;
             const int ScreenHeight = 160;
@@ -206,13 +205,13 @@ namespace Iris
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
-            if (KeyMapping.TryGetValue(e.KeyCode, out GBA.Keys value))
+            if (KeyMapping.TryGetValue(e.KeyCode, out Emulation.GBA.Core.Keys value))
                 _gba.SetKeyStatus(value, true);
         }
 
         private void MainWindow_KeyUp(object sender, KeyEventArgs e)
         {
-            if (KeyMapping.TryGetValue(e.KeyCode, out GBA.Keys value))
+            if (KeyMapping.TryGetValue(e.KeyCode, out Emulation.GBA.Core.Keys value))
                 _gba.SetKeyStatus(value, false);
         }
 

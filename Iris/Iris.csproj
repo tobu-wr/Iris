@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="UserInterface\" />
+    <Folder Include="Emulation\NDS\" />
   </ItemGroup>
 
 </Project>
