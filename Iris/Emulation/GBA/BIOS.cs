@@ -39,7 +39,6 @@
                 case 0x06:
                     Div();
                     break;
-
                 default:
                     throw new Exception(string.Format("Emulation.GBA.Core: Unknown BIOS function 0x{0:x2}", function));
             }
