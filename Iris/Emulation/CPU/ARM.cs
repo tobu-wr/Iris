@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace Iris.Core
+namespace Iris.Emulation.CPU
 {
     internal sealed partial class Interpreter
     {
