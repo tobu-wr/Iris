@@ -19,7 +19,7 @@
         private const int KB = 1024;
 
         private Byte[]? _rom;
-        private Byte[] _sram = new byte[64 * KB];
+        private readonly Byte[] _sram = new byte[64 * KB];
         private readonly Byte[] _externalWRAM = new Byte[256 * KB];
         private readonly Byte[] _internalWRAM = new Byte[32 * KB];
 
