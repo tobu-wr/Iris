@@ -2,9 +2,9 @@
 
 namespace Iris.Emulation.CPU
 {
-    internal sealed partial class Interpreter
+    internal sealed partial class Core
     {
-        private delegate void ARM_InstructionHandler(Interpreter cpu, UInt32 instruction);
+        private delegate void ARM_InstructionHandler(Core cpu, UInt32 instruction);
         private readonly record struct ARM_InstructionListEntry(UInt32 Mask, UInt32 Expected, ARM_InstructionHandler Handler);
 
         private static readonly ARM_InstructionListEntry[] ARM_InstructionList = new ARM_InstructionListEntry[]
@@ -588,7 +588,7 @@ namespace Iris.Emulation.CPU
             return (startAddress, endAddress);
         }
 
-        private static void ARM_ADC(Interpreter cpu, UInt32 instruction)
+        private static void ARM_ADC(Core cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -620,7 +620,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void ARM_ADD(Interpreter cpu, UInt32 instruction)
+        private static void ARM_ADD(Core cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -652,7 +652,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void ARM_AND(Interpreter cpu, UInt32 instruction)
+        private static void ARM_AND(Core cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -682,14 +682,14 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void ARM_B(Interpreter cpu, UInt32 instruction)
+        private static void ARM_B(Core cpu, UInt32 instruction)
         {
             UInt32 imm = instruction & 0xff_ffff;
 
             cpu.ARM_SetPC(cpu.Reg[PC] + (SignExtend(imm, 24) << 2));
         }
 
-        private static void ARM_BL(Interpreter cpu, UInt32 instruction)
+        private static void ARM_BL(Core cpu, UInt32 instruction)
         {
             UInt32 imm = instruction & 0xff_ffff;
 
@@ -697,7 +697,7 @@ namespace Iris.Emulation.CPU
             cpu.ARM_SetPC(cpu.Reg[PC] + (SignExtend(imm, 24) << 2));
         }
 
-        private static void ARM_BIC(Interpreter cpu, UInt32 instruction)
+        private static void ARM_BIC(Core cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -727,7 +727,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void ARM_BX(Interpreter cpu, UInt32 instruction)
+        private static void ARM_BX(Core cpu, UInt32 instruction)
         {
             UInt32 rm = instruction & 0b1111;
 
@@ -735,7 +735,7 @@ namespace Iris.Emulation.CPU
             cpu.ARM_SetPC(cpu.Reg[rm] & 0xffff_fffe);
         }
 
-        private static void ARM_CMN(Interpreter cpu, UInt32 instruction)
+        private static void ARM_CMN(Core cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
@@ -766,7 +766,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void ARM_CMP(Interpreter cpu, UInt32 instruction)
+        private static void ARM_CMP(Core cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
@@ -796,7 +796,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void ARM_EOR(Interpreter cpu, UInt32 instruction)
+        private static void ARM_EOR(Core cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -826,7 +826,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void ARM_LDM1(Interpreter cpu, UInt32 instruction)
+        private static void ARM_LDM1(Core cpu, UInt32 instruction)
         {
             UInt32 registerList = instruction & 0xffff;
 
@@ -854,7 +854,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void ARM_LDM2(Interpreter cpu, UInt32 instruction)
+        private static void ARM_LDM2(Core cpu, UInt32 instruction)
         {
             UInt32 registerList = instruction & 0x7fff;
 
@@ -908,7 +908,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void ARM_LDR(Interpreter cpu, UInt32 instruction)
+        private static void ARM_LDR(Core cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
@@ -921,7 +921,7 @@ namespace Iris.Emulation.CPU
                 cpu.Reg[rd] = data;
         }
 
-        private static void ARM_LDRB(Interpreter cpu, UInt32 instruction)
+        private static void ARM_LDRB(Core cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
@@ -930,7 +930,7 @@ namespace Iris.Emulation.CPU
             cpu.ARM_SetReg(rd, data);
         }
 
-        private static void ARM_LDRH(Interpreter cpu, UInt32 instruction)
+        private static void ARM_LDRH(Core cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
@@ -939,7 +939,7 @@ namespace Iris.Emulation.CPU
             cpu.ARM_SetReg(rd, data);
         }
 
-        private static void ARM_LDRSB(Interpreter cpu, UInt32 instruction)
+        private static void ARM_LDRSB(Core cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
@@ -948,7 +948,7 @@ namespace Iris.Emulation.CPU
             cpu.ARM_SetReg(rd, SignExtend(data, 8));
         }
 
-        private static void ARM_LDRSH(Interpreter cpu, UInt32 instruction)
+        private static void ARM_LDRSH(Core cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
@@ -966,7 +966,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void ARM_MLA(Interpreter cpu, UInt32 instruction)
+        private static void ARM_MLA(Core cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rd = (instruction >> 16) & 0b1111;
@@ -983,7 +983,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void ARM_MOV(Interpreter cpu, UInt32 instruction)
+        private static void ARM_MOV(Core cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rd = (instruction >> 12) & 0b1111;
@@ -1007,7 +1007,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void ARM_MRS(Interpreter cpu, UInt32 instruction)
+        private static void ARM_MRS(Core cpu, UInt32 instruction)
         {
             UInt32 r = (instruction >> 22) & 1;
             UInt32 rd = (instruction >> 12) & 0b1111;
@@ -1015,7 +1015,7 @@ namespace Iris.Emulation.CPU
             cpu.ARM_SetReg(rd, (r == 1) ? cpu.SPSR : cpu.CPSR);
         }
 
-        private static void ARM_MSR(Interpreter cpu, UInt32 instruction)
+        private static void ARM_MSR(Core cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 r = (instruction >> 22) & 1;
@@ -1060,7 +1060,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void ARM_MUL(Interpreter cpu, UInt32 instruction)
+        private static void ARM_MUL(Core cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rd = (instruction >> 16) & 0b1111;
@@ -1076,7 +1076,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void ARM_MVN(Interpreter cpu, UInt32 instruction)
+        private static void ARM_MVN(Core cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rd = (instruction >> 12) & 0b1111;
@@ -1100,7 +1100,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void ARM_ORR(Interpreter cpu, UInt32 instruction)
+        private static void ARM_ORR(Core cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -1130,7 +1130,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void ARM_RSB(Interpreter cpu, UInt32 instruction)
+        private static void ARM_RSB(Core cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -1161,7 +1161,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void ARM_RSC(Interpreter cpu, UInt32 instruction)
+        private static void ARM_RSC(Core cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -1193,7 +1193,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void ARM_SBC(Interpreter cpu, UInt32 instruction)
+        private static void ARM_SBC(Core cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -1224,7 +1224,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void ARM_SMLAL(Interpreter cpu, UInt32 instruction)
+        private static void ARM_SMLAL(Core cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rdHi = (instruction >> 16) & 0b1111;
@@ -1245,7 +1245,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void ARM_SMULL(Interpreter cpu, UInt32 instruction)
+        private static void ARM_SMULL(Core cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rdHi = (instruction >> 16) & 0b1111;
@@ -1264,7 +1264,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void ARM_STM1(Interpreter cpu, UInt32 instruction)
+        private static void ARM_STM1(Core cpu, UInt32 instruction)
         {
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 registerList = instruction & 0xffff;
@@ -1299,7 +1299,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void ARM_STM2(Interpreter cpu, UInt32 instruction)
+        private static void ARM_STM2(Core cpu, UInt32 instruction)
         {
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 registerList = instruction & 0xffff;
@@ -1360,7 +1360,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void ARM_STR(Interpreter cpu, UInt32 instruction)
+        private static void ARM_STR(Core cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
@@ -1369,7 +1369,7 @@ namespace Iris.Emulation.CPU
             cpu._callbackInterface.WriteMemory32(address, data);
         }
 
-        private static void ARM_STRB(Interpreter cpu, UInt32 instruction)
+        private static void ARM_STRB(Core cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
@@ -1378,7 +1378,7 @@ namespace Iris.Emulation.CPU
             cpu._callbackInterface.WriteMemory8(address, (Byte)data);
         }
 
-        private static void ARM_STRH(Interpreter cpu, UInt32 instruction)
+        private static void ARM_STRH(Core cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
@@ -1387,7 +1387,7 @@ namespace Iris.Emulation.CPU
             cpu._callbackInterface.WriteMemory16(address, (UInt16)data);
         }
 
-        private static void ARM_SUB(Interpreter cpu, UInt32 instruction)
+        private static void ARM_SUB(Core cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -1418,14 +1418,14 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void ARM_SWI(Interpreter cpu, UInt32 instruction)
+        private static void ARM_SWI(Core cpu, UInt32 instruction)
         {
             UInt32 imm = instruction & 0xff_ffff;
 
             cpu._callbackInterface.HandleSWI(imm);
         }
 
-        private static void ARM_SWP(Interpreter cpu, UInt32 instruction)
+        private static void ARM_SWP(Core cpu, UInt32 instruction)
         {
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
@@ -1436,7 +1436,7 @@ namespace Iris.Emulation.CPU
             cpu.ARM_SetReg(rd, temp);
         }
 
-        private static void ARM_SWPB(Interpreter cpu, UInt32 instruction)
+        private static void ARM_SWPB(Core cpu, UInt32 instruction)
         {
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
@@ -1447,7 +1447,7 @@ namespace Iris.Emulation.CPU
             cpu.ARM_SetReg(rd, temp);
         }
 
-        private static void ARM_TEQ(Interpreter cpu, UInt32 instruction)
+        private static void ARM_TEQ(Core cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
@@ -1476,7 +1476,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void ARM_TST(Interpreter cpu, UInt32 instruction)
+        private static void ARM_TST(Core cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
@@ -1505,7 +1505,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void ARM_UMLAL(Interpreter cpu, UInt32 instruction)
+        private static void ARM_UMLAL(Core cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rdHi = (instruction >> 16) & 0b1111;
@@ -1526,7 +1526,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void ARM_UMULL(Interpreter cpu, UInt32 instruction)
+        private static void ARM_UMULL(Core cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rdHi = (instruction >> 16) & 0b1111;
