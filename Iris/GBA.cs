@@ -67,7 +67,7 @@
                 HandleIRQ = HandleIRQ
             };
 
-            _cpu = new(cpuCallbackInterface);
+            _cpu = new(CPU.Architecture.ARMv4T, cpuCallbackInterface);
             _ppu = new(renderer);
         }
 

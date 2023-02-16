@@ -2,6 +2,12 @@
 {
     internal sealed partial class CPU
     {
+        internal enum Architecture
+        {
+            ARMv4T,
+            ARMv5TE
+        };
+
         internal struct CallbackInterface
         {
             internal delegate Byte ReadMemory8_Delegate(UInt32 address);
@@ -56,12 +62,15 @@
         internal UInt32 Reg8_fiq, Reg9_fiq, Reg10_fiq, Reg11_fiq, Reg12_fiq, Reg13_fiq, Reg14_fiq;
         internal UInt32 SPSR_svc, SPSR_abt, SPSR_und, SPSR_irq, SPSR_fiq;
 
+        private readonly Architecture _architecture;
         private readonly CallbackInterface _callbackInterface;
+
         internal UInt32 NextInstructionAddress;
         internal bool IRQPending;
 
-        internal CPU(CallbackInterface callbacks)
+        internal CPU(Architecture architecture, CallbackInterface callbacks)
         {
+            _architecture = architecture;
             _callbackInterface = callbacks;
         }
 
