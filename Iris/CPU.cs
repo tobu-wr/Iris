@@ -64,15 +64,13 @@
             {
                 _callbacks.HandleInterrupt();
             }
-            else
-            {
-                UInt32 t = (CPSR >> 5) & 1;
 
-                if (t == 0)
-                    ARM_Step();
-                else
-                    THUMB_Step();
-            }
+            UInt32 t = (CPSR >> 5) & 1;
+
+            if (t == 0)
+                ARM_Step();
+            else
+                THUMB_Step();
         }
 
         private void SetCPSR(UInt32 value)
