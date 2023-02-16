@@ -27,20 +27,15 @@
                 // unused
                 return 0;
             }
-            else if (address is >= 0x0200_0000 and < 0x0204_0000)
+            else if (address is >= 0x0200_0000 and < 0x0300_0000)
             {
-                UInt32 offset = address - 0x0200_0000;
+                UInt32 offset = (address - 0x0200_0000) & 0x0003_ffff;
                 return _externalWRAM[offset];
             }
-            else if (address is >= 0x0300_0000 and < 0x0300_8000)
+            else if (address is >= 0x0300_0000 and < 0x0400_0000)
             {
-                UInt32 offset = address - 0x0300_0000;
+                UInt32 offset = (address - 0x0300_0000) & 0x0000_7fff;
                 return _internalWRAM[offset];
-            }
-            else if (address is >= 0x0300_8000 and < 0x0400_0000)
-            {
-                // unused
-                return 0;
             }
             else if (address is >= 0x0400_0000 and < 0x0500_0000)
             {
@@ -181,8 +176,7 @@
             else if (address is >= 0x0600_0000 and < 0x0601_8000)
             {
                 UInt32 offset = address - 0x0600_0000;
-                if (offset < _ppu.VRAM.Length)
-                    return _ppu.VRAM[offset];
+                return _ppu.VRAM[offset];
             }
             else if (address is >= 0x0800_0000 and < 0x0a00_0000)
             {
@@ -216,21 +210,19 @@
 
         private void WriteMemory8(UInt32 address, Byte value)
         {
-            if (address is >= 0x0200_0000 and < 0x0300_0000)
+            if (address is >= 0x0000_4000 and < 0x0200_0000)
             {
-                UInt32 offset = address - 0x0200_0000;
-                if (offset < _externalWRAM.Length)
-                    _externalWRAM[offset] = value;
-                else
-                    throw new Exception(string.Format("Emulation.GBA.Core: Invalid write to address 0x{0:x8}", address));
+                // unused
+            }
+            else if (address is >= 0x0200_0000 and < 0x0300_0000)
+            {
+                UInt32 offset = (address - 0x0200_0000) & 0x0003_ffff;
+                _externalWRAM[offset] = value;
             }
             else if (address is >= 0x0300_0000 and < 0x0400_0000)
             {
-                UInt32 offset = address - 0x0300_0000;
-                if (offset < _internalWRAM.Length)
-                    _internalWRAM[offset] = value;
-                else
-                    throw new Exception(string.Format("Emulation.GBA.Core: Invalid write to address 0x{0:x8}", address));
+                UInt32 offset = (address - 0x0300_0000) & 0x0000_7fff;
+                _internalWRAM[offset] = value;
             }
             else if (address is >= 0x0400_0000 and < 0x0500_0000)
             {
@@ -667,6 +659,10 @@
                 else
                     throw new Exception(string.Format("Emulation.GBA.Core: Invalid write to address 0x{0:x8}", address));
             }
+            else if (address is >= 0x0700_0000 and < 0x0800_0000)
+            {
+                Console.WriteLine("Emulation.GBA.Core: Write to OAM");
+            }
             else if (address is >= 0x0e00_0000 and < 0x0e01_0000)
             {
                 UInt32 offset = address - 0x0e00_0000;
@@ -674,7 +670,7 @@
             }
             else
             {
-                throw new Exception(string.Format("Emulation.GBA.Core: Invalid write to address 0x{0:x8}", address));
+                Console.WriteLine("Emulation.GBA.Core: Write to address 0x{0:x8}", address);
             }
         }
 
