@@ -504,6 +504,39 @@
                         _DMA2CNT_H = (UInt16)(_DMA2CNT_H & 0x00ff | value << 8);
                         break;
 
+                    case 0x0d4:
+                        _DMA3SAD_L = (UInt16)(_DMA3SAD_L & 0xff00 | value);
+                        break;
+                    case 0x0d5:
+                        _DMA3SAD_L = (UInt16)(_DMA3SAD_L & 0x00ff | value << 8);
+                        break;
+
+                    case 0x0d6:
+                        _DMA3SAD_H = (UInt16)(_DMA3SAD_H & 0xff00 | value);
+                        break;
+                    case 0x0d7:
+                        _DMA3SAD_H = (UInt16)(_DMA3SAD_H & 0x00ff | value << 8);
+                        break;
+
+                    case 0x0d8:
+                        _DMA3DAD_L = (UInt16)(_DMA3DAD_L & 0xff00 | value);
+                        break;
+                    case 0x0d9:
+                        _DMA3DAD_L = (UInt16)(_DMA3DAD_L & 0x00ff | value << 8);
+                        break;
+
+                    case 0x0da:
+                        _DMA3DAD_H = (UInt16)(_DMA3DAD_H & 0xff00 | value);
+                        break;
+                    case 0x0db:
+                        _DMA3DAD_H = (UInt16)(_DMA3DAD_H & 0x00ff | value << 8);
+                        break;
+
+                    case 0x0dc:
+                    case 0x0dd:
+                        Console.WriteLine("Emulation.GBA.Core: Write to DMA3CNT_L register unimplemented");
+                        break;
+
                     case 0x0de:
                         _DMA3CNT_H = (UInt16)(_DMA3CNT_H & 0xff00 | value);
                         break;
@@ -626,6 +659,11 @@
                     case 0x205:
                         _WAITCNT = (UInt16)(_WAITCNT & 0x00ff | value << 8);
                         break;
+
+                    case 0x206:
+                    case 0x207:
+                        // unused
+                        break; // ignore
 
                     case 0x208:
                         _IME = (UInt16)(_IME & 0xff00 | value);
