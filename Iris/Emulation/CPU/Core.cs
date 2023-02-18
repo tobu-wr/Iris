@@ -68,10 +68,10 @@
         internal UInt32 NextInstructionAddress;
         internal bool IRQPending;
 
-        internal Core(Architecture architecture, CallbackInterface callbacks)
+        internal Core(Architecture architecture, CallbackInterface callbackInterface)
         {
             _architecture = architecture;
-            _callbackInterface = callbacks;
+            _callbackInterface = callbackInterface;
         }
 
         internal void Step()
