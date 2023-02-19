@@ -45,12 +45,13 @@
         private UInt16 _KEYINPUT;
         private UInt16 _KEYCNT;
         private UInt16 _IE;
+        private UInt16 _IF;
         private UInt16 _WAITCNT;
         private UInt16 _IME;
 
         private bool _running = false;
 
-        internal Core(PPU.DrawFrame_Delegate drawFrameCallback)
+        internal Core(PPU.CallbackInterface.DrawFrame_Delegate drawFrame)
         {
             CPU.Core.CallbackInterface cpuCallbackInterface = new()
             {
@@ -64,8 +65,14 @@
                 HandleIRQ = HandleIRQ
             };
 
+            PPU.CallbackInterface ppuCallbackInterface = new()
+            {
+                DrawFrame = drawFrame,
+                RequestVBlankInterrupt = RequestVBlankInterrupt
+            };
+
             _cpu = new(CPU.Core.Architecture.ARMv4T, cpuCallbackInterface);
-            _ppu = new(drawFrameCallback);
+            _ppu = new(ppuCallbackInterface);
         }
 
         internal void Reset()
@@ -111,6 +118,15 @@
 
             while (_running)
             {
+                if (_IME == 1)
+                {
+                    // VBlank
+                    if ((_IE & _IF & 1) != 0)
+                    {
+                        _cpu.IRQPending = true;
+                    }
+                }
+
                 _cpu.Step();
                 _ppu.Step();
             }
@@ -125,6 +141,11 @@
         {
             int mask = 1 << (int)key;
             _KEYINPUT = (UInt16)(pressed ? (_KEYINPUT & ~mask) : (_KEYINPUT | mask));
+        }
+
+        private void RequestVBlankInterrupt()
+        {
+            _IF |= 1;
         }
     }
 }

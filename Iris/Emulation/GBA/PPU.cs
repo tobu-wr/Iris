@@ -16,14 +16,21 @@
         private const UInt32 HorizontalLineWidth = 308;
         private const UInt32 HorizontalLineCount = 228;
 
-        internal delegate void DrawFrame_Delegate(UInt16[] frameBuffer);
-        private readonly DrawFrame_Delegate _drawFrameCallback;
+        internal struct CallbackInterface
+        {
+            internal delegate void DrawFrame_Delegate(UInt16[] frameBuffer);
+            internal delegate void RequestVBlankInterrupt_Delegate();
 
+            internal DrawFrame_Delegate DrawFrame;
+            internal RequestVBlankInterrupt_Delegate RequestVBlankInterrupt;
+        }
+
+        private readonly CallbackInterface _callbackInterface;
         private UInt32 _cycleCounter = 0;
 
-        internal PPU(DrawFrame_Delegate drawFrameCallback)
+        internal PPU(CallbackInterface callbackInterface)
         {
-            _drawFrameCallback = drawFrameCallback;
+            _callbackInterface = callbackInterface;
         }
 
         internal void Step()
@@ -53,7 +60,7 @@
                                     rendererFrameBuffer[i] = color;
                                 }
 
-                                _drawFrameCallback(rendererFrameBuffer);
+                                _callbackInterface.DrawFrame(rendererFrameBuffer);
                             }
                             break;
                         }
@@ -62,6 +69,9 @@
                         Console.WriteLine("PPU: BG mode {0} unimplemented", bgMode);
                         break;
                 }
+
+                if ((DISPSTAT & 0x0008) != 0)
+                    _callbackInterface.RequestVBlankInterrupt();
 
                 DISPSTAT |= 1;
                 ++_cycleCounter;

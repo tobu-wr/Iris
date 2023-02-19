@@ -6,8 +6,8 @@
 
         private Byte[]? _ROM;
         private readonly Byte[] _SRAM = new Byte[64 * KB];
-        private readonly Byte[] _externalWRAM = new Byte[256 * KB];
-        private readonly Byte[] _internalWRAM = new Byte[32 * KB];
+        private readonly Byte[] _eWRAM = new Byte[256 * KB];
+        private readonly Byte[] _iWRAM = new Byte[32 * KB];
 
         internal void LoadROM(string filename)
         {
@@ -30,12 +30,12 @@
             else if (address is >= 0x0200_0000 and < 0x0300_0000)
             {
                 UInt32 offset = (address - 0x0200_0000) & 0x0003_ffff;
-                return _externalWRAM[offset];
+                return _eWRAM[offset];
             }
             else if (address is >= 0x0300_0000 and < 0x0400_0000)
             {
                 UInt32 offset = (address - 0x0300_0000) & 0x0000_7fff;
-                return _internalWRAM[offset];
+                return _iWRAM[offset];
             }
             else if (address is >= 0x0400_0000 and < 0x0500_0000)
             {
@@ -217,12 +217,12 @@
             else if (address is >= 0x0200_0000 and < 0x0300_0000)
             {
                 UInt32 offset = (address - 0x0200_0000) & 0x0003_ffff;
-                _externalWRAM[offset] = value;
+                _eWRAM[offset] = value;
             }
             else if (address is >= 0x0300_0000 and < 0x0400_0000)
             {
                 UInt32 offset = (address - 0x0300_0000) & 0x0000_7fff;
-                _internalWRAM[offset] = value;
+                _iWRAM[offset] = value;
             }
             else if (address is >= 0x0400_0000 and < 0x0500_0000)
             {
@@ -649,8 +649,10 @@
                         break;
 
                     case 0x202:
+                        _IF = (UInt16)(_IF & 0xff00 | value);
+                        break;
                     case 0x203:
-                        Console.WriteLine("Emulation.GBA.Core: Write to IF register unimplemented");
+                        _IF = (UInt16)(_IF & 0x00ff | value << 8);
                         break;
 
                     case 0x204:
