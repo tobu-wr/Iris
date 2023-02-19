@@ -48,17 +48,31 @@
 
         private void HandleIRQ()
         {
-            // TODO:
-            // - switch to IRQ mode
-            // - save registers to stack
-            
+            _cpu.Reg14_irq = _cpu.NextInstructionAddress + 4;
+            _cpu.SPSR_irq = _cpu.CPSR;
+
+            _cpu.SetCPSR((_cpu.CPSR & 0xffff_ff40) | 0x92);
+
+            _cpu.Reg[CPU.Core.SP] -= 4;
+            WriteMemory32(_cpu.Reg[CPU.Core.SP], _cpu.Reg[0]);
+            _cpu.Reg[CPU.Core.SP] -= 4;
+            WriteMemory32(_cpu.Reg[CPU.Core.SP], _cpu.Reg[1]);
+            _cpu.Reg[CPU.Core.SP] -= 4;
+            WriteMemory32(_cpu.Reg[CPU.Core.SP], _cpu.Reg[2]);
+            _cpu.Reg[CPU.Core.SP] -= 4;
+            WriteMemory32(_cpu.Reg[CPU.Core.SP], _cpu.Reg[3]);
+            _cpu.Reg[CPU.Core.SP] -= 4;
+            WriteMemory32(_cpu.Reg[CPU.Core.SP], _cpu.Reg[12]);
+            _cpu.Reg[CPU.Core.SP] -= 4;
+            WriteMemory32(_cpu.Reg[CPU.Core.SP], _cpu.Reg[CPU.Core.LR]);
+
             const UInt32 UserHandlerAddress = 0x0300_7ffc;
 
             _cpu.Reg[0] = 0x0400_0000;
 
             _cpu.Reg[CPU.Core.LR] = 0x0000_0138;
             _cpu.Reg[CPU.Core.PC] = UserHandlerAddress;
-            
+
             _cpu.NextInstructionAddress = UserHandlerAddress;
         }
 
