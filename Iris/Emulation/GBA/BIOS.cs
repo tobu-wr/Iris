@@ -4,30 +4,27 @@
     {
         private void BIOS_Reset()
         {
-            // TODO: Hardware reset rather than software?
-
-            const UInt32 ROMAddress = 0x0800_0000;
+            const UInt32 ROMAddress = 0x800_0000;
 
             for (int i = 0; i <= 12; ++i)
                 _cpu.Reg[i] = 0;
 
-            _cpu.Reg[CPU.Core.SP] = 0x0300_7f00;
+            _cpu.Reg[CPU.Core.SP] = 0x300_7f00;
             _cpu.Reg[CPU.Core.LR] = ROMAddress;
 
-            _cpu.Reg13_svc = 0x0300_7fe0;
-            _cpu.Reg13_irq = 0x0300_7fa0;
-
+            _cpu.Reg13_svc = 0x300_7fe0;
             _cpu.Reg14_svc = 0;
-            _cpu.Reg14_irq = 0;
-
             _cpu.SPSR_svc = 0;
+
+            _cpu.Reg13_irq = 0x300_7fa0;
+            _cpu.Reg14_irq = 0;
             _cpu.SPSR_irq = 0;
 
             _cpu.CPSR = 0x1f;
 
             _cpu.NextInstructionAddress = ROMAddress;
 
-            for (UInt32 address = 0x0300_7e00; address < 0x0300_8000; address += 4)
+            for (UInt32 address = 0x300_7e00; address < 0x300_8000; address += 4)
                 WriteMemory32(address, 0);
         }
 
@@ -49,7 +46,7 @@
         {
             _cpu.Reg14_irq = _cpu.NextInstructionAddress + 4;
             _cpu.SPSR_irq = _cpu.CPSR;
-            _cpu.SetCPSR((_cpu.CPSR & 0xffff_ff40) | 0x92);
+            _cpu.SetCPSR((_cpu.CPSR & ~0xbfu) | 0x92u);
 
             _cpu.Reg[CPU.Core.SP] -= 4;
             WriteMemory32(_cpu.Reg[CPU.Core.SP], _cpu.Reg[0]);
@@ -64,9 +61,9 @@
             _cpu.Reg[CPU.Core.SP] -= 4;
             WriteMemory32(_cpu.Reg[CPU.Core.SP], _cpu.Reg[CPU.Core.LR]);
 
-            _cpu.Reg[0] = 0x0400_0000;
-            _cpu.Reg[CPU.Core.LR] = 0x0000_0138;
-            _cpu.NextInstructionAddress = ReadMemory32(0x0300_7ffc);
+            _cpu.Reg[0] = 0x400_0000;
+            _cpu.Reg[CPU.Core.LR] = 0x138;
+            _cpu.NextInstructionAddress = ReadMemory32(0x300_7ffc);
         }
 
         private void Div()
