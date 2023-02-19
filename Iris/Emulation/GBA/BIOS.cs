@@ -4,6 +4,8 @@
     {
         private void BIOS_Reset()
         {
+            // TODO: Hardware reset rather than software?
+
             const UInt32 ROMAddress = 0x0800_0000;
 
             for (int i = 0; i <= 12; ++i)
@@ -46,7 +48,18 @@
 
         private void HandleIRQ()
         {
-            throw new NotImplementedException("Emulation.GBA.Core: HandleIRQ unimplemented");
+            // TODO:
+            // - switch to IRQ mode
+            // - save registers to stack
+            
+            const UInt32 UserHandlerAddress = 0x0300_7ffc;
+
+            _cpu.Reg[0] = 0x0400_0000;
+
+            _cpu.Reg[CPU.Core.LR] = 0x0000_0138;
+            _cpu.Reg[CPU.Core.PC] = UserHandlerAddress;
+            
+            _cpu.NextInstructionAddress = UserHandlerAddress;
         }
 
         private void Div()
