@@ -78,10 +78,8 @@
         {
             UInt32 i = (CPSR >> 7) & 1;
 
-            if (IRQPending && (i == 0))
-            {
+            if ((i == 0) && IRQPending)
                 _callbackInterface.HandleIRQ();
-            }
 
             UInt32 t = (CPSR >> 5) & 1;
 
