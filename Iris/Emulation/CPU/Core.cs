@@ -91,7 +91,7 @@
                 THUMB_Step();
         }
 
-        private void SetCPSR(UInt32 value)
+        internal void SetCPSR(UInt32 value)
         {
             UInt32 previousMode = CPSR & ModeMask;
             UInt32 newMode = value & ModeMask;
