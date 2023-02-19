@@ -82,6 +82,46 @@
                         Console.WriteLine("Emulation.GBA.Core: Read from BG3CNT register unimplemented");
                         return 0;
 
+                    case 0x010:
+                    case 0x011:
+                        Console.WriteLine("Emulation.GBA.Core: Read from BG0HOFS register unimplemented");
+                        return 0;
+
+                    case 0x012:
+                    case 0x013:
+                        Console.WriteLine("Emulation.GBA.Core: Read from BG0VOFS register unimplemented");
+                        return 0;
+
+                    case 0x014:
+                    case 0x015:
+                        Console.WriteLine("Emulation.GBA.Core: Read from BG1HOFS register unimplemented");
+                        return 0;
+
+                    case 0x016:
+                    case 0x017:
+                        Console.WriteLine("Emulation.GBA.Core: Read from BG1VOFS register unimplemented");
+                        return 0;
+
+                    case 0x018:
+                    case 0x019:
+                        Console.WriteLine("Emulation.GBA.Core: Read from BG2HOFS register unimplemented");
+                        return 0;
+
+                    case 0x01a:
+                    case 0x01b:
+                        Console.WriteLine("Emulation.GBA.Core: Read from BG2VOFS register unimplemented");
+                        return 0;
+
+                    case 0x01c:
+                    case 0x01d:
+                        Console.WriteLine("Emulation.GBA.Core: Read from BG3HOFS register unimplemented");
+                        return 0;
+
+                    case 0x01e:
+                    case 0x01f:
+                        Console.WriteLine("Emulation.GBA.Core: Read from BG3VOFS register unimplemented");
+                        return 0;
+
                     case 0x050:
                     case 0x051:
                         Console.WriteLine("Emulation.GBA.Core: Read from BLDCNT register unimplemented");
