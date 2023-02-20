@@ -1,4 +1,6 @@
-﻿namespace Iris.Emulation.GBA
+﻿using Iris.Emulation.NDS;
+
+namespace Iris.Emulation.GBA
 {
     internal sealed partial class Core
     {
@@ -31,15 +33,11 @@
 
         private Byte BIOS_Read(UInt32 address)
         {
-            // end of BIOS IRQ handler
-            if (address is >= 0x138 and < 0x140)
+            // end of IRQ handler
+            if (address is >= 0x138 and < 0x13c)
             {
-                Byte[] data =
-                {
-                    0x0f, 0x50, 0xbd, 0xe8, // ldmia sp!,{r0,r1,r2,r3,r12,lr}
-                    0x04, 0xf0, 0x5e, 0xe2  // subs pc,lr,#4
-                };
-
+                // fallback to HLE (see ReturnFromIRQ())
+                Byte[] data = { 0x00, 0x00, 0xff, 0xef }; // SWI 0xff
                 return data[address - 0x138];
             }
 
@@ -64,6 +62,9 @@
                 case 0x12:
                     LZ77UnCompReadNormalWrite16bit();
                     break;
+                case 0xff:
+                    ReturnFromIRQ();
+                    break;
                 default:
                     throw new Exception(string.Format("Emulation.GBA.Core: Unknown BIOS function 0x{0:x2}", function));
             }
@@ -71,24 +72,24 @@
 
         private void HandleIRQ()
         {
-            // start of BIOS IRQ handler
+            // start of IRQ handler
 
             _cpu.Reg14_irq = _cpu.NextInstructionAddress + 4;
             _cpu.SPSR_irq = _cpu.CPSR;
             _cpu.SetCPSR((_cpu.CPSR & ~0xbfu) | 0x92u);
 
-            _cpu.Reg[CPU.Core.SP] -= 4;
-            WriteMemory32(_cpu.Reg[CPU.Core.SP], _cpu.Reg[CPU.Core.LR]);
-            _cpu.Reg[CPU.Core.SP] -= 4;
-            WriteMemory32(_cpu.Reg[CPU.Core.SP], _cpu.Reg[12]);
-            _cpu.Reg[CPU.Core.SP] -= 4;
-            WriteMemory32(_cpu.Reg[CPU.Core.SP], _cpu.Reg[3]);
-            _cpu.Reg[CPU.Core.SP] -= 4;
-            WriteMemory32(_cpu.Reg[CPU.Core.SP], _cpu.Reg[2]);
-            _cpu.Reg[CPU.Core.SP] -= 4;
-            WriteMemory32(_cpu.Reg[CPU.Core.SP], _cpu.Reg[1]);
-            _cpu.Reg[CPU.Core.SP] -= 4;
-            WriteMemory32(_cpu.Reg[CPU.Core.SP], _cpu.Reg[0]);
+            void PushToStack(UInt32 value)
+            {
+                _cpu.Reg[CPU.Core.SP] -= 4;
+                WriteMemory32(_cpu.Reg[CPU.Core.SP], value);
+            }
+
+            PushToStack(_cpu.Reg[CPU.Core.LR]);
+            PushToStack(_cpu.Reg[12]);
+            PushToStack(_cpu.Reg[3]);
+            PushToStack(_cpu.Reg[2]);
+            PushToStack(_cpu.Reg[1]);
+            PushToStack(_cpu.Reg[0]);
 
             _cpu.Reg[0] = 0x400_0000;
             _cpu.Reg[CPU.Core.LR] = 0x138;
@@ -190,6 +191,28 @@
         private void LZ77UnCompReadNormalWrite16bit()
         {
             // TODO
+        }
+
+        private void ReturnFromIRQ()
+        {
+            // end of IRQ handler
+
+            UInt32 PopFromStack()
+            {
+                UInt32 value = ReadMemory32(_cpu.Reg[CPU.Core.SP]);
+                _cpu.Reg[CPU.Core.SP] += 4;
+                return value;
+            }
+
+            _cpu.Reg[0] = PopFromStack();
+            _cpu.Reg[1] = PopFromStack();
+            _cpu.Reg[2] = PopFromStack();
+            _cpu.Reg[3] = PopFromStack();
+            _cpu.Reg[12] = PopFromStack();
+            _cpu.Reg[CPU.Core.LR] = PopFromStack();
+
+            _cpu.NextInstructionAddress = _cpu.Reg[CPU.Core.LR] - 4;
+            _cpu.SetCPSR(_cpu.SPSR);
         }
     }
 }
