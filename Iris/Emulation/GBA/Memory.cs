@@ -275,10 +275,10 @@
                 switch (offset)
                 {
                     case 0x000:
-                        _ppu.DISPCNT = (UInt16)(_ppu.DISPCNT & 0xff00 | value);
+                        _ppu.DISPCNT = (UInt16)((_ppu.DISPCNT & 0xff00) | value);
                         break;
                     case 0x001:
-                        _ppu.DISPCNT = (UInt16)(_ppu.DISPCNT & 0x00ff | value << 8);
+                        _ppu.DISPCNT = (UInt16)((_ppu.DISPCNT & 0x00ff) | (value << 8));
                         break;
 
                     case 0x002:
@@ -287,10 +287,10 @@
                         break; // ignore
 
                     case 0x004:
-                        _ppu.DISPSTAT = (UInt16)(_ppu.DISPSTAT & 0xff00 | value);
+                        _ppu.DISPSTAT = (UInt16)((_ppu.DISPSTAT & 0xff00) | value);
                         break;
                     case 0x005:
-                        _ppu.DISPSTAT = (UInt16)(_ppu.DISPSTAT & 0x00ff | value << 8);
+                        _ppu.DISPSTAT = (UInt16)((_ppu.DISPSTAT & 0x00ff) | (value << 8));
                         break;
 
                     case 0x008:
@@ -444,73 +444,73 @@
                         break;
 
                     case 0x082:
-                        _SOUNDCNT_H = (UInt16)(_SOUNDCNT_H & 0xff00 | value);
+                        _SOUNDCNT_H = (UInt16)((_SOUNDCNT_H & 0xff00) | value);
                         break;
                     case 0x083:
-                        _SOUNDCNT_H = (UInt16)(_SOUNDCNT_H & 0x00ff | value << 8);
+                        _SOUNDCNT_H = (UInt16)((_SOUNDCNT_H & 0x00ff) | (value << 8));
                         break;
 
                     case 0x084:
-                        _SOUNDCNT_X = (UInt16)(_SOUNDCNT_X & 0xff00 | value);
+                        _SOUNDCNT_X = (UInt16)((_SOUNDCNT_X & 0xff00) | value);
                         break;
                     case 0x085:
-                        _SOUNDCNT_X = (UInt16)(_SOUNDCNT_X & 0x00ff | value << 8);
+                        _SOUNDCNT_X = (UInt16)((_SOUNDCNT_X & 0x00ff) | (value << 8));
                         break;
 
                     case 0x088:
-                        _SOUNDBIAS = (UInt16)(_SOUNDBIAS & 0xff00 | value);
+                        _SOUNDBIAS = (UInt16)((_SOUNDBIAS & 0xff00) | value);
                         break;
                     case 0x089:
-                        _SOUNDBIAS = (UInt16)(_SOUNDBIAS & 0x00ff | value << 8);
+                        _SOUNDBIAS = (UInt16)((_SOUNDBIAS & 0x00ff) | (value << 8));
                         break;
 
                     case 0x0ba:
-                        _DMA0CNT_H = (UInt16)(_DMA0CNT_H & 0xff00 | value);
+                        _DMA0CNT_H = (UInt16)((_DMA0CNT_H & 0xff00) | value);
                         break;
                     case 0x0bb:
-                        _DMA0CNT_H = (UInt16)(_DMA0CNT_H & 0x00ff | value << 8);
+                        _DMA0CNT_H = (UInt16)((_DMA0CNT_H & 0x00ff) | (value << 8));
                         break;
 
                     case 0x0bc:
-                        _DMA1SAD_L = (UInt16)(_DMA1SAD_L & 0xff00 | value);
+                        _DMA1SAD_L = (UInt16)((_DMA1SAD_L & 0xff00) | value);
                         break;
                     case 0x0bd:
-                        _DMA1SAD_L = (UInt16)(_DMA1SAD_L & 0x00ff | value << 8);
+                        _DMA1SAD_L = (UInt16)((_DMA1SAD_L & 0x00ff) | (value << 8));
                         break;
 
                     case 0x0be:
-                        _DMA1SAD_H = (UInt16)(_DMA1SAD_H & 0xff00 | value);
+                        _DMA1SAD_H = (UInt16)((_DMA1SAD_H & 0xff00) | value);
                         break;
                     case 0x0bf:
-                        _DMA1SAD_H = (UInt16)(_DMA1SAD_H & 0x00ff | value << 8);
+                        _DMA1SAD_H = (UInt16)((_DMA1SAD_H & 0x00ff) | (value << 8));
                         break;
 
                     case 0x0c0:
-                        _DMA1DAD_L = (UInt16)(_DMA1DAD_L & 0xff00 | value);
+                        _DMA1DAD_L = (UInt16)((_DMA1DAD_L & 0xff00) | value);
                         break;
                     case 0x0c1:
-                        _DMA1DAD_L = (UInt16)(_DMA1DAD_L & 0x00ff | value << 8);
+                        _DMA1DAD_L = (UInt16)((_DMA1DAD_L & 0x00ff) | (value << 8));
                         break;
 
                     case 0x0c2:
-                        _DMA1DAD_H = (UInt16)(_DMA1DAD_H & 0xff00 | value);
+                        _DMA1DAD_H = (UInt16)((_DMA1DAD_H & 0xff00) | value);
                         break;
                     case 0x0c3:
-                        _DMA1DAD_H = (UInt16)(_DMA1DAD_H & 0x00ff | value << 8);
+                        _DMA1DAD_H = (UInt16)((_DMA1DAD_H & 0x00ff) | (value << 8));
                         break;
 
                     case 0x0c4:
-                        _DMA1CNT_L = (UInt16)(_DMA1CNT_L & 0xff00 | value);
+                        _DMA1CNT_L = (UInt16)((_DMA1CNT_L & 0xff00) | value);
                         break;
                     case 0x0c5:
-                        _DMA1CNT_L = (UInt16)(_DMA1CNT_L & 0x00ff | value << 8);
+                        _DMA1CNT_L = (UInt16)((_DMA1CNT_L & 0x00ff) | (value << 8));
                         break;
 
                     case 0x0c6:
-                        _DMA1CNT_H = (UInt16)(_DMA1CNT_H & 0xff00 | value);
+                        _DMA1CNT_H = (UInt16)((_DMA1CNT_H & 0xff00) | value);
                         break;
                     case 0x0c7:
-                        _DMA1CNT_H = (UInt16)(_DMA1CNT_H & 0x00ff | value << 8);
+                        _DMA1CNT_H = (UInt16)((_DMA1CNT_H & 0x00ff) | (value << 8));
                         break;
 
                     case 0x0c8:
@@ -519,10 +519,10 @@
                         break;
 
                     case 0x0ca:
-                        _DMA2SAD_H = (UInt16)(_DMA2SAD_H & 0xff00 | value);
+                        _DMA2SAD_H = (UInt16)((_DMA2SAD_H & 0xff00) | value);
                         break;
                     case 0x0cb:
-                        _DMA2SAD_H = (UInt16)(_DMA2SAD_H & 0x00ff | value << 8);
+                        _DMA2SAD_H = (UInt16)((_DMA2SAD_H & 0x00ff) | (value << 8));
                         break;
 
                     case 0x0cc:
@@ -536,45 +536,45 @@
                         break;
 
                     case 0x0d0:
-                        _DMA2CNT_L = (UInt16)(_DMA2CNT_L & 0xff00 | value);
+                        _DMA2CNT_L = (UInt16)((_DMA2CNT_L & 0xff00) | value);
                         break;
                     case 0x0d1:
-                        _DMA2CNT_L = (UInt16)(_DMA2CNT_L & 0x00ff | value << 8);
+                        _DMA2CNT_L = (UInt16)((_DMA2CNT_L & 0x00ff) | (value << 8));
                         break;
 
                     case 0x0d2:
-                        _DMA2CNT_H = (UInt16)(_DMA2CNT_H & 0xff00 | value);
+                        _DMA2CNT_H = (UInt16)((_DMA2CNT_H & 0xff00) | value);
                         break;
                     case 0x0d3:
-                        _DMA2CNT_H = (UInt16)(_DMA2CNT_H & 0x00ff | value << 8);
+                        _DMA2CNT_H = (UInt16)((_DMA2CNT_H & 0x00ff) | (value << 8));
                         break;
 
                     case 0x0d4:
-                        _DMA3SAD_L = (UInt16)(_DMA3SAD_L & 0xff00 | value);
+                        _DMA3SAD_L = (UInt16)((_DMA3SAD_L & 0xff00) | value);
                         break;
                     case 0x0d5:
-                        _DMA3SAD_L = (UInt16)(_DMA3SAD_L & 0x00ff | value << 8);
+                        _DMA3SAD_L = (UInt16)((_DMA3SAD_L & 0x00ff) | (value << 8));
                         break;
 
                     case 0x0d6:
-                        _DMA3SAD_H = (UInt16)(_DMA3SAD_H & 0xff00 | value);
+                        _DMA3SAD_H = (UInt16)((_DMA3SAD_H & 0xff00) | value);
                         break;
                     case 0x0d7:
-                        _DMA3SAD_H = (UInt16)(_DMA3SAD_H & 0x00ff | value << 8);
+                        _DMA3SAD_H = (UInt16)((_DMA3SAD_H & 0x00ff) | (value << 8));
                         break;
 
                     case 0x0d8:
-                        _DMA3DAD_L = (UInt16)(_DMA3DAD_L & 0xff00 | value);
+                        _DMA3DAD_L = (UInt16)((_DMA3DAD_L & 0xff00) | value);
                         break;
                     case 0x0d9:
-                        _DMA3DAD_L = (UInt16)(_DMA3DAD_L & 0x00ff | value << 8);
+                        _DMA3DAD_L = (UInt16)((_DMA3DAD_L & 0x00ff) | (value << 8));
                         break;
 
                     case 0x0da:
-                        _DMA3DAD_H = (UInt16)(_DMA3DAD_H & 0xff00 | value);
+                        _DMA3DAD_H = (UInt16)((_DMA3DAD_H & 0xff00) | value);
                         break;
                     case 0x0db:
-                        _DMA3DAD_H = (UInt16)(_DMA3DAD_H & 0x00ff | value << 8);
+                        _DMA3DAD_H = (UInt16)((_DMA3DAD_H & 0x00ff) | (value << 8));
                         break;
 
                     case 0x0dc:
@@ -583,10 +583,10 @@
                         break;
 
                     case 0x0de:
-                        _DMA3CNT_H = (UInt16)(_DMA3CNT_H & 0xff00 | value);
+                        _DMA3CNT_H = (UInt16)((_DMA3CNT_H & 0xff00) | value);
                         break;
                     case 0x0df:
-                        _DMA3CNT_H = (UInt16)(_DMA3CNT_H & 0x00ff | value << 8);
+                        _DMA3CNT_H = (UInt16)((_DMA3CNT_H & 0x00ff) | (value << 8));
                         break;
 
                     case 0x100:
@@ -595,10 +595,10 @@
                         break;
 
                     case 0x102:
-                        _TM0CNT_H = (UInt16)(_TM0CNT_H & 0xff00 | value);
+                        _TM0CNT_H = (UInt16)((_TM0CNT_H & 0xff00) | value);
                         break;
                     case 0x103:
-                        _TM0CNT_H = (UInt16)(_TM0CNT_H & 0x00ff | value << 8);
+                        _TM0CNT_H = (UInt16)((_TM0CNT_H & 0x00ff) | (value << 8));
                         break;
 
                     case 0x104:
@@ -607,10 +607,10 @@
                         break;
 
                     case 0x106:
-                        _TM1CNT_H = (UInt16)(_TM1CNT_H & 0xff00 | value);
+                        _TM1CNT_H = (UInt16)((_TM1CNT_H & 0xff00) | value);
                         break;
                     case 0x107:
-                        _TM1CNT_H = (UInt16)(_TM1CNT_H & 0x00ff | value << 8);
+                        _TM1CNT_H = (UInt16)((_TM1CNT_H & 0x00ff) | (value << 8));
                         break;
 
                     case 0x108:
@@ -619,10 +619,10 @@
                         break;
 
                     case 0x10a:
-                        _TM2CNT_H = (UInt16)(_TM2CNT_H & 0xff00 | value);
+                        _TM2CNT_H = (UInt16)((_TM2CNT_H & 0xff00) | value);
                         break;
                     case 0x10b:
-                        _TM2CNT_H = (UInt16)(_TM2CNT_H & 0x00ff | value << 8);
+                        _TM2CNT_H = (UInt16)((_TM2CNT_H & 0x00ff) | (value << 8));
                         break;
 
                     case 0x10c:
@@ -631,10 +631,10 @@
                         break;
 
                     case 0x10e:
-                        _TM3CNT_H = (UInt16)(_TM3CNT_H & 0xff00 | value);
+                        _TM3CNT_H = (UInt16)((_TM3CNT_H & 0xff00) | value);
                         break;
                     case 0x10f:
-                        _TM3CNT_H = (UInt16)(_TM3CNT_H & 0x00ff | value << 8);
+                        _TM3CNT_H = (UInt16)((_TM3CNT_H & 0x00ff) | (value << 8));
                         break;
 
                     case 0x120:
@@ -658,10 +658,10 @@
                         break;
 
                     case 0x128:
-                        _SIOCNT = (UInt16)(_SIOCNT & 0xff00 | value);
+                        _SIOCNT = (UInt16)((_SIOCNT & 0xff00) | value);
                         break;
                     case 0x129:
-                        _SIOCNT = (UInt16)(_SIOCNT & 0x00ff | value << 8);
+                        _SIOCNT = (UInt16)((_SIOCNT & 0x00ff) | (value << 8));
                         break;
 
                     case 0x12a:
@@ -675,10 +675,10 @@
                         break;
 
                     case 0x132:
-                        _KEYCNT = (UInt16)(_KEYCNT & 0xff00 | value);
+                        _KEYCNT = (UInt16)((_KEYCNT & 0xff00) | value);
                         break;
                     case 0x133:
-                        _KEYCNT = (UInt16)(_KEYCNT & 0x00ff | value << 8);
+                        _KEYCNT = (UInt16)((_KEYCNT & 0x00ff) | (value << 8));
                         break;
 
                     case 0x134:
@@ -687,24 +687,24 @@
                         break;
 
                     case 0x200:
-                        _IE = (UInt16)(_IE & 0xff00 | value);
+                        _IE = (UInt16)((_IE & 0xff00) | value);
                         break;
                     case 0x201:
-                        _IE = (UInt16)(_IE & 0x00ff | value << 8);
+                        _IE = (UInt16)((_IE & 0x00ff) | (value << 8));
                         break;
 
                     case 0x202:
-                        _IF = (UInt16)(_IF & 0xff00 | value);
+                        _IF = (UInt16)(_IF & ~value);
                         break;
                     case 0x203:
-                        _IF = (UInt16)(_IF & 0x00ff | value << 8);
+                        _IF = (UInt16)(_IF & ~(value << 8));
                         break;
 
                     case 0x204:
-                        _WAITCNT = (UInt16)(_WAITCNT & 0xff00 | value);
+                        _WAITCNT = (UInt16)((_WAITCNT & 0xff00) | value);
                         break;
                     case 0x205:
-                        _WAITCNT = (UInt16)(_WAITCNT & 0x00ff | value << 8);
+                        _WAITCNT = (UInt16)((_WAITCNT & 0x00ff) | (value << 8));
                         break;
 
                     case 0x206:
@@ -713,10 +713,10 @@
                         break; // ignore
 
                     case 0x208:
-                        _IME = (UInt16)(_IME & 0xff00 | value);
+                        _IME = (UInt16)((_IME & 0xff00) | value);
                         break;
                     case 0x209:
-                        _IME = (UInt16)(_IME & 0x00ff | value << 8);
+                        _IME = (UInt16)((_IME & 0x00ff) | (value << 8));
                         break;
 
                     case 0x20a:
