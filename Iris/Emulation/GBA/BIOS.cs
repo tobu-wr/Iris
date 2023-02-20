@@ -37,6 +37,9 @@
                 case 0x06:
                     Div();
                     break;
+                case 0x0b:
+                    CpuSet();
+                    break;
                 case 0x0c:
                     CpuFastSet();
                     break;
@@ -78,20 +81,60 @@
             _cpu.Reg[3] = (UInt32)Math.Abs((Int32)_cpu.Reg[0]);
         }
 
+        private void CpuSet()
+        {
+            UInt32 source = _cpu.Reg[0];
+            UInt32 destination = _cpu.Reg[1];
+            UInt32 length = _cpu.Reg[2] & 0xf_ffff;
+            UInt32 fixedSource = (_cpu.Reg[2] >> 24) & 1;
+            UInt32 dataSize = (_cpu.Reg[2] >> 26) & 1;
+
+            if (dataSize == 0)
+            {
+                UInt32 lastDestination = destination + (length * 2);
+
+                if (fixedSource == 0)
+                {
+                    for (; destination != lastDestination; destination += 2, source += 2)
+                        WriteMemory16(destination, ReadMemory16(source));
+                }
+                else
+                {
+                    UInt16 value = ReadMemory16(source);
+
+                    for (; destination != lastDestination; destination += 2)
+                        WriteMemory16(destination, value);
+                }
+            }
+            else
+            {
+                UInt32 lastDestination = destination + (length * 4);
+
+                if (fixedSource == 0)
+                {
+                    for (; destination != lastDestination; destination += 4, source += 4)
+                        WriteMemory32(destination, ReadMemory32(source));
+                }
+                else
+                {
+                    UInt32 value = ReadMemory32(source);
+
+                    for (; destination != lastDestination; destination += 4)
+                        WriteMemory32(destination, value);
+                }
+            }
+        }
+
         private void CpuFastSet()
         {
             UInt32 source = _cpu.Reg[0];
             UInt32 destination = _cpu.Reg[1];
             UInt32 length = _cpu.Reg[2] & 0xf_ffff;
-            UInt32 mode = (_cpu.Reg[2] >> 24) & 1;
-
-            // round-up length to multiple of 8
-            if ((length & 7) != 0)
-                length = (length & ~7u) + 8;
+            UInt32 fixedSource = (_cpu.Reg[2] >> 24) & 1;
 
             UInt32 lastDestination = destination + (length * 4);
 
-            if (mode == 0)
+            if (fixedSource == 0)
             {
                 for (; destination != lastDestination; destination += 4, source += 4)
                     WriteMemory32(destination, ReadMemory32(source));
