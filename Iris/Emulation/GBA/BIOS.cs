@@ -61,6 +61,9 @@
                 case 0x0c:
                     CpuFastSet();
                     break;
+                case 0x12:
+                    LZ77UnCompReadNormalWrite16bit();
+                    break;
                 default:
                     throw new Exception(string.Format("Emulation.GBA.Core: Unknown BIOS function 0x{0:x2}", function));
             }
@@ -182,6 +185,11 @@
                 for (; destination != lastDestination; destination += 4)
                     WriteMemory32(destination, value);
             }
+        }
+
+        private void LZ77UnCompReadNormalWrite16bit()
+        {
+            // TODO
         }
     }
 }

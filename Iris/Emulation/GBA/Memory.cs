@@ -751,7 +751,11 @@
             }
             else if (address is >= 0x0700_0000 and < 0x0800_0000)
             {
-                Console.WriteLine("Emulation.GBA.Core: Write to OAM");
+                UInt32 offset = address - 0x0700_0000;
+                if (offset < _ppu.OAM.Length)
+                    _ppu.OAM[offset] = value;
+                else
+                    throw new Exception(string.Format("Emulation.GBA.Core: Invalid write to address 0x{0:x8}", address));
             }
             else if (address is >= 0x0e00_0000 and < 0x0e01_0000)
             {

@@ -6,6 +6,7 @@
 
         internal Byte[] PaletteRAM = new Byte[1 * KB];
         internal Byte[] VRAM = new Byte[96 * KB];
+        internal Byte[] OAM = new Byte[1 * KB];
 
         internal UInt16 DISPSTAT = 0;
         internal UInt16 DISPCNT = 0;
