@@ -29,7 +29,20 @@ namespace Iris.Emulation.CPU
             new(0xffc0, 0x4100, THUMB_ASR2),
 
             // B
-            new(0xf000, 0xd000, THUMB_B1),
+            new(0xff00, 0xd000, THUMB_B1), // condition field 0b0000
+            new(0xff00, 0xd100, THUMB_B1), // condition field 0b0001
+            new(0xff00, 0xd200, THUMB_B1), // condition field 0b0010
+            new(0xff00, 0xd300, THUMB_B1), // condition field 0b0011
+            new(0xff00, 0xd400, THUMB_B1), // condition field 0b0100
+            new(0xff00, 0xd500, THUMB_B1), // condition field 0b0101
+            new(0xff00, 0xd600, THUMB_B1), // condition field 0b0110
+            new(0xff00, 0xd700, THUMB_B1), // condition field 0b0111
+            new(0xff00, 0xd800, THUMB_B1), // condition field 0b1000
+            new(0xff00, 0xd900, THUMB_B1), // condition field 0b1001
+            new(0xff00, 0xda00, THUMB_B1), // condition field 0b1010
+            new(0xff00, 0xdb00, THUMB_B1), // condition field 0b1011
+            new(0xff00, 0xdc00, THUMB_B1), // condition field 0b1100
+            new(0xff00, 0xdd00, THUMB_B1), // condition field 0b1101
             new(0xf800, 0xe000, THUMB_B2),
 
             // BIC
@@ -135,7 +148,7 @@ namespace Iris.Emulation.CPU
             new(0xff80, 0xb080, THUMB_SUB4),
 
             // SWI
-            //new(0xff00, 0xdf00, THUMB_SWI),
+            new(0xff00, 0xdf00, THUMB_SWI),
 
             // TST
             new(0xffc0, 0x4200, THUMB_TST),
@@ -1039,6 +1052,13 @@ namespace Iris.Emulation.CPU
             UInt16 imm = (UInt16)(instruction & 0x7f);
 
             cpu.Reg[SP] -= (UInt32)imm << 2;
+        }
+
+        private static void THUMB_SWI(Core cpu, UInt32 instruction)
+        {
+            UInt16 imm = (UInt16)(instruction & 0xff);
+
+            cpu._callbackInterface.HandleSWI((UInt32)(imm << 16));
         }
 
         private static void THUMB_TST(Core cpu, UInt32 instruction)
