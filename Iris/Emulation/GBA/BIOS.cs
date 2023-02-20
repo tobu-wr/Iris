@@ -2,6 +2,7 @@
 {
     internal sealed partial class Core
     {
+        // TODO: SoftReset BIOS function is done atm but we should execute the reset exception handler
         private void BIOS_Reset()
         {
             const UInt32 ROMAddress = 0x800_0000;
@@ -30,6 +31,7 @@
 
         private Byte BIOS_Read(UInt32 address)
         {
+            // end of BIOS IRQ handler
             if (address is >= 0x138 and < 0x140)
             {
                 Byte[] data =
@@ -66,6 +68,8 @@
 
         private void HandleIRQ()
         {
+            // start of BIOS IRQ handler
+
             _cpu.Reg14_irq = _cpu.NextInstructionAddress + 4;
             _cpu.SPSR_irq = _cpu.CPSR;
             _cpu.SetCPSR((_cpu.CPSR & ~0xbfu) | 0x92u);
