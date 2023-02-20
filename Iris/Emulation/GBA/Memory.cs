@@ -19,8 +19,7 @@
             address &= 0x0fff_ffff;
             if (address is >= 0x0000_0000 and < 0x0000_4000)
             {
-                // BIOS
-                return 0;
+                return BIOS_Read(address);
             }
             else if (address is >= 0x0000_4000 and < 0x0200_0000)
             {

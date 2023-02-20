@@ -28,6 +28,22 @@
                 WriteMemory32(address, 0);
         }
 
+        private Byte BIOS_Read(UInt32 address)
+        {
+            if (address is >= 0x138 and < 0x140)
+            {
+                Byte[] data =
+                {
+                    0x0f, 0x50, 0xbd, 0xe8, // ldmia sp!,{r0,r1,r2,r3,r12,lr}
+                    0x04, 0xf0, 0x5e, 0xe2  // subs pc,lr,#4
+                };
+
+                return data[address - 0x138];
+            }
+
+            return 0;
+        }
+
         private void HandleSWI(UInt32 value)
         {
             Byte function = (Byte)((value >> 16) & 0xff);
