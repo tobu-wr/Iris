@@ -48,6 +48,9 @@
 
             switch (function)
             {
+                case 0x05:
+                    VBlankIntrWait();
+                    break;
                 case 0x06:
                     Div();
                     break;
@@ -92,6 +95,11 @@
             _cpu.Reg[0] = 0x400_0000;
             _cpu.Reg[CPU.Core.LR] = 0x138;
             _cpu.NextInstructionAddress = ReadMemory32(0x300_7ffc);
+        }
+
+        private void VBlankIntrWait()
+        {
+            // TODO
         }
 
         private void Div()

@@ -224,7 +224,6 @@ namespace Iris.Emulation.CPU
 
         private void ARM_SetPC(UInt32 value)
         {
-            Reg[PC] = value;
             NextInstructionAddress = value;
         }
 
