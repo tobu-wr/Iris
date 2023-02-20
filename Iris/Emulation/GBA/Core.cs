@@ -104,7 +104,7 @@
             _WAITCNT = 0;
             _IME = 0;
 
-            _cpu.IRQPending = false;
+            _cpu.NIRQ = CPU.Core.Signal.High;
         }
 
         internal bool IsRunning()
@@ -120,11 +120,14 @@
             {
                 if (_IME == 1)
                 {
-                    // VBlank
-                    if ((_IE & _IF & 1) != 0)
-                    {
-                        _cpu.IRQPending = true;
-                    }
+                    if ((_IE & _IF & 1) != 0) // VBlank
+                        _cpu.NIRQ = CPU.Core.Signal.Low;
+                    else
+                        _cpu.NIRQ = CPU.Core.Signal.High;
+                }
+                else
+                {
+                    _cpu.NIRQ = CPU.Core.Signal.High;
                 }
 
                 _cpu.Step();

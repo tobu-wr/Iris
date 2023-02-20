@@ -6,7 +6,7 @@
         {
             ARMv4T,
             ARMv5TE
-        };
+        }
 
         internal struct CallbackInterface
         {
@@ -29,13 +29,19 @@
             internal HandleIRQ_Delegate HandleIRQ;
         }
 
+        internal enum Signal
+        {
+            Low,
+            High
+        }
+
         private enum Flags
         {
             V = 28,
             C = 29,
             Z = 30,
             N = 31
-        };
+        }
 
         private const UInt32 ModeMask = 0b1_1111;
         internal const UInt32 UserMode = 0b1_0000;
@@ -66,7 +72,7 @@
         private readonly CallbackInterface _callbackInterface;
 
         internal UInt32 NextInstructionAddress;
-        internal bool IRQPending;
+        internal Signal NIRQ;
 
         internal Core(Architecture architecture, CallbackInterface callbackInterface)
         {
@@ -78,7 +84,7 @@
         {
             UInt32 i = (CPSR >> 7) & 1;
 
-            if ((i == 0) && IRQPending)
+            if ((i == 0) && (NIRQ == Signal.Low))
                 _callbackInterface.HandleIRQ();
 
             UInt32 t = (CPSR >> 5) & 1;

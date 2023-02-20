@@ -29,7 +29,7 @@
         {
             BIOS_Reset();
 
-            _cpu.IRQPending = false;
+            _cpu.NIRQ = CPU.Core.Signal.High;
         }
 
         internal bool IsRunning()
