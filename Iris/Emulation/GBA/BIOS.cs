@@ -1,6 +1,4 @@
-﻿using Iris.Emulation.NDS;
-
-namespace Iris.Emulation.GBA
+﻿namespace Iris.Emulation.GBA
 {
     internal sealed partial class Core
     {
