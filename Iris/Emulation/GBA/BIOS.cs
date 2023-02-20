@@ -37,6 +37,9 @@
                 case 0x06:
                     Div();
                     break;
+                case 0x0c:
+                    CpuFastSet();
+                    break;
                 default:
                     throw new Exception(string.Format("Emulation.GBA.Core: Unknown BIOS function 0x{0:x2}", function));
             }
@@ -69,10 +72,37 @@
         private void Div()
         {
             Int32 number = (Int32)_cpu.Reg[0];
-            Int32 denom = (Int32)_cpu.Reg[1];
-            _cpu.Reg[0] = (UInt32)(number / denom);
-            _cpu.Reg[1] = (UInt32)(number % denom);
+            Int32 divisor = (Int32)_cpu.Reg[1];
+            _cpu.Reg[0] = (UInt32)(number / divisor);
+            _cpu.Reg[1] = (UInt32)(number % divisor);
             _cpu.Reg[3] = (UInt32)Math.Abs((Int32)_cpu.Reg[0]);
+        }
+
+        private void CpuFastSet()
+        {
+            UInt32 source = _cpu.Reg[0];
+            UInt32 destination = _cpu.Reg[1];
+            UInt32 length = _cpu.Reg[2] & 0xf_ffff;
+            UInt32 mode = (_cpu.Reg[2] >> 24) & 1;
+
+            // round-up length to multiple of 8
+            if ((length & 7) != 0)
+                length = (length & ~7u) + 8;
+
+            UInt32 lastDestination = destination + (length * 4);
+
+            if (mode == 0)
+            {
+                for (; destination != lastDestination; destination += 4, source += 4)
+                    WriteMemory32(destination, ReadMemory32(source));
+            }
+            else
+            {
+                UInt32 value = ReadMemory32(source);
+
+                for (; destination != lastDestination; destination += 4)
+                    WriteMemory32(destination, value);
+            }
         }
     }
 }
