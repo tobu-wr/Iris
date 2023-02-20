@@ -688,16 +688,20 @@
 
                     case 0x200:
                         _IE = (UInt16)((_IE & 0xff00) | value);
+                        UpdateInterrupts();
                         break;
                     case 0x201:
                         _IE = (UInt16)((_IE & 0x00ff) | (value << 8));
+                        UpdateInterrupts();
                         break;
 
                     case 0x202:
                         _IF = (UInt16)(_IF & ~value);
+                        UpdateInterrupts();
                         break;
                     case 0x203:
                         _IF = (UInt16)(_IF & ~(value << 8));
+                        UpdateInterrupts();
                         break;
 
                     case 0x204:
@@ -714,9 +718,11 @@
 
                     case 0x208:
                         _IME = (UInt16)((_IME & 0xff00) | value);
+                        UpdateInterrupts();
                         break;
                     case 0x209:
                         _IME = (UInt16)((_IME & 0x00ff) | (value << 8));
+                        UpdateInterrupts();
                         break;
 
                     case 0x20a:

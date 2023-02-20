@@ -101,6 +101,7 @@
             _KEYINPUT = 0x03ff;
             _KEYCNT = 0;
             _IE = 0;
+            _IF = 0;
             _WAITCNT = 0;
             _IME = 0;
 
@@ -118,18 +119,6 @@
 
             while (_running)
             {
-                if (_IME == 1)
-                {
-                    if ((_IE & _IF & 1) != 0) // VBlank
-                        _cpu.NIRQ = CPU.Core.Signal.Low;
-                    else
-                        _cpu.NIRQ = CPU.Core.Signal.High;
-                }
-                else
-                {
-                    _cpu.NIRQ = CPU.Core.Signal.High;
-                }
-
                 _cpu.Step();
                 _ppu.Step();
             }
@@ -149,6 +138,22 @@
         private void RequestVBlankInterrupt()
         {
             _IF |= 1;
+            UpdateInterrupts();
+        }
+
+        private void UpdateInterrupts()
+        {
+            if (_IME == 1)
+            {
+                if ((_IE & _IF & 1) != 0) // VBlank
+                    _cpu.NIRQ = CPU.Core.Signal.Low;
+                else
+                    _cpu.NIRQ = CPU.Core.Signal.High;
+            }
+            else
+            {
+                _cpu.NIRQ = CPU.Core.Signal.High;
+            }
         }
     }
 }

@@ -19,10 +19,10 @@
         internal struct CallbackInterface
         {
             internal delegate void DrawFrame_Delegate(UInt16[] frameBuffer);
-            internal delegate void RequestVBlankInterrupt_Delegate();
+            internal delegate void RequestInterrupt_Delegate();
 
             internal DrawFrame_Delegate DrawFrame;
-            internal RequestVBlankInterrupt_Delegate RequestVBlankInterrupt;
+            internal RequestInterrupt_Delegate RequestVBlankInterrupt;
         }
 
         private readonly CallbackInterface _callbackInterface;
