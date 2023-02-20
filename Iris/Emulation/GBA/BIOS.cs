@@ -89,15 +89,19 @@
             UInt32 fixedSource = (_cpu.Reg[2] >> 24) & 1;
             UInt32 dataSize = (_cpu.Reg[2] >> 26) & 1;
 
+            // 16 bit
             if (dataSize == 0)
             {
                 UInt32 lastDestination = destination + (length * 2);
 
+                // copy
                 if (fixedSource == 0)
                 {
                     for (; destination != lastDestination; destination += 2, source += 2)
                         WriteMemory16(destination, ReadMemory16(source));
                 }
+
+                // fill
                 else
                 {
                     UInt16 value = ReadMemory16(source);
@@ -106,15 +110,20 @@
                         WriteMemory16(destination, value);
                 }
             }
+
+            // 32 bit
             else
             {
                 UInt32 lastDestination = destination + (length * 4);
 
+                // copy
                 if (fixedSource == 0)
                 {
                     for (; destination != lastDestination; destination += 4, source += 4)
                         WriteMemory32(destination, ReadMemory32(source));
                 }
+
+                // fill
                 else
                 {
                     UInt32 value = ReadMemory32(source);
@@ -132,13 +141,20 @@
             UInt32 length = _cpu.Reg[2] & 0xf_ffff;
             UInt32 fixedSource = (_cpu.Reg[2] >> 24) & 1;
 
+            // round-up length to multiple of 8
+            if ((length & 7) != 0)
+                length = (length & ~7u) + 8;
+
             UInt32 lastDestination = destination + (length * 4);
 
+            // copy
             if (fixedSource == 0)
             {
                 for (; destination != lastDestination; destination += 4, source += 4)
                     WriteMemory32(destination, ReadMemory32(source));
             }
+
+            // fill
             else
             {
                 UInt32 value = ReadMemory32(source);
