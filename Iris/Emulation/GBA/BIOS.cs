@@ -75,17 +75,17 @@
             _cpu.SetCPSR((_cpu.CPSR & ~0xbfu) | 0x92u);
 
             _cpu.Reg[CPU.Core.SP] -= 4;
-            WriteMemory32(_cpu.Reg[CPU.Core.SP], _cpu.Reg[0]);
-            _cpu.Reg[CPU.Core.SP] -= 4;
-            WriteMemory32(_cpu.Reg[CPU.Core.SP], _cpu.Reg[1]);
-            _cpu.Reg[CPU.Core.SP] -= 4;
-            WriteMemory32(_cpu.Reg[CPU.Core.SP], _cpu.Reg[2]);
-            _cpu.Reg[CPU.Core.SP] -= 4;
-            WriteMemory32(_cpu.Reg[CPU.Core.SP], _cpu.Reg[3]);
+            WriteMemory32(_cpu.Reg[CPU.Core.SP], _cpu.Reg[CPU.Core.LR]);
             _cpu.Reg[CPU.Core.SP] -= 4;
             WriteMemory32(_cpu.Reg[CPU.Core.SP], _cpu.Reg[12]);
             _cpu.Reg[CPU.Core.SP] -= 4;
-            WriteMemory32(_cpu.Reg[CPU.Core.SP], _cpu.Reg[CPU.Core.LR]);
+            WriteMemory32(_cpu.Reg[CPU.Core.SP], _cpu.Reg[3]);
+            _cpu.Reg[CPU.Core.SP] -= 4;
+            WriteMemory32(_cpu.Reg[CPU.Core.SP], _cpu.Reg[2]);
+            _cpu.Reg[CPU.Core.SP] -= 4;
+            WriteMemory32(_cpu.Reg[CPU.Core.SP], _cpu.Reg[1]);
+            _cpu.Reg[CPU.Core.SP] -= 4;
+            WriteMemory32(_cpu.Reg[CPU.Core.SP], _cpu.Reg[0]);
 
             _cpu.Reg[0] = 0x400_0000;
             _cpu.Reg[CPU.Core.LR] = 0x138;
