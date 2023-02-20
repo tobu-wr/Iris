@@ -202,6 +202,11 @@
                     case 0x201:
                         return (Byte)(_IE >> 8);
 
+                    case 0x202:
+                        return (Byte)_IF;
+                    case 0x203:
+                        return (Byte)(_IF >> 8);
+
                     case 0x204:
                         return (Byte)_WAITCNT;
                     case 0x205:
