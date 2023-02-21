@@ -238,9 +238,9 @@
                     // uncompressed
                     if (blockType == 0)
                     {
-                        WriteMemory8(destination, ReadMemory8(source));
-                        ++destination;
-                        ++source;
+                        WriteMemory16(destination, ReadMemory16(source));
+                        destination += 2;
+                        source += 2;
                     }
 
                     // compressed
@@ -254,8 +254,8 @@
 
                         for (int j = 0; j < blockSize; ++j)
                         {
-                            WriteMemory8(destination, ReadMemory8(destination - disp));
-                            ++destination;
+                            WriteMemory16(destination, ReadMemory16(destination - disp));
+                            destination += 2;
                         }
                     }
                 }

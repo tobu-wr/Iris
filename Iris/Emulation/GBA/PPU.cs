@@ -11,6 +11,9 @@
         internal UInt16 DISPSTAT = 0;
         internal UInt16 DISPCNT = 0;
         internal UInt16 VCOUNT = 0;
+        internal UInt16 BG0CNT = 0;
+        internal UInt16 BG0HOFS = 0;
+        internal UInt16 BG0VOFS = 0;
 
         private const UInt32 ScreenWidth = 240;
         private const UInt32 ScreenHeight = 160;
@@ -38,26 +41,71 @@
         {
             VCOUNT = (UInt16)(_cycleCounter / HorizontalLineWidth);
 
-            if (_cycleCounter == HorizontalLineWidth * ScreenHeight)
+            if (_cycleCounter == (HorizontalLineWidth * ScreenHeight))
             {
                 // start of vertical blank
                 UInt16 bgMode = (UInt16)(DISPCNT & 0b111);
                 switch (bgMode)
                 {
+                    case 0b000:
+                        {
+                            UInt16 bg0 = (UInt16)((DISPCNT >> 8) & 1);
+                            UInt16 bg1 = (UInt16)((DISPCNT >> 9) & 1);
+                            UInt16 bg2 = (UInt16)((DISPCNT >> 10) & 1);
+                            UInt16 bg3 = (UInt16)((DISPCNT >> 11) & 1);
+                            UInt16 obj = (UInt16)((DISPCNT >> 12) & 1);
+
+                            if (bg0 == 1)
+                            {
+                                //UInt16 virtualScreenSize = (UInt16)((BG0CNT >> 14) & 0b11);
+                                //UInt32 virtualScreenWidth = ((virtualScreenSize & 0b01) == 0) ? 256u : 512u;
+                                //UInt32 virtualScreenHeight = ((virtualScreenSize & 0b10) == 0) ? 256u : 512u;
+
+                                //UInt32 hOffset = BG0HOFS & 0x1ffu;
+                                //UInt32 vOffset = BG0VOFS & 0x1ffu;
+
+                                //UInt16 charBaseBlock = (UInt16)((BG0CNT >> 2) & 0b11);
+                                //UInt16 screenBaseBlock = (UInt16)((BG0CNT >> 8) & 0x1f);
+
+                                //UInt32 screenDataBaseAddress = screenBaseBlock * 2u * KB;
+
+                                //UInt16[] rendererFrameBuffer = new UInt16[ScreenWidth * ScreenHeight];
+                                //for (UInt32 i = 0; i < ScreenWidth * ScreenHeight; ++i)
+                                //{
+                                //    UInt32 hPixel = (i % ScreenWidth) + hOffset;
+                                //    UInt32 vPixel = (i / ScreenWidth) + vOffset;
+                                //    UInt32 hBlock = hPixel / 8;
+                                //    UInt32 vBlock = vPixel / 8;
+                                //    UInt32 blockNumber = vBlock * (virtualScreenWidth / 8) + hBlock;
+                                //    UInt32 screenDataAddress = screenDataBaseAddress + blockNumber * 2;
+                                //    UInt16 screenData = (UInt16)((VRAM[screenDataAddress + 1] << 8) | VRAM[screenDataAddress]);
+                                //    UInt16 characterNumber = (UInt16)(screenData & 0x3ff);
+
+
+
+                                //    UInt32 hPixelInBlock = hPixel % 8;
+                                //    UInt32 vPixelInBlock = vPixel % 8;
+                                //}
+
+                                //_callbackInterface.DrawFrame(rendererFrameBuffer);
+                            }
+                            break;
+                        }
+
                     case 0b100:
                         {
-                            UInt16 bg2 = (UInt16)(DISPCNT >> 10 & 1);
+                            UInt16 bg2 = (UInt16)((DISPCNT >> 10) & 1);
                             if (bg2 == 1)
                             {
-                                UInt16 frameBuffer = (UInt16)(DISPCNT >> 4 & 1);
-                                UInt32 frameBufferAddress = frameBuffer == 0 ? 0x0_0000u : 0x0_a000u;
+                                UInt16 frameBuffer = (UInt16)((DISPCNT >> 4) & 1);
+                                UInt32 frameBufferAddress = (frameBuffer == 0) ? 0x0_0000u : 0x0_a000u;
 
                                 UInt16[] rendererFrameBuffer = new UInt16[ScreenWidth * ScreenHeight];
                                 for (UInt32 i = 0; i < ScreenWidth * ScreenHeight; ++i)
                                 {
                                     Byte colorNo = VRAM[frameBufferAddress + i];
-                                    UInt16 color = (UInt16)(PaletteRAM[colorNo * 2 + 1] << 8
-                                                          | PaletteRAM[colorNo * 2 + 0] << 0);
+                                    UInt16 color = (UInt16)(PaletteRAM[(colorNo * 2) + 1] << 8
+                                                          | PaletteRAM[(colorNo * 2) + 0] << 0);
                                     rendererFrameBuffer[i] = color;
                                 }
 
@@ -77,7 +125,7 @@
                 DISPSTAT |= 1;
                 ++_cycleCounter;
             }
-            else if (_cycleCounter == HorizontalLineWidth * HorizontalLineCount)
+            else if (_cycleCounter == (HorizontalLineWidth * HorizontalLineCount))
             {
                 // end of vertical blank
                 DISPSTAT &= ~1 & 0xffff;

@@ -62,9 +62,9 @@
                         return (Byte)(_ppu.VCOUNT >> 8);
 
                     case 0x008:
+                        return (Byte)_ppu.BG0CNT;
                     case 0x009:
-                        Console.WriteLine("Emulation.GBA.Core: Read from BG0CNT register unimplemented");
-                        return 0;
+                        return (Byte)(_ppu.BG0CNT >> 8);
 
                     case 0x00a:
                     case 0x00b:
@@ -82,14 +82,14 @@
                         return 0;
 
                     case 0x010:
+                        return (Byte)_ppu.BG0HOFS;
                     case 0x011:
-                        Console.WriteLine("Emulation.GBA.Core: Read from BG0HOFS register unimplemented");
-                        return 0;
+                        return (Byte)(_ppu.BG0HOFS >> 8);
 
                     case 0x012:
+                        return (Byte)_ppu.BG0VOFS;
                     case 0x013:
-                        Console.WriteLine("Emulation.GBA.Core: Read from BG0VOFS register unimplemented");
-                        return 0;
+                        return (Byte)(_ppu.BG0VOFS >> 8);
 
                     case 0x014:
                     case 0x015:
@@ -293,8 +293,10 @@
                         break;
 
                     case 0x008:
+                        _ppu.BG0CNT = (UInt16)((_ppu.BG0CNT & 0xff00) | value);
+                        break;
                     case 0x009:
-                        Console.WriteLine("Emulation.GBA.Core: Write to BG0CNT register unimplemented");
+                        _ppu.BG0CNT = (UInt16)((_ppu.BG0CNT & 0x00ff) | (value << 8));
                         break;
 
                     case 0x00a:
@@ -313,13 +315,17 @@
                         break;
 
                     case 0x010:
+                        _ppu.BG0HOFS = (UInt16)((_ppu.BG0HOFS & 0xff00) | value);
+                        break;
                     case 0x011:
-                        Console.WriteLine("Emulation.GBA.Core: Write to BG0HOFS register unimplemented");
+                        _ppu.BG0HOFS = (UInt16)((_ppu.BG0HOFS & 0x00ff) | (value << 8));
                         break;
 
                     case 0x012:
+                        _ppu.BG0VOFS = (UInt16)((_ppu.BG0VOFS & 0xff00) | value);
+                        break;
                     case 0x013:
-                        Console.WriteLine("Emulation.GBA.Core: Write to BG0VOFS register unimplemented");
+                        _ppu.BG0VOFS = (UInt16)((_ppu.BG0VOFS & 0x00ff) | (value << 8));
                         break;
 
                     case 0x014:
