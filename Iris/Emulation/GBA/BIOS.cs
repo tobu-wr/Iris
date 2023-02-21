@@ -127,8 +127,12 @@
                 // copy
                 if (fixedSource == 0)
                 {
-                    for (; destination != lastDestination; destination += 2, source += 2)
+                    while (destination < lastDestination)
+                    {
                         WriteMemory16(destination, ReadMemory16(source));
+                        destination += 2;
+                        source += 2;
+                    }
                 }
 
                 // fill
@@ -136,8 +140,11 @@
                 {
                     UInt16 value = ReadMemory16(source);
 
-                    for (; destination != lastDestination; destination += 2)
+                    while (destination < lastDestination)
+                    {
                         WriteMemory16(destination, value);
+                        destination += 2;
+                    }
                 }
             }
 
@@ -149,8 +156,12 @@
                 // copy
                 if (fixedSource == 0)
                 {
-                    for (; destination != lastDestination; destination += 4, source += 4)
+                    while (destination < lastDestination)
+                    {
                         WriteMemory32(destination, ReadMemory32(source));
+                        destination += 4;
+                        source += 4;
+                    }
                 }
 
                 // fill
@@ -158,8 +169,11 @@
                 {
                     UInt32 value = ReadMemory32(source);
 
-                    for (; destination != lastDestination; destination += 4)
+                    while (destination < lastDestination)
+                    {
                         WriteMemory32(destination, value);
+                        destination += 4;
+                    }
                 }
             }
         }
@@ -180,8 +194,12 @@
             // copy
             if (fixedSource == 0)
             {
-                for (; destination != lastDestination; destination += 4, source += 4)
+                while (destination < lastDestination)
+                {
                     WriteMemory32(destination, ReadMemory32(source));
+                    destination += 4;
+                    source += 4;
+                }
             }
 
             // fill
@@ -189,14 +207,59 @@
             {
                 UInt32 value = ReadMemory32(source);
 
-                for (; destination != lastDestination; destination += 4)
+                while (destination < lastDestination)
+                {
                     WriteMemory32(destination, value);
+                    destination += 4;
+                }
             }
         }
 
         private void LZ77UnCompReadNormalWrite16bit()
         {
-            // TODO
+            UInt32 source = _cpu.Reg[0];
+            UInt32 destination = _cpu.Reg[1];
+
+            UInt32 dataHeader = ReadMemory32(source);
+            source += 4;
+
+            UInt32 decompressedDataSize = dataHeader >> 8;
+            UInt32 lastDestination = destination + decompressedDataSize;
+
+            while (destination < lastDestination)
+            {
+                Byte flag = ReadMemory8(source);
+                ++source;
+
+                for (int i = 0; i < 8; ++i)
+                {
+                    Byte blockType = (Byte)((flag << i) & 0x80);
+
+                    // uncompressed
+                    if (blockType == 0)
+                    {
+                        WriteMemory8(destination, ReadMemory8(source));
+                        ++destination;
+                        ++source;
+                    }
+
+                    // compressed
+                    else
+                    {
+                        UInt16 blockHeader = ReadMemory16(source);
+                        source += 2;
+
+                        UInt16 disp = (UInt16)((((blockHeader & 0xf) << 8) | (blockHeader >> 8)) + 1);
+                        UInt16 blockSize = (UInt16)(((blockHeader >> 4) & 0xf) + 3);
+
+                        for (int j = 0; j < blockSize; ++j)
+                        {
+                            WriteMemory8(destination, ReadMemory8(destination - disp));
+                            ++destination;
+                        }
+                    }
+                }
+            }
         }
 
         private void ReturnFromIRQ()
