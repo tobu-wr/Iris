@@ -191,8 +191,7 @@ namespace Iris.Emulation.CPU
 
         private void THUMB_SetPC(UInt32 value)
         {
-            value &= 0xffff_fffe;
-            NextInstructionAddress = value;
+            NextInstructionAddress = value & 0xffff_fffe;
         }
 
         private void THUMB_SetReg(UInt32 i, UInt32 value)
