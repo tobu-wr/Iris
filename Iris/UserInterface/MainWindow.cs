@@ -222,6 +222,7 @@ namespace Iris.UserInterface
         {
             int fps = (int)(_frameCount * 1000 / _performanceUpdateTimer.Interval);
             menuStrip1.Invoke(() => toolStripStatusLabel2.Text = "FPS: " + fps);
+            Console.WriteLine("UserInterface.MainWindow: FPS: {0}", fps);
             _frameCount = 0;
         }
     }
