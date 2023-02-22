@@ -5,7 +5,7 @@ namespace Iris.Emulation.CPU
     internal sealed partial class Core
     {
         // This doesn't compile and I don't know why :(
-        //private readonly unsafe record struct THUMB_InstructionListEntry(UInt16 Mask, UInt16 Expected, delegate*<Core, UInt16, void> Handler);
+        //private unsafe readonly record struct THUMB_InstructionListEntry(UInt16 Mask, UInt16 Expected, delegate*<Core, UInt16, void> Handler);
 
         private readonly struct THUMB_InstructionListEntry
         {
