@@ -8,6 +8,7 @@
             ARMv5TE
         }
 
+        // could have used function pointers (delegate*) for performance instead of delegates but it's less flexible
         internal struct CallbackInterface
         {
             internal delegate Byte ReadMemory8_Delegate(UInt32 address);
@@ -78,6 +79,8 @@
         {
             _architecture = architecture;
             _callbackInterface = callbackInterface;
+
+            THUMB_InitInstructionLookupTable();
         }
 
         internal void Step()

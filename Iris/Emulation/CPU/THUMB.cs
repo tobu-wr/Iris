@@ -168,25 +168,48 @@ namespace Iris.Emulation.CPU
             new(0xffc0, 0x4200, &THUMB_TST),
         };
 
+        private unsafe readonly delegate*<Core, UInt16, void>[] THUMB_InstructionLookupTable = new delegate*<Core, UInt16, void>[UInt16.MaxValue + 1];
+
+        private void THUMB_InitInstructionLookupTable()
+        {
+            for (UInt32 instruction = 0; instruction < THUMB_InstructionLookupTable.Length; ++instruction)
+            {
+                bool unknownInstruction = true;
+
+                foreach (THUMB_InstructionListEntry entry in THUMB_InstructionList)
+                {
+                    if ((instruction & entry.Mask) == entry.Expected)
+                    {
+                        unsafe
+                        {
+                            THUMB_InstructionLookupTable[instruction] = entry.Handler;
+                        }
+
+                        unknownInstruction = false;
+                        break;
+                    }
+                }
+
+                if (unknownInstruction)
+                {
+                    unsafe
+                    {
+                        THUMB_InstructionLookupTable[instruction] = &THUMB_UNKNOWN;
+                    }
+                }
+            }
+        }
+
         private void THUMB_Step()
         {
             UInt16 instruction = _callbackInterface.ReadMemory16(NextInstructionAddress);
             NextInstructionAddress += 2;
             Reg[PC] = NextInstructionAddress + 2;
 
-            foreach (THUMB_InstructionListEntry entry in THUMB_InstructionList)
+            unsafe
             {
-                if ((instruction & entry.Mask) == entry.Expected)
-                {
-                    unsafe
-                    {
-                        entry.Handler(this, instruction);
-                    }
-                    return;
-                }
+                THUMB_InstructionLookupTable[instruction](this, instruction);
             }
-
-            throw new Exception(string.Format("Emulation.CPU.Core: Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, NextInstructionAddress - 2));
         }
 
         private void THUMB_SetPC(UInt32 value)
@@ -200,6 +223,11 @@ namespace Iris.Emulation.CPU
                 THUMB_SetPC(value);
             else
                 Reg[i] = value;
+        }
+
+        private static void THUMB_UNKNOWN(Core cpu, UInt16 instruction)
+        {
+            throw new Exception(string.Format("Emulation.CPU.Core: Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, cpu.NextInstructionAddress - 2));
         }
 
         private static void THUMB_ADC(Core cpu, UInt16 instruction)
