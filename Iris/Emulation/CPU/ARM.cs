@@ -21,197 +21,6 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static unsafe readonly ARM_InstructionListEntry[] ARM_InstructionList = new ARM_InstructionListEntry[]
-        {
-            // ADC
-            new(0x0fe0_0000, 0x02a0_0000, &ARM_ADC), // I bit is 1
-            new(0x0fe0_0090, 0x00a0_0000, &ARM_ADC), // I bit is 0, bit[7] is 0 and bit[4] is 0
-            new(0x0fe0_0090, 0x00a0_0080, &ARM_ADC), // I bit is 0, bit[7] is 1 and bit[4] is 0
-            new(0x0fe0_0090, 0x00a0_0010, &ARM_ADC), // I bit is 0, bit[7] is 0 and bit[4] is 1
-
-            // ADD
-            new(0x0fe0_0000, 0x0280_0000, &ARM_ADD), // I bit is 1
-            new(0x0fe0_0090, 0x0080_0000, &ARM_ADD), // I bit is 0, bit[7] is 0 and bit[4] is 0
-            new(0x0fe0_0090, 0x0080_0080, &ARM_ADD), // I bit is 0, bit[7] is 1 and bit[4] is 0
-            new(0x0fe0_0090, 0x0080_0010, &ARM_ADD), // I bit is 0, bit[7] is 0 and bit[4] is 1
-
-            // AND
-            new(0x0fe0_0000, 0x0200_0000, &ARM_AND), // I bit is 1
-            new(0x0fe0_0090, 0x0000_0000, &ARM_AND), // I bit is 0, bit[7] is 0 and bit[4] is 0
-            new(0x0fe0_0090, 0x0000_0080, &ARM_AND), // I bit is 0, bit[7] is 1 and bit[4] is 0
-            new(0x0fe0_0090, 0x0000_0010, &ARM_AND), // I bit is 0, bit[7] is 0 and bit[4] is 1
-
-            // B
-            new(0x0f00_0000, 0x0a00_0000, &ARM_B),
-
-            // BL
-            new(0x0f00_0000, 0x0b00_0000, &ARM_BL),
-
-            // BIC
-            new(0x0fe0_0000, 0x03c0_0000, &ARM_BIC), // I bit is 1
-            new(0x0fe0_0090, 0x01c0_0000, &ARM_BIC), // I bit is 0, bit[7] is 0 and bit[4] is 0
-            new(0x0fe0_0090, 0x01c0_0080, &ARM_BIC), // I bit is 0, bit[7] is 1 and bit[4] is 0
-            new(0x0fe0_0090, 0x01c0_0010, &ARM_BIC), // I bit is 0, bit[7] is 0 and bit[4] is 1
-
-            // BX
-            new(0x0fff_fff0, 0x012f_ff10, &ARM_BX),
-
-            // CMN
-            new(0x0ff0_f000, 0x0370_0000, &ARM_CMN), // I bit is 1
-            new(0x0ff0_f090, 0x0170_0000, &ARM_CMN), // I bit is 0, bit[7] is 0 and bit[4] is 0
-            new(0x0ff0_f090, 0x0170_0080, &ARM_CMN), // I bit is 0, bit[7] is 1 and bit[4] is 0
-            new(0x0ff0_f090, 0x0170_0010, &ARM_CMN), // I bit is 0, bit[7] is 0 and bit[4] is 1
-            new(0x0ff0_f000, 0x0370_f000, &ARM_CMN), // I bit is 1
-            new(0x0ff0_f090, 0x0170_f000, &ARM_CMN), // I bit is 0, bit[7] is 0 and bit[4] is 0
-            new(0x0ff0_f090, 0x0170_f080, &ARM_CMN), // I bit is 0, bit[7] is 1 and bit[4] is 0
-            new(0x0ff0_f090, 0x0170_f010, &ARM_CMN), // I bit is 0, bit[7] is 0 and bit[4] is 1
-
-            // CMP
-            new(0x0ff0_f000, 0x0350_0000, &ARM_CMP), // I bit is 1
-            new(0x0ff0_f090, 0x0150_0000, &ARM_CMP), // I bit is 0, bit[7] is 0 and bit[4] is 0
-            new(0x0ff0_f090, 0x0150_0080, &ARM_CMP), // I bit is 0, bit[7] is 1 and bit[4] is 0
-            new(0x0ff0_f090, 0x0150_0010, &ARM_CMP), // I bit is 0, bit[7] is 0 and bit[4] is 1
-            new(0x0ff0_f000, 0x0350_f000, &ARM_CMP), // I bit is 1
-            new(0x0ff0_f090, 0x0150_f000, &ARM_CMP), // I bit is 0, bit[7] is 0 and bit[4] is 0
-            new(0x0ff0_f090, 0x0150_f080, &ARM_CMP), // I bit is 0, bit[7] is 1 and bit[4] is 0
-            new(0x0ff0_f090, 0x0150_f010, &ARM_CMP), // I bit is 0, bit[7] is 0 and bit[4] is 1
-
-            // EOR
-            new(0x0fe0_0000, 0x0220_0000, &ARM_EOR), // I bit is 1
-            new(0x0fe0_0090, 0x0020_0000, &ARM_EOR), // I bit is 0, bit[7] is 0 and bit[4] is 0
-            new(0x0fe0_0090, 0x0020_0080, &ARM_EOR), // I bit is 0, bit[7] is 1 and bit[4] is 0
-            new(0x0fe0_0090, 0x0020_0010, &ARM_EOR), // I bit is 0, bit[7] is 0 and bit[4] is 1
-
-            // LDM
-            new(0x0e50_0000, 0x0810_0000, &ARM_LDM1),
-            new(0x0e50_8000, 0x0850_0000, &ARM_LDM2),
-            //new(0x0e50_8000, 0x0850_8000, &ARM_LDM3),
-
-            // LDR
-            new(0x0c50_0000, 0x0410_0000, &ARM_LDR),
-
-            // LDRB
-            new(0x0c50_0000, 0x0450_0000, &ARM_LDRB),
-
-            // LDRH
-            new(0x0e10_00f0, 0x0010_00b0, &ARM_LDRH),
-
-            // LDRSB
-            new(0x0e10_00f0, 0x0010_00d0, &ARM_LDRSB),
-
-            // LDRSH
-            new(0x0e10_00f0, 0x0010_00f0, &ARM_LDRSH),
-
-            // MLA
-            new(0x0fe0_00f0, 0x0020_0090, &ARM_MLA),
-
-            // MOV
-            new(0x0fef_0000, 0x03a0_0000, &ARM_MOV), // I bit is 1
-            new(0x0fef_0090, 0x01a0_0000, &ARM_MOV), // I bit is 0, bit[7] is 0 and bit[4] is 0
-            new(0x0fef_0090, 0x01a0_0080, &ARM_MOV), // I bit is 0, bit[7] is 1 and bit[4] is 0
-            new(0x0fef_0090, 0x01a0_0010, &ARM_MOV), // I bit is 0, bit[7] is 0 and bit[4] is 1
-
-            // MRS
-            new(0x0fbf_0fff, 0x010f_0000, &ARM_MRS),
-
-            // MSR
-            new(0x0fb0_f000, 0x0320_f000, &ARM_MSR), // Immediate operand
-            new(0x0fb0_fff0, 0x0120_f000, &ARM_MSR), // Register operand
-
-            // MUL
-            new(0x0fe0_f0f0, 0x0000_0090, &ARM_MUL),
-
-            // MVN
-            new(0x0fef_0000, 0x03e0_0000, &ARM_MVN), // I bit is 1
-            new(0x0fef_0090, 0x01e0_0000, &ARM_MVN), // I bit is 0, bit[7] is 0 and bit[4] is 0
-            new(0x0fef_0090, 0x01e0_0080, &ARM_MVN), // I bit is 0, bit[7] is 1 and bit[4] is 0
-            new(0x0fef_0090, 0x01e0_0010, &ARM_MVN), // I bit is 0, bit[7] is 0 and bit[4] is 1
-
-            // ORR
-            new(0x0fe0_0000, 0x0380_0000, &ARM_ORR), // I bit is 1
-            new(0x0fe0_0090, 0x0180_0000, &ARM_ORR), // I bit is 0, bit[7] is 0 and bit[4] is 0
-            new(0x0fe0_0090, 0x0180_0080, &ARM_ORR), // I bit is 0, bit[7] is 1 and bit[4] is 0
-            new(0x0fe0_0090, 0x0180_0010, &ARM_ORR), // I bit is 0, bit[7] is 0 and bit[4] is 1
-
-            // RSB
-            new(0x0fe0_0000, 0x0260_0000, &ARM_RSB), // I bit is 1
-            new(0x0fe0_0090, 0x0060_0000, &ARM_RSB), // I bit is 0, bit[7] is 0 and bit[4] is 0
-            new(0x0fe0_0090, 0x0060_0080, &ARM_RSB), // I bit is 0, bit[7] is 1 and bit[4] is 0
-            new(0x0fe0_0090, 0x0060_0010, &ARM_RSB), // I bit is 0, bit[7] is 0 and bit[4] is 1
-
-            // RSC
-            new(0x0fe0_0000, 0x02e0_0000, &ARM_RSC), // I bit is 1
-            new(0x0fe0_0090, 0x00e0_0000, &ARM_RSC), // I bit is 0, bit[7] is 0 and bit[4] is 0
-            new(0x0fe0_0090, 0x00e0_0080, &ARM_RSC), // I bit is 0, bit[7] is 1 and bit[4] is 0
-            new(0x0fe0_0090, 0x00e0_0010, &ARM_RSC), // I bit is 0, bit[7] is 0 and bit[4] is 1
-
-            // SBC
-            new(0x0fe0_0000, 0x02c0_0000, &ARM_SBC), // I bit is 1
-            new(0x0fe0_0090, 0x00c0_0000, &ARM_SBC), // I bit is 0, bit[7] is 0 and bit[4] is 0
-            new(0x0fe0_0090, 0x00c0_0080, &ARM_SBC), // I bit is 0, bit[7] is 1 and bit[4] is 0
-            new(0x0fe0_0090, 0x00c0_0010, &ARM_SBC), // I bit is 0, bit[7] is 0 and bit[4] is 1
-
-            // SMLAL
-            new(0x0fe0_00f0, 0x00e0_0090, &ARM_SMLAL),
-
-            // SMULL
-            new(0x0fe0_00f0, 0x00c0_0090, &ARM_SMULL),
-
-            // STM
-            new(0x0e50_0000, 0x0800_0000, &ARM_STM1),
-            new(0x0e70_0000, 0x0840_0000, &ARM_STM2),
-
-            // STR
-            new(0x0c50_0000, 0x0400_0000, &ARM_STR),
-
-            // STRB
-            new(0x0c50_0000, 0x0440_0000, &ARM_STRB),
-
-            // STRH
-            new(0x0e10_00f0, 0x0000_00b0, &ARM_STRH),
-
-            // SUB
-            new(0x0fe0_0000, 0x0240_0000, &ARM_SUB), // I bit is 1
-            new(0x0fe0_0090, 0x0040_0000, &ARM_SUB), // I bit is 0, bit[7] is 0 and bit[4] is 0
-            new(0x0fe0_0090, 0x0040_0080, &ARM_SUB), // I bit is 0, bit[7] is 1 and bit[4] is 0
-            new(0x0fe0_0090, 0x0040_0010, &ARM_SUB), // I bit is 0, bit[7] is 0 and bit[4] is 1
-
-            // SWI
-            new(0x0f00_0000, 0x0f00_0000, &ARM_SWI),
-
-            // SWP
-            new(0x0ff0_0ff0, 0x0100_0090, &ARM_SWP),
-
-            // SWPB
-            new(0x0ff0_0ff0, 0x0140_0090, &ARM_SWPB),
-
-            // TEQ
-            new(0x0ff0_f000, 0x0330_0000, &ARM_TEQ), // I bit is 1
-            new(0x0ff0_f090, 0x0130_0000, &ARM_TEQ), // I bit is 0, bit[7] is 0 and bit[4] is 0
-            new(0x0ff0_f090, 0x0130_0080, &ARM_TEQ), // I bit is 0, bit[7] is 1 and bit[4] is 0
-            new(0x0ff0_f090, 0x0130_0010, &ARM_TEQ), // I bit is 0, bit[7] is 0 and bit[4] is 1
-            new(0x0ff0_f000, 0x0330_f000, &ARM_TEQ), // I bit is 1
-            new(0x0ff0_f090, 0x0130_f000, &ARM_TEQ), // I bit is 0, bit[7] is 0 and bit[4] is 0
-            new(0x0ff0_f090, 0x0130_f080, &ARM_TEQ), // I bit is 0, bit[7] is 1 and bit[4] is 0
-            new(0x0ff0_f090, 0x0130_f010, &ARM_TEQ), // I bit is 0, bit[7] is 0 and bit[4] is 1
-
-            // TST
-            new(0x0ff0_f000, 0x0310_0000, &ARM_TST), // I bit is 1
-            new(0x0ff0_f090, 0x0110_0000, &ARM_TST), // I bit is 0, bit[7] is 0 and bit[4] is 0
-            new(0x0ff0_f090, 0x0110_0080, &ARM_TST), // I bit is 0, bit[7] is 1 and bit[4] is 0
-            new(0x0ff0_f090, 0x0110_0010, &ARM_TST), // I bit is 0, bit[7] is 0 and bit[4] is 1
-            new(0x0ff0_f000, 0x0310_f000, &ARM_TST), // I bit is 1
-            new(0x0ff0_f090, 0x0110_f000, &ARM_TST), // I bit is 0, bit[7] is 0 and bit[4] is 0
-            new(0x0ff0_f090, 0x0110_f080, &ARM_TST), // I bit is 0, bit[7] is 1 and bit[4] is 0
-            new(0x0ff0_f090, 0x0110_f010, &ARM_TST), // I bit is 0, bit[7] is 0 and bit[4] is 1
-
-            // UMLAL
-            new(0x0fe0_00f0, 0x00a0_0090, &ARM_UMLAL),
-
-            // UMULL
-            new(0x0fe0_00f0, 0x0080_0090, &ARM_UMULL),
-        };
-
         private unsafe readonly delegate*<Core, UInt32, void>[] ARM_InstructionLUT = new delegate*<Core, UInt32, void>[1 << 12];
 
         private static UInt32 ARM_InstructionLUTHash(UInt32 value)
@@ -219,8 +28,199 @@ namespace Iris.Emulation.CPU
             return ((value >> 16) & 0xff0) | ((value >> 4) & 0x00f);
         }
 
-        private void ARM_InitInstructionLUT()
+        private unsafe void ARM_InitInstructionLUT()
         {
+            ARM_InstructionListEntry[] ARM_InstructionList = new ARM_InstructionListEntry[]
+            {
+                // ADC
+                new(0x0fe0_0000, 0x02a0_0000, &ARM_ADC), // I bit is 1
+                new(0x0fe0_0090, 0x00a0_0000, &ARM_ADC), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x00a0_0080, &ARM_ADC), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x00a0_0010, &ARM_ADC), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
+                // ADD
+                new(0x0fe0_0000, 0x0280_0000, &ARM_ADD), // I bit is 1
+                new(0x0fe0_0090, 0x0080_0000, &ARM_ADD), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x0080_0080, &ARM_ADD), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x0080_0010, &ARM_ADD), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
+                // AND
+                new(0x0fe0_0000, 0x0200_0000, &ARM_AND), // I bit is 1
+                new(0x0fe0_0090, 0x0000_0000, &ARM_AND), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x0000_0080, &ARM_AND), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x0000_0010, &ARM_AND), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
+                // B
+                new(0x0f00_0000, 0x0a00_0000, &ARM_B),
+
+                // BL
+                new(0x0f00_0000, 0x0b00_0000, &ARM_BL),
+
+                // BIC
+                new(0x0fe0_0000, 0x03c0_0000, &ARM_BIC), // I bit is 1
+                new(0x0fe0_0090, 0x01c0_0000, &ARM_BIC), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x01c0_0080, &ARM_BIC), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x01c0_0010, &ARM_BIC), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
+                // BX
+                new(0x0fff_fff0, 0x012f_ff10, &ARM_BX),
+
+                // CMN
+                new(0x0ff0_f000, 0x0370_0000, &ARM_CMN), // I bit is 1
+                new(0x0ff0_f090, 0x0170_0000, &ARM_CMN), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0ff0_f090, 0x0170_0080, &ARM_CMN), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0ff0_f090, 0x0170_0010, &ARM_CMN), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0ff0_f000, 0x0370_f000, &ARM_CMN), // I bit is 1
+                new(0x0ff0_f090, 0x0170_f000, &ARM_CMN), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0ff0_f090, 0x0170_f080, &ARM_CMN), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0ff0_f090, 0x0170_f010, &ARM_CMN), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
+                // CMP
+                new(0x0ff0_f000, 0x0350_0000, &ARM_CMP), // I bit is 1
+                new(0x0ff0_f090, 0x0150_0000, &ARM_CMP), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0ff0_f090, 0x0150_0080, &ARM_CMP), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0ff0_f090, 0x0150_0010, &ARM_CMP), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0ff0_f000, 0x0350_f000, &ARM_CMP), // I bit is 1
+                new(0x0ff0_f090, 0x0150_f000, &ARM_CMP), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0ff0_f090, 0x0150_f080, &ARM_CMP), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0ff0_f090, 0x0150_f010, &ARM_CMP), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
+                // EOR
+                new(0x0fe0_0000, 0x0220_0000, &ARM_EOR), // I bit is 1
+                new(0x0fe0_0090, 0x0020_0000, &ARM_EOR), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x0020_0080, &ARM_EOR), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x0020_0010, &ARM_EOR), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
+                // LDM
+                new(0x0e50_0000, 0x0810_0000, &ARM_LDM1),
+                new(0x0e50_8000, 0x0850_0000, &ARM_LDM2),
+                //new(0x0e50_8000, 0x0850_8000, &ARM_LDM3),
+
+                // LDR
+                new(0x0c50_0000, 0x0410_0000, &ARM_LDR),
+
+                // LDRB
+                new(0x0c50_0000, 0x0450_0000, &ARM_LDRB),
+
+                // LDRH
+                new(0x0e10_00f0, 0x0010_00b0, &ARM_LDRH),
+
+                // LDRSB
+                new(0x0e10_00f0, 0x0010_00d0, &ARM_LDRSB),
+
+                // LDRSH
+                new(0x0e10_00f0, 0x0010_00f0, &ARM_LDRSH),
+
+                // MLA
+                new(0x0fe0_00f0, 0x0020_0090, &ARM_MLA),
+
+                // MOV
+                new(0x0fef_0000, 0x03a0_0000, &ARM_MOV), // I bit is 1
+                new(0x0fef_0090, 0x01a0_0000, &ARM_MOV), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fef_0090, 0x01a0_0080, &ARM_MOV), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fef_0090, 0x01a0_0010, &ARM_MOV), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
+                // MRS
+                new(0x0fbf_0fff, 0x010f_0000, &ARM_MRS),
+
+                // MSR
+                new(0x0fb0_f000, 0x0320_f000, &ARM_MSR), // Immediate operand
+                new(0x0fb0_fff0, 0x0120_f000, &ARM_MSR), // Register operand
+
+                // MUL
+                new(0x0fe0_f0f0, 0x0000_0090, &ARM_MUL),
+
+                // MVN
+                new(0x0fef_0000, 0x03e0_0000, &ARM_MVN), // I bit is 1
+                new(0x0fef_0090, 0x01e0_0000, &ARM_MVN), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fef_0090, 0x01e0_0080, &ARM_MVN), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fef_0090, 0x01e0_0010, &ARM_MVN), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
+                // ORR
+                new(0x0fe0_0000, 0x0380_0000, &ARM_ORR), // I bit is 1
+                new(0x0fe0_0090, 0x0180_0000, &ARM_ORR), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x0180_0080, &ARM_ORR), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x0180_0010, &ARM_ORR), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
+                // RSB
+                new(0x0fe0_0000, 0x0260_0000, &ARM_RSB), // I bit is 1
+                new(0x0fe0_0090, 0x0060_0000, &ARM_RSB), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x0060_0080, &ARM_RSB), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x0060_0010, &ARM_RSB), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
+                // RSC
+                new(0x0fe0_0000, 0x02e0_0000, &ARM_RSC), // I bit is 1
+                new(0x0fe0_0090, 0x00e0_0000, &ARM_RSC), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x00e0_0080, &ARM_RSC), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x00e0_0010, &ARM_RSC), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
+                // SBC
+                new(0x0fe0_0000, 0x02c0_0000, &ARM_SBC), // I bit is 1
+                new(0x0fe0_0090, 0x00c0_0000, &ARM_SBC), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x00c0_0080, &ARM_SBC), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x00c0_0010, &ARM_SBC), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
+                // SMLAL
+                new(0x0fe0_00f0, 0x00e0_0090, &ARM_SMLAL),
+
+                // SMULL
+                new(0x0fe0_00f0, 0x00c0_0090, &ARM_SMULL),
+
+                // STM
+                new(0x0e50_0000, 0x0800_0000, &ARM_STM1),
+                new(0x0e70_0000, 0x0840_0000, &ARM_STM2),
+
+                // STR
+                new(0x0c50_0000, 0x0400_0000, &ARM_STR),
+
+                // STRB
+                new(0x0c50_0000, 0x0440_0000, &ARM_STRB),
+
+                // STRH
+                new(0x0e10_00f0, 0x0000_00b0, &ARM_STRH),
+
+                // SUB
+                new(0x0fe0_0000, 0x0240_0000, &ARM_SUB), // I bit is 1
+                new(0x0fe0_0090, 0x0040_0000, &ARM_SUB), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x0040_0080, &ARM_SUB), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x0040_0010, &ARM_SUB), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
+                // SWI
+                new(0x0f00_0000, 0x0f00_0000, &ARM_SWI),
+
+                // SWP
+                new(0x0ff0_0ff0, 0x0100_0090, &ARM_SWP),
+
+                // SWPB
+                new(0x0ff0_0ff0, 0x0140_0090, &ARM_SWPB),
+
+                // TEQ
+                new(0x0ff0_f000, 0x0330_0000, &ARM_TEQ), // I bit is 1
+                new(0x0ff0_f090, 0x0130_0000, &ARM_TEQ), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0ff0_f090, 0x0130_0080, &ARM_TEQ), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0ff0_f090, 0x0130_0010, &ARM_TEQ), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0ff0_f000, 0x0330_f000, &ARM_TEQ), // I bit is 1
+                new(0x0ff0_f090, 0x0130_f000, &ARM_TEQ), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0ff0_f090, 0x0130_f080, &ARM_TEQ), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0ff0_f090, 0x0130_f010, &ARM_TEQ), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
+                // TST
+                new(0x0ff0_f000, 0x0310_0000, &ARM_TST), // I bit is 1
+                new(0x0ff0_f090, 0x0110_0000, &ARM_TST), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0ff0_f090, 0x0110_0080, &ARM_TST), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0ff0_f090, 0x0110_0010, &ARM_TST), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0ff0_f000, 0x0310_f000, &ARM_TST), // I bit is 1
+                new(0x0ff0_f090, 0x0110_f000, &ARM_TST), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0ff0_f090, 0x0110_f080, &ARM_TST), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0ff0_f090, 0x0110_f010, &ARM_TST), // I bit is 0, bit[7] is 0 and bit[4] is 1
+
+                // UMLAL
+                new(0x0fe0_00f0, 0x00a0_0090, &ARM_UMLAL),
+
+                // UMULL
+                new(0x0fe0_00f0, 0x0080_0090, &ARM_UMULL),
+            };
+
             for (UInt64 instruction = 0; instruction < (UInt64)ARM_InstructionLUT.LongLength; ++instruction)
             {
                 bool unknownInstruction = true;
@@ -229,23 +229,14 @@ namespace Iris.Emulation.CPU
                 {
                     if ((instruction & ARM_InstructionLUTHash(entry.Mask)) == ARM_InstructionLUTHash(entry.Expected))
                     {
-                        unsafe
-                        {
-                            ARM_InstructionLUT[instruction] = entry.Handler;
-                        }
-
+                        ARM_InstructionLUT[instruction] = entry.Handler;
                         unknownInstruction = false;
                         break;
                     }
                 }
 
                 if (unknownInstruction)
-                {
-                    unsafe
-                    {
-                        ARM_InstructionLUT[instruction] = &ARM_UNKNOWN;
-                    }
-                }
+                    ARM_InstructionLUT[instruction] = &ARM_UNKNOWN;
             }
         }
 

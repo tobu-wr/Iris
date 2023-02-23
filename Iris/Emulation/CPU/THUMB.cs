@@ -21,153 +21,6 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static unsafe readonly THUMB_InstructionListEntry[] THUMB_InstructionList = new THUMB_InstructionListEntry[]
-        {
-            // ADC
-            new(0xffc0, 0x4140, &THUMB_ADC),
-
-            // ADD
-            new(0xfe00, 0x1c00, &THUMB_ADD1),
-            new(0xf800, 0x3000, &THUMB_ADD2),
-            new(0xfe00, 0x1800, &THUMB_ADD3),
-            new(0xff00, 0x4400, &THUMB_ADD4),
-            new(0xf800, 0xa000, &THUMB_ADD5),
-            new(0xf800, 0xa800, &THUMB_ADD6),
-            new(0xff80, 0xb000, &THUMB_ADD7),
-
-            // AND
-            new(0xffc0, 0x4000, &THUMB_AND),
-
-            // ASR
-            new(0xf800, 0x1000, &THUMB_ASR1),
-            new(0xffc0, 0x4100, &THUMB_ASR2),
-
-            // B
-            new(0xff00, 0xd000, &THUMB_B1), // condition field 0b0000
-            new(0xff00, 0xd100, &THUMB_B1), // condition field 0b0001
-            new(0xff00, 0xd200, &THUMB_B1), // condition field 0b0010
-            new(0xff00, 0xd300, &THUMB_B1), // condition field 0b0011
-            new(0xff00, 0xd400, &THUMB_B1), // condition field 0b0100
-            new(0xff00, 0xd500, &THUMB_B1), // condition field 0b0101
-            new(0xff00, 0xd600, &THUMB_B1), // condition field 0b0110
-            new(0xff00, 0xd700, &THUMB_B1), // condition field 0b0111
-            new(0xff00, 0xd800, &THUMB_B1), // condition field 0b1000
-            new(0xff00, 0xd900, &THUMB_B1), // condition field 0b1001
-            new(0xff00, 0xda00, &THUMB_B1), // condition field 0b1010
-            new(0xff00, 0xdb00, &THUMB_B1), // condition field 0b1011
-            new(0xff00, 0xdc00, &THUMB_B1), // condition field 0b1100
-            new(0xff00, 0xdd00, &THUMB_B1), // condition field 0b1101
-            new(0xf800, 0xe000, &THUMB_B2),
-
-            // BIC
-            new(0xffc0, 0x4380, &THUMB_BIC),
-
-            // BL
-            new(0xf000, 0xf000, &THUMB_BL),
-
-            // BX
-            new(0xff80, 0x4700, &THUMB_BX),
-
-            // CMN
-            new(0xffc0, 0x42c0, &THUMB_CMN),
-
-            // CMP
-            new(0xf800, 0x2800, &THUMB_CMP1),
-            new(0xffc0, 0x4280, &THUMB_CMP2),
-            new(0xff00, 0x4500, &THUMB_CMP3),
-
-            // EOR
-            new(0xffc0, 0x4040, &THUMB_EOR),
-
-            // LDMIA
-            new(0xf800, 0xc800, &THUMB_LDMIA),
-
-            // LDR
-            new(0xf800, 0x6800, &THUMB_LDR1),
-            new(0xfe00, 0x5800, &THUMB_LDR2),
-            new(0xf800, 0x4800, &THUMB_LDR3),
-            new(0xf800, 0x9800, &THUMB_LDR4),
-
-            // LDRB
-            new(0xf800, 0x7800, &THUMB_LDRB1),
-            new(0xfe00, 0x5c00, &THUMB_LDRB2),
-
-            // LDRH
-            new(0xf800, 0x8800, &THUMB_LDRH1),
-            new(0xfe00, 0x5a00, &THUMB_LDRH2),
-
-            // LDRSB
-            new(0xfe00, 0x5600, &THUMB_LDRSB),
-
-            // LDRSH
-            new(0xfe00, 0x5e00, &THUMB_LDRSH),
-
-            // LSL
-            new(0xf800, 0x0000, &THUMB_LSL1),
-            new(0xffc0, 0x4080, &THUMB_LSL2),
-
-            // LSR
-            new(0xf800, 0x0800, &THUMB_LSR1),
-            new(0xffc0, 0x40c0, &THUMB_LSR2),
-
-            // MOV
-            new(0xf800, 0x2000, &THUMB_MOV1),
-            //new(0xffc0, 0x1c00, &THUMB_MOV2),
-            new(0xff00, 0x4600, &THUMB_MOV3),
-
-            // MUL
-            new(0xffc0, 0x4340, &THUMB_MUL),
-
-            // MVN
-            new(0xffc0, 0x43c0, &THUMB_MVN),
-
-            // NEG
-            new(0xffc0, 0x4240, &THUMB_NEG),
-
-            // ORR
-            new(0xffc0, 0x4300, &THUMB_ORR),
-
-            // POP
-            new(0xfe00, 0xbc00, &THUMB_POP),
-
-            // PUSH
-            new(0xfe00, 0xb400, &THUMB_PUSH),
-
-            // ROR
-            new(0xffc0, 0x41c0, &THUMB_ROR),
-
-            // SBC
-            new(0xffc0, 0x4180, &THUMB_SBC),
-
-            // STMIA
-            new(0xf800, 0xc000, &THUMB_STMIA),
-
-            // STR
-            new(0xf800, 0x6000, &THUMB_STR1),
-            new(0xfe00, 0x5000, &THUMB_STR2),
-            new(0xf800, 0x9000, &THUMB_STR3),
-
-            // STRB
-            new(0xf800, 0x7000, &THUMB_STRB1),
-            new(0xfe00, 0x5400, &THUMB_STRB2),
-
-            // STRH
-            new(0xf800, 0x8000, &THUMB_STRH1),
-            new(0xfe00, 0x5200, &THUMB_STRH2),
-
-            // SUB
-            new(0xfe00, 0x1e00, &THUMB_SUB1),
-            new(0xf800, 0x3800, &THUMB_SUB2),
-            new(0xfe00, 0x1a00, &THUMB_SUB3),
-            new(0xff80, 0xb080, &THUMB_SUB4),
-
-            // SWI
-            new(0xff00, 0xdf00, &THUMB_SWI),
-
-            // TST
-            new(0xffc0, 0x4200, &THUMB_TST),
-        };
-
         private unsafe readonly delegate*<Core, UInt16, void>[] THUMB_InstructionLUT = new delegate*<Core, UInt16, void>[1 << 10];
 
         private static UInt16 THUMB_InstructionLUTHash(UInt16 value)
@@ -175,8 +28,155 @@ namespace Iris.Emulation.CPU
             return (UInt16)(value >> 6);
         }
 
-        private void THUMB_InitInstructionLUT()
+        private unsafe void THUMB_InitInstructionLUT()
         {
+            THUMB_InstructionListEntry[] THUMB_InstructionList = new THUMB_InstructionListEntry[]
+            {
+                // ADC
+                new(0xffc0, 0x4140, &THUMB_ADC),
+
+                // ADD
+                new(0xfe00, 0x1c00, &THUMB_ADD1),
+                new(0xf800, 0x3000, &THUMB_ADD2),
+                new(0xfe00, 0x1800, &THUMB_ADD3),
+                new(0xff00, 0x4400, &THUMB_ADD4),
+                new(0xf800, 0xa000, &THUMB_ADD5),
+                new(0xf800, 0xa800, &THUMB_ADD6),
+                new(0xff80, 0xb000, &THUMB_ADD7),
+
+                // AND
+                new(0xffc0, 0x4000, &THUMB_AND),
+
+                // ASR
+                new(0xf800, 0x1000, &THUMB_ASR1),
+                new(0xffc0, 0x4100, &THUMB_ASR2),
+
+                // B
+                new(0xff00, 0xd000, &THUMB_B1), // condition field 0b0000
+                new(0xff00, 0xd100, &THUMB_B1), // condition field 0b0001
+                new(0xff00, 0xd200, &THUMB_B1), // condition field 0b0010
+                new(0xff00, 0xd300, &THUMB_B1), // condition field 0b0011
+                new(0xff00, 0xd400, &THUMB_B1), // condition field 0b0100
+                new(0xff00, 0xd500, &THUMB_B1), // condition field 0b0101
+                new(0xff00, 0xd600, &THUMB_B1), // condition field 0b0110
+                new(0xff00, 0xd700, &THUMB_B1), // condition field 0b0111
+                new(0xff00, 0xd800, &THUMB_B1), // condition field 0b1000
+                new(0xff00, 0xd900, &THUMB_B1), // condition field 0b1001
+                new(0xff00, 0xda00, &THUMB_B1), // condition field 0b1010
+                new(0xff00, 0xdb00, &THUMB_B1), // condition field 0b1011
+                new(0xff00, 0xdc00, &THUMB_B1), // condition field 0b1100
+                new(0xff00, 0xdd00, &THUMB_B1), // condition field 0b1101
+                new(0xf800, 0xe000, &THUMB_B2),
+
+                // BIC
+                new(0xffc0, 0x4380, &THUMB_BIC),
+
+                // BL
+                new(0xf000, 0xf000, &THUMB_BL),
+
+                // BX
+                new(0xff80, 0x4700, &THUMB_BX),
+
+                // CMN
+                new(0xffc0, 0x42c0, &THUMB_CMN),
+
+                // CMP
+                new(0xf800, 0x2800, &THUMB_CMP1),
+                new(0xffc0, 0x4280, &THUMB_CMP2),
+                new(0xff00, 0x4500, &THUMB_CMP3),
+
+                // EOR
+                new(0xffc0, 0x4040, &THUMB_EOR),
+
+                // LDMIA
+                new(0xf800, 0xc800, &THUMB_LDMIA),
+
+                // LDR
+                new(0xf800, 0x6800, &THUMB_LDR1),
+                new(0xfe00, 0x5800, &THUMB_LDR2),
+                new(0xf800, 0x4800, &THUMB_LDR3),
+                new(0xf800, 0x9800, &THUMB_LDR4),
+
+                // LDRB
+                new(0xf800, 0x7800, &THUMB_LDRB1),
+                new(0xfe00, 0x5c00, &THUMB_LDRB2),
+
+                // LDRH
+                new(0xf800, 0x8800, &THUMB_LDRH1),
+                new(0xfe00, 0x5a00, &THUMB_LDRH2),
+
+                // LDRSB
+                new(0xfe00, 0x5600, &THUMB_LDRSB),
+
+                // LDRSH
+                new(0xfe00, 0x5e00, &THUMB_LDRSH),
+
+                // LSL
+                new(0xf800, 0x0000, &THUMB_LSL1),
+                new(0xffc0, 0x4080, &THUMB_LSL2),
+
+                // LSR
+                new(0xf800, 0x0800, &THUMB_LSR1),
+                new(0xffc0, 0x40c0, &THUMB_LSR2),
+
+                // MOV
+                new(0xf800, 0x2000, &THUMB_MOV1),
+                //new(0xffc0, 0x1c00, &THUMB_MOV2),
+                new(0xff00, 0x4600, &THUMB_MOV3),
+
+                // MUL
+                new(0xffc0, 0x4340, &THUMB_MUL),
+
+                // MVN
+                new(0xffc0, 0x43c0, &THUMB_MVN),
+
+                // NEG
+                new(0xffc0, 0x4240, &THUMB_NEG),
+
+                // ORR
+                new(0xffc0, 0x4300, &THUMB_ORR),
+
+                // POP
+                new(0xfe00, 0xbc00, &THUMB_POP),
+
+                // PUSH
+                new(0xfe00, 0xb400, &THUMB_PUSH),
+
+                // ROR
+                new(0xffc0, 0x41c0, &THUMB_ROR),
+
+                // SBC
+                new(0xffc0, 0x4180, &THUMB_SBC),
+
+                // STMIA
+                new(0xf800, 0xc000, &THUMB_STMIA),
+
+                // STR
+                new(0xf800, 0x6000, &THUMB_STR1),
+                new(0xfe00, 0x5000, &THUMB_STR2),
+                new(0xf800, 0x9000, &THUMB_STR3),
+
+                // STRB
+                new(0xf800, 0x7000, &THUMB_STRB1),
+                new(0xfe00, 0x5400, &THUMB_STRB2),
+
+                // STRH
+                new(0xf800, 0x8000, &THUMB_STRH1),
+                new(0xfe00, 0x5200, &THUMB_STRH2),
+
+                // SUB
+                new(0xfe00, 0x1e00, &THUMB_SUB1),
+                new(0xf800, 0x3800, &THUMB_SUB2),
+                new(0xfe00, 0x1a00, &THUMB_SUB3),
+                new(0xff80, 0xb080, &THUMB_SUB4),
+
+                // SWI
+                new(0xff00, 0xdf00, &THUMB_SWI),
+
+                // TST
+                new(0xffc0, 0x4200, &THUMB_TST),
+            };
+
             for (UInt32 instruction = 0; instruction < THUMB_InstructionLUT.Length; ++instruction)
             {
                 bool unknownInstruction = true;
@@ -185,23 +185,14 @@ namespace Iris.Emulation.CPU
                 {
                     if ((instruction & THUMB_InstructionLUTHash(entry.Mask)) == THUMB_InstructionLUTHash(entry.Expected))
                     {
-                        unsafe
-                        {
-                            THUMB_InstructionLUT[instruction] = entry.Handler;
-                        }
-
+                        THUMB_InstructionLUT[instruction] = entry.Handler;
                         unknownInstruction = false;
                         break;
                     }
                 }
 
                 if (unknownInstruction)
-                {
-                    unsafe
-                    {
-                        THUMB_InstructionLUT[instruction] = &THUMB_UNKNOWN;
-                    }
-                }
+                    THUMB_InstructionLUT[instruction] = &THUMB_UNKNOWN;
             }
         }
 
