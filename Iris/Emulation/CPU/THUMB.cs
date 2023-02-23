@@ -168,7 +168,12 @@ namespace Iris.Emulation.CPU
             new(0xffc0, 0x4200, &THUMB_TST),
         };
 
-        private unsafe readonly delegate*<Core, UInt16, void>[] THUMB_InstructionLUT = new delegate*<Core, UInt16, void>[1 << 16];
+        private unsafe readonly delegate*<Core, UInt16, void>[] THUMB_InstructionLUT = new delegate*<Core, UInt16, void>[1 << 10];
+
+        private static UInt16 THUMB_InstructionLUTHash(UInt16 value)
+        {
+            return (UInt16)(value >> 6);
+        }
 
         private void THUMB_InitInstructionLUT()
         {
@@ -178,7 +183,7 @@ namespace Iris.Emulation.CPU
 
                 foreach (THUMB_InstructionListEntry entry in THUMB_InstructionList)
                 {
-                    if ((instruction & entry.Mask) == entry.Expected)
+                    if ((instruction & THUMB_InstructionLUTHash(entry.Mask)) == THUMB_InstructionLUTHash(entry.Expected))
                     {
                         unsafe
                         {
@@ -208,7 +213,7 @@ namespace Iris.Emulation.CPU
 
             unsafe
             {
-                THUMB_InstructionLUT[instruction](this, instruction);
+                THUMB_InstructionLUT[THUMB_InstructionLUTHash(instruction)](this, instruction);
             }
         }
 
