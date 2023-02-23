@@ -168,7 +168,7 @@ namespace Iris.Emulation.CPU
             new(0xffc0, 0x4200, &THUMB_TST),
         };
 
-        private unsafe readonly delegate*<Core, UInt16, void>[] THUMB_InstructionLookupTable = new delegate*<Core, UInt16, void>[UInt16.MaxValue + 1];
+        private unsafe readonly delegate*<Core, UInt16, void>[] THUMB_InstructionLookupTable = new delegate*<Core, UInt16, void>[1 << 16];
 
         private void THUMB_InitInstructionLookupTable()
         {
