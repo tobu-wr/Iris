@@ -80,7 +80,8 @@
             _architecture = architecture;
             _callbackInterface = callbackInterface;
 
-            THUMB_InitInstructionLookupTable();
+            ARM_InitInstructionLUT();
+            THUMB_InitInstructionLUT();
         }
 
         internal void Step()

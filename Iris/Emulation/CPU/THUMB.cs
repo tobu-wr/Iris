@@ -168,11 +168,11 @@ namespace Iris.Emulation.CPU
             new(0xffc0, 0x4200, &THUMB_TST),
         };
 
-        private unsafe readonly delegate*<Core, UInt16, void>[] THUMB_InstructionLookupTable = new delegate*<Core, UInt16, void>[1 << 16];
+        private unsafe readonly delegate*<Core, UInt16, void>[] THUMB_InstructionLUT = new delegate*<Core, UInt16, void>[1 << 16];
 
-        private void THUMB_InitInstructionLookupTable()
+        private void THUMB_InitInstructionLUT()
         {
-            for (UInt32 instruction = 0; instruction < THUMB_InstructionLookupTable.Length; ++instruction)
+            for (UInt32 instruction = 0; instruction < THUMB_InstructionLUT.Length; ++instruction)
             {
                 bool unknownInstruction = true;
 
@@ -182,7 +182,7 @@ namespace Iris.Emulation.CPU
                     {
                         unsafe
                         {
-                            THUMB_InstructionLookupTable[instruction] = entry.Handler;
+                            THUMB_InstructionLUT[instruction] = entry.Handler;
                         }
 
                         unknownInstruction = false;
@@ -194,7 +194,7 @@ namespace Iris.Emulation.CPU
                 {
                     unsafe
                     {
-                        THUMB_InstructionLookupTable[instruction] = &THUMB_UNKNOWN;
+                        THUMB_InstructionLUT[instruction] = &THUMB_UNKNOWN;
                     }
                 }
             }
@@ -208,7 +208,7 @@ namespace Iris.Emulation.CPU
 
             unsafe
             {
-                THUMB_InstructionLookupTable[instruction](this, instruction);
+                THUMB_InstructionLUT[instruction](this, instruction);
             }
         }
 
