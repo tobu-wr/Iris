@@ -212,6 +212,43 @@ namespace Iris.Emulation.CPU
             new(0x0fe0_00f0, 0x0080_0090, &ARM_UMULL),
         };
 
+        private unsafe readonly delegate*<Core, UInt32, void>[] ARM_InstructionLUT = new delegate*<Core, UInt32, void>[1 << 12];
+
+        private static UInt32 ARM_InstructionLUTHash(UInt32 value)
+        {
+            return ((value >> 16) & 0xff0) | ((value >> 4) & 0x00f);
+        }
+
+        private void ARM_InitInstructionLUT()
+        {
+            for (UInt64 instruction = 0; instruction < (UInt64)ARM_InstructionLUT.LongLength; ++instruction)
+            {
+                bool unknownInstruction = true;
+
+                foreach (ARM_InstructionListEntry entry in ARM_InstructionList)
+                {
+                    if ((instruction & ARM_InstructionLUTHash(entry.Mask)) == ARM_InstructionLUTHash(entry.Expected))
+                    {
+                        unsafe
+                        {
+                            ARM_InstructionLUT[instruction] = entry.Handler;
+                        }
+
+                        unknownInstruction = false;
+                        break;
+                    }
+                }
+
+                if (unknownInstruction)
+                {
+                    unsafe
+                    {
+                        ARM_InstructionLUT[instruction] = &ARM_UNKNOWN;
+                    }
+                }
+            }
+        }
+
         private void ARM_Step()
         {
             UInt32 instruction = _callbackInterface.ReadMemory32(NextInstructionAddress);
@@ -223,19 +260,10 @@ namespace Iris.Emulation.CPU
             {
                 Reg[PC] = NextInstructionAddress + 4;
 
-                foreach (ARM_InstructionListEntry entry in ARM_InstructionList)
+                unsafe
                 {
-                    if ((instruction & entry.Mask) == entry.Expected)
-                    {
-                        unsafe
-                        {
-                            entry.Handler(this, instruction);
-                        }
-                        return;
-                    }
+                    ARM_InstructionLUT[ARM_InstructionLUTHash(instruction)](this, instruction);
                 }
-
-                throw new Exception(string.Format("Emulation.CPU.Core: Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, NextInstructionAddress - 4));
             }
         }
 
@@ -602,6 +630,11 @@ namespace Iris.Emulation.CPU
                 ARM_SetReg(rn, value);
 
             return (startAddress, endAddress);
+        }
+
+        private static void ARM_UNKNOWN(Core cpu, UInt32 instruction)
+        {
+            throw new Exception(string.Format("Emulation.CPU.Core: Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, cpu.NextInstructionAddress - 4));
         }
 
         private static void ARM_ADC(Core cpu, UInt32 instruction)
