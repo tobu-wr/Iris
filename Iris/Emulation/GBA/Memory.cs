@@ -114,9 +114,9 @@ namespace Iris.Emulation.GBA
             Marshal.Copy(data, 0, _ROM, data.Length);
 
             int pageCount = data.Length / KB;
-            MapMemory(_ROM, pageCount, 0x0800_0000, 0x0a00_0000, MemoryFlag.AllRead | MemoryFlag.Mirrored);
-            MapMemory(_ROM, pageCount, 0x0a00_0000, 0x0c00_0000, MemoryFlag.AllRead | MemoryFlag.Mirrored);
-            MapMemory(_ROM, pageCount, 0x0c00_0000, 0x0e00_0000, MemoryFlag.AllRead | MemoryFlag.Mirrored);
+            MapMemory(_ROM, pageCount, 0x0800_0000, 0x0a00_0000, MemoryFlag.AllRead);
+            MapMemory(_ROM, pageCount, 0x0a00_0000, 0x0c00_0000, MemoryFlag.AllRead);
+            MapMemory(_ROM, pageCount, 0x0c00_0000, 0x0e00_0000, MemoryFlag.AllRead);
         }
 
         private Byte ReadMemory8(UInt32 address)
@@ -830,6 +830,10 @@ namespace Iris.Emulation.GBA
                     default:
                         throw new Exception(string.Format("Emulation.GBA.Core: Invalid write to address 0x{0:x8}", address));
                 }
+            }
+            else
+            {
+                throw new Exception(string.Format("Emulation.GBA.Core: Invalid write to address 0x{0:x8}", address));
             }
         }
 
