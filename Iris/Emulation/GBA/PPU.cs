@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Iris.Emulation.GBA
 {
@@ -110,8 +111,8 @@ namespace Iris.Emulation.GBA
                                 {
                                     unsafe
                                     {
-                                        Byte colorNo = Marshal.ReadByte(VRAM, (int)(frameBufferAddress + i));
-                                        UInt16 color = (UInt16)Marshal.ReadInt16(PaletteRAM, (int)(colorNo * 2));
+                                        Byte colorNo = Unsafe.Read<Byte>((Byte*)VRAM + (frameBufferAddress + i));
+                                        UInt16 color = Unsafe.Read<UInt16>((Byte*)PaletteRAM + (colorNo * 2));
                                         rendererFrameBuffer[i] = color;
                                     }
                                 }
