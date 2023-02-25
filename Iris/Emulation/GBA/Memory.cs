@@ -346,12 +346,36 @@ namespace Iris.Emulation.GBA
         private UInt16 ReadMemory16(UInt32 address)
         {
             address &= 0x0fff_fffe;
+
+            IntPtr page = _read16PageTable[address >> 10];
+            if (page != IntPtr.Zero)
+            {
+                unsafe
+                {
+                    // much faster than Marshal.ReadInt16
+                    return Unsafe.Read<UInt16>((Byte*)page + (address & 0x3ff));
+                }
+            }
+
+            // page fault
             return (UInt16)(ReadMemory8(address + 1) << 8 | ReadMemory8(address));
         }
 
         private UInt32 ReadMemory32(UInt32 address)
         {
             address &= 0x0fff_fffc;
+
+            IntPtr page = _read32PageTable[address >> 10];
+            if (page != IntPtr.Zero)
+            {
+                unsafe
+                {
+                    // much faster than Marshal.ReadInt32
+                    return Unsafe.Read<UInt32>((Byte*)page + (address & 0x3ff));
+                }
+            }
+
+            // page fault
             return (UInt32)(ReadMemory16(address + 2) << 16 | ReadMemory16(address));
         }
 
@@ -850,14 +874,40 @@ namespace Iris.Emulation.GBA
 
         private void WriteMemory16(UInt32 address, UInt16 value)
         {
-            address &= 0xffff_fffe;
+            address &= 0x0fff_fffe;
+
+            IntPtr page = _write16PageTable[address >> 10];
+            if (page != IntPtr.Zero)
+            {
+                unsafe
+                {
+                    // much faster than Marshal.WriteInt16
+                    Unsafe.Write<UInt16>((Byte*)page + (address & 0x3ff), value);
+                }
+                return;
+            }
+
+            // page fault
             WriteMemory8(address + 1, (Byte)(value >> 8));
             WriteMemory8(address, (Byte)value);
         }
 
         private void WriteMemory32(UInt32 address, UInt32 value)
         {
-            address &= 0xffff_fffc;
+            address &= 0x0fff_fffc;
+
+            IntPtr page = _write32PageTable[address >> 10];
+            if (page != IntPtr.Zero)
+            {
+                unsafe
+                {
+                    // much faster than Marshal.WriteInt32
+                    Unsafe.Write<UInt32>((Byte*)page + (address & 0x3ff), value);
+                }
+                return;
+            }
+
+            // page fault
             WriteMemory16(address + 2, (UInt16)(value >> 16));
             WriteMemory16(address, (UInt16)value);
         }
