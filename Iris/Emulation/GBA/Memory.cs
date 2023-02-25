@@ -85,7 +85,9 @@ namespace Iris.Emulation.GBA
 
             if (writable8 || writable16 || writable32)
             {
-                for (int offset = 0; offset < (pageCount * KB); ++offset)
+                int length = pageCount * KB;
+
+                for (int offset = 0; offset < length; ++offset)
                     Marshal.WriteByte(data, offset, 0);
             }
         }
@@ -108,7 +110,7 @@ namespace Iris.Emulation.GBA
                 Marshal.FreeHGlobal(_ROM);
 
             _ROM = Marshal.AllocHGlobal(data.Length);
-            Marshal.Copy(data, 0, (IntPtr)_ROM, data.Length);
+            Marshal.Copy(data, 0, _ROM, data.Length);
 
             int pageCount = data.Length / KB;
             MapMemory(_ROM, pageCount, 0x0800_0000, 0x0a00_0000, MemoryFlag.AllRead | MemoryFlag.Mirrored);
