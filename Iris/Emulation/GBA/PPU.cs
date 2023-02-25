@@ -1,12 +1,14 @@
-﻿namespace Iris.Emulation.GBA
+﻿using System.Runtime.InteropServices;
+
+namespace Iris.Emulation.GBA
 {
     internal sealed class PPU
     {
         private const int KB = 1024;
 
-        internal Byte[] PaletteRAM = new Byte[1 * KB];
-        internal Byte[] VRAM = new Byte[96 * KB];
-        internal Byte[] OAM = new Byte[1 * KB];
+        internal readonly IntPtr PaletteRAM = Marshal.AllocHGlobal(1 * KB);
+        internal readonly IntPtr VRAM = Marshal.AllocHGlobal(96 * KB);
+        internal readonly IntPtr OAM = Marshal.AllocHGlobal(1 * KB);
 
         internal UInt16 DISPSTAT = 0;
         internal UInt16 DISPCNT = 0;
@@ -89,6 +91,9 @@
 
                                 //_callbackInterface.DrawFrame(rendererFrameBuffer);
                             }
+
+                            UInt16[] rendererFrameBuffer = new UInt16[ScreenWidth * ScreenHeight];
+                            _callbackInterface.DrawFrame(rendererFrameBuffer);
                             break;
                         }
 
@@ -103,10 +108,12 @@
                                 UInt16[] rendererFrameBuffer = new UInt16[ScreenWidth * ScreenHeight];
                                 for (UInt32 i = 0; i < ScreenWidth * ScreenHeight; ++i)
                                 {
-                                    Byte colorNo = VRAM[frameBufferAddress + i];
-                                    UInt16 color = (UInt16)(PaletteRAM[(colorNo * 2) + 1] << 8
-                                                          | PaletteRAM[(colorNo * 2) + 0] << 0);
-                                    rendererFrameBuffer[i] = color;
+                                    unsafe
+                                    {
+                                        Byte colorNo = Marshal.ReadByte(VRAM, (int)(frameBufferAddress + i));
+                                        UInt16 color = (UInt16)Marshal.ReadInt16(PaletteRAM, (int)(colorNo * 2));
+                                        rendererFrameBuffer[i] = color;
+                                    }
                                 }
 
                                 _callbackInterface.DrawFrame(rendererFrameBuffer);

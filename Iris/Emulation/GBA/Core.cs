@@ -73,6 +73,8 @@
 
             _cpu = new(CPU.Core.Architecture.ARMv4T, cpuCallbackInterface);
             _ppu = new(ppuCallbackInterface);
+
+            InitPageTables();
         }
 
         internal void Reset()

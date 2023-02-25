@@ -1,22 +1,130 @@
-﻿namespace Iris.Emulation.GBA
+﻿using System.Runtime.InteropServices;
+
+namespace Iris.Emulation.GBA
 {
     internal sealed partial class Core
     {
+        [Flags]
+        private enum MemoryFlag
+        {
+            Read8 = 1 << 0,
+            Read16 = 1 << 1,
+            Read32 = 1 << 2,
+            Write8 = 1 << 3,
+            Write16 = 1 << 4,
+            Write32 = 1 << 5,
+            Mirrored = 1 << 6,
+
+            None = 0,
+            AllRead = Read8 | Read16 | Read32,
+            AllWrite = Write8 | Write16 | Write32,
+            All = AllRead | AllWrite | Mirrored,
+        }
+
         private const int KB = 1024;
 
-        private Byte[]? _ROM;
-        private readonly Byte[] _SRAM = new Byte[64 * KB];
-        private readonly Byte[] _eWRAM = new Byte[256 * KB];
-        private readonly Byte[] _iWRAM = new Byte[32 * KB];
+        private IntPtr _ROM = IntPtr.Zero;
+        private readonly IntPtr _SRAM = Marshal.AllocHGlobal(64 * KB);
+        private readonly IntPtr _eWRAM = Marshal.AllocHGlobal(256 * KB);
+        private readonly IntPtr _iWRAM = Marshal.AllocHGlobal(32 * KB);
+
+        private readonly IntPtr[] _read8PageTable = new IntPtr[1 << 18];
+        private readonly IntPtr[] _read16PageTable = new IntPtr[1 << 18];
+        private readonly IntPtr[] _read32PageTable = new IntPtr[1 << 18];
+        private readonly IntPtr[] _write8PageTable = new IntPtr[1 << 18];
+        private readonly IntPtr[] _write16PageTable = new IntPtr[1 << 18];
+        private readonly IntPtr[] _write32PageTable = new IntPtr[1 << 18];
+
+        private void MapMemory(IntPtr data, int pageCount, UInt32 startAddress, UInt32 endAddress, MemoryFlag flags)
+        {
+            int startTablePageIndex = (int)(startAddress >> 10);
+            int endPageTableIndex = (int)(endAddress >> 10);
+
+            bool readable8 = (flags & MemoryFlag.Read8) == MemoryFlag.Read8;
+            bool readable16 = (flags & MemoryFlag.Read16) == MemoryFlag.Read16;
+            bool readable32 = (flags & MemoryFlag.Read32) == MemoryFlag.Read32;
+            bool writable8 = (flags & MemoryFlag.Write8) == MemoryFlag.Write8;
+            bool writable16 = (flags & MemoryFlag.Write16) == MemoryFlag.Write16;
+            bool writable32 = (flags & MemoryFlag.Write32) == MemoryFlag.Write32;
+            bool mirrored = (flags & MemoryFlag.Mirrored) == MemoryFlag.Mirrored;
+
+            for (int pageTableIndex = startTablePageIndex, pageIndex = 0; pageTableIndex != endPageTableIndex; ++pageTableIndex, ++pageIndex)
+            {
+                if (pageIndex < pageCount)
+                {
+                    int pageOffset = pageIndex * KB;
+                    IntPtr page = data + pageOffset;
+                    _read8PageTable[pageTableIndex] = readable8 ? page : IntPtr.Zero;
+                    _read16PageTable[pageTableIndex] = readable16 ? page : IntPtr.Zero;
+                    _read32PageTable[pageTableIndex] = readable32 ? page : IntPtr.Zero;
+                    _write8PageTable[pageTableIndex] = writable8 ? page : IntPtr.Zero;
+                    _write16PageTable[pageTableIndex] = writable16 ? page : IntPtr.Zero;
+                    _write32PageTable[pageTableIndex] = writable32 ? page : IntPtr.Zero;
+                }
+                else if (mirrored)
+                {
+                    int pageOffset = (pageIndex % pageCount) * KB;
+                    IntPtr page = data + pageOffset;
+                    _read8PageTable[pageTableIndex] = readable8 ? page : IntPtr.Zero;
+                    _read16PageTable[pageTableIndex] = readable16 ? page : IntPtr.Zero;
+                    _read32PageTable[pageTableIndex] = readable32 ? page : IntPtr.Zero;
+                    _write8PageTable[pageTableIndex] = writable8 ? page : IntPtr.Zero;
+                    _write16PageTable[pageTableIndex] = writable16 ? page : IntPtr.Zero;
+                    _write32PageTable[pageTableIndex] = writable32 ? page : IntPtr.Zero;
+                }
+                else
+                {
+                    _read8PageTable[pageTableIndex] = IntPtr.Zero;
+                    _read16PageTable[pageTableIndex] = IntPtr.Zero;
+                    _read32PageTable[pageTableIndex] = IntPtr.Zero;
+                    _write8PageTable[pageTableIndex] = IntPtr.Zero;
+                    _write16PageTable[pageTableIndex] = IntPtr.Zero;
+                    _write32PageTable[pageTableIndex] = IntPtr.Zero;
+                }
+            }
+
+            if (writable8 || writable16 || writable32)
+            {
+                for (int offset = 0; offset < (pageCount * KB); ++offset)
+                    Marshal.WriteByte(data, offset, 0);
+            }
+        }
+
+        private void InitPageTables()
+        {
+            MapMemory(_eWRAM, 256, 0x0200_0000, 0x0300_0000, MemoryFlag.All);
+            MapMemory(_iWRAM, 32, 0x0300_0000, 0x0400_0000, MemoryFlag.All);
+            MapMemory(_ppu.PaletteRAM, 1, 0x0500_0000, 0x0600_0000, MemoryFlag.All);
+            MapMemory(_ppu.VRAM, 96, 0x0600_0000, 0x0700_0000, MemoryFlag.All);
+            MapMemory(_ppu.OAM, 1, 0x0700_0000, 0x0800_0000, MemoryFlag.All);
+            MapMemory(_SRAM, 64, 0x0e00_0000, 0x1000_0000, MemoryFlag.All);
+        }
 
         internal void LoadROM(string filename)
         {
-            _ROM = File.ReadAllBytes(filename);
+            Byte[] data = File.ReadAllBytes(filename);
+
+            if (_ROM != IntPtr.Zero)
+                Marshal.FreeHGlobal(_ROM);
+
+            _ROM = Marshal.AllocHGlobal(data.Length);
+            Marshal.Copy(data, 0, (IntPtr)_ROM, data.Length);
+
+            int pageCount = data.Length / KB;
+            MapMemory(_ROM, pageCount, 0x0800_0000, 0x0a00_0000, MemoryFlag.AllRead | MemoryFlag.Mirrored);
+            MapMemory(_ROM, pageCount, 0x0a00_0000, 0x0c00_0000, MemoryFlag.AllRead | MemoryFlag.Mirrored);
+            MapMemory(_ROM, pageCount, 0x0c00_0000, 0x0e00_0000, MemoryFlag.AllRead | MemoryFlag.Mirrored);
         }
 
         private Byte ReadMemory8(UInt32 address)
         {
             address &= 0x0fff_ffff;
+
+            IntPtr page = _read8PageTable[address >> 10];
+            if (page != IntPtr.Zero)
+                return Marshal.ReadByte(page, (int)(address & 0x3ff));
+
+            // page fault
             if (address is >= 0x0000_0000 and < 0x0000_4000)
             {
                 return BIOS_Read(address);
@@ -25,16 +133,6 @@
             {
                 // unused
                 return 0;
-            }
-            else if (address is >= 0x0200_0000 and < 0x0300_0000)
-            {
-                UInt32 offset = (address - 0x0200_0000) & 0x0003_ffff;
-                return _eWRAM[offset];
-            }
-            else if (address is >= 0x0300_0000 and < 0x0400_0000)
-            {
-                UInt32 offset = (address - 0x0300_0000) & 0x0000_7fff;
-                return _iWRAM[offset];
             }
             else if (address is >= 0x0400_0000 and < 0x0500_0000)
             {
@@ -217,25 +315,6 @@
                         return (Byte)(_IME >> 8);
                 }
             }
-            else if (address is >= 0x0600_0000 and < 0x0601_8000)
-            {
-                UInt32 offset = address - 0x0600_0000;
-                return _ppu.VRAM[offset];
-            }
-            else if (address is >= 0x0800_0000 and < 0x0a00_0000)
-            {
-                if (_ROM is null)
-                    throw new Exception("Emulation.GBA.Core: No ROM loaded");
-
-                UInt32 offset = address - 0x0800_0000;
-                if (offset < _ROM.Length)
-                    return _ROM[offset];
-            }
-            else if (address is >= 0x0e00_0000 and < 0x0e01_0000)
-            {
-                UInt32 offset = address - 0x0e00_0000;
-                return _SRAM[offset];
-            }
 
             throw new Exception(string.Format("Emulation.GBA.Core: Invalid read from address 0x{0:x8}", address));
         }
@@ -254,19 +333,19 @@
 
         private void WriteMemory8(UInt32 address, Byte value)
         {
+            address &= 0x0fff_ffff;
+
+            IntPtr page = _write8PageTable[address >> 10];
+            if (page != IntPtr.Zero)
+            {
+                Marshal.WriteByte(page, (int)(address & 0x3ff), value);
+                return;
+            }
+
+            // page fault
             if (address is >= 0x0000_4000 and < 0x0200_0000)
             {
                 // unused
-            }
-            else if (address is >= 0x0200_0000 and < 0x0300_0000)
-            {
-                UInt32 offset = (address - 0x0200_0000) & 0x0003_ffff;
-                _eWRAM[offset] = value;
-            }
-            else if (address is >= 0x0300_0000 and < 0x0400_0000)
-            {
-                UInt32 offset = (address - 0x0300_0000) & 0x0000_7fff;
-                _iWRAM[offset] = value;
             }
             else if (address is >= 0x0400_0000 and < 0x0500_0000)
             {
@@ -301,17 +380,17 @@
 
                     case 0x00a:
                     case 0x00b:
-                        Console.WriteLine("Emulation.GBA.Core: Write to BG1CNT register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to BG1CNT register unimplemented");
                         break;
 
                     case 0x00c:
                     case 0x00d:
-                        Console.WriteLine("Emulation.GBA.Core: Write to BG2CNT register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to BG2CNT register unimplemented");
                         break;
 
                     case 0x00e:
                     case 0x00f:
-                        Console.WriteLine("Emulation.GBA.Core: Write to BG3CNT register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to BG3CNT register unimplemented");
                         break;
 
                     case 0x010:
@@ -330,122 +409,122 @@
 
                     case 0x014:
                     case 0x015:
-                        Console.WriteLine("Emulation.GBA.Core: Write to BG1HOFS register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to BG1HOFS register unimplemented");
                         break;
 
                     case 0x016:
                     case 0x017:
-                        Console.WriteLine("Emulation.GBA.Core: Write to BG1VOFS register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to BG1VOFS register unimplemented");
                         break;
 
                     case 0x018:
                     case 0x019:
-                        Console.WriteLine("Emulation.GBA.Core: Write to BG2HOFS register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to BG2HOFS register unimplemented");
                         break;
 
                     case 0x01a:
                     case 0x01b:
-                        Console.WriteLine("Emulation.GBA.Core: Write to BG2VOFS register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to BG2VOFS register unimplemented");
                         break;
 
                     case 0x01c:
                     case 0x01d:
-                        Console.WriteLine("Emulation.GBA.Core: Write to BG3HOFS register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to BG3HOFS register unimplemented");
                         break;
 
                     case 0x01e:
                     case 0x01f:
-                        Console.WriteLine("Emulation.GBA.Core: Write to BG3VOFS register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to BG3VOFS register unimplemented");
                         break;
 
                     case 0x040:
                     case 0x041:
-                        Console.WriteLine("Emulation.GBA.Core: Write to WIN0H register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to WIN0H register unimplemented");
                         break;
 
                     case 0x042:
                     case 0x043:
-                        Console.WriteLine("Emulation.GBA.Core: Write to WIN1H register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to WIN1H register unimplemented");
                         break;
 
                     case 0x044:
                     case 0x045:
-                        Console.WriteLine("Emulation.GBA.Core: Write to WIN0V register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to WIN0V register unimplemented");
                         break;
 
                     case 0x046:
                     case 0x047:
-                        Console.WriteLine("Emulation.GBA.Core: Write to WIN1V register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to WIN1V register unimplemented");
                         break;
 
                     case 0x048:
                     case 0x049:
-                        Console.WriteLine("Emulation.GBA.Core: Write to WININ register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to WININ register unimplemented");
                         break;
 
                     case 0x04a:
                     case 0x04b:
-                        Console.WriteLine("Emulation.GBA.Core: Write to WINOUT register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to WINOUT register unimplemented");
                         break;
 
                     case 0x04c:
                     case 0x04d:
-                        Console.WriteLine("Emulation.GBA.Core: Write to MOSAIC register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to MOSAIC register unimplemented");
                         break;
 
                     case 0x050:
                     case 0x051:
-                        Console.WriteLine("Emulation.GBA.Core: Write to BLDCNT register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to BLDCNT register unimplemented");
                         break;
 
                     case 0x052:
                     case 0x053:
-                        Console.WriteLine("Emulation.GBA.Core: Write to BLDALPHA register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to BLDALPHA register unimplemented");
                         break;
 
                     case 0x054:
                     case 0x055:
-                        Console.WriteLine("Emulation.GBA.Core: Write to BLDY register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to BLDY register unimplemented");
                         break;
 
                     case 0x062:
                     case 0x063:
-                        Console.WriteLine("Emulation.GBA.Core: Write to SOUND1CNT_H register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to SOUND1CNT_H register unimplemented");
                         break;
 
                     case 0x064:
                     case 0x065:
-                        Console.WriteLine("Emulation.GBA.Core: Write to SOUND1CNT_X register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to SOUND1CNT_X register unimplemented");
                         break;
 
                     case 0x068:
                     case 0x069:
-                        Console.WriteLine("Emulation.GBA.Core: Write to SOUND2CNT_L register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to SOUND2CNT_L register unimplemented");
                         break;
 
                     case 0x06c:
                     case 0x06d:
-                        Console.WriteLine("Emulation.GBA.Core: Write to SOUND2CNT_H register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to SOUND2CNT_H register unimplemented");
                         break;
 
                     case 0x070:
                     case 0x071:
-                        Console.WriteLine("Emulation.GBA.Core: Write to SOUND3CNT_L register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to SOUND3CNT_L register unimplemented");
                         break;
 
                     case 0x078:
                     case 0x079:
-                        Console.WriteLine("Emulation.GBA.Core: Write to SOUND4CNT_L register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to SOUND4CNT_L register unimplemented");
                         break;
 
                     case 0x07c:
                     case 0x07d:
-                        Console.WriteLine("Emulation.GBA.Core: Write to SOUND4CNT_H register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to SOUND4CNT_H register unimplemented");
                         break;
 
                     case 0x080:
                     case 0x081:
-                        Console.WriteLine("Emulation.GBA.Core: Write to SOUNDCNT_L register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to SOUNDCNT_L register unimplemented");
                         break;
 
                     case 0x082:
@@ -520,7 +599,7 @@
 
                     case 0x0c8:
                     case 0x0c9:
-                        Console.WriteLine("Emulation.GBA.Core: Write to DMA2SAD_L register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to DMA2SAD_L register unimplemented");
                         break;
 
                     case 0x0ca:
@@ -532,12 +611,12 @@
 
                     case 0x0cc:
                     case 0x0cd:
-                        Console.WriteLine("Emulation.GBA.Core: Write to DMA2DAD_L register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to DMA2DAD_L register unimplemented");
                         break;
 
                     case 0x0ce:
                     case 0x0cf:
-                        Console.WriteLine("Emulation.GBA.Core: Write to DMA2DAD_H register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to DMA2DAD_H register unimplemented");
                         break;
 
                     case 0x0d0:
@@ -584,7 +663,7 @@
 
                     case 0x0dc:
                     case 0x0dd:
-                        Console.WriteLine("Emulation.GBA.Core: Write to DMA3CNT_L register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to DMA3CNT_L register unimplemented");
                         break;
 
                     case 0x0de:
@@ -596,7 +675,7 @@
 
                     case 0x100:
                     case 0x101:
-                        Console.WriteLine("Emulation.GBA.Core: Write to TM0CNT_L register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to TM0CNT_L register unimplemented");
                         break;
 
                     case 0x102:
@@ -608,7 +687,7 @@
 
                     case 0x104:
                     case 0x105:
-                        Console.WriteLine("Emulation.GBA.Core: Write to TM1CNT_L register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to TM1CNT_L register unimplemented");
                         break;
 
                     case 0x106:
@@ -620,7 +699,7 @@
 
                     case 0x108:
                     case 0x109:
-                        Console.WriteLine("Emulation.GBA.Core: Write to TM2CNT_L register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to TM2CNT_L register unimplemented");
                         break;
 
                     case 0x10a:
@@ -632,7 +711,7 @@
 
                     case 0x10c:
                     case 0x10d:
-                        Console.WriteLine("Emulation.GBA.Core: Write to TM3CNT_L register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to TM3CNT_L register unimplemented");
                         break;
 
                     case 0x10e:
@@ -644,22 +723,22 @@
 
                     case 0x120:
                     case 0x121:
-                        Console.WriteLine("Emulation.GBA.Core: Write to SIODATA32_L/SIOMULTI0 register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to SIODATA32_L/SIOMULTI0 register unimplemented");
                         break;
 
                     case 0x122:
                     case 0x123:
-                        Console.WriteLine("Emulation.GBA.Core: Write to SIODATA32_H/SIOMULTI1 register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to SIODATA32_H/SIOMULTI1 register unimplemented");
                         break;
 
                     case 0x124:
                     case 0x125:
-                        Console.WriteLine("Emulation.GBA.Core: Write to SIOMULTI2 register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to SIOMULTI2 register unimplemented");
                         break;
 
                     case 0x126:
                     case 0x127:
-                        Console.WriteLine("Emulation.GBA.Core: Write to SIOMULTI3 register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to SIOMULTI3 register unimplemented");
                         break;
 
                     case 0x128:
@@ -671,12 +750,12 @@
 
                     case 0x12a:
                     case 0x12b:
-                        Console.WriteLine("Emulation.GBA.Core: Write to SIODATA8 register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to SIODATA8 register unimplemented");
                         break;
 
                     case 0x130:
                     case 0x131:
-                        Console.WriteLine("Emulation.GBA.Core: Write to KEYINPUT register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to KEYINPUT register unimplemented");
                         break;
 
                     case 0x132:
@@ -688,7 +767,7 @@
 
                     case 0x134:
                     case 0x135:
-                        Console.WriteLine("Emulation.GBA.Core: Write to RCNT register unimplemented");
+                        // Console.WriteLine("Emulation.GBA.Core: Write to RCNT register unimplemented");
                         break;
 
                     case 0x200:
@@ -738,39 +817,6 @@
                     default:
                         throw new Exception(string.Format("Emulation.GBA.Core: Invalid write to address 0x{0:x8}", address));
                 }
-            }
-            else if (address is >= 0x0500_0000 and < 0x0600_0000)
-            {
-                UInt32 offset = address - 0x0500_0000;
-                if (offset < _ppu.PaletteRAM.Length)
-                    _ppu.PaletteRAM[offset] = value;
-                else
-                    throw new Exception(string.Format("Emulation.GBA.Core: Invalid write to address 0x{0:x8}", address));
-            }
-            else if (address is >= 0x0600_0000 and < 0x0700_0000)
-            {
-                UInt32 offset = address - 0x0600_0000;
-                if (offset < _ppu.VRAM.Length)
-                    _ppu.VRAM[offset] = value;
-                else
-                    throw new Exception(string.Format("Emulation.GBA.Core: Invalid write to address 0x{0:x8}", address));
-            }
-            else if (address is >= 0x0700_0000 and < 0x0800_0000)
-            {
-                UInt32 offset = address - 0x0700_0000;
-                if (offset < _ppu.OAM.Length)
-                    _ppu.OAM[offset] = value;
-                else
-                    throw new Exception(string.Format("Emulation.GBA.Core: Invalid write to address 0x{0:x8}", address));
-            }
-            else if (address is >= 0x0e00_0000 and < 0x0e01_0000)
-            {
-                UInt32 offset = address - 0x0e00_0000;
-                _SRAM[offset] = value;
-            }
-            else
-            {
-                Console.WriteLine("Emulation.GBA.Core: Write to address 0x{0:x8}", address);
             }
         }
 
