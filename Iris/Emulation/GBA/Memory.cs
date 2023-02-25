@@ -25,6 +25,8 @@ namespace Iris.Emulation.GBA
         private const int KB = 1024;
 
         private IntPtr _ROM = IntPtr.Zero;
+        private int _ROMSize = 0;
+
         private readonly IntPtr _SRAM = Marshal.AllocHGlobal(64 * KB);
         private readonly IntPtr _eWRAM = Marshal.AllocHGlobal(256 * KB);
         private readonly IntPtr _iWRAM = Marshal.AllocHGlobal(32 * KB);
@@ -110,10 +112,11 @@ namespace Iris.Emulation.GBA
             if (_ROM != IntPtr.Zero)
                 Marshal.FreeHGlobal(_ROM);
 
-            _ROM = Marshal.AllocHGlobal(data.Length);
-            Marshal.Copy(data, 0, _ROM, data.Length);
+            _ROMSize = data.Length;
+            _ROM = Marshal.AllocHGlobal(_ROMSize);
+            Marshal.Copy(data, 0, _ROM, _ROMSize);
 
-            int pageCount = data.Length / KB;
+            int pageCount = _ROMSize / KB;
             MapMemory(_ROM, pageCount, 0x0800_0000, 0x0a00_0000, MemoryFlag.AllRead);
             MapMemory(_ROM, pageCount, 0x0a00_0000, 0x0c00_0000, MemoryFlag.AllRead);
             MapMemory(_ROM, pageCount, 0x0c00_0000, 0x0e00_0000, MemoryFlag.AllRead);
@@ -322,6 +325,18 @@ namespace Iris.Emulation.GBA
                         return (Byte)_IME;
                     case 0x209:
                         return (Byte)(_IME >> 8);
+                }
+            }
+            else if (address is >= 0x0800_0000 and < 0x0e00_0000)
+            {
+                UInt32 offset = (address - 0x0800_0000) % 0x0200_0000;
+                if (offset < _ROMSize)
+                {
+                    unsafe
+                    {
+                        // much faster than Marshal.ReadByte
+                        return Unsafe.Read<Byte>((Byte*)_ROM + offset);
+                    }
                 }
             }
 
@@ -830,10 +845,6 @@ namespace Iris.Emulation.GBA
                     default:
                         throw new Exception(string.Format("Emulation.GBA.Core: Invalid write to address 0x{0:x8}", address));
                 }
-            }
-            else
-            {
-                throw new Exception(string.Format("Emulation.GBA.Core: Invalid write to address 0x{0:x8}", address));
             }
         }
 
