@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Iris.Emulation.GBA
 {
@@ -124,7 +125,13 @@ namespace Iris.Emulation.GBA
 
             IntPtr page = _read8PageTable[address >> 10];
             if (page != IntPtr.Zero)
-                return Marshal.ReadByte(page, (int)(address & 0x3ff));
+            {
+                unsafe
+                {
+                    // much faster than Marshal.ReadByte
+                    return Unsafe.Read<Byte>((Byte*)page + (address & 0x3ff));
+                }
+            }
 
             // page fault
             if (address is >= 0x0000_0000 and < 0x0000_4000)
@@ -340,7 +347,11 @@ namespace Iris.Emulation.GBA
             IntPtr page = _write8PageTable[address >> 10];
             if (page != IntPtr.Zero)
             {
-                Marshal.WriteByte(page, (int)(address & 0x3ff), value);
+                unsafe
+                {
+                    // much faster than Marshal.WriteByte
+                    Unsafe.Write<Byte>((Byte*)page + (address & 0x3ff), value);
+                }
                 return;
             }
 
