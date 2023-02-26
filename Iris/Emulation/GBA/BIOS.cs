@@ -2,7 +2,6 @@
 {
     internal sealed partial class Core
     {
-        // TODO: SoftReset BIOS function is done atm but we should execute the reset exception handler
         private void BIOS_Reset()
         {
             const UInt32 ROMAddress = 0x800_0000;
@@ -29,17 +28,36 @@
                 WriteMemory32(address, 0);
         }
 
-        private Byte BIOS_Read(UInt32 address)
+        private Byte BIOS_Read8(UInt32 address)
         {
-            // end of IRQ handler
-            if (address is >= 0x138 and < 0x13c)
+            return address switch
             {
-                // fallback to HLE (see ReturnFromIRQ())
-                Byte[] data = { 0x00, 0x00, 0xff, 0xef }; // SWI 0xff
-                return data[address - 0x138];
-            }
+                // SWI 0xff (fallback to HLE, see ReturnFromIRQ)
+                0x138 => 0x00,
+                0x139 => 0x00,
+                0x13a => 0xff,
+                0x13b => 0xef,
 
-            return 0;
+                _ => 0,
+            };
+        }
+
+        private UInt16 BIOS_Read16(UInt32 address)
+        {
+            return address switch
+            {
+                // SWI 0xff (fallback to HLE, see ReturnFromIRQ)
+                0x138 => 0x0000,
+                0x13a => 0xefff,
+
+                _ => 0,
+            };
+        }
+
+        private UInt32 BIOS_Read32(UInt32 address)
+        {
+            // SWI 0xff (fallback to HLE, see ReturnFromIRQ)
+            return (address == 0x138) ? 0xefff_0000 : 0;
         }
 
         private void HandleSWI(UInt32 value)
@@ -71,10 +89,9 @@
             }
         }
 
+        // IRQ handler start
         private void HandleIRQ()
         {
-            // start of IRQ handler
-
             _cpu.Reg14_irq = _cpu.NextInstructionAddress + 4;
             _cpu.SPSR_irq = _cpu.CPSR;
             _cpu.SetCPSR((_cpu.CPSR & ~0xbfu) | 0x92u);
@@ -262,10 +279,9 @@
             }
         }
 
+        // IRQ handler end
         private void ReturnFromIRQ()
         {
-            // end of IRQ handler
-
             UInt32 PopFromStack()
             {
                 UInt32 value = ReadMemory32(_cpu.Reg[CPU.Core.SP]);
