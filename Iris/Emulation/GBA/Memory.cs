@@ -212,20 +212,15 @@ namespace Iris.Emulation.GBA
             //        case 0x133:
             //            return (Byte)(_KEYCNT >> 8);
 
-            //        case 0x202:
-            //            return (Byte)_IF;
-            //        case 0x203:
-            //            return (Byte)(_IF >> 8);
-
             switch (address >> 24)
             {
                 case 0x0:
-                    if (address < 0x0000_4000)
+                    if (address < 0x000_4000)
                         return BIOS_Read8(address);
                     break;
                 case 0x4:
                     {
-                        UInt32 offset = address - 0x0400_0000;
+                        UInt32 offset = address - 0x400_0000;
                         switch (offset)
                         {
                             case 0x000:
@@ -308,6 +303,11 @@ namespace Iris.Emulation.GBA
                             case 0x201:
                                 return (Byte)(_IE >> 8);
 
+                            case 0x202:
+                                return (Byte)_IF;
+                            case 0x203:
+                                return (Byte)(_IF >> 8);
+
                             case 0x204:
                                 return (Byte)_WAITCNT;
                             case 0x205:
@@ -323,7 +323,7 @@ namespace Iris.Emulation.GBA
                 case 0x8:
                 case 0x9:
                     {
-                        UInt32 offset = address - 0x0800_0000;
+                        UInt32 offset = address - 0x800_0000;
                         if (offset < _ROMSize)
                         {
                             unsafe
@@ -337,7 +337,7 @@ namespace Iris.Emulation.GBA
                 case 0xa:
                 case 0xb:
                     {
-                        UInt32 offset = address - 0x0a00_0000;
+                        UInt32 offset = address - 0xa00_0000;
                         if (offset < _ROMSize)
                         {
                             unsafe
@@ -351,7 +351,7 @@ namespace Iris.Emulation.GBA
                 case 0xc:
                 case 0xd:
                     {
-                        UInt32 offset = address - 0x0c00_0000;
+                        UInt32 offset = address - 0xc00_0000;
                         if (offset < _ROMSize)
                         {
                             unsafe
@@ -385,12 +385,12 @@ namespace Iris.Emulation.GBA
             switch (address >> 24)
             {
                 case 0x0:
-                    if (address < 0x0000_4000)
+                    if (address < 0x000_4000)
                         return BIOS_Read16(address);
                     break;
                 case 0x4:
                     {
-                        UInt32 offset = address - 0x0400_0000;
+                        UInt32 offset = address - 0x400_0000;
                         switch (offset)
                         {
                             case 0x000:
@@ -424,6 +424,8 @@ namespace Iris.Emulation.GBA
                                 return _KEYINPUT;
                             case 0x200:
                                 return _IE;
+                            case 0x202:
+                                return _IF;
                             case 0x204:
                                 return _WAITCNT;
                             case 0x208:
@@ -434,7 +436,7 @@ namespace Iris.Emulation.GBA
                 case 0x8:
                 case 0x9:
                     {
-                        UInt32 offset = address - 0x0800_0000;
+                        UInt32 offset = address - 0x800_0000;
                         if (offset < _ROMSize)
                         {
                             unsafe
@@ -448,7 +450,7 @@ namespace Iris.Emulation.GBA
                 case 0xa:
                 case 0xb:
                     {
-                        UInt32 offset = address - 0x0a00_0000;
+                        UInt32 offset = address - 0xa00_0000;
                         if (offset < _ROMSize)
                         {
                             unsafe
@@ -462,7 +464,7 @@ namespace Iris.Emulation.GBA
                 case 0xc:
                 case 0xd:
                     {
-                        UInt32 offset = address - 0x0c00_0000;
+                        UInt32 offset = address - 0xc00_0000;
                         if (offset < _ROMSize)
                         {
                             unsafe
@@ -496,12 +498,12 @@ namespace Iris.Emulation.GBA
             switch (address >> 24)
             {
                 case 0x0:
-                    if (address < 0x0000_4000)
+                    if (address < 0x000_4000)
                         return BIOS_Read32(address);
                     break;
                 case 0x4:
                     {
-                        UInt32 offset = address - 0x0400_0000;
+                        UInt32 offset = address - 0x400_0000;
                         switch (offset)
                         {
                             case 0x004:
@@ -509,7 +511,7 @@ namespace Iris.Emulation.GBA
                             case 0x0c4:
                                 return (UInt32)((_DMA1CNT_H << 16) | _DMA1CNT_L);
                             case 0x0d0:
-                                return (UInt32)((_DMA1CNT_H << 16) | _DMA1CNT_L);
+                                return (UInt32)((_DMA2CNT_H << 16) | _DMA2CNT_L);
                             case 0x200:
                                 return (UInt32)((_IF << 16) | _IE);
                         }
@@ -518,7 +520,7 @@ namespace Iris.Emulation.GBA
                 case 0x8:
                 case 0x9:
                     {
-                        UInt32 offset = address - 0x0800_0000;
+                        UInt32 offset = address - 0x800_0000;
                         if (offset < _ROMSize)
                         {
                             unsafe
@@ -532,7 +534,7 @@ namespace Iris.Emulation.GBA
                 case 0xa:
                 case 0xb:
                     {
-                        UInt32 offset = address - 0x0a00_0000;
+                        UInt32 offset = address - 0xa00_0000;
                         if (offset < _ROMSize)
                         {
                             unsafe
@@ -546,7 +548,7 @@ namespace Iris.Emulation.GBA
                 case 0xc:
                 case 0xd:
                     {
-                        UInt32 offset = address - 0x0c00_0000;
+                        UInt32 offset = address - 0xc00_0000;
                         if (offset < _ROMSize)
                         {
                             unsafe
