@@ -11,12 +11,13 @@ namespace Iris.Emulation.GBA
         internal readonly IntPtr VRAM = Marshal.AllocHGlobal(96 * KB);
         internal readonly IntPtr OAM = Marshal.AllocHGlobal(1 * KB);
 
-        internal UInt16 DISPSTAT = 0;
-        internal UInt16 DISPCNT = 0;
-        internal UInt16 VCOUNT = 0;
-        internal UInt16 BG0CNT = 0;
-        internal UInt16 BG0HOFS = 0;
-        internal UInt16 BG0VOFS = 0;
+        internal UInt16 DISPSTAT;
+        internal UInt16 DISPCNT;
+        internal UInt16 VCOUNT;
+        internal UInt16 BLDCNT;
+        internal UInt16 BG0CNT;
+        internal UInt16 BG0HOFS;
+        internal UInt16 BG0VOFS;
 
         private const UInt32 ScreenWidth = 240;
         private const UInt32 ScreenHeight = 160;

@@ -164,9 +164,9 @@ namespace Iris.Emulation.GBA
                                 return (Byte)(_ppu.VCOUNT >> 8);
 
                             case 0x050:
+                                return (Byte)_ppu.BLDCNT;
                             case 0x051:
-                                Console.WriteLine("Emulation.GBA.Memory: Read from BLDCNT register unimplemented");
-                                return 0;
+                                return (Byte)(_ppu.BLDCNT >> 8);
 
                             case 0x088:
                                 return (Byte)_SOUNDBIAS;
@@ -325,8 +325,9 @@ namespace Iris.Emulation.GBA
                             case 0x006:
                                 return _ppu.VCOUNT;
                             case 0x050:
-                                Console.WriteLine("Emulation.GBA.Memory: Read from BLDCNT register unimplemented");
-                                return 0;
+                                return _ppu.BLDCNT;
+                            case 0x088:
+                                return _SOUNDBIAS;
                             case 0x0ba:
                                 return _DMA0CNT_H;
                             case 0x0c6:
@@ -434,9 +435,9 @@ namespace Iris.Emulation.GBA
                             case 0x004:
                                 return (UInt32)((_ppu.VCOUNT << 16) | _ppu.DISPSTAT);
                             case 0x0c4:
-                                return (UInt32)((_DMA1CNT_H << 16) | _DMA1CNT_L);
+                                return (UInt32)(_DMA1CNT_H << 16);
                             case 0x0d0:
-                                return (UInt32)((_DMA2CNT_H << 16) | _DMA2CNT_L);
+                                return (UInt32)(_DMA2CNT_H << 16);
                             case 0x200:
                                 return (UInt32)((_IF << 16) | _IE);
                         }
