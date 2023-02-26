@@ -146,105 +146,68 @@ namespace Iris.Emulation.GBA
                 case 0x4:
                     {
                         UInt32 offset = address - 0x400_0000;
-                        switch (offset)
+                        return offset switch
                         {
-                            case 0x000:
-                                return (Byte)_ppu.DISPCNT;
-                            case 0x001:
-                                return (Byte)(_ppu.DISPCNT >> 8);
+                            0x000 => (Byte)_ppu.DISPCNT,
+                            0x001 => (Byte)(_ppu.DISPCNT >> 8),
 
-                            case 0x004:
-                                return (Byte)_ppu.DISPSTAT;
-                            case 0x005:
-                                return (Byte)(_ppu.DISPSTAT >> 8);
+                            0x004 => (Byte)_ppu.DISPSTAT,
+                            0x005 => (Byte)(_ppu.DISPSTAT >> 8),
 
-                            case 0x006:
-                                return (Byte)_ppu.VCOUNT;
-                            case 0x007:
-                                return (Byte)(_ppu.VCOUNT >> 8);
+                            0x006 => (Byte)_ppu.VCOUNT,
+                            0x007 => (Byte)(_ppu.VCOUNT >> 8),
 
-                            case 0x050:
-                                return (Byte)_ppu.BLDCNT;
-                            case 0x051:
-                                return (Byte)(_ppu.BLDCNT >> 8);
+                            0x050 => (Byte)_ppu.BLDCNT,
+                            0x051 => (Byte)(_ppu.BLDCNT >> 8),
 
-                            case 0x088:
-                                return (Byte)_SOUNDBIAS;
-                            case 0x089:
-                                return (Byte)(_SOUNDBIAS >> 8);
+                            0x088 => (Byte)_SOUNDBIAS,
+                            0x089 => (Byte)(_SOUNDBIAS >> 8),
 
-                            case 0x0ba:
-                                return (Byte)_DMA0CNT_H;
-                            case 0x0bb:
-                                return (Byte)(_DMA0CNT_H >> 8);
+                            0x0ba => (Byte)_DMA0CNT_H,
+                            0x0bb => (Byte)(_DMA0CNT_H >> 8),
 
-                            case 0x0c6:
-                                return (Byte)_DMA1CNT_H;
-                            case 0x0c7:
-                                return (Byte)(_DMA1CNT_H >> 8);
+                            0x0c6 => (Byte)_DMA1CNT_H,
+                            0x0c7 => (Byte)(_DMA1CNT_H >> 8),
 
-                            case 0x0d2:
-                                return (Byte)_DMA2CNT_H;
-                            case 0x0d3:
-                                return (Byte)(_DMA2CNT_H >> 8);
+                            0x0d2 => (Byte)_DMA2CNT_H,
+                            0x0d3 => (Byte)(_DMA2CNT_H >> 8),
 
-                            case 0x0de:
-                                return (Byte)_DMA3CNT_H;
-                            case 0x0df:
-                                return (Byte)(_DMA3CNT_H >> 8);
+                            0x0de => (Byte)_DMA3CNT_H,
+                            0x0df => (Byte)(_DMA3CNT_H >> 8),
 
-                            case 0x102:
-                                return (Byte)_TM0CNT_H;
-                            case 0x103:
-                                return (Byte)(_TM0CNT_H >> 8);
+                            0x102 => (Byte)_TM0CNT_H,
+                            0x103 => (Byte)(_TM0CNT_H >> 8),
 
-                            case 0x106:
-                                return (Byte)_TM1CNT_H;
-                            case 0x107:
-                                return (Byte)(_TM1CNT_H >> 8);
+                            0x106 => (Byte)_TM1CNT_H,
+                            0x107 => (Byte)(_TM1CNT_H >> 8),
 
-                            case 0x10a:
-                                return (Byte)_TM2CNT_H;
-                            case 0x10b:
-                                return (Byte)(_TM2CNT_H >> 8);
+                            0x10a => (Byte)_TM2CNT_H,
+                            0x10b => (Byte)(_TM2CNT_H >> 8),
 
-                            case 0x10e:
-                                return (Byte)_TM3CNT_H;
-                            case 0x10f:
-                                return (Byte)(_TM3CNT_H >> 8);
+                            0x10e => (Byte)_TM3CNT_H,
+                            0x10f => (Byte)(_TM3CNT_H >> 8),
 
-                            case 0x128:
-                                return (Byte)_SIOCNT;
-                            case 0x129:
-                                return (Byte)(_SIOCNT >> 8);
+                            0x128 => (Byte)_SIOCNT,
+                            0x129 => (Byte)(_SIOCNT >> 8),
 
-                            case 0x130:
-                                return (Byte)_KEYINPUT;
-                            case 0x131:
-                                return (Byte)(_KEYINPUT >> 8);
+                            0x130 => (Byte)_KEYINPUT,
+                            0x131 => (Byte)(_KEYINPUT >> 8),
 
-                            case 0x200:
-                                return (Byte)_IE;
-                            case 0x201:
-                                return (Byte)(_IE >> 8);
+                            0x200 => (Byte)_IE,
+                            0x201 => (Byte)(_IE >> 8),
 
-                            case 0x202:
-                                return (Byte)_IF;
-                            case 0x203:
-                                return (Byte)(_IF >> 8);
+                            0x202 => (Byte)_IF,
+                            0x203 => (Byte)(_IF >> 8),
 
-                            case 0x204:
-                                return (Byte)_WAITCNT;
-                            case 0x205:
-                                return (Byte)(_WAITCNT >> 8);
+                            0x204 => (Byte)_WAITCNT,
+                            0x205 => (Byte)(_WAITCNT >> 8),
 
-                            case 0x208:
-                                return (Byte)_IME;
-                            case 0x209:
-                                return (Byte)(_IME >> 8);
-                        }
+                            0x208 => (Byte)_IME,
+                            0x209 => (Byte)(_IME >> 8),
+
+                            _ => throw new Exception(string.Format("Emulation.GBA.Memory: Unhandled read from address 0x{0:x8}", address)),
+                        };
                     }
-                    break;
                 case 0x8:
                 case 0x9:
                     {
@@ -316,49 +279,30 @@ namespace Iris.Emulation.GBA
                 case 0x4:
                     {
                         UInt32 offset = address - 0x400_0000;
-                        switch (offset)
+                        return offset switch
                         {
-                            case 0x000:
-                                return _ppu.DISPCNT;
-                            case 0x004:
-                                return _ppu.DISPSTAT;
-                            case 0x006:
-                                return _ppu.VCOUNT;
-                            case 0x050:
-                                return _ppu.BLDCNT;
-                            case 0x088:
-                                return _SOUNDBIAS;
-                            case 0x0ba:
-                                return _DMA0CNT_H;
-                            case 0x0c6:
-                                return _DMA1CNT_H;
-                            case 0x0d2:
-                                return _DMA2CNT_H;
-                            case 0x0de:
-                                return _DMA3CNT_H;
-                            case 0x102:
-                                return _TM0CNT_H;
-                            case 0x106:
-                                return _TM1CNT_H;
-                            case 0x10a:
-                                return _TM2CNT_H;
-                            case 0x10e:
-                                return _TM3CNT_H;
-                            case 0x128:
-                                return _SIOCNT;
-                            case 0x130:
-                                return _KEYINPUT;
-                            case 0x200:
-                                return _IE;
-                            case 0x202:
-                                return _IF;
-                            case 0x204:
-                                return _WAITCNT;
-                            case 0x208:
-                                return _IME;
-                        }
+                            0x000 => _ppu.DISPCNT,
+                            0x004 => _ppu.DISPSTAT,
+                            0x006 => _ppu.VCOUNT,
+                            0x050 => _ppu.BLDCNT,
+                            0x088 => _SOUNDBIAS,
+                            0x0ba => _DMA0CNT_H,
+                            0x0c6 => _DMA1CNT_H,
+                            0x0d2 => _DMA2CNT_H,
+                            0x0de => _DMA3CNT_H,
+                            0x102 => _TM0CNT_H,
+                            0x106 => _TM1CNT_H,
+                            0x10a => _TM2CNT_H,
+                            0x10e => _TM3CNT_H,
+                            0x128 => _SIOCNT,
+                            0x130 => _KEYINPUT,
+                            0x200 => _IE,
+                            0x202 => _IF,
+                            0x204 => _WAITCNT,
+                            0x208 => _IME,
+                            _ => throw new Exception(string.Format("Emulation.GBA.Memory: Unhandled read from address 0x{0:x8}", address)),
+                        };
                     }
-                    break;
                 case 0x8:
                 case 0x9:
                     {
@@ -430,19 +374,15 @@ namespace Iris.Emulation.GBA
                 case 0x4:
                     {
                         UInt32 offset = address - 0x400_0000;
-                        switch (offset)
+                        return offset switch
                         {
-                            case 0x004:
-                                return (UInt32)((_ppu.VCOUNT << 16) | _ppu.DISPSTAT);
-                            case 0x0c4:
-                                return (UInt32)(_DMA1CNT_H << 16);
-                            case 0x0d0:
-                                return (UInt32)(_DMA2CNT_H << 16);
-                            case 0x200:
-                                return (UInt32)((_IF << 16) | _IE);
-                        }
+                            0x004 => (UInt32)((_ppu.VCOUNT << 16) | _ppu.DISPSTAT),
+                            0x0c4 => (UInt32)(_DMA1CNT_H << 16),
+                            0x0d0 => (UInt32)(_DMA2CNT_H << 16),
+                            0x200 => (UInt32)((_IF << 16) | _IE),
+                            _ => throw new Exception(string.Format("Emulation.GBA.Memory: Unhandled read from address 0x{0:x8}", address)),
+                        };
                     }
-                    break;
                 case 0x8:
                 case 0x9:
                     {
