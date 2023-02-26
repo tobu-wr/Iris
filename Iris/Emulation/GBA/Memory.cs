@@ -99,10 +99,10 @@ namespace Iris.Emulation.GBA
         {
             MapMemory(_eWRAM, 256, 0x0200_0000, 0x0300_0000, MemoryFlag.All);
             MapMemory(_iWRAM, 32, 0x0300_0000, 0x0400_0000, MemoryFlag.All);
-            MapMemory(_ppu.PaletteRAM, 1, 0x0500_0000, 0x0600_0000, MemoryFlag.All);
-            MapMemory(_ppu.VRAM, 96, 0x0600_0000, 0x0700_0000, MemoryFlag.All);
-            MapMemory(_ppu.OAM, 1, 0x0700_0000, 0x0800_0000, MemoryFlag.All);
-            MapMemory(_SRAM, 64, 0x0e00_0000, 0x1000_0000, MemoryFlag.All);
+            MapMemory(_ppu.PaletteRAM, 1, 0x0500_0000, 0x0600_0000, MemoryFlag.All & ~(MemoryFlag.Read8 | MemoryFlag.Write8));
+            MapMemory(_ppu.VRAM, 96, 0x0600_0000, 0x0700_0000, MemoryFlag.All & ~(MemoryFlag.Read8 | MemoryFlag.Write8));
+            MapMemory(_ppu.OAM, 1, 0x0700_0000, 0x0800_0000, MemoryFlag.All & ~(MemoryFlag.Read8 | MemoryFlag.Write8));
+            MapMemory(_SRAM, 64, 0x0e00_0000, 0x1000_0000, MemoryFlag.Read8 | MemoryFlag.Write8 | MemoryFlag.Mirrored);
         }
 
         internal void LoadROM(string filename)
