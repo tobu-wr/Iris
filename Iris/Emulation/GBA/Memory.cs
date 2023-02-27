@@ -188,6 +188,36 @@ namespace Iris.Emulation.GBA
                             0x052 => GetLowByte(_ppu.BLDALPHA),
                             0x053 => GetHighByte(_ppu.BLDALPHA),
 
+                            0x062 => GetLowByte(_SOUND1CNT_H),
+                            0x063 => GetHighByte(_SOUND1CNT_H),
+
+                            0x064 => GetLowByte(_SOUND1CNT_X),
+                            0x065 => GetHighByte(_SOUND1CNT_X),
+
+                            0x068 => GetLowByte(_SOUND2CNT_L),
+                            0x069 => GetHighByte(_SOUND2CNT_L),
+
+                            0x06c => GetLowByte(_SOUND2CNT_H),
+                            0x06d => GetHighByte(_SOUND2CNT_H),
+
+                            0x070 => GetLowByte(_SOUND3CNT_L),
+                            0x071 => GetHighByte(_SOUND3CNT_L),
+
+                            0x078 => GetLowByte(_SOUND4CNT_L),
+                            0x079 => GetHighByte(_SOUND4CNT_L),
+
+                            0x07c => GetLowByte(_SOUND4CNT_H),
+                            0x07d => GetHighByte(_SOUND4CNT_H),
+
+                            0x080 => GetLowByte(_SOUNDCNT_L),
+                            0x081 => GetHighByte(_SOUNDCNT_L),
+
+                            0x082 => GetLowByte(_SOUNDCNT_H),
+                            0x083 => GetHighByte(_SOUNDCNT_H),
+
+                            0x084 => GetLowByte(_SOUNDCNT_X),
+                            0x085 => GetHighByte(_SOUNDCNT_X),
+
                             0x088 => GetLowByte(_SOUNDBIAS),
                             0x089 => GetHighByte(_SOUNDBIAS),
 
@@ -203,23 +233,56 @@ namespace Iris.Emulation.GBA
                             0x0de => GetLowByte(_DMA3CNT_H),
                             0x0df => GetHighByte(_DMA3CNT_H),
 
+                            0x100 => GetLowByte(_TM0CNT_L),
+                            0x101 => GetHighByte(_TM0CNT_L),
+
                             0x102 => GetLowByte(_TM0CNT_H),
                             0x103 => GetHighByte(_TM0CNT_H),
+
+                            0x104 => GetLowByte(_TM1CNT_L),
+                            0x105 => GetHighByte(_TM1CNT_L),
 
                             0x106 => GetLowByte(_TM1CNT_H),
                             0x107 => GetHighByte(_TM1CNT_H),
 
+                            0x108 => GetLowByte(_TM2CNT_L),
+                            0x109 => GetHighByte(_TM2CNT_L),
+
                             0x10a => GetLowByte(_TM2CNT_H),
                             0x10b => GetHighByte(_TM2CNT_H),
+
+                            0x10c => GetLowByte(_TM3CNT_L),
+                            0x10d => GetHighByte(_TM3CNT_L),
 
                             0x10e => GetLowByte(_TM3CNT_H),
                             0x10f => GetHighByte(_TM3CNT_H),
 
+                            0x120 => GetLowByte(_SIOMULTI0),
+                            0x121 => GetHighByte(_SIOMULTI0),
+
+                            0x122 => GetLowByte(_SIOMULTI1),
+                            0x123 => GetHighByte(_SIOMULTI1),
+
+                            0x124 => GetLowByte(_SIOMULTI2),
+                            0x125 => GetHighByte(_SIOMULTI2),
+
+                            0x126 => GetLowByte(_SIOMULTI3),
+                            0x127 => GetHighByte(_SIOMULTI3),
+
                             0x128 => GetLowByte(_SIOCNT),
                             0x129 => GetHighByte(_SIOCNT),
 
+                            0x12a => GetLowByte(_SIODATA8),
+                            0x12b => GetHighByte(_SIODATA8),
+
                             0x130 => GetLowByte(_KEYINPUT),
                             0x131 => GetHighByte(_KEYINPUT),
+
+                            0x132 => GetLowByte(_KEYCNT),
+                            0x133 => GetHighByte(_KEYCNT),
+
+                            0x134 => GetLowByte(_RCNT),
+                            0x135 => GetHighByte(_RCNT),
 
                             0x200 => GetLowByte(_IE),
                             0x201 => GetHighByte(_IE),
@@ -333,17 +396,38 @@ namespace Iris.Emulation.GBA
                             0x04a => _ppu.WINOUT,
                             0x050 => _ppu.BLDCNT,
                             0x052 => _ppu.BLDALPHA,
+                            0x062 => _SOUND1CNT_H,
+                            0x064 => _SOUND1CNT_X,
+                            0x068 => _SOUND2CNT_L,
+                            0x06c => _SOUND2CNT_H,
+                            0x070 => _SOUND3CNT_L,
+                            0x078 => _SOUND4CNT_L,
+                            0x07c => _SOUND4CNT_H,
+                            0x080 => _SOUNDCNT_L,
+                            0x082 => _SOUNDCNT_H,
+                            0x084 => _SOUNDCNT_X,
                             0x088 => _SOUNDBIAS,
                             0x0ba => _DMA0CNT_H,
                             0x0c6 => _DMA1CNT_H,
                             0x0d2 => _DMA2CNT_H,
                             0x0de => _DMA3CNT_H,
+                            0x100 => _TM0CNT_L,
                             0x102 => _TM0CNT_H,
+                            0x104 => _TM1CNT_L,
                             0x106 => _TM1CNT_H,
+                            0x108 => _TM2CNT_L,
                             0x10a => _TM2CNT_H,
+                            0x10c => _TM3CNT_L,
                             0x10e => _TM3CNT_H,
+                            0x120 => _SIOMULTI0,
+                            0x122 => _SIOMULTI1,
+                            0x124 => _SIOMULTI2,
+                            0x126 => _SIOMULTI3,
                             0x128 => _SIOCNT,
+                            0x12a => _SIODATA8,
                             0x130 => _KEYINPUT,
+                            0x132 => _KEYCNT,
+                            0x134 => _RCNT,
                             0x200 => _IE,
                             0x202 => _IF,
                             0x204 => _WAITCNT,
@@ -518,230 +602,6 @@ namespace Iris.Emulation.GBA
             }
 
             // page fault
-
-            //        case 0x062:
-            //        case 0x063:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to SOUND1CNT_H register unimplemented");
-            //            break;
-
-            //        case 0x064:
-            //        case 0x065:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to SOUND1CNT_X register unimplemented");
-            //            break;
-
-            //        case 0x068:
-            //        case 0x069:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to SOUND2CNT_L register unimplemented");
-            //            break;
-
-            //        case 0x06c:
-            //        case 0x06d:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to SOUND2CNT_H register unimplemented");
-            //            break;
-
-            //        case 0x070:
-            //        case 0x071:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to SOUND3CNT_L register unimplemented");
-            //            break;
-
-            //        case 0x078:
-            //        case 0x079:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to SOUND4CNT_L register unimplemented");
-            //            break;
-
-            //        case 0x07c:
-            //        case 0x07d:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to SOUND4CNT_H register unimplemented");
-            //            break;
-
-            //        case 0x080:
-            //        case 0x081:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to SOUNDCNT_L register unimplemented");
-            //            break;
-
-            //        case 0x082:
-            //            _SOUNDCNT_H = (UInt16)((_SOUNDCNT_H & 0xff00) | value);
-            //            break;
-            //        case 0x083:
-            //            _SOUNDCNT_H = (UInt16)((_SOUNDCNT_H & 0x00ff) | (value << 8));
-            //            break;
-
-            //        case 0x084:
-            //            _SOUNDCNT_X = (UInt16)((_SOUNDCNT_X & 0xff00) | value);
-            //            break;
-            //        case 0x085:
-            //            _SOUNDCNT_X = (UInt16)((_SOUNDCNT_X & 0x00ff) | (value << 8));
-            //            break;
-
-            //        case 0x0bc:
-            //            _DMA1SAD_L = (UInt16)((_DMA1SAD_L & 0xff00) | value);
-            //            break;
-            //        case 0x0bd:
-            //            _DMA1SAD_L = (UInt16)((_DMA1SAD_L & 0x00ff) | (value << 8));
-            //            break;
-
-            //        case 0x0be:
-            //            _DMA1SAD_H = (UInt16)((_DMA1SAD_H & 0xff00) | value);
-            //            break;
-            //        case 0x0bf:
-            //            _DMA1SAD_H = (UInt16)((_DMA1SAD_H & 0x00ff) | (value << 8));
-            //            break;
-
-            //        case 0x0c0:
-            //            _DMA1DAD_L = (UInt16)((_DMA1DAD_L & 0xff00) | value);
-            //            break;
-            //        case 0x0c1:
-            //            _DMA1DAD_L = (UInt16)((_DMA1DAD_L & 0x00ff) | (value << 8));
-            //            break;
-
-            //        case 0x0c2:
-            //            _DMA1DAD_H = (UInt16)((_DMA1DAD_H & 0xff00) | value);
-            //            break;
-            //        case 0x0c3:
-            //            _DMA1DAD_H = (UInt16)((_DMA1DAD_H & 0x00ff) | (value << 8));
-            //            break;
-
-            //        case 0x0c4:
-            //            _DMA1CNT_L = (UInt16)((_DMA1CNT_L & 0xff00) | value);
-            //            break;
-            //        case 0x0c5:
-            //            _DMA1CNT_L = (UInt16)((_DMA1CNT_L & 0x00ff) | (value << 8));
-            //            break;
-
-            //        case 0x0c8:
-            //        case 0x0c9:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to DMA2SAD_L register unimplemented");
-            //            break;
-
-            //        case 0x0ca:
-            //            _DMA2SAD_H = (UInt16)((_DMA2SAD_H & 0xff00) | value);
-            //            break;
-            //        case 0x0cb:
-            //            _DMA2SAD_H = (UInt16)((_DMA2SAD_H & 0x00ff) | (value << 8));
-            //            break;
-
-            //        case 0x0cc:
-            //        case 0x0cd:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to DMA2DAD_L register unimplemented");
-            //            break;
-
-            //        case 0x0ce:
-            //        case 0x0cf:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to DMA2DAD_H register unimplemented");
-            //            break;
-
-            //        case 0x0d0:
-            //            _DMA2CNT_L = (UInt16)((_DMA2CNT_L & 0xff00) | value);
-            //            break;
-            //        case 0x0d1:
-            //            _DMA2CNT_L = (UInt16)((_DMA2CNT_L & 0x00ff) | (value << 8));
-            //            break;
-
-            //        case 0x0d4:
-            //            _DMA3SAD_L = (UInt16)((_DMA3SAD_L & 0xff00) | value);
-            //            break;
-            //        case 0x0d5:
-            //            _DMA3SAD_L = (UInt16)((_DMA3SAD_L & 0x00ff) | (value << 8));
-            //            break;
-
-            //        case 0x0d6:
-            //            _DMA3SAD_H = (UInt16)((_DMA3SAD_H & 0xff00) | value);
-            //            break;
-            //        case 0x0d7:
-            //            _DMA3SAD_H = (UInt16)((_DMA3SAD_H & 0x00ff) | (value << 8));
-            //            break;
-
-            //        case 0x0d8:
-            //            _DMA3DAD_L = (UInt16)((_DMA3DAD_L & 0xff00) | value);
-            //            break;
-            //        case 0x0d9:
-            //            _DMA3DAD_L = (UInt16)((_DMA3DAD_L & 0x00ff) | (value << 8));
-            //            break;
-
-            //        case 0x0da:
-            //            _DMA3DAD_H = (UInt16)((_DMA3DAD_H & 0xff00) | value);
-            //            break;
-            //        case 0x0db:
-            //            _DMA3DAD_H = (UInt16)((_DMA3DAD_H & 0x00ff) | (value << 8));
-            //            break;
-
-            //        case 0x0dc:
-            //        case 0x0dd:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to DMA3CNT_L register unimplemented");
-            //            break;
-
-            //        case 0x100:
-            //        case 0x101:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to TM0CNT_L register unimplemented");
-            //            break;
-
-            //        case 0x104:
-            //        case 0x105:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to TM1CNT_L register unimplemented");
-            //            break;
-
-            //        case 0x108:
-            //        case 0x109:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to TM2CNT_L register unimplemented");
-            //            break;
-
-            //        case 0x10c:
-            //        case 0x10d:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to TM3CNT_L register unimplemented");
-            //            break;
-
-            //        case 0x120:
-            //        case 0x121:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to SIODATA32_L/SIOMULTI0 register unimplemented");
-            //            break;
-
-            //        case 0x122:
-            //        case 0x123:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to SIODATA32_H/SIOMULTI1 register unimplemented");
-            //            break;
-
-            //        case 0x124:
-            //        case 0x125:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to SIOMULTI2 register unimplemented");
-            //            break;
-
-            //        case 0x126:
-            //        case 0x127:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to SIOMULTI3 register unimplemented");
-            //            break;
-
-            //        case 0x12a:
-            //        case 0x12b:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to SIODATA8 register unimplemented");
-            //            break;
-
-            //        case 0x132:
-            //            _KEYCNT = (UInt16)((_KEYCNT & 0xff00) | value);
-            //            break;
-            //        case 0x133:
-            //            _KEYCNT = (UInt16)((_KEYCNT & 0x00ff) | (value << 8));
-            //            break;
-
-            //        case 0x134:
-            //        case 0x135:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to RCNT register unimplemented");
-            //            break;
-
-            //        case 0x206:
-            //        case 0x207:
-            //            // unused
-            //            break; // ignore
-
-            //        case 0x20a:
-            //        case 0x20b:
-            //            // unused
-            //            break; // ignore
-
-            //        default:
-            //            throw new Exception(string.Format("Emulation.GBA.Core: Invalid write to address 0x{0:x8}", address));
-            //    }
-            //}
-
             switch (address >> 24)
             {
                 // BIOS
@@ -927,6 +787,76 @@ namespace Iris.Emulation.GBA
                                 SetHighByte(ref _ppu.BLDY, value);
                                 break;
 
+                            case 0x062:
+                                SetLowByte(ref _SOUND1CNT_H, value);
+                                break;
+                            case 0x063:
+                                SetHighByte(ref _SOUND1CNT_H, value);
+                                break;
+
+                            case 0x064:
+                                SetLowByte(ref _SOUND1CNT_X, value);
+                                break;
+                            case 0x065:
+                                SetHighByte(ref _SOUND1CNT_X, value);
+                                break;
+
+                            case 0x068:
+                                SetLowByte(ref _SOUND2CNT_L, value);
+                                break;
+                            case 0x069:
+                                SetHighByte(ref _SOUND2CNT_L, value);
+                                break;
+
+                            case 0x06c:
+                                SetLowByte(ref _SOUND2CNT_H, value);
+                                break;
+                            case 0x06d:
+                                SetHighByte(ref _SOUND2CNT_H, value);
+                                break;
+
+                            case 0x070:
+                                SetLowByte(ref _SOUND3CNT_L, value);
+                                break;
+                            case 0x071:
+                                SetHighByte(ref _SOUND3CNT_L, value);
+                                break;
+
+                            case 0x078:
+                                SetLowByte(ref _SOUND4CNT_L, value);
+                                break;
+                            case 0x079:
+                                SetHighByte(ref _SOUND4CNT_L, value);
+                                break;
+
+                            case 0x07c:
+                                SetLowByte(ref _SOUND4CNT_H, value);
+                                break;
+                            case 0x07d:
+                                SetHighByte(ref _SOUND4CNT_H, value);
+                                break;
+
+                            case 0x080:
+                                SetLowByte(ref _SOUNDCNT_L, value);
+                                break;
+                            case 0x081:
+                                SetHighByte(ref _SOUNDCNT_L, value);
+                                break;
+
+                            case 0x082:
+                                SetLowByte(ref _SOUNDCNT_H, value);
+                                break;
+                            case 0x083:
+                                SetHighByte(ref _SOUNDCNT_H, value);
+                                break;
+
+                            case 0x084:
+                                SetLowByte(ref _SOUNDCNT_X, value);
+                                break;
+                            case 0x085:
+                                SetHighByte(ref _SOUNDCNT_X, value);
+                                break;
+
                             case 0x088:
                                 SetLowByte(ref _SOUNDBIAS, value);
                                 break;
@@ -941,11 +871,81 @@ namespace Iris.Emulation.GBA
                                 SetHighByte(ref _DMA0CNT_H, value);
                                 break;
 
+                            case 0x0bc:
+                                SetLowByte(ref _DMA1SAD_L, value);
+                                break;
+                            case 0x0bd:
+                                SetHighByte(ref _DMA1SAD_L, value);
+                                break;
+
+                            case 0x0be:
+                                SetLowByte(ref _DMA1SAD_H, value);
+                                break;
+                            case 0x0bf:
+                                SetHighByte(ref _DMA1SAD_H, value);
+                                break;
+
+                            case 0x0c0:
+                                SetLowByte(ref _DMA1DAD_L, value);
+                                break;
+                            case 0x0c1:
+                                SetHighByte(ref _DMA1DAD_L, value);
+                                break;
+
+                            case 0x0c2:
+                                SetLowByte(ref _DMA1DAD_H, value);
+                                break;
+                            case 0x0c3:
+                                SetHighByte(ref _DMA1DAD_H, value);
+                                break;
+
+                            case 0x0c4:
+                                SetLowByte(ref _DMA1CNT_L, value);
+                                break;
+                            case 0x0c5:
+                                SetHighByte(ref _DMA1CNT_L, value);
+                                break;
+
                             case 0x0c6:
                                 SetLowByte(ref _DMA1CNT_H, value);
                                 break;
                             case 0x0c7:
                                 SetHighByte(ref _DMA1CNT_H, value);
+                                break;
+
+                            case 0x0c8:
+                                SetLowByte(ref _DMA2SAD_L, value);
+                                break;
+                            case 0x0c9:
+                                SetHighByte(ref _DMA2SAD_L, value);
+                                break;
+
+                            case 0x0ca:
+                                SetLowByte(ref _DMA2SAD_H, value);
+                                break;
+                            case 0x0cb:
+                                SetHighByte(ref _DMA2SAD_H, value);
+                                break;
+
+                            case 0x0cc:
+                                SetLowByte(ref _DMA2DAD_L, value);
+                                break;
+                            case 0x0cd:
+                                SetHighByte(ref _DMA2DAD_L, value);
+                                break;
+
+                            case 0x0ce:
+                                SetLowByte(ref _DMA2DAD_H, value);
+                                break;
+                            case 0x0cf:
+                                SetHighByte(ref _DMA2DAD_H, value);
+                                break;
+
+                            case 0x0d0:
+                                SetLowByte(ref _DMA2CNT_L, value);
+                                break;
+                            case 0x0d1:
+                                SetHighByte(ref _DMA2CNT_L, value);
                                 break;
 
                             case 0x0d2:
@@ -962,11 +962,25 @@ namespace Iris.Emulation.GBA
                                 SetHighByte(ref _DMA3CNT_H, value);
                                 break;
 
+                            case 0x100:
+                                SetLowByte(ref _TM0CNT_L, value);
+                                break;
+                            case 0x101:
+                                SetHighByte(ref _TM0CNT_L, value);
+                                break;
+
                             case 0x102:
                                 SetLowByte(ref _TM0CNT_H, value);
                                 break;
                             case 0x103:
                                 SetHighByte(ref _TM0CNT_H, value);
+                                break;
+
+                            case 0x104:
+                                SetLowByte(ref _TM1CNT_L, value);
+                                break;
+                            case 0x105:
+                                SetHighByte(ref _TM1CNT_L, value);
                                 break;
 
                             case 0x106:
@@ -976,11 +990,25 @@ namespace Iris.Emulation.GBA
                                 SetHighByte(ref _TM1CNT_H, value);
                                 break;
 
+                            case 0x108:
+                                SetLowByte(ref _TM2CNT_L, value);
+                                break;
+                            case 0x109:
+                                SetHighByte(ref _TM2CNT_L, value);
+                                break;
+
                             case 0x10a:
                                 SetLowByte(ref _TM2CNT_H, value);
                                 break;
                             case 0x10b:
                                 SetHighByte(ref _TM2CNT_H, value);
+                                break;
+
+                            case 0x10c:
+                                SetLowByte(ref _TM3CNT_L, value);
+                                break;
+                            case 0x10d:
+                                SetHighByte(ref _TM3CNT_L, value);
                                 break;
 
                             case 0x10e:
@@ -990,6 +1018,34 @@ namespace Iris.Emulation.GBA
                                 SetHighByte(ref _TM3CNT_H, value);
                                 break;
 
+                            case 0x120:
+                                SetLowByte(ref _SIOMULTI0, value);
+                                break;
+                            case 0x121:
+                                SetHighByte(ref _SIOMULTI0, value);
+                                break;
+
+                            case 0x122:
+                                SetLowByte(ref _SIOMULTI1, value);
+                                break;
+                            case 0x123:
+                                SetHighByte(ref _SIOMULTI1, value);
+                                break;
+
+                            case 0x124:
+                                SetLowByte(ref _SIOMULTI2, value);
+                                break;
+                            case 0x125:
+                                SetHighByte(ref _SIOMULTI2, value);
+                                break;
+
+                            case 0x126:
+                                SetLowByte(ref _SIOMULTI3, value);
+                                break;
+                            case 0x127:
+                                SetHighByte(ref _SIOMULTI3, value);
+                                break;
+
                             case 0x128:
                                 SetLowByte(ref _SIOCNT, value);
                                 break;
@@ -997,11 +1053,32 @@ namespace Iris.Emulation.GBA
                                 SetHighByte(ref _SIOCNT, value);
                                 break;
 
+                            case 0x12a:
+                                SetLowByte(ref _SIODATA8, value);
+                                break;
+                            case 0x12b:
+                                SetHighByte(ref _SIODATA8, value);
+                                break;
+
                             case 0x130:
                                 SetLowByte(ref _KEYINPUT, value);
                                 break;
                             case 0x131:
                                 SetHighByte(ref _KEYINPUT, value);
+                                break;
+
+                            case 0x132:
+                                SetLowByte(ref _KEYCNT, value);
+                                break;
+                            case 0x133:
+                                SetHighByte(ref _KEYCNT, value);
+                                break;
+
+                            case 0x134:
+                                SetLowByte(ref _RCNT, value);
+                                break;
+                            case 0x135:
+                                SetHighByte(ref _RCNT, value);
                                 break;
 
                             case 0x200:
@@ -1162,14 +1239,74 @@ namespace Iris.Emulation.GBA
                             case 0x054:
                                 _ppu.BLDY = value;
                                 break;
+                            case 0x062:
+                                _SOUND1CNT_H = value;
+                                break;
+                            case 0x064:
+                                _SOUND1CNT_X = value;
+                                break;
+                            case 0x068:
+                                _SOUND2CNT_L = value;
+                                break;
+                            case 0x06c:
+                                _SOUND2CNT_H = value;
+                                break;
+                            case 0x070:
+                                _SOUND3CNT_L = value;
+                                break;
+                            case 0x078:
+                                _SOUND4CNT_L = value;
+                                break;
+                            case 0x07c:
+                                _SOUND4CNT_H = value;
+                                break;
+                            case 0x080:
+                                _SOUNDCNT_L = value;
+                                break;
+                            case 0x082:
+                                _SOUNDCNT_H = value;
+                                break;
+                            case 0x084:
+                                _SOUNDCNT_X = value;
+                                break;
                             case 0x088:
                                 _SOUNDBIAS = value;
                                 break;
                             case 0x0ba:
                                 _DMA0CNT_H = value;
                                 break;
+                            case 0x0bc:
+                                _DMA1SAD_L = value;
+                                break;
+                            case 0x0be:
+                                _DMA1SAD_H = value;
+                                break;
+                            case 0x0c0:
+                                _DMA1DAD_L = value;
+                                break;
+                            case 0x0c2:
+                                _DMA1DAD_H = value;
+                                break;
+                            case 0x0c4:
+                                _DMA1CNT_L = value;
+                                break;
                             case 0x0c6:
                                 _DMA1CNT_H = value;
+                                break;
+                            case 0x0c8:
+                                _DMA2SAD_L = value;
+                                break;
+                            case 0x0ca:
+                                _DMA2SAD_H = value;
+                                break;
+                            case 0x0cc:
+                                _DMA2DAD_L = value;
+                                break;
+                            case 0x0ce:
+                                _DMA2DAD_H = value;
+                                break;
+                            case 0x0d0:
+                                _DMA2CNT_L = value;
                                 break;
                             case 0x0d2:
                                 _DMA2CNT_H = value;
@@ -1177,23 +1314,56 @@ namespace Iris.Emulation.GBA
                             case 0x0de:
                                 _DMA3CNT_H = value;
                                 break;
+                            case 0x100:
+                                _TM0CNT_L = value;
+                                break;
                             case 0x102:
                                 _TM0CNT_H = value;
+                                break;
+                            case 0x104:
+                                _TM1CNT_L = value;
                                 break;
                             case 0x106:
                                 _TM1CNT_H = value;
                                 break;
+                            case 0x108:
+                                _TM2CNT_L = value;
+                                break;
                             case 0x10a:
                                 _TM2CNT_H = value;
+                                break;
+                            case 0x10c:
+                                _TM3CNT_L = value;
                                 break;
                             case 0x10e:
                                 _TM3CNT_H = value;
                                 break;
+                            case 0x120:
+                                _SIOMULTI0 = value;
+                                break;
+                            case 0x122:
+                                _SIOMULTI1 = value;
+                                break;
+                            case 0x124:
+                                _SIOMULTI2 = value;
+                                break;
+                            case 0x126:
+                                _SIOMULTI3 = value;
+                                break;
                             case 0x128:
                                 _SIOCNT = value;
                                 break;
+                            case 0x12a:
+                                _SIODATA8 = value;
+                                break;
                             case 0x130:
                                 _KEYINPUT = value;
+                                break;
+                            case 0x132:
+                                _KEYCNT = value;
+                                break;
+                            case 0x134:
+                                _RCNT = value;
                                 break;
                             case 0x200:
                                 _IE = value;
@@ -1265,6 +1435,30 @@ namespace Iris.Emulation.GBA
                             case 0x000:
                                 _ppu.DISPCNT = (UInt16)value;
                                 // 16 upper bits are undocumented (green swap register)
+                                break;
+                            case 0x0bc:
+                                _DMA1SAD_L = (UInt16)value;
+                                _DMA1SAD_H = (UInt16)(value >> 16);
+                                break;
+                            case 0x0c0:
+                                _DMA1DAD_L = (UInt16)value;
+                                _DMA1DAD_H = (UInt16)(value >> 16);
+                                break;
+                            case 0x0c4:
+                                _DMA1CNT_L = (UInt16)value;
+                                _DMA1CNT_H = (UInt16)(value >> 16);
+                                break;
+                            case 0x0c8:
+                                _DMA2SAD_L = (UInt16)value;
+                                _DMA2SAD_H = (UInt16)(value >> 16);
+                                break;
+                            case 0x0cc:
+                                _DMA2DAD_L = (UInt16)value;
+                                _DMA2DAD_H = (UInt16)(value >> 16);
+                                break;
+                            case 0x0d0:
+                                _DMA2CNT_L = (UInt16)value;
+                                _DMA2CNT_H = (UInt16)(value >> 16);
                                 break;
                             case 0x208:
                                 _IME = (UInt16)value;
