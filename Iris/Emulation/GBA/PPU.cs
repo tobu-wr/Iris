@@ -14,10 +14,37 @@ namespace Iris.Emulation.GBA
         internal UInt16 DISPSTAT;
         internal UInt16 DISPCNT;
         internal UInt16 VCOUNT;
-        internal UInt16 BLDCNT;
+        
         internal UInt16 BG0CNT;
+        internal UInt16 BG1CNT;
+        internal UInt16 BG2CNT;
+        internal UInt16 BG3CNT;
+
         internal UInt16 BG0HOFS;
         internal UInt16 BG0VOFS;
+
+        internal UInt16 BG1HOFS;
+        internal UInt16 BG1VOFS;
+
+        internal UInt16 BG2HOFS;
+        internal UInt16 BG2VOFS;
+
+        internal UInt16 BG3HOFS;
+        internal UInt16 BG3VOFS;
+
+        internal UInt16 WIN0H;
+        internal UInt16 WIN1H;
+
+        internal UInt16 WIN0V;
+        internal UInt16 WIN1V;
+
+        internal UInt16 WININ;
+        internal UInt16 WINOUT;
+
+        internal UInt16 MOSAIC;
+        internal UInt16 BLDCNT;
+        internal UInt16 BLDALPHA;
+        internal UInt16 BLDY;
 
         private const UInt32 ScreenWidth = 240;
         private const UInt32 ScreenHeight = 160;

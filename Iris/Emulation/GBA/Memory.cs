@@ -164,8 +164,29 @@ namespace Iris.Emulation.GBA
                             0x006 => GetLowByte(_ppu.VCOUNT),
                             0x007 => GetHighByte(_ppu.VCOUNT),
 
+                            0x008 => GetLowByte(_ppu.BG0CNT),
+                            0x009 => GetHighByte(_ppu.BG0CNT),
+
+                            0x00a => GetLowByte(_ppu.BG1CNT),
+                            0x00b => GetHighByte(_ppu.BG1CNT),
+
+                            0x00c => GetLowByte(_ppu.BG2CNT),
+                            0x00d => GetHighByte(_ppu.BG2CNT),
+
+                            0x00e => GetLowByte(_ppu.BG3CNT),
+                            0x00f => GetHighByte(_ppu.BG3CNT),
+
+                            0x048 => GetLowByte(_ppu.WININ),
+                            0x049 => GetHighByte(_ppu.WININ),
+
+                            0x04a => GetLowByte(_ppu.WINOUT),
+                            0x04b => GetHighByte(_ppu.WINOUT),
+
                             0x050 => GetLowByte(_ppu.BLDCNT),
                             0x051 => GetHighByte(_ppu.BLDCNT),
+
+                            0x052 => GetLowByte(_ppu.BLDALPHA),
+                            0x053 => GetHighByte(_ppu.BLDALPHA),
 
                             0x088 => GetLowByte(_SOUNDBIAS),
                             0x089 => GetHighByte(_SOUNDBIAS),
@@ -304,7 +325,14 @@ namespace Iris.Emulation.GBA
                             0x000 => _ppu.DISPCNT,
                             0x004 => _ppu.DISPSTAT,
                             0x006 => _ppu.VCOUNT,
+                            0x008 => _ppu.BG0CNT,
+                            0x00a => _ppu.BG1CNT,
+                            0x00c => _ppu.BG2CNT,
+                            0x00e => _ppu.BG3CNT,
+                            0x048 => _ppu.WININ,
+                            0x04a => _ppu.WINOUT,
                             0x050 => _ppu.BLDCNT,
+                            0x052 => _ppu.BLDALPHA,
                             0x088 => _SOUNDBIAS,
                             0x0ba => _DMA0CNT_H,
                             0x0c6 => _DMA1CNT_H,
@@ -490,122 +518,6 @@ namespace Iris.Emulation.GBA
             }
 
             // page fault
-
-            //        case 0x008:
-            //            _ppu.BG0CNT = (UInt16)((_ppu.BG0CNT & 0xff00) | value);
-            //            break;
-            //        case 0x009:
-            //            _ppu.BG0CNT = (UInt16)((_ppu.BG0CNT & 0x00ff) | (value << 8));
-            //            break;
-
-            //        case 0x00a:
-            //        case 0x00b:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to BG1CNT register unimplemented");
-            //            break;
-
-            //        case 0x00c:
-            //        case 0x00d:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to BG2CNT register unimplemented");
-            //            break;
-
-            //        case 0x00e:
-            //        case 0x00f:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to BG3CNT register unimplemented");
-            //            break;
-
-            //        case 0x010:
-            //            _ppu.BG0HOFS = (UInt16)((_ppu.BG0HOFS & 0xff00) | value);
-            //            break;
-            //        case 0x011:
-            //            _ppu.BG0HOFS = (UInt16)((_ppu.BG0HOFS & 0x00ff) | (value << 8));
-            //            break;
-
-            //        case 0x012:
-            //            _ppu.BG0VOFS = (UInt16)((_ppu.BG0VOFS & 0xff00) | value);
-            //            break;
-            //        case 0x013:
-            //            _ppu.BG0VOFS = (UInt16)((_ppu.BG0VOFS & 0x00ff) | (value << 8));
-            //            break;
-
-            //        case 0x014:
-            //        case 0x015:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to BG1HOFS register unimplemented");
-            //            break;
-
-            //        case 0x016:
-            //        case 0x017:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to BG1VOFS register unimplemented");
-            //            break;
-
-            //        case 0x018:
-            //        case 0x019:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to BG2HOFS register unimplemented");
-            //            break;
-
-            //        case 0x01a:
-            //        case 0x01b:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to BG2VOFS register unimplemented");
-            //            break;
-
-            //        case 0x01c:
-            //        case 0x01d:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to BG3HOFS register unimplemented");
-            //            break;
-
-            //        case 0x01e:
-            //        case 0x01f:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to BG3VOFS register unimplemented");
-            //            break;
-
-            //        case 0x040:
-            //        case 0x041:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to WIN0H register unimplemented");
-            //            break;
-
-            //        case 0x042:
-            //        case 0x043:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to WIN1H register unimplemented");
-            //            break;
-
-            //        case 0x044:
-            //        case 0x045:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to WIN0V register unimplemented");
-            //            break;
-
-            //        case 0x046:
-            //        case 0x047:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to WIN1V register unimplemented");
-            //            break;
-
-            //        case 0x048:
-            //        case 0x049:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to WININ register unimplemented");
-            //            break;
-
-            //        case 0x04a:
-            //        case 0x04b:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to WINOUT register unimplemented");
-            //            break;
-
-            //        case 0x04c:
-            //        case 0x04d:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to MOSAIC register unimplemented");
-            //            break;
-
-            //        case 0x050:
-            //        case 0x051:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to BLDCNT register unimplemented");
-            //            break;
-
-            //        case 0x052:
-            //        case 0x053:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to BLDALPHA register unimplemented");
-            //            break;
-
-            //        case 0x054:
-            //        case 0x055:
-            //            // Console.WriteLine("Emulation.GBA.Core: Write to BLDY register unimplemented");
-            //            break;
 
             //        case 0x062:
             //        case 0x063:
@@ -861,11 +773,158 @@ namespace Iris.Emulation.GBA
                                 SetHighByte(ref _ppu.DISPSTAT, value);
                                 break;
 
+                            case 0x008:
+                                SetLowByte(ref _ppu.BG0CNT, value);
+                                break;
+                            case 0x009:
+                                SetHighByte(ref _ppu.BG0CNT, value);
+                                break;
+
+                            case 0x00a:
+                                SetLowByte(ref _ppu.BG1CNT, value);
+                                break;
+                            case 0x00b:
+                                SetHighByte(ref _ppu.BG1CNT, value);
+                                break;
+
+                            case 0x00c:
+                                SetLowByte(ref _ppu.BG2CNT, value);
+                                break;
+                            case 0x00d:
+                                SetHighByte(ref _ppu.BG2CNT, value);
+                                break;
+
+                            case 0x00e:
+                                SetLowByte(ref _ppu.BG3CNT, value);
+                                break;
+                            case 0x00f:
+                                SetHighByte(ref _ppu.BG3CNT, value);
+                                break;
+
+                            case 0x010:
+                                SetLowByte(ref _ppu.BG0HOFS, value);
+                                break;
+                            case 0x011:
+                                SetHighByte(ref _ppu.BG0HOFS, value);
+                                break;
+
+                            case 0x012:
+                                SetLowByte(ref _ppu.BG0VOFS, value);
+                                break;
+                            case 0x013:
+                                SetHighByte(ref _ppu.BG0VOFS, value);
+                                break;
+
+                            case 0x014:
+                                SetLowByte(ref _ppu.BG1HOFS, value);
+                                break;
+                            case 0x015:
+                                SetHighByte(ref _ppu.BG1HOFS, value);
+                                break;
+
+                            case 0x016:
+                                SetLowByte(ref _ppu.BG1VOFS, value);
+                                break;
+                            case 0x017:
+                                SetHighByte(ref _ppu.BG1VOFS, value);
+                                break;
+
+                            case 0x018:
+                                SetLowByte(ref _ppu.BG2HOFS, value);
+                                break;
+                            case 0x019:
+                                SetHighByte(ref _ppu.BG2HOFS, value);
+                                break;
+
+                            case 0x01a:
+                                SetLowByte(ref _ppu.BG2VOFS, value);
+                                break;
+                            case 0x01b:
+                                SetHighByte(ref _ppu.BG2VOFS, value);
+                                break;
+
+                            case 0x01c:
+                                SetLowByte(ref _ppu.BG3HOFS, value);
+                                break;
+                            case 0x01d:
+                                SetHighByte(ref _ppu.BG3HOFS, value);
+                                break;
+
+                            case 0x01e:
+                                SetLowByte(ref _ppu.BG3VOFS, value);
+                                break;
+                            case 0x01f:
+                                SetHighByte(ref _ppu.BG3VOFS, value);
+                                break;
+
+                            case 0x040:
+                                SetLowByte(ref _ppu.WIN0H, value);
+                                break;
+                            case 0x041:
+                                SetHighByte(ref _ppu.WIN0H, value);
+                                break;
+
+                            case 0x042:
+                                SetLowByte(ref _ppu.WIN1H, value);
+                                break;
+                            case 0x043:
+                                SetHighByte(ref _ppu.WIN1H, value);
+                                break;
+
+                            case 0x044:
+                                SetLowByte(ref _ppu.WIN0V, value);
+                                break;
+                            case 0x045:
+                                SetHighByte(ref _ppu.WIN0V, value);
+                                break;
+
+                            case 0x046:
+                                SetLowByte(ref _ppu.WIN1V, value);
+                                break;
+                            case 0x047:
+                                SetHighByte(ref _ppu.WIN1V, value);
+                                break;
+
+                            case 0x048:
+                                SetLowByte(ref _ppu.WININ, value);
+                                break;
+                            case 0x049:
+                                SetHighByte(ref _ppu.WININ, value);
+                                break;
+
+                            case 0x04a:
+                                SetLowByte(ref _ppu.WINOUT, value);
+                                break;
+                            case 0x04b:
+                                SetHighByte(ref _ppu.WINOUT, value);
+                                break;
+
+                            case 0x04c:
+                                SetLowByte(ref _ppu.MOSAIC, value);
+                                break;
+                            case 0x04d:
+                                SetHighByte(ref _ppu.MOSAIC, value);
+                                break;
+
                             case 0x050:
                                 SetLowByte(ref _ppu.BLDCNT, value);
                                 break;
                             case 0x051:
                                 SetHighByte(ref _ppu.BLDCNT, value);
+                                break;
+
+                            case 0x052:
+                                SetLowByte(ref _ppu.BLDALPHA, value);
+                                break;
+                            case 0x053:
+                                SetHighByte(ref _ppu.BLDALPHA, value);
+                                break;
+
+                            case 0x054:
+                                SetLowByte(ref _ppu.BLDY, value);
+                                break;
+                            case 0x055:
+                                SetHighByte(ref _ppu.BLDY, value);
                                 break;
 
                             case 0x088:
@@ -1037,8 +1096,71 @@ namespace Iris.Emulation.GBA
                             case 0x004:
                                 _ppu.DISPSTAT = value;
                                 break;
+                            case 0x008:
+                                _ppu.BG0CNT = value;
+                                break;
+                            case 0x00a:
+                                _ppu.BG1CNT = value;
+                                break;
+                            case 0x00c:
+                                _ppu.BG2CNT = value;
+                                break;
+                            case 0x00e:
+                                _ppu.BG3CNT = value;
+                                break;
+                            case 0x010:
+                                _ppu.BG0HOFS = value;
+                                break;
+                            case 0x012:
+                                _ppu.BG0VOFS = value;
+                                break;
+                            case 0x014:
+                                _ppu.BG1HOFS = value;
+                                break;
+                            case 0x016:
+                                _ppu.BG1VOFS = value;
+                                break;
+                            case 0x018:
+                                _ppu.BG2HOFS = value;
+                                break;
+                            case 0x01a:
+                                _ppu.BG2VOFS = value;
+                                break;
+                            case 0x01c:
+                                _ppu.BG3HOFS = value;
+                                break;
+                            case 0x01e:
+                                _ppu.BG3VOFS = value;
+                                break;
+                            case 0x040:
+                                _ppu.WIN0H = value;
+                                break;
+                            case 0x042:
+                                _ppu.WIN1H = value;
+                                break;
+                            case 0x044:
+                                _ppu.WIN0V = value;
+                                break;
+                            case 0x046:
+                                _ppu.WIN1V = value;
+                                break;
+                            case 0x048:
+                                _ppu.WININ = value;
+                                break;
+                            case 0x04a:
+                                _ppu.WINOUT = value;
+                                break;
+                            case 0x04c:
+                                _ppu.MOSAIC = value;
+                                break;
                             case 0x050:
                                 _ppu.BLDCNT = value;
+                                break;
+                            case 0x052:
+                                _ppu.BLDALPHA = value;
+                                break;
+                            case 0x054:
+                                _ppu.BLDY = value;
                                 break;
                             case 0x088:
                                 _SOUNDBIAS = value;
