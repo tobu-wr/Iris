@@ -17,7 +17,7 @@
         };
 
         private readonly CPU.Core _CPU;
-        private readonly PPU _ppu;
+        private readonly PPU _PPU;
 
         private UInt16 _SOUND1CNT_H;
         private UInt16 _SOUND1CNT_X;
@@ -56,10 +56,10 @@
         private UInt16 _DMA2CNT_L;
         private UInt16 _DMA2CNT_H;
 
-        private UInt16 _DMA3SAD_L;
-        private UInt16 _DMA3SAD_H;
-        private UInt16 _DMA3DAD_L;
-        private UInt16 _DMA3DAD_H;
+        //private UInt16 _DMA3SAD_L;
+        //private UInt16 _DMA3SAD_H;
+        //private UInt16 _DMA3DAD_L;
+        //private UInt16 _DMA3DAD_H;
         private UInt16 _DMA3CNT_H;
 
         private UInt16 _TM0CNT_L;
@@ -115,7 +115,7 @@
             };
 
             _CPU = new(CPU.Core.Architecture.ARMv4T, cpuCallbackInterface);
-            _ppu = new(ppuCallbackInterface);
+            _PPU = new(ppuCallbackInterface);
 
             InitPageTables();
         }
@@ -165,7 +165,7 @@
             while (_running)
             {
                 _CPU.Step();
-                _ppu.Step();
+                _PPU.Step();
             }
         }
 

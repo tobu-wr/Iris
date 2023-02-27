@@ -99,9 +99,9 @@ namespace Iris.Emulation.GBA
         {
             MapMemory(_eWRAM, 256, 0x0200_0000, 0x0300_0000, MemoryFlag.All);
             MapMemory(_iWRAM, 32, 0x0300_0000, 0x0400_0000, MemoryFlag.All);
-            MapMemory(_ppu.PaletteRAM, 1, 0x0500_0000, 0x0600_0000, MemoryFlag.All & ~(MemoryFlag.Read8 | MemoryFlag.Write8));
-            MapMemory(_ppu.VRAM, 96, 0x0600_0000, 0x0700_0000, MemoryFlag.All & ~(MemoryFlag.Read8 | MemoryFlag.Write8));
-            MapMemory(_ppu.OAM, 1, 0x0700_0000, 0x0800_0000, MemoryFlag.All & ~(MemoryFlag.Read8 | MemoryFlag.Write8));
+            MapMemory(_PPU.PaletteRAM, 1, 0x0500_0000, 0x0600_0000, MemoryFlag.All & ~(MemoryFlag.Read8 | MemoryFlag.Write8));
+            MapMemory(_PPU.VRAM, 96, 0x0600_0000, 0x0700_0000, MemoryFlag.All & ~(MemoryFlag.Read8 | MemoryFlag.Write8));
+            MapMemory(_PPU.OAM, 1, 0x0700_0000, 0x0800_0000, MemoryFlag.All & ~(MemoryFlag.Read8 | MemoryFlag.Write8));
             MapMemory(_SRAM, 64, 0x0e00_0000, 0x1000_0000, MemoryFlag.Read8 | MemoryFlag.Write8 | MemoryFlag.Mirrored);
         }
 
@@ -155,38 +155,38 @@ namespace Iris.Emulation.GBA
 
                         return offset switch
                         {
-                            0x000 => GetLowByte(_ppu.DISPCNT),
-                            0x001 => GetHighByte(_ppu.DISPCNT),
+                            0x000 => GetLowByte(_PPU.DISPCNT),
+                            0x001 => GetHighByte(_PPU.DISPCNT),
 
-                            0x004 => GetLowByte(_ppu.DISPSTAT),
-                            0x005 => GetHighByte(_ppu.DISPSTAT),
+                            0x004 => GetLowByte(_PPU.DISPSTAT),
+                            0x005 => GetHighByte(_PPU.DISPSTAT),
 
-                            0x006 => GetLowByte(_ppu.VCOUNT),
-                            0x007 => GetHighByte(_ppu.VCOUNT),
+                            0x006 => GetLowByte(_PPU.VCOUNT),
+                            0x007 => GetHighByte(_PPU.VCOUNT),
 
-                            0x008 => GetLowByte(_ppu.BG0CNT),
-                            0x009 => GetHighByte(_ppu.BG0CNT),
+                            0x008 => GetLowByte(_PPU.BG0CNT),
+                            0x009 => GetHighByte(_PPU.BG0CNT),
 
-                            0x00a => GetLowByte(_ppu.BG1CNT),
-                            0x00b => GetHighByte(_ppu.BG1CNT),
+                            0x00a => GetLowByte(_PPU.BG1CNT),
+                            0x00b => GetHighByte(_PPU.BG1CNT),
 
-                            0x00c => GetLowByte(_ppu.BG2CNT),
-                            0x00d => GetHighByte(_ppu.BG2CNT),
+                            0x00c => GetLowByte(_PPU.BG2CNT),
+                            0x00d => GetHighByte(_PPU.BG2CNT),
 
-                            0x00e => GetLowByte(_ppu.BG3CNT),
-                            0x00f => GetHighByte(_ppu.BG3CNT),
+                            0x00e => GetLowByte(_PPU.BG3CNT),
+                            0x00f => GetHighByte(_PPU.BG3CNT),
 
-                            0x048 => GetLowByte(_ppu.WININ),
-                            0x049 => GetHighByte(_ppu.WININ),
+                            0x048 => GetLowByte(_PPU.WININ),
+                            0x049 => GetHighByte(_PPU.WININ),
 
-                            0x04a => GetLowByte(_ppu.WINOUT),
-                            0x04b => GetHighByte(_ppu.WINOUT),
+                            0x04a => GetLowByte(_PPU.WINOUT),
+                            0x04b => GetHighByte(_PPU.WINOUT),
 
-                            0x050 => GetLowByte(_ppu.BLDCNT),
-                            0x051 => GetHighByte(_ppu.BLDCNT),
+                            0x050 => GetLowByte(_PPU.BLDCNT),
+                            0x051 => GetHighByte(_PPU.BLDCNT),
 
-                            0x052 => GetLowByte(_ppu.BLDALPHA),
-                            0x053 => GetHighByte(_ppu.BLDALPHA),
+                            0x052 => GetLowByte(_PPU.BLDALPHA),
+                            0x053 => GetHighByte(_PPU.BLDALPHA),
 
                             0x062 => GetLowByte(_SOUND1CNT_H),
                             0x063 => GetHighByte(_SOUND1CNT_H),
@@ -385,17 +385,17 @@ namespace Iris.Emulation.GBA
 
                         return offset switch
                         {
-                            0x000 => _ppu.DISPCNT,
-                            0x004 => _ppu.DISPSTAT,
-                            0x006 => _ppu.VCOUNT,
-                            0x008 => _ppu.BG0CNT,
-                            0x00a => _ppu.BG1CNT,
-                            0x00c => _ppu.BG2CNT,
-                            0x00e => _ppu.BG3CNT,
-                            0x048 => _ppu.WININ,
-                            0x04a => _ppu.WINOUT,
-                            0x050 => _ppu.BLDCNT,
-                            0x052 => _ppu.BLDALPHA,
+                            0x000 => _PPU.DISPCNT,
+                            0x004 => _PPU.DISPSTAT,
+                            0x006 => _PPU.VCOUNT,
+                            0x008 => _PPU.BG0CNT,
+                            0x00a => _PPU.BG1CNT,
+                            0x00c => _PPU.BG2CNT,
+                            0x00e => _PPU.BG3CNT,
+                            0x048 => _PPU.WININ,
+                            0x04a => _PPU.WINOUT,
+                            0x050 => _PPU.BLDCNT,
+                            0x052 => _PPU.BLDALPHA,
                             0x062 => _SOUND1CNT_H,
                             0x064 => _SOUND1CNT_X,
                             0x068 => _SOUND2CNT_L,
@@ -521,7 +521,7 @@ namespace Iris.Emulation.GBA
 
                         return offset switch
                         {
-                            0x004 => (UInt32)((_ppu.VCOUNT << 16) | _ppu.DISPSTAT),
+                            0x004 => (UInt32)((_PPU.VCOUNT << 16) | _PPU.DISPSTAT),
                             0x0c4 => (UInt32)(_DMA1CNT_H << 16),
                             0x0d0 => (UInt32)(_DMA2CNT_H << 16),
                             0x200 => (UInt32)((_IF << 16) | _IE),
@@ -620,171 +620,171 @@ namespace Iris.Emulation.GBA
                         switch (offset)
                         {
                             case 0x000:
-                                SetLowByte(ref _ppu.DISPCNT, value);
+                                SetLowByte(ref _PPU.DISPCNT, value);
                                 break;
                             case 0x001:
-                                SetHighByte(ref _ppu.DISPCNT, value);
+                                SetHighByte(ref _PPU.DISPCNT, value);
                                 break;
 
                             case 0x004:
-                                SetLowByte(ref _ppu.DISPSTAT, value);
+                                SetLowByte(ref _PPU.DISPSTAT, value);
                                 break;
                             case 0x005:
-                                SetHighByte(ref _ppu.DISPSTAT, value);
+                                SetHighByte(ref _PPU.DISPSTAT, value);
                                 break;
 
                             case 0x008:
-                                SetLowByte(ref _ppu.BG0CNT, value);
+                                SetLowByte(ref _PPU.BG0CNT, value);
                                 break;
                             case 0x009:
-                                SetHighByte(ref _ppu.BG0CNT, value);
+                                SetHighByte(ref _PPU.BG0CNT, value);
                                 break;
 
                             case 0x00a:
-                                SetLowByte(ref _ppu.BG1CNT, value);
+                                SetLowByte(ref _PPU.BG1CNT, value);
                                 break;
                             case 0x00b:
-                                SetHighByte(ref _ppu.BG1CNT, value);
+                                SetHighByte(ref _PPU.BG1CNT, value);
                                 break;
 
                             case 0x00c:
-                                SetLowByte(ref _ppu.BG2CNT, value);
+                                SetLowByte(ref _PPU.BG2CNT, value);
                                 break;
                             case 0x00d:
-                                SetHighByte(ref _ppu.BG2CNT, value);
+                                SetHighByte(ref _PPU.BG2CNT, value);
                                 break;
 
                             case 0x00e:
-                                SetLowByte(ref _ppu.BG3CNT, value);
+                                SetLowByte(ref _PPU.BG3CNT, value);
                                 break;
                             case 0x00f:
-                                SetHighByte(ref _ppu.BG3CNT, value);
+                                SetHighByte(ref _PPU.BG3CNT, value);
                                 break;
 
                             case 0x010:
-                                SetLowByte(ref _ppu.BG0HOFS, value);
+                                SetLowByte(ref _PPU.BG0HOFS, value);
                                 break;
                             case 0x011:
-                                SetHighByte(ref _ppu.BG0HOFS, value);
+                                SetHighByte(ref _PPU.BG0HOFS, value);
                                 break;
 
                             case 0x012:
-                                SetLowByte(ref _ppu.BG0VOFS, value);
+                                SetLowByte(ref _PPU.BG0VOFS, value);
                                 break;
                             case 0x013:
-                                SetHighByte(ref _ppu.BG0VOFS, value);
+                                SetHighByte(ref _PPU.BG0VOFS, value);
                                 break;
 
                             case 0x014:
-                                SetLowByte(ref _ppu.BG1HOFS, value);
+                                SetLowByte(ref _PPU.BG1HOFS, value);
                                 break;
                             case 0x015:
-                                SetHighByte(ref _ppu.BG1HOFS, value);
+                                SetHighByte(ref _PPU.BG1HOFS, value);
                                 break;
 
                             case 0x016:
-                                SetLowByte(ref _ppu.BG1VOFS, value);
+                                SetLowByte(ref _PPU.BG1VOFS, value);
                                 break;
                             case 0x017:
-                                SetHighByte(ref _ppu.BG1VOFS, value);
+                                SetHighByte(ref _PPU.BG1VOFS, value);
                                 break;
 
                             case 0x018:
-                                SetLowByte(ref _ppu.BG2HOFS, value);
+                                SetLowByte(ref _PPU.BG2HOFS, value);
                                 break;
                             case 0x019:
-                                SetHighByte(ref _ppu.BG2HOFS, value);
+                                SetHighByte(ref _PPU.BG2HOFS, value);
                                 break;
 
                             case 0x01a:
-                                SetLowByte(ref _ppu.BG2VOFS, value);
+                                SetLowByte(ref _PPU.BG2VOFS, value);
                                 break;
                             case 0x01b:
-                                SetHighByte(ref _ppu.BG2VOFS, value);
+                                SetHighByte(ref _PPU.BG2VOFS, value);
                                 break;
 
                             case 0x01c:
-                                SetLowByte(ref _ppu.BG3HOFS, value);
+                                SetLowByte(ref _PPU.BG3HOFS, value);
                                 break;
                             case 0x01d:
-                                SetHighByte(ref _ppu.BG3HOFS, value);
+                                SetHighByte(ref _PPU.BG3HOFS, value);
                                 break;
 
                             case 0x01e:
-                                SetLowByte(ref _ppu.BG3VOFS, value);
+                                SetLowByte(ref _PPU.BG3VOFS, value);
                                 break;
                             case 0x01f:
-                                SetHighByte(ref _ppu.BG3VOFS, value);
+                                SetHighByte(ref _PPU.BG3VOFS, value);
                                 break;
 
                             case 0x040:
-                                SetLowByte(ref _ppu.WIN0H, value);
+                                SetLowByte(ref _PPU.WIN0H, value);
                                 break;
                             case 0x041:
-                                SetHighByte(ref _ppu.WIN0H, value);
+                                SetHighByte(ref _PPU.WIN0H, value);
                                 break;
 
                             case 0x042:
-                                SetLowByte(ref _ppu.WIN1H, value);
+                                SetLowByte(ref _PPU.WIN1H, value);
                                 break;
                             case 0x043:
-                                SetHighByte(ref _ppu.WIN1H, value);
+                                SetHighByte(ref _PPU.WIN1H, value);
                                 break;
 
                             case 0x044:
-                                SetLowByte(ref _ppu.WIN0V, value);
+                                SetLowByte(ref _PPU.WIN0V, value);
                                 break;
                             case 0x045:
-                                SetHighByte(ref _ppu.WIN0V, value);
+                                SetHighByte(ref _PPU.WIN0V, value);
                                 break;
 
                             case 0x046:
-                                SetLowByte(ref _ppu.WIN1V, value);
+                                SetLowByte(ref _PPU.WIN1V, value);
                                 break;
                             case 0x047:
-                                SetHighByte(ref _ppu.WIN1V, value);
+                                SetHighByte(ref _PPU.WIN1V, value);
                                 break;
 
                             case 0x048:
-                                SetLowByte(ref _ppu.WININ, value);
+                                SetLowByte(ref _PPU.WININ, value);
                                 break;
                             case 0x049:
-                                SetHighByte(ref _ppu.WININ, value);
+                                SetHighByte(ref _PPU.WININ, value);
                                 break;
 
                             case 0x04a:
-                                SetLowByte(ref _ppu.WINOUT, value);
+                                SetLowByte(ref _PPU.WINOUT, value);
                                 break;
                             case 0x04b:
-                                SetHighByte(ref _ppu.WINOUT, value);
+                                SetHighByte(ref _PPU.WINOUT, value);
                                 break;
 
                             case 0x04c:
-                                SetLowByte(ref _ppu.MOSAIC, value);
+                                SetLowByte(ref _PPU.MOSAIC, value);
                                 break;
                             case 0x04d:
-                                SetHighByte(ref _ppu.MOSAIC, value);
+                                SetHighByte(ref _PPU.MOSAIC, value);
                                 break;
 
                             case 0x050:
-                                SetLowByte(ref _ppu.BLDCNT, value);
+                                SetLowByte(ref _PPU.BLDCNT, value);
                                 break;
                             case 0x051:
-                                SetHighByte(ref _ppu.BLDCNT, value);
+                                SetHighByte(ref _PPU.BLDCNT, value);
                                 break;
 
                             case 0x052:
-                                SetLowByte(ref _ppu.BLDALPHA, value);
+                                SetLowByte(ref _PPU.BLDALPHA, value);
                                 break;
                             case 0x053:
-                                SetHighByte(ref _ppu.BLDALPHA, value);
+                                SetHighByte(ref _PPU.BLDALPHA, value);
                                 break;
 
                             case 0x054:
-                                SetLowByte(ref _ppu.BLDY, value);
+                                SetLowByte(ref _PPU.BLDY, value);
                                 break;
                             case 0x055:
-                                SetHighByte(ref _ppu.BLDY, value);
+                                SetHighByte(ref _PPU.BLDY, value);
                                 break;
 
                             case 0x062:
@@ -1168,76 +1168,76 @@ namespace Iris.Emulation.GBA
                         switch (offset)
                         {
                             case 0x000:
-                                _ppu.DISPCNT = value;
+                                _PPU.DISPCNT = value;
                                 break;
                             case 0x004:
-                                _ppu.DISPSTAT = value;
+                                _PPU.DISPSTAT = value;
                                 break;
                             case 0x008:
-                                _ppu.BG0CNT = value;
+                                _PPU.BG0CNT = value;
                                 break;
                             case 0x00a:
-                                _ppu.BG1CNT = value;
+                                _PPU.BG1CNT = value;
                                 break;
                             case 0x00c:
-                                _ppu.BG2CNT = value;
+                                _PPU.BG2CNT = value;
                                 break;
                             case 0x00e:
-                                _ppu.BG3CNT = value;
+                                _PPU.BG3CNT = value;
                                 break;
                             case 0x010:
-                                _ppu.BG0HOFS = value;
+                                _PPU.BG0HOFS = value;
                                 break;
                             case 0x012:
-                                _ppu.BG0VOFS = value;
+                                _PPU.BG0VOFS = value;
                                 break;
                             case 0x014:
-                                _ppu.BG1HOFS = value;
+                                _PPU.BG1HOFS = value;
                                 break;
                             case 0x016:
-                                _ppu.BG1VOFS = value;
+                                _PPU.BG1VOFS = value;
                                 break;
                             case 0x018:
-                                _ppu.BG2HOFS = value;
+                                _PPU.BG2HOFS = value;
                                 break;
                             case 0x01a:
-                                _ppu.BG2VOFS = value;
+                                _PPU.BG2VOFS = value;
                                 break;
                             case 0x01c:
-                                _ppu.BG3HOFS = value;
+                                _PPU.BG3HOFS = value;
                                 break;
                             case 0x01e:
-                                _ppu.BG3VOFS = value;
+                                _PPU.BG3VOFS = value;
                                 break;
                             case 0x040:
-                                _ppu.WIN0H = value;
+                                _PPU.WIN0H = value;
                                 break;
                             case 0x042:
-                                _ppu.WIN1H = value;
+                                _PPU.WIN1H = value;
                                 break;
                             case 0x044:
-                                _ppu.WIN0V = value;
+                                _PPU.WIN0V = value;
                                 break;
                             case 0x046:
-                                _ppu.WIN1V = value;
+                                _PPU.WIN1V = value;
                                 break;
                             case 0x048:
-                                _ppu.WININ = value;
+                                _PPU.WININ = value;
                                 break;
                             case 0x04a:
-                                _ppu.WINOUT = value;
+                                _PPU.WINOUT = value;
                                 break;
                             case 0x04c:
-                                _ppu.MOSAIC = value;
+                                _PPU.MOSAIC = value;
                                 break;
                             case 0x050:
-                                _ppu.BLDCNT = value;
+                                _PPU.BLDCNT = value;
                                 break;
                             case 0x052:
-                                _ppu.BLDALPHA = value;
+                                _PPU.BLDALPHA = value;
                                 break;
                             case 0x054:
-                                _ppu.BLDY = value;
+                                _PPU.BLDY = value;
                                 break;
                             case 0x062:
                                 _SOUND1CNT_H = value;
@@ -1433,7 +1433,7 @@ namespace Iris.Emulation.GBA
                         switch (offset)
                         {
                             case 0x000:
-                                _ppu.DISPCNT = (UInt16)value;
+                                _PPU.DISPCNT = (UInt16)value;
                                 // 16 upper bits are undocumented (green swap register)
                                 break;
                             case 0x0bc:
