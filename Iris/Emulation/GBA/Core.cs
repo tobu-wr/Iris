@@ -16,7 +16,7 @@
             L = 9,
         };
 
-        private readonly CPU.Core _cpu;
+        private readonly CPU.Core _CPU;
         private readonly PPU _ppu;
 
         private UInt16 _SOUND1CNT_H;
@@ -114,7 +114,7 @@
                 RequestVBlankInterrupt = RequestVBlankInterrupt
             };
 
-            _cpu = new(CPU.Core.Architecture.ARMv4T, cpuCallbackInterface);
+            _CPU = new(CPU.Core.Architecture.ARMv4T, cpuCallbackInterface);
             _ppu = new(ppuCallbackInterface);
 
             InitPageTables();
@@ -150,7 +150,7 @@
             _WAITCNT = 0;
             _IME = 0;
 
-            _cpu.NIRQ = CPU.Core.Signal.High;
+            _CPU.NIRQ = CPU.Core.Signal.High;
         }
 
         internal bool IsRunning()
@@ -164,7 +164,7 @@
 
             while (_running)
             {
-                _cpu.Step();
+                _CPU.Step();
                 _ppu.Step();
             }
         }
@@ -191,13 +191,13 @@
             if (_IME == 1)
             {
                 if ((_IE & _IF & 1) != 0) // VBlank
-                    _cpu.NIRQ = CPU.Core.Signal.Low;
+                    _CPU.NIRQ = CPU.Core.Signal.Low;
                 else
-                    _cpu.NIRQ = CPU.Core.Signal.High;
+                    _CPU.NIRQ = CPU.Core.Signal.High;
             }
             else
             {
-                _cpu.NIRQ = CPU.Core.Signal.High;
+                _CPU.NIRQ = CPU.Core.Signal.High;
             }
         }
     }
