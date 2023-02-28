@@ -625,7 +625,7 @@ namespace Iris.Emulation.CPU
 
         private static void ARM_UNKNOWN(Core cpu, UInt32 instruction)
         {
-            throw new Exception(string.Format("Emulation.CPU.Core: Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, cpu.NextInstructionAddress - 4));
+            throw new Exception(string.Format("Emulation.CPU.Core.ARM: Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, cpu.NextInstructionAddress - 4));
         }
 
         private static void ARM_ADC(Core cpu, UInt32 instruction)
