@@ -4,7 +4,8 @@ Iris is a GameBoy Advance emulator (and maybe DS in the future).
 
 ## Features
 
-TBD
+- Complete CPU emulation
+- TBD
 
 ## Tested games
 
