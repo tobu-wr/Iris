@@ -209,13 +209,13 @@ namespace Iris.UserInterface
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
             if (KeyMapping.TryGetValue(e.KeyCode, out Emulation.GBA.Core.Keys value))
-                _GBA.SetKeyStatus(value, true);
+                _GBA.SetKeyStatus(value, Emulation.GBA.Core.KeyStatus.Input);
         }
 
         private void MainWindow_KeyUp(object sender, KeyEventArgs e)
         {
             if (KeyMapping.TryGetValue(e.KeyCode, out Emulation.GBA.Core.Keys value))
-                _GBA.SetKeyStatus(value, false);
+                _GBA.SetKeyStatus(value, Emulation.GBA.Core.KeyStatus.NoInput);
         }
 
         private void PerformanceUpdateTimer_Elapsed(object? sender, ElapsedEventArgs e)
