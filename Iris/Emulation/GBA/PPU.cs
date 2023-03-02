@@ -14,7 +14,7 @@ namespace Iris.Emulation.GBA
         internal UInt16 DISPSTAT;
         internal UInt16 DISPCNT;
         internal UInt16 VCOUNT;
-        
+
         internal UInt16 BG0CNT;
         internal UInt16 BG1CNT;
         internal UInt16 BG2CNT;
@@ -54,10 +54,10 @@ namespace Iris.Emulation.GBA
         internal struct CallbackInterface
         {
             internal delegate void DrawFrame_Delegate(UInt16[] frameBuffer);
-            internal delegate void RequestInterrupt_Delegate();
+            internal delegate void RequestInterrupt_Delegate(Core.Interrupt interrupt);
 
             internal DrawFrame_Delegate DrawFrame;
-            internal RequestInterrupt_Delegate RequestVBlankInterrupt;
+            internal RequestInterrupt_Delegate RequestInterrupt;
         }
 
         private readonly CallbackInterface _callbackInterface;
@@ -156,7 +156,7 @@ namespace Iris.Emulation.GBA
                 }
 
                 if ((DISPSTAT & 0x0008) != 0)
-                    _callbackInterface.RequestVBlankInterrupt();
+                    _callbackInterface.RequestInterrupt(Core.Interrupt.VBlank);
 
                 DISPSTAT |= 1;
                 ++_cycleCounter;
