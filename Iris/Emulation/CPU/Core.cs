@@ -36,7 +36,7 @@
             High
         }
 
-        private enum Flags
+        private enum Flag
         {
             V = 28,
             C = 29,
@@ -240,12 +240,12 @@
             }
         }
 
-        private UInt32 GetFlag(Flags flag)
+        private UInt32 GetFlag(Flag flag)
         {
             return (CPSR >> (int)flag) & 1;
         }
 
-        private void SetFlag(Flags flag, UInt32 value)
+        private void SetFlag(Flag flag, UInt32 value)
         {
             CPSR = (CPSR & ~(1u << (int)flag)) | (value << (int)flag);
         }
@@ -255,33 +255,33 @@
             return cond switch
             {
                 // EQ
-                0b0000 => GetFlag(Flags.Z) == 1,
+                0b0000 => GetFlag(Flag.Z) == 1,
                 // NE
-                0b0001 => GetFlag(Flags.Z) == 0,
+                0b0001 => GetFlag(Flag.Z) == 0,
                 // CS/HS
-                0b0010 => GetFlag(Flags.C) == 1,
+                0b0010 => GetFlag(Flag.C) == 1,
                 // CC/LO
-                0b0011 => GetFlag(Flags.C) == 0,
+                0b0011 => GetFlag(Flag.C) == 0,
                 // MI
-                0b0100 => GetFlag(Flags.N) == 1,
+                0b0100 => GetFlag(Flag.N) == 1,
                 // PL
-                0b0101 => GetFlag(Flags.N) == 0,
+                0b0101 => GetFlag(Flag.N) == 0,
                 // VS
-                0b0110 => GetFlag(Flags.V) == 1,
+                0b0110 => GetFlag(Flag.V) == 1,
                 // VC
-                0b0111 => GetFlag(Flags.V) == 0,
+                0b0111 => GetFlag(Flag.V) == 0,
                 // HI
-                0b1000 => (GetFlag(Flags.C) == 1) && (GetFlag(Flags.Z) == 0),
+                0b1000 => (GetFlag(Flag.C) == 1) && (GetFlag(Flag.Z) == 0),
                 // LS
-                0b1001 => (GetFlag(Flags.C) == 0) || (GetFlag(Flags.Z) == 1),
+                0b1001 => (GetFlag(Flag.C) == 0) || (GetFlag(Flag.Z) == 1),
                 // GE
-                0b1010 => GetFlag(Flags.N) == GetFlag(Flags.V),
+                0b1010 => GetFlag(Flag.N) == GetFlag(Flag.V),
                 // LT
-                0b1011 => GetFlag(Flags.N) != GetFlag(Flags.V),
+                0b1011 => GetFlag(Flag.N) != GetFlag(Flag.V),
                 // GT
-                0b1100 => (GetFlag(Flags.Z) == 0) && (GetFlag(Flags.N) == GetFlag(Flags.V)),
+                0b1100 => (GetFlag(Flag.Z) == 0) && (GetFlag(Flag.N) == GetFlag(Flag.V)),
                 // LE
-                0b1101 => (GetFlag(Flags.Z) == 1) || (GetFlag(Flags.N) != GetFlag(Flags.V)),
+                0b1101 => (GetFlag(Flag.Z) == 1) || (GetFlag(Flag.N) != GetFlag(Flag.V)),
                 // AL
                 0b1110 => true,
                 // NV

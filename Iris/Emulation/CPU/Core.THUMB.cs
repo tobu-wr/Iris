@@ -232,15 +232,15 @@ namespace Iris.Emulation.CPU
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             UInt32 leftOperand = cpu.Reg[rd];
-            UInt64 rightOperand = (UInt64)cpu.Reg[rm] + (UInt64)cpu.GetFlag(Flags.C);
+            UInt64 rightOperand = (UInt64)cpu.Reg[rm] + (UInt64)cpu.GetFlag(Flag.C);
 
             UInt64 result = (UInt64)leftOperand + rightOperand;
             cpu.Reg[rd] = (UInt32)result;
 
-            cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-            cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
-            cpu.SetFlag(Flags.C, CarryFrom(result));
-            cpu.SetFlag(Flags.V, OverflowFrom_Addition(leftOperand, (UInt32)rightOperand, cpu.Reg[rd]));
+            cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+            cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+            cpu.SetFlag(Flag.C, CarryFrom(result));
+            cpu.SetFlag(Flag.V, OverflowFrom_Addition(leftOperand, (UInt32)rightOperand, cpu.Reg[rd]));
         }
 
         private static void THUMB_ADD1(Core cpu, UInt16 instruction)
@@ -255,10 +255,10 @@ namespace Iris.Emulation.CPU
             UInt64 result = (UInt64)leftOperand + (UInt64)rightOperand;
             cpu.Reg[rd] = (UInt32)result;
 
-            cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-            cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
-            cpu.SetFlag(Flags.C, CarryFrom(result));
-            cpu.SetFlag(Flags.V, OverflowFrom_Addition(leftOperand, rightOperand, cpu.Reg[rd]));
+            cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+            cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+            cpu.SetFlag(Flag.C, CarryFrom(result));
+            cpu.SetFlag(Flag.V, OverflowFrom_Addition(leftOperand, rightOperand, cpu.Reg[rd]));
         }
 
         private static void THUMB_ADD2(Core cpu, UInt16 instruction)
@@ -272,10 +272,10 @@ namespace Iris.Emulation.CPU
             UInt64 result = (UInt64)leftOperand + (UInt64)rightOperand;
             cpu.Reg[rd] = (UInt32)result;
 
-            cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-            cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
-            cpu.SetFlag(Flags.C, CarryFrom(result));
-            cpu.SetFlag(Flags.V, OverflowFrom_Addition(leftOperand, rightOperand, cpu.Reg[rd]));
+            cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+            cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+            cpu.SetFlag(Flag.C, CarryFrom(result));
+            cpu.SetFlag(Flag.V, OverflowFrom_Addition(leftOperand, rightOperand, cpu.Reg[rd]));
         }
 
         private static void THUMB_ADD3(Core cpu, UInt16 instruction)
@@ -290,10 +290,10 @@ namespace Iris.Emulation.CPU
             UInt64 result = (UInt64)leftOperand + (UInt64)rightOperand;
             cpu.Reg[rd] = (UInt32)result;
 
-            cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-            cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
-            cpu.SetFlag(Flags.C, CarryFrom(result));
-            cpu.SetFlag(Flags.V, OverflowFrom_Addition(leftOperand, rightOperand, cpu.Reg[rd]));
+            cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+            cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+            cpu.SetFlag(Flag.C, CarryFrom(result));
+            cpu.SetFlag(Flag.V, OverflowFrom_Addition(leftOperand, rightOperand, cpu.Reg[rd]));
         }
 
         private static void THUMB_ADD4(Core cpu, UInt16 instruction)
@@ -339,8 +339,8 @@ namespace Iris.Emulation.CPU
 
             cpu.Reg[rd] &= cpu.Reg[rm];
 
-            cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-            cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+            cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+            cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
         private static void THUMB_ASR1(Core cpu, UInt16 instruction)
@@ -353,17 +353,17 @@ namespace Iris.Emulation.CPU
 
             if (shiftAmount == 0)
             {
-                cpu.SetFlag(Flags.C, cpu.Reg[rm] >> 31);
+                cpu.SetFlag(Flag.C, cpu.Reg[rm] >> 31);
                 cpu.Reg[rd] = ((cpu.Reg[rm] >> 31) == 0) ? 0 : 0xffff_ffff;
             }
             else
             {
-                cpu.SetFlag(Flags.C, (cpu.Reg[rm] >> (shiftAmount - 1)) & 1);
+                cpu.SetFlag(Flag.C, (cpu.Reg[rm] >> (shiftAmount - 1)) & 1);
                 cpu.Reg[rd] = ArithmeticShiftRight(cpu.Reg[rm], shiftAmount);
             }
 
-            cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-            cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+            cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+            cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
         private static void THUMB_ASR2(Core cpu, UInt16 instruction)
@@ -379,17 +379,17 @@ namespace Iris.Emulation.CPU
             }
             else if (shiftAmount < 32)
             {
-                cpu.SetFlag(Flags.C, (cpu.Reg[rd] >> (shiftAmount - 1)) & 1);
+                cpu.SetFlag(Flag.C, (cpu.Reg[rd] >> (shiftAmount - 1)) & 1);
                 cpu.Reg[rd] = ArithmeticShiftRight(cpu.Reg[rd], shiftAmount);
             }
             else
             {
-                cpu.SetFlag(Flags.C, cpu.Reg[rd] >> 31);
+                cpu.SetFlag(Flag.C, cpu.Reg[rd] >> 31);
                 cpu.Reg[rd] = ((cpu.Reg[rd] >> 31) == 0) ? 0 : 0xffff_ffff;
             }
 
-            cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-            cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+            cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+            cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
         private static void THUMB_B1(Core cpu, UInt16 instruction)
@@ -415,8 +415,8 @@ namespace Iris.Emulation.CPU
 
             cpu.Reg[rd] &= ~cpu.Reg[rm];
 
-            cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-            cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+            cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+            cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
         private static void THUMB_BL(Core cpu, UInt16 instruction)
@@ -460,10 +460,10 @@ namespace Iris.Emulation.CPU
             UInt64 result = (UInt64)leftOperand + (UInt64)rightOperand;
             UInt32 aluOut = (UInt32)result;
 
-            cpu.SetFlag(Flags.N, aluOut >> 31);
-            cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
-            cpu.SetFlag(Flags.C, CarryFrom(result));
-            cpu.SetFlag(Flags.V, OverflowFrom_Addition(leftOperand, rightOperand, aluOut));
+            cpu.SetFlag(Flag.N, aluOut >> 31);
+            cpu.SetFlag(Flag.Z, (aluOut == 0) ? 1u : 0u);
+            cpu.SetFlag(Flag.C, CarryFrom(result));
+            cpu.SetFlag(Flag.V, OverflowFrom_Addition(leftOperand, rightOperand, aluOut));
         }
 
         private static void THUMB_CMP1(Core cpu, UInt16 instruction)
@@ -476,10 +476,10 @@ namespace Iris.Emulation.CPU
 
             UInt32 aluOut = leftOperand - rightOperand;
 
-            cpu.SetFlag(Flags.N, aluOut >> 31);
-            cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
-            cpu.SetFlag(Flags.C, Not(BorrowFrom(leftOperand, rightOperand)));
-            cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(leftOperand, rightOperand, aluOut));
+            cpu.SetFlag(Flag.N, aluOut >> 31);
+            cpu.SetFlag(Flag.Z, (aluOut == 0) ? 1u : 0u);
+            cpu.SetFlag(Flag.C, Not(BorrowFrom(leftOperand, rightOperand)));
+            cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, rightOperand, aluOut));
         }
 
         private static void THUMB_CMP2(Core cpu, UInt16 instruction)
@@ -492,10 +492,10 @@ namespace Iris.Emulation.CPU
 
             UInt32 aluOut = leftOperand - rightOperand;
 
-            cpu.SetFlag(Flags.N, aluOut >> 31);
-            cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
-            cpu.SetFlag(Flags.C, Not(BorrowFrom(leftOperand, rightOperand)));
-            cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(leftOperand, rightOperand, aluOut));
+            cpu.SetFlag(Flag.N, aluOut >> 31);
+            cpu.SetFlag(Flag.Z, (aluOut == 0) ? 1u : 0u);
+            cpu.SetFlag(Flag.C, Not(BorrowFrom(leftOperand, rightOperand)));
+            cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, rightOperand, aluOut));
         }
 
         private static void THUMB_CMP3(Core cpu, UInt16 instruction)
@@ -513,10 +513,10 @@ namespace Iris.Emulation.CPU
 
             UInt32 aluOut = leftOperand - rightOperand;
 
-            cpu.SetFlag(Flags.N, aluOut >> 31);
-            cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
-            cpu.SetFlag(Flags.C, Not(BorrowFrom(leftOperand, rightOperand)));
-            cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(leftOperand, rightOperand, aluOut));
+            cpu.SetFlag(Flag.N, aluOut >> 31);
+            cpu.SetFlag(Flag.Z, (aluOut == 0) ? 1u : 0u);
+            cpu.SetFlag(Flag.C, Not(BorrowFrom(leftOperand, rightOperand)));
+            cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, rightOperand, aluOut));
         }
 
         private static void THUMB_EOR(Core cpu, UInt16 instruction)
@@ -526,8 +526,8 @@ namespace Iris.Emulation.CPU
 
             cpu.Reg[rd] ^= cpu.Reg[rm];
 
-            cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-            cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+            cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+            cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
         private static void THUMB_LDMIA(Core cpu, UInt16 instruction)
@@ -688,12 +688,12 @@ namespace Iris.Emulation.CPU
             }
             else
             {
-                cpu.SetFlag(Flags.C, (cpu.Reg[rm] >> (32 - shiftAmount)) & 1);
+                cpu.SetFlag(Flag.C, (cpu.Reg[rm] >> (32 - shiftAmount)) & 1);
                 cpu.Reg[rd] = cpu.Reg[rm] << shiftAmount;
             }
 
-            cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-            cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+            cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+            cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
         private static void THUMB_LSL2(Core cpu, UInt16 instruction)
@@ -709,22 +709,22 @@ namespace Iris.Emulation.CPU
             }
             else if (shiftAmount < 32)
             {
-                cpu.SetFlag(Flags.C, (cpu.Reg[rd] >> (32 - shiftAmount)) & 1);
+                cpu.SetFlag(Flag.C, (cpu.Reg[rd] >> (32 - shiftAmount)) & 1);
                 cpu.Reg[rd] = cpu.Reg[rd] << shiftAmount;
             }
             else if (shiftAmount == 32)
             {
-                cpu.SetFlag(Flags.C, cpu.Reg[rd] & 1);
+                cpu.SetFlag(Flag.C, cpu.Reg[rd] & 1);
                 cpu.Reg[rd] = 0;
             }
             else
             {
-                cpu.SetFlag(Flags.C, 0);
+                cpu.SetFlag(Flag.C, 0);
                 cpu.Reg[rd] = 0;
             }
 
-            cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-            cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+            cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+            cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
         private static void THUMB_LSR1(Core cpu, UInt16 instruction)
@@ -737,17 +737,17 @@ namespace Iris.Emulation.CPU
 
             if (shiftAmount == 0)
             {
-                cpu.SetFlag(Flags.C, cpu.Reg[rm] >> 31);
+                cpu.SetFlag(Flag.C, cpu.Reg[rm] >> 31);
                 cpu.Reg[rd] = 0;
             }
             else
             {
-                cpu.SetFlag(Flags.C, (cpu.Reg[rm] >> (shiftAmount - 1)) & 1);
+                cpu.SetFlag(Flag.C, (cpu.Reg[rm] >> (shiftAmount - 1)) & 1);
                 cpu.Reg[rd] = cpu.Reg[rm] >> shiftAmount;
             }
 
-            cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-            cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+            cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+            cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
         private static void THUMB_LSR2(Core cpu, UInt16 instruction)
@@ -763,22 +763,22 @@ namespace Iris.Emulation.CPU
             }
             else if (shiftAmount < 32)
             {
-                cpu.SetFlag(Flags.C, (cpu.Reg[rd] >> (shiftAmount - 1)) & 1);
+                cpu.SetFlag(Flag.C, (cpu.Reg[rd] >> (shiftAmount - 1)) & 1);
                 cpu.Reg[rd] = cpu.Reg[rd] >> shiftAmount;
             }
             else if (shiftAmount == 32)
             {
-                cpu.SetFlag(Flags.C, cpu.Reg[rd] >> 31);
+                cpu.SetFlag(Flag.C, cpu.Reg[rd] >> 31);
                 cpu.Reg[rd] = 0;
             }
             else
             {
-                cpu.SetFlag(Flags.C, 0);
+                cpu.SetFlag(Flag.C, 0);
                 cpu.Reg[rd] = 0;
             }
 
-            cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-            cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+            cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+            cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
         private static void THUMB_MOV1(Core cpu, UInt16 instruction)
@@ -788,8 +788,8 @@ namespace Iris.Emulation.CPU
 
             cpu.Reg[rd] = imm;
 
-            cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-            cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+            cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+            cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
         private static void THUMB_MOV3(Core cpu, UInt16 instruction)
@@ -812,8 +812,8 @@ namespace Iris.Emulation.CPU
 
             cpu.Reg[rd] *= cpu.Reg[rm];
 
-            cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-            cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+            cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+            cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
         private static void THUMB_MVN(Core cpu, UInt16 instruction)
@@ -823,8 +823,8 @@ namespace Iris.Emulation.CPU
 
             cpu.Reg[rd] = ~cpu.Reg[rm];
 
-            cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-            cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+            cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+            cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
         private static void THUMB_NEG(Core cpu, UInt16 instruction)
@@ -837,10 +837,10 @@ namespace Iris.Emulation.CPU
 
             cpu.Reg[rd] = leftOperand - rightOperand;
 
-            cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-            cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
-            cpu.SetFlag(Flags.C, Not(BorrowFrom(leftOperand, rightOperand)));
-            cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(leftOperand, rightOperand, cpu.Reg[rd]));
+            cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+            cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+            cpu.SetFlag(Flag.C, Not(BorrowFrom(leftOperand, rightOperand)));
+            cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, rightOperand, cpu.Reg[rd]));
         }
 
         private static void THUMB_ORR(Core cpu, UInt16 instruction)
@@ -850,8 +850,8 @@ namespace Iris.Emulation.CPU
 
             cpu.Reg[rd] |= cpu.Reg[rm];
 
-            cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-            cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+            cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+            cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
         private static void THUMB_POP(Core cpu, UInt16 instruction)
@@ -907,16 +907,16 @@ namespace Iris.Emulation.CPU
             }
             else if ((cpu.Reg[rs] & 0b1_1111) == 0)
             {
-                cpu.SetFlag(Flags.C, cpu.Reg[rd] >> 31);
+                cpu.SetFlag(Flag.C, cpu.Reg[rd] >> 31);
             }
             else
             {
-                cpu.SetFlag(Flags.C, (cpu.Reg[rd] >> (int)((cpu.Reg[rs] & 0b1_1111) - 1)) & 1);
+                cpu.SetFlag(Flag.C, (cpu.Reg[rd] >> (int)((cpu.Reg[rs] & 0b1_1111) - 1)) & 1);
                 cpu.Reg[rd] = BitOperations.RotateRight(cpu.Reg[rd], (int)(cpu.Reg[rs] & 0b1_1111));
             }
 
-            cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-            cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+            cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+            cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
         private static void THUMB_SBC(Core cpu, UInt16 instruction)
@@ -925,14 +925,14 @@ namespace Iris.Emulation.CPU
             UInt16 rd = (UInt16)(instruction & 0b111);
 
             UInt32 leftOperand = cpu.Reg[rd];
-            UInt64 rightOperand = (UInt64)cpu.Reg[rm] + (UInt64)Not(cpu.GetFlag(Flags.C));
+            UInt64 rightOperand = (UInt64)cpu.Reg[rm] + (UInt64)Not(cpu.GetFlag(Flag.C));
 
             cpu.Reg[rd] = leftOperand - (UInt32)rightOperand;
 
-            cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-            cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
-            cpu.SetFlag(Flags.C, Not(BorrowFrom(leftOperand, rightOperand)));
-            cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(leftOperand, (UInt32)rightOperand, cpu.Reg[rd]));
+            cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+            cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+            cpu.SetFlag(Flag.C, Not(BorrowFrom(leftOperand, rightOperand)));
+            cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, (UInt32)rightOperand, cpu.Reg[rd]));
         }
 
         private static void THUMB_STMIA(Core cpu, UInt16 instruction)
@@ -1047,10 +1047,10 @@ namespace Iris.Emulation.CPU
 
             cpu.Reg[rd] = leftOperand - rightOperand;
 
-            cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-            cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
-            cpu.SetFlag(Flags.C, Not(BorrowFrom(leftOperand, rightOperand)));
-            cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(leftOperand, rightOperand, cpu.Reg[rd]));
+            cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+            cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+            cpu.SetFlag(Flag.C, Not(BorrowFrom(leftOperand, rightOperand)));
+            cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, rightOperand, cpu.Reg[rd]));
         }
 
         private static void THUMB_SUB2(Core cpu, UInt16 instruction)
@@ -1063,10 +1063,10 @@ namespace Iris.Emulation.CPU
 
             cpu.Reg[rd] = leftOperand - rightOperand;
 
-            cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-            cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
-            cpu.SetFlag(Flags.C, Not(BorrowFrom(leftOperand, rightOperand)));
-            cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(leftOperand, rightOperand, cpu.Reg[rd]));
+            cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+            cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+            cpu.SetFlag(Flag.C, Not(BorrowFrom(leftOperand, rightOperand)));
+            cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, rightOperand, cpu.Reg[rd]));
         }
 
         private static void THUMB_SUB3(Core cpu, UInt16 instruction)
@@ -1080,10 +1080,10 @@ namespace Iris.Emulation.CPU
 
             cpu.Reg[rd] = leftOperand - rightOperand;
 
-            cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-            cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
-            cpu.SetFlag(Flags.C, Not(BorrowFrom(leftOperand, rightOperand)));
-            cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(leftOperand, rightOperand, cpu.Reg[rd]));
+            cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+            cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+            cpu.SetFlag(Flag.C, Not(BorrowFrom(leftOperand, rightOperand)));
+            cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, rightOperand, cpu.Reg[rd]));
         }
 
         private static void THUMB_SUB4(Core cpu, UInt16 instruction)
@@ -1107,8 +1107,8 @@ namespace Iris.Emulation.CPU
 
             UInt32 aluOut = cpu.Reg[rn] & cpu.Reg[rm];
 
-            cpu.SetFlag(Flags.N, aluOut >> 31);
-            cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
+            cpu.SetFlag(Flag.N, aluOut >> 31);
+            cpu.SetFlag(Flag.Z, (aluOut == 0) ? 1u : 0u);
         }
     }
 }

@@ -285,7 +285,7 @@ namespace Iris.Emulation.CPU
                 UInt32 imm = instruction & 0xff;
 
                 shifterOperand = BitOperations.RotateRight(imm, (int)(rotateImm * 2));
-                shifterCarryOut = (rotateImm == 0) ? GetFlag(Flags.C) : (shifterOperand >> 31);
+                shifterCarryOut = (rotateImm == 0) ? GetFlag(Flag.C) : (shifterOperand >> 31);
             }
             else
             {
@@ -306,7 +306,7 @@ namespace Iris.Emulation.CPU
                             if (shiftAmount == 0)
                             {
                                 shifterOperand = value;
-                                shifterCarryOut = GetFlag(Flags.C);
+                                shifterCarryOut = GetFlag(Flag.C);
                             }
                             else
                             {
@@ -341,7 +341,7 @@ namespace Iris.Emulation.CPU
                         case 0b11: // Rotate right
                             if (shiftAmount == 0)
                             {
-                                shifterOperand = (GetFlag(Flags.C) << 31) | (value >> 1);
+                                shifterOperand = (GetFlag(Flag.C) << 31) | (value >> 1);
                                 shifterCarryOut = value & 1;
                             }
                             else
@@ -365,7 +365,7 @@ namespace Iris.Emulation.CPU
                             if (shiftAmount == 0)
                             {
                                 shifterOperand = value;
-                                shifterCarryOut = GetFlag(Flags.C);
+                                shifterCarryOut = GetFlag(Flag.C);
                             }
                             else if (shiftAmount < 32)
                             {
@@ -387,7 +387,7 @@ namespace Iris.Emulation.CPU
                             if (shiftAmount == 0)
                             {
                                 shifterOperand = value;
-                                shifterCarryOut = GetFlag(Flags.C);
+                                shifterCarryOut = GetFlag(Flag.C);
                             }
                             else if (shiftAmount < 32)
                             {
@@ -409,7 +409,7 @@ namespace Iris.Emulation.CPU
                             if (shiftAmount == 0)
                             {
                                 shifterOperand = value;
-                                shifterCarryOut = GetFlag(Flags.C);
+                                shifterCarryOut = GetFlag(Flag.C);
                             }
                             else if (shiftAmount < 32)
                             {
@@ -426,7 +426,7 @@ namespace Iris.Emulation.CPU
                             if (shiftAmount == 0)
                             {
                                 shifterOperand = value;
-                                shifterCarryOut = GetFlag(Flags.C);
+                                shifterCarryOut = GetFlag(Flag.C);
                             }
                             else if ((shiftAmount & 0b1_1111) == 0)
                             {
@@ -494,7 +494,7 @@ namespace Iris.Emulation.CPU
                             break;
                         case 0b11:
                             if (shiftImm == 0) // RRX
-                                index = (GetFlag(Flags.C) << 31) | (Reg[rm] >> 1);
+                                index = (GetFlag(Flag.C) << 31) | (Reg[rm] >> 1);
                             else // ROR
                                 index = BitOperations.RotateRight(Reg[rm], (int)shiftImm);
                             break;
@@ -639,7 +639,7 @@ namespace Iris.Emulation.CPU
             (UInt32 shifterOperand, _) = cpu.GetShifterOperand(instruction);
 
             UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (cpu.Reg[PC] + 4) : cpu.Reg[rn];
-            UInt64 rightOperand = (UInt64)shifterOperand + (UInt64)cpu.GetFlag(Flags.C);
+            UInt64 rightOperand = (UInt64)shifterOperand + (UInt64)cpu.GetFlag(Flag.C);
 
             UInt64 result = (UInt64)leftOperand + rightOperand;
             cpu.ARM_SetReg(rd, (UInt32)result);
@@ -652,10 +652,10 @@ namespace Iris.Emulation.CPU
                 }
                 else
                 {
-                    cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
-                    cpu.SetFlag(Flags.C, CarryFrom(result));
-                    cpu.SetFlag(Flags.V, OverflowFrom_Addition(leftOperand, (UInt32)rightOperand, cpu.Reg[rd]));
+                    cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+                    cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flag.C, CarryFrom(result));
+                    cpu.SetFlag(Flag.V, OverflowFrom_Addition(leftOperand, (UInt32)rightOperand, cpu.Reg[rd]));
                 }
             }
         }
@@ -684,10 +684,10 @@ namespace Iris.Emulation.CPU
                 }
                 else
                 {
-                    cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
-                    cpu.SetFlag(Flags.C, CarryFrom(result));
-                    cpu.SetFlag(Flags.V, OverflowFrom_Addition(leftOperand, rightOperand, cpu.Reg[rd]));
+                    cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+                    cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flag.C, CarryFrom(result));
+                    cpu.SetFlag(Flag.V, OverflowFrom_Addition(leftOperand, rightOperand, cpu.Reg[rd]));
                 }
             }
         }
@@ -715,9 +715,9 @@ namespace Iris.Emulation.CPU
                 }
                 else
                 {
-                    cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
-                    cpu.SetFlag(Flags.C, shifterCarryOut);
+                    cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+                    cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flag.C, shifterCarryOut);
                 }
             }
         }
@@ -760,9 +760,9 @@ namespace Iris.Emulation.CPU
                 }
                 else
                 {
-                    cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
-                    cpu.SetFlag(Flags.C, shifterCarryOut);
+                    cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+                    cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flag.C, shifterCarryOut);
                 }
             }
         }
@@ -799,10 +799,10 @@ namespace Iris.Emulation.CPU
             }
             else
             {
-                cpu.SetFlag(Flags.N, aluOut >> 31);
-                cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
-                cpu.SetFlag(Flags.C, CarryFrom(result));
-                cpu.SetFlag(Flags.V, OverflowFrom_Addition(leftOperand, rightOperand, aluOut));
+                cpu.SetFlag(Flag.N, aluOut >> 31);
+                cpu.SetFlag(Flag.Z, (aluOut == 0) ? 1u : 0u);
+                cpu.SetFlag(Flag.C, CarryFrom(result));
+                cpu.SetFlag(Flag.V, OverflowFrom_Addition(leftOperand, rightOperand, aluOut));
             }
         }
 
@@ -829,10 +829,10 @@ namespace Iris.Emulation.CPU
             }
             else
             {
-                cpu.SetFlag(Flags.N, aluOut >> 31);
-                cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
-                cpu.SetFlag(Flags.C, Not(BorrowFrom(leftOperand, rightOperand)));
-                cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(leftOperand, rightOperand, aluOut));
+                cpu.SetFlag(Flag.N, aluOut >> 31);
+                cpu.SetFlag(Flag.Z, (aluOut == 0) ? 1u : 0u);
+                cpu.SetFlag(Flag.C, Not(BorrowFrom(leftOperand, rightOperand)));
+                cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, rightOperand, aluOut));
             }
         }
 
@@ -859,9 +859,9 @@ namespace Iris.Emulation.CPU
                 }
                 else
                 {
-                    cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
-                    cpu.SetFlag(Flags.C, shifterCarryOut);
+                    cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+                    cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flag.C, shifterCarryOut);
                 }
             }
         }
@@ -1018,8 +1018,8 @@ namespace Iris.Emulation.CPU
 
             if (s == 1)
             {
-                cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-                cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+                cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+                cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
             }
         }
 
@@ -1040,9 +1040,9 @@ namespace Iris.Emulation.CPU
                 }
                 else
                 {
-                    cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
-                    cpu.SetFlag(Flags.C, shifterCarryOut);
+                    cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+                    cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flag.C, shifterCarryOut);
                 }
             }
         }
@@ -1111,8 +1111,8 @@ namespace Iris.Emulation.CPU
 
             if (s == 1)
             {
-                cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-                cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+                cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+                cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
             }
         }
 
@@ -1133,9 +1133,9 @@ namespace Iris.Emulation.CPU
                 }
                 else
                 {
-                    cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
-                    cpu.SetFlag(Flags.C, shifterCarryOut);
+                    cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+                    cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flag.C, shifterCarryOut);
                 }
             }
         }
@@ -1163,9 +1163,9 @@ namespace Iris.Emulation.CPU
                 }
                 else
                 {
-                    cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
-                    cpu.SetFlag(Flags.C, shifterCarryOut);
+                    cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+                    cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flag.C, shifterCarryOut);
                 }
             }
         }
@@ -1193,10 +1193,10 @@ namespace Iris.Emulation.CPU
                 }
                 else
                 {
-                    cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
-                    cpu.SetFlag(Flags.C, Not(BorrowFrom(leftOperand, rightOperand)));
-                    cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(leftOperand, rightOperand, cpu.Reg[rd]));
+                    cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+                    cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flag.C, Not(BorrowFrom(leftOperand, rightOperand)));
+                    cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, rightOperand, cpu.Reg[rd]));
                 }
             }
         }
@@ -1213,7 +1213,7 @@ namespace Iris.Emulation.CPU
 
             UInt32 leftOperand = shifterOperand;
             UInt64 rightOperand = (UInt64)(((rn == PC) && (i == 0) && (r == 1)) ? (cpu.Reg[PC] + 4) : cpu.Reg[rn])
-                                + (UInt64)Not(cpu.GetFlag(Flags.C));
+                                + (UInt64)Not(cpu.GetFlag(Flag.C));
 
             cpu.ARM_SetReg(rd, leftOperand - (UInt32)rightOperand);
 
@@ -1225,10 +1225,10 @@ namespace Iris.Emulation.CPU
                 }
                 else
                 {
-                    cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
-                    cpu.SetFlag(Flags.C, Not(BorrowFrom(leftOperand, rightOperand)));
-                    cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(leftOperand, (UInt32)rightOperand, cpu.Reg[rd]));
+                    cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+                    cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flag.C, Not(BorrowFrom(leftOperand, rightOperand)));
+                    cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, (UInt32)rightOperand, cpu.Reg[rd]));
                 }
             }
         }
@@ -1244,7 +1244,7 @@ namespace Iris.Emulation.CPU
             (UInt32 shifterOperand, _) = cpu.GetShifterOperand(instruction);
 
             UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (cpu.Reg[PC] + 4) : cpu.Reg[rn];
-            UInt64 rightOperand = (UInt64)shifterOperand + (UInt64)Not(cpu.GetFlag(Flags.C));
+            UInt64 rightOperand = (UInt64)shifterOperand + (UInt64)Not(cpu.GetFlag(Flag.C));
 
             cpu.ARM_SetReg(rd, leftOperand - (UInt32)rightOperand);
 
@@ -1256,10 +1256,10 @@ namespace Iris.Emulation.CPU
                 }
                 else
                 {
-                    cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
-                    cpu.SetFlag(Flags.C, Not(BorrowFrom(leftOperand, rightOperand)));
-                    cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(leftOperand, (UInt32)rightOperand, cpu.Reg[rd]));
+                    cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+                    cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flag.C, Not(BorrowFrom(leftOperand, rightOperand)));
+                    cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, (UInt32)rightOperand, cpu.Reg[rd]));
                 }
             }
         }
@@ -1280,8 +1280,8 @@ namespace Iris.Emulation.CPU
 
             if (s == 1)
             {
-                cpu.SetFlag(Flags.N, cpu.Reg[rdHi] >> 31);
-                cpu.SetFlag(Flags.Z, ((cpu.Reg[rdHi] == 0) && (cpu.Reg[rdLo] == 0)) ? 1u : 0u);
+                cpu.SetFlag(Flag.N, cpu.Reg[rdHi] >> 31);
+                cpu.SetFlag(Flag.Z, ((cpu.Reg[rdHi] == 0) && (cpu.Reg[rdLo] == 0)) ? 1u : 0u);
             }
         }
 
@@ -1299,8 +1299,8 @@ namespace Iris.Emulation.CPU
 
             if (s == 1)
             {
-                cpu.SetFlag(Flags.N, cpu.Reg[rdHi] >> 31);
-                cpu.SetFlag(Flags.Z, ((cpu.Reg[rdHi] == 0) && (cpu.Reg[rdLo] == 0)) ? 1u : 0u);
+                cpu.SetFlag(Flag.N, cpu.Reg[rdHi] >> 31);
+                cpu.SetFlag(Flag.Z, ((cpu.Reg[rdHi] == 0) && (cpu.Reg[rdLo] == 0)) ? 1u : 0u);
             }
         }
 
@@ -1450,10 +1450,10 @@ namespace Iris.Emulation.CPU
                 }
                 else
                 {
-                    cpu.SetFlag(Flags.N, cpu.Reg[rd] >> 31);
-                    cpu.SetFlag(Flags.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
-                    cpu.SetFlag(Flags.C, Not(BorrowFrom(leftOperand, rightOperand)));
-                    cpu.SetFlag(Flags.V, OverflowFrom_Subtraction(leftOperand, rightOperand, cpu.Reg[rd]));
+                    cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
+                    cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+                    cpu.SetFlag(Flag.C, Not(BorrowFrom(leftOperand, rightOperand)));
+                    cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, rightOperand, cpu.Reg[rd]));
                 }
             }
         }
@@ -1510,9 +1510,9 @@ namespace Iris.Emulation.CPU
             }
             else
             {
-                cpu.SetFlag(Flags.N, aluOut >> 31);
-                cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
-                cpu.SetFlag(Flags.C, shifterCarryOut);
+                cpu.SetFlag(Flag.N, aluOut >> 31);
+                cpu.SetFlag(Flag.Z, (aluOut == 0) ? 1u : 0u);
+                cpu.SetFlag(Flag.C, shifterCarryOut);
             }
         }
 
@@ -1539,9 +1539,9 @@ namespace Iris.Emulation.CPU
             }
             else
             {
-                cpu.SetFlag(Flags.N, aluOut >> 31);
-                cpu.SetFlag(Flags.Z, (aluOut == 0) ? 1u : 0u);
-                cpu.SetFlag(Flags.C, shifterCarryOut);
+                cpu.SetFlag(Flag.N, aluOut >> 31);
+                cpu.SetFlag(Flag.Z, (aluOut == 0) ? 1u : 0u);
+                cpu.SetFlag(Flag.C, shifterCarryOut);
             }
         }
 
@@ -1561,8 +1561,8 @@ namespace Iris.Emulation.CPU
 
             if (s == 1)
             {
-                cpu.SetFlag(Flags.N, cpu.Reg[rdHi] >> 31);
-                cpu.SetFlag(Flags.Z, ((cpu.Reg[rdHi] == 0) && (cpu.Reg[rdLo] == 0)) ? 1u : 0u);
+                cpu.SetFlag(Flag.N, cpu.Reg[rdHi] >> 31);
+                cpu.SetFlag(Flag.Z, ((cpu.Reg[rdHi] == 0) && (cpu.Reg[rdLo] == 0)) ? 1u : 0u);
             }
         }
 
@@ -1580,8 +1580,8 @@ namespace Iris.Emulation.CPU
 
             if (s == 1)
             {
-                cpu.SetFlag(Flags.N, cpu.Reg[rdHi] >> 31);
-                cpu.SetFlag(Flags.Z, ((cpu.Reg[rdHi] == 0) && (cpu.Reg[rdLo] == 0)) ? 1u : 0u);
+                cpu.SetFlag(Flag.N, cpu.Reg[rdHi] >> 31);
+                cpu.SetFlag(Flag.Z, ((cpu.Reg[rdHi] == 0) && (cpu.Reg[rdLo] == 0)) ? 1u : 0u);
             }
         }
     }
