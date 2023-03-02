@@ -2,29 +2,24 @@
 {
     internal sealed partial class Core
     {
+        internal enum Interrupt
+        {
+            VBlank = 1 << 0,
+        }
+
         private UInt16 _IE;
         private UInt16 _IF;
         private UInt16 _IME;
 
-        private void RequestVBlankInterrupt()
+        internal void RequestInterrupt(Interrupt interrupt)
         {
-            _IF |= 1;
+            _IF |= (UInt16)interrupt;
             UpdateInterrupts();
         }
 
         private void UpdateInterrupts()
         {
-            if (_IME == 1)
-            {
-                if ((_IE & _IF & 1) != 0) // VBlank
-                    _CPU.NIRQ = CPU.Core.Signal.Low;
-                else
-                    _CPU.NIRQ = CPU.Core.Signal.High;
-            }
-            else
-            {
-                _CPU.NIRQ = CPU.Core.Signal.High;
-            }
+            _CPU.NIRQ = ((_IME == 0) || (_IE & _IF) == 0) ? CPU.Core.Signal.High : CPU.Core.Signal.Low;
         }
     }
 }
