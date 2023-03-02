@@ -85,12 +85,15 @@ namespace Iris.Emulation.GBA
                             UInt32 characterDataBaseAddress = 0 * 16u * KB;
                             UInt32 screenDataBaseAddress = 30 * 2u * KB;
 
+                            UInt32 xOffset = BG0HOFS & 0x1ffu;
+                            UInt32 yOffset = BG0VOFS & 0x1ffu;
+
                             UInt16[] rendererFrameBuffer = new UInt16[ScreenWidth * ScreenHeight];
                             for (UInt32 i = 0; i < ScreenWidth * ScreenHeight; ++i)
                             {
-                                UInt32 x = i % ScreenWidth;
-                                UInt32 y = i / ScreenWidth;
-                                UInt32 c = ((y / 8) * 32) + (x / 8);
+                                UInt32 x = ((i % ScreenWidth) + xOffset) % 256;
+                                UInt32 y = ((i / ScreenWidth) + yOffset) % 256;
+                                UInt32 c = (((((i % ScreenWidth) + xOffset) % 512) >= 256) ? 0x400u : 0u) + (((y / 8) * 32) + (x / 8));
                                 UInt32 screenDataAddress = screenDataBaseAddress + (c * 2);
 
                                 unsafe
