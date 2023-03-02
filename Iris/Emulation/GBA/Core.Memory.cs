@@ -257,23 +257,23 @@ namespace Iris.Emulation.GBA
                             0x10e => GetLowByte(_TM3CNT_H),
                             0x10f => GetHighByte(_TM3CNT_H),
 
-                            0x120 => GetLowByte(_SIOMULTI0),
-                            0x121 => GetHighByte(_SIOMULTI0),
+                            0x120 => GetLowByte(_SIODATA0),
+                            0x121 => GetHighByte(_SIODATA0),
 
-                            0x122 => GetLowByte(_SIOMULTI1),
-                            0x123 => GetHighByte(_SIOMULTI1),
+                            0x122 => GetLowByte(_SIODATA1),
+                            0x123 => GetHighByte(_SIODATA1),
 
-                            0x124 => GetLowByte(_SIOMULTI2),
-                            0x125 => GetHighByte(_SIOMULTI2),
+                            0x124 => GetLowByte(_SIODATA2),
+                            0x125 => GetHighByte(_SIODATA2),
 
-                            0x126 => GetLowByte(_SIOMULTI3),
-                            0x127 => GetHighByte(_SIOMULTI3),
+                            0x126 => GetLowByte(_SIODATA3),
+                            0x127 => GetHighByte(_SIODATA3),
 
                             0x128 => GetLowByte(_SIOCNT),
                             0x129 => GetHighByte(_SIOCNT),
 
-                            0x12a => GetLowByte(_SIODATA8),
-                            0x12b => GetHighByte(_SIODATA8),
+                            0x12a => GetLowByte(_SIODATA_SEND),
+                            0x12b => GetHighByte(_SIODATA_SEND),
 
                             0x130 => GetLowByte(_KEYINPUT),
                             0x131 => GetHighByte(_KEYINPUT),
@@ -1019,31 +1019,31 @@ namespace Iris.Emulation.GBA
                                 break;
 
                             case 0x120:
-                                SetLowByte(ref _SIOMULTI0, value);
+                                SetLowByte(ref _SIODATA0, value);
                                 break;
                             case 0x121:
-                                SetHighByte(ref _SIOMULTI0, value);
+                                SetHighByte(ref _SIODATA0, value);
                                 break;
 
                             case 0x122:
-                                SetLowByte(ref _SIOMULTI1, value);
+                                SetLowByte(ref _SIODATA1, value);
                                 break;
                             case 0x123:
-                                SetHighByte(ref _SIOMULTI1, value);
+                                SetHighByte(ref _SIODATA1, value);
                                 break;
 
                             case 0x124:
-                                SetLowByte(ref _SIOMULTI2, value);
+                                SetLowByte(ref _SIODATA2, value);
                                 break;
                             case 0x125:
-                                SetHighByte(ref _SIOMULTI2, value);
+                                SetHighByte(ref _SIODATA2, value);
                                 break;
 
                             case 0x126:
-                                SetLowByte(ref _SIOMULTI3, value);
+                                SetLowByte(ref _SIODATA3, value);
                                 break;
                             case 0x127:
-                                SetHighByte(ref _SIOMULTI3, value);
+                                SetHighByte(ref _SIODATA3, value);
                                 break;
 
                             case 0x128:
@@ -1054,10 +1054,10 @@ namespace Iris.Emulation.GBA
                                 break;
 
                             case 0x12a:
-                                SetLowByte(ref _SIODATA8, value);
+                                SetLowByte(ref _SIODATA_SEND, value);
                                 break;
                             case 0x12b:
-                                SetHighByte(ref _SIODATA8, value);
+                                SetHighByte(ref _SIODATA_SEND, value);
                                 break;
 
                             case 0x130:
@@ -1339,22 +1339,22 @@ namespace Iris.Emulation.GBA
                                 _TM3CNT_H = value;
                                 break;
                             case 0x120:
-                                _SIOMULTI0 = value;
+                                _SIODATA0 = value;
                                 break;
                             case 0x122:
-                                _SIOMULTI1 = value;
+                                _SIODATA1 = value;
                                 break;
                             case 0x124:
-                                _SIOMULTI2 = value;
+                                _SIODATA2 = value;
                                 break;
                             case 0x126:
-                                _SIOMULTI3 = value;
+                                _SIODATA3 = value;
                                 break;
                             case 0x128:
                                 _SIOCNT = value;
                                 break;
                             case 0x12a:
-                                _SIODATA8 = value;
+                                _SIODATA_SEND = value;
                                 break;
                             case 0x130:
                                 _KEYINPUT = value;
