@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Drawing;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Iris.Emulation.GBA
@@ -80,48 +81,38 @@ namespace Iris.Emulation.GBA
                 {
                     case 0b000:
                         {
-                            UInt16 bg0 = (UInt16)((DISPCNT >> 8) & 1);
-                            UInt16 bg1 = (UInt16)((DISPCNT >> 9) & 1);
-                            UInt16 bg2 = (UInt16)((DISPCNT >> 10) & 1);
-                            UInt16 bg3 = (UInt16)((DISPCNT >> 11) & 1);
-                            UInt16 obj = (UInt16)((DISPCNT >> 12) & 1);
-
-                            if (bg0 == 1)
-                            {
-                                //UInt16 virtualScreenSize = (UInt16)((BG0CNT >> 14) & 0b11);
-                                //UInt32 virtualScreenWidth = ((virtualScreenSize & 0b01) == 0) ? 256u : 512u;
-                                //UInt32 virtualScreenHeight = ((virtualScreenSize & 0b10) == 0) ? 256u : 512u;
-
-                                //UInt32 hOffset = BG0HOFS & 0x1ffu;
-                                //UInt32 vOffset = BG0VOFS & 0x1ffu;
-
-                                //UInt16 charBaseBlock = (UInt16)((BG0CNT >> 2) & 0b11);
-                                //UInt16 screenBaseBlock = (UInt16)((BG0CNT >> 8) & 0x1f);
-
-                                //UInt32 screenDataBaseAddress = screenBaseBlock * 2u * KB;
-
-                                //UInt16[] rendererFrameBuffer = new UInt16[ScreenWidth * ScreenHeight];
-                                //for (UInt32 i = 0; i < ScreenWidth * ScreenHeight; ++i)
-                                //{
-                                //    UInt32 hPixel = (i % ScreenWidth) + hOffset;
-                                //    UInt32 vPixel = (i / ScreenWidth) + vOffset;
-                                //    UInt32 hBlock = hPixel / 8;
-                                //    UInt32 vBlock = vPixel / 8;
-                                //    UInt32 blockNumber = vBlock * (virtualScreenWidth / 8) + hBlock;
-                                //    UInt32 screenDataAddress = screenDataBaseAddress + blockNumber * 2;
-                                //    UInt16 screenData = (UInt16)((VRAM[screenDataAddress + 1] << 8) | VRAM[screenDataAddress]);
-                                //    UInt16 characterNumber = (UInt16)(screenData & 0x3ff);
-
-
-
-                                //    UInt32 hPixelInBlock = hPixel % 8;
-                                //    UInt32 vPixelInBlock = vPixel % 8;
-                                //}
-
-                                //_callbackInterface.DrawFrame(rendererFrameBuffer);
-                            }
+                            // bg0, cbb=0, sbb=30, 4bpp, 512x256px, x=0,y=0
+                            UInt32 characterDataBaseAddress = 0 * 16u * KB;
+                            UInt32 screenDataBaseAddress = 30 * 2u * KB;
 
                             UInt16[] rendererFrameBuffer = new UInt16[ScreenWidth * ScreenHeight];
+                            for (UInt32 i = 0; i < ScreenWidth * ScreenHeight; ++i)
+                            {
+                                UInt32 x = i % ScreenWidth;
+                                UInt32 y = i / ScreenWidth;
+                                UInt32 c = ((y / 8) * 32) + (x / 8);
+                                UInt32 screenDataAddress = screenDataBaseAddress + (c * 2);
+
+                                unsafe
+                                {
+                                    UInt16 screenData = Unsafe.Read<UInt16>((Byte*)VRAM + screenDataAddress);
+                                    UInt16 palette = (UInt16)(screenData >> 12);
+                                    UInt16 character = (UInt16)(screenData & 0x3ff);
+                                    UInt32 characterDataAddress = (UInt32)(characterDataBaseAddress + (character * 32) + ((y % 8) * 4) + ((x % 8) / 2));
+                                    Byte characterData = Unsafe.Read<Byte>((Byte*)VRAM + characterDataAddress);
+
+                                    Byte colorNo = characterData;
+                                    if (((x % 8) % 2) == 0)
+                                        colorNo &= 0xf;
+                                    else
+                                        colorNo >>= 4;
+
+                                    UInt32 paletteAddress = palette * 16u * 2u;
+                                    UInt16 color = Unsafe.Read<UInt16>((Byte*)PaletteRAM + paletteAddress + (colorNo * 2));
+                                    rendererFrameBuffer[i] = color;
+                                }
+                            }
+
                             _callbackInterface.DrawFrame(rendererFrameBuffer);
                             break;
                         }
