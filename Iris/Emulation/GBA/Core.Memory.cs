@@ -43,13 +43,13 @@ namespace Iris.Emulation.GBA
             int startTablePageIndex = (int)(startAddress >> 10);
             int endPageTableIndex = (int)(endAddress >> 10);
 
-            bool readable8 = (flags & MemoryFlag.Read8) == MemoryFlag.Read8;
-            bool readable16 = (flags & MemoryFlag.Read16) == MemoryFlag.Read16;
-            bool readable32 = (flags & MemoryFlag.Read32) == MemoryFlag.Read32;
-            bool writable8 = (flags & MemoryFlag.Write8) == MemoryFlag.Write8;
-            bool writable16 = (flags & MemoryFlag.Write16) == MemoryFlag.Write16;
-            bool writable32 = (flags & MemoryFlag.Write32) == MemoryFlag.Write32;
-            bool mirrored = (flags & MemoryFlag.Mirrored) == MemoryFlag.Mirrored;
+            bool readable8 = flags.HasFlag(MemoryFlag.Read8);
+            bool readable16 = flags.HasFlag(MemoryFlag.Read16);
+            bool readable32 = flags.HasFlag(MemoryFlag.Read32);
+            bool writable8 = flags.HasFlag(MemoryFlag.Write8);
+            bool writable16 = flags.HasFlag(MemoryFlag.Write16);
+            bool writable32 = flags.HasFlag(MemoryFlag.Write32);
+            bool mirrored = flags.HasFlag(MemoryFlag.Mirrored);
 
             for (int pageTableIndex = startTablePageIndex, pageIndex = 0; pageTableIndex != endPageTableIndex; ++pageTableIndex, ++pageIndex)
             {
