@@ -100,11 +100,26 @@ namespace Iris.Emulation.GBA
                                 {
                                     UInt16 screenData = Unsafe.Read<UInt16>((Byte*)VRAM + screenDataAddress);
                                     UInt16 palette = (UInt16)(screenData >> 12);
+                                    UInt16 verticalFlip = (UInt16)((screenData >> 11) & 1);
+                                    UInt16 horizontalFlip = (UInt16)((screenData >> 10) & 1);
                                     UInt16 character = (UInt16)(screenData & 0x3ff);
-                                    UInt32 characterDataAddress = (UInt32)(characterDataBaseAddress + (character * 32) + ((y % 8) * 4) + ((x % 8) / 2));
+
+                                    UInt32 characterDataAddress = (UInt32)(characterDataBaseAddress + (character * 32));
+                                    
+                                    if (verticalFlip == 0)
+                                        characterDataAddress += (y % 8) * 4;
+                                    else
+                                        characterDataAddress += (7 - (y % 8)) * 4;
+
+                                    if (horizontalFlip == 0)
+                                        characterDataAddress += (x % 8) / 2;
+                                    else
+                                        characterDataAddress += (7 - (x % 8)) / 2;
+
                                     Byte characterData = Unsafe.Read<Byte>((Byte*)VRAM + characterDataAddress);
 
                                     Byte colorNo = characterData;
+
                                     if (((x % 8) % 2) == 0)
                                         colorNo &= 0xf;
                                     else
