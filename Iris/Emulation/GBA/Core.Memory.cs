@@ -1428,40 +1428,47 @@ namespace Iris.Emulation.GBA
                 // IO and registers
                 case 0x4:
                     {
+                        static UInt16 GetLowHalfword(UInt32 value) => (UInt16)value;
+                        static UInt16 GetHighHalfword(UInt32 value) => (UInt16)(value >> 16);
+
                         UInt32 offset = address - 0x400_0000;
 
                         switch (offset)
                         {
                             case 0x000:
-                                _PPU.DISPCNT = (UInt16)value;
+                                _PPU.DISPCNT = GetLowHalfword(value);
                                 // 16 upper bits are undocumented (green swap register)
                                 break;
+                            case 0x10:
+                                _PPU.BG0HOFS = GetLowHalfword(value);
+                                _PPU.BG0VOFS = GetHighHalfword(value);
+                                break;
                             case 0x0bc:
-                                _DMA1SAD_L = (UInt16)value;
-                                _DMA1SAD_H = (UInt16)(value >> 16);
+                                _DMA1SAD_L = GetLowHalfword(value);
+                                _DMA1SAD_H = GetHighHalfword(value);
                                 break;
                             case 0x0c0:
-                                _DMA1DAD_L = (UInt16)value;
-                                _DMA1DAD_H = (UInt16)(value >> 16);
+                                _DMA1DAD_L = GetLowHalfword(value);
+                                _DMA1DAD_H = GetHighHalfword(value);
                                 break;
                             case 0x0c4:
-                                _DMA1CNT_L = (UInt16)value;
-                                _DMA1CNT_H = (UInt16)(value >> 16);
+                                _DMA1CNT_L = GetLowHalfword(value);
+                                _DMA1CNT_H = GetHighHalfword(value);
                                 break;
                             case 0x0c8:
-                                _DMA2SAD_L = (UInt16)value;
-                                _DMA2SAD_H = (UInt16)(value >> 16);
+                                _DMA2SAD_L = GetLowHalfword(value);
+                                _DMA2SAD_H = GetHighHalfword(value);
                                 break;
                             case 0x0cc:
-                                _DMA2DAD_L = (UInt16)value;
-                                _DMA2DAD_H = (UInt16)(value >> 16);
+                                _DMA2DAD_L = GetLowHalfword(value);
+                                _DMA2DAD_H = GetHighHalfword(value);
                                 break;
                             case 0x0d0:
-                                _DMA2CNT_L = (UInt16)value;
-                                _DMA2CNT_H = (UInt16)(value >> 16);
+                                _DMA2CNT_L = GetLowHalfword(value);
+                                _DMA2CNT_H = GetHighHalfword(value);
                                 break;
                             case 0x208:
-                                _IME = (UInt16)value;
+                                _IME = GetLowHalfword(value);
                                 // 16 upper bits are unused
                                 break;
                             default:

@@ -81,7 +81,7 @@ namespace Iris.Emulation.GBA
                 {
                     case 0b000:
                         {
-                            // bg0, cbb=0, sbb=30, 4bpp, 512x256px, x=0,y=0
+                            // bg0, cbb=0, sbb=30, 4bpp, 512x256px
                             UInt32 characterDataBaseAddress = 0 * 16u * KB;
                             UInt32 screenDataBaseAddress = 30 * 2u * KB;
 
