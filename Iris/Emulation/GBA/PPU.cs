@@ -81,9 +81,12 @@ namespace Iris.Emulation.GBA
                 {
                     case 0b000:
                         {
-                            // bg0, cbb=0, sbb=30, 4bpp, 512x256px
-                            UInt32 characterDataBaseAddress = 0 * 16u * KB;
-                            UInt32 screenDataBaseAddress = 30 * 2u * KB;
+                            // bg0, 4bpp, 512x256px
+                            UInt16 characterBaseBlock = (UInt16)((BG0CNT >> 2) & 0b11);
+                            UInt16 screenBaseBlock = (UInt16)((BG0CNT >> 8) & 0b1_1111);
+
+                            UInt32 characterDataBaseAddress = characterBaseBlock * 16u * KB;
+                            UInt32 screenDataBaseAddress = screenBaseBlock * 2u * KB;
 
                             UInt32 xOffset = BG0HOFS & 0x1ffu;
                             UInt32 yOffset = BG0VOFS & 0x1ffu;
@@ -105,7 +108,7 @@ namespace Iris.Emulation.GBA
                                     UInt16 character = (UInt16)(screenData & 0x3ff);
 
                                     UInt32 characterDataAddress = (UInt32)(characterDataBaseAddress + (character * 32));
-                                    
+
                                     if (verticalFlip == 0)
                                         characterDataAddress += (y % 8) * 4;
                                     else
