@@ -84,89 +84,25 @@ namespace Iris.Emulation.GBA
                 {
                     case 0b000:
                         {
-                            // bg0, 4bpp
-                            UInt16 screenSize = (UInt16)((BG0CNT >> 14) & 0b11);
-                            UInt16 screenBaseBlock = (UInt16)((BG0CNT >> 8) & 0b1_1111);
-                            UInt16 colorMode = (UInt16)((BG0CNT >> 7) & 1);
-                            UInt16 characterBaseBlock = (UInt16)((BG0CNT >> 2) & 0b11);
-
-                            UInt32 screenWidth = ((screenSize & 0b01) == 0) ? 256u : 512u;
-                            UInt32 screenHeight = ((screenSize & 0b10) == 0) ? 256u : 512u;
-
-                            const UInt32 ScreenBaseBlockSize = 2u * KB;
-                            const UInt32 CharacterBaseBlockSize = 16u * KB;
-
-                            UInt32 screenBaseBlockAddress = screenBaseBlock * ScreenBaseBlockSize;
-                            UInt32 characterBaseBlockAddress = characterBaseBlock * CharacterBaseBlockSize;
-
-                            UInt32 vOffset = BG0VOFS & 0x1ffu;
-                            UInt32 hOffset = BG0HOFS & 0x1ffu;
-
-                            const UInt32 CharacterWidth = 8;
-                            const UInt32 CharacterHeight = 8;
-
-                            const UInt32 ScreenDataSizePerCharacter = 2;
-
-                            UInt32 characterDataSize = (colorMode == 0) ? 32u : 64u;
-
-                            const UInt32 ColorSize = 2;
+                            // 4bpp
+                            UInt16 bg0 = (UInt16)((DISPCNT >> 8) & 1);
+                            UInt16 bg1 = (UInt16)((DISPCNT >> 9) & 1);
+                            UInt16 bg2 = (UInt16)((DISPCNT >> 10) & 1);
+                            UInt16 bg3 = (UInt16)((DISPCNT >> 11) & 1);
 
                             UInt16[] screenFrameBuffer = new UInt16[PhysicalScreenSize];
 
-                            for (UInt32 i = 0; i < PhysicalScreenSize; ++i)
-                            {
-                                UInt32 h = ((i % PhysicalScreenWidth) + hOffset) % screenWidth;
-                                UInt32 v = ((i / PhysicalScreenWidth) + vOffset) % screenHeight;
+                            if (bg0 == 1)
+                                RenderBackground(0, screenFrameBuffer);
 
-                                UInt32 screenCharacterNumber = (((v % 256) / CharacterHeight) * (256 / CharacterWidth)) + ((h % 256) / CharacterWidth);
+                            //    if (bg1 == 1)
+                            //      RenderBackground(1, screenFrameBuffer);
 
-                                if (h >= 256)
-                                    screenCharacterNumber += 0x400;
+                            //  if (bg2 == 1)
+                            //    RenderBackground(2, screenFrameBuffer);
 
-                                if (v >= 256)
-                                    screenCharacterNumber += 0x400 * (screenWidth / 256);
-
-                                UInt32 screenDataAddress = screenBaseBlockAddress + (screenCharacterNumber * ScreenDataSizePerCharacter);
-
-                                unsafe
-                                {
-                                    UInt16 screenData = Unsafe.Read<UInt16>((Byte*)VRAM + screenDataAddress);
-
-                                    UInt16 palette = (UInt16)(screenData >> 12);
-                                    UInt16 verticalFlip = (UInt16)((screenData >> 11) & 1);
-                                    UInt16 horizontalFlip = (UInt16)((screenData >> 10) & 1);
-                                    UInt16 characterNumber = (UInt16)(screenData & 0x3ff);
-
-                                    UInt32 characterDataAddress = characterBaseBlockAddress + (characterNumber * characterDataSize);
-
-                                    // TODO: take colorMode into account
-                                    if (verticalFlip == 0)
-                                        characterDataAddress += (v % CharacterHeight) * 4;
-                                    else
-                                        characterDataAddress += (7 - (v % CharacterHeight)) * 4;
-
-                                    // TODO: take colorMode into account
-                                    if (horizontalFlip == 0)
-                                        characterDataAddress += (h % CharacterWidth) / 2;
-                                    else
-                                        characterDataAddress += (7 - (h % CharacterWidth)) / 2;
-
-                                    Byte characterData = Unsafe.Read<Byte>((Byte*)VRAM + characterDataAddress);
-
-                                    Byte colorNumber = characterData;
-
-                                    // TODO: take colorMode into account
-                                    if (((h % CharacterWidth) % 2) == 0)
-                                        colorNumber &= 0xf;
-                                    else
-                                        colorNumber >>= 4;
-
-                                    UInt32 paletteAddress = (colorMode == 0) ? (palette * 16u * ColorSize) : 0u;
-
-                                    UInt16 color = Unsafe.Read<UInt16>((Byte*)PaletteRAM + paletteAddress + (colorNumber * ColorSize));
-                                    screenFrameBuffer[i] = color;
-                                }
-                            }
+                            //if (bg3 == 1)
+                            //  RenderBackground(3, screenFrameBuffer);
 
                             _callbackInterface.DrawFrame(screenFrameBuffer);
                             break;
@@ -215,6 +151,118 @@ namespace Iris.Emulation.GBA
             else
             {
                 ++_cycleCounter;
+            }
+        }
+
+        private void RenderBackground(int bg, UInt16[] screenFrameBuffer)
+        {
+            UInt16 bgcnt = 0;
+            UInt16 bgvofs = 0;
+            UInt16 bghofs = 0;
+
+            switch (bg)
+            {
+                case 0:
+                    bgcnt = BG0CNT;
+                    bgvofs = BG0VOFS;
+                    bghofs = BG0HOFS;
+                    break;
+                case 1:
+                    bgcnt = BG1CNT;
+                    bgvofs = BG1VOFS;
+                    bghofs = BG1HOFS;
+                    break;
+                case 2:
+                    bgcnt = BG2CNT;
+                    bgvofs = BG2VOFS;
+                    bghofs = BG2HOFS;
+                    break;
+                case 3:
+                    bgcnt = BG3CNT;
+                    bgvofs = BG3VOFS;
+                    bghofs = BG3HOFS;
+                    break;
+            }
+
+            UInt16 screenSize = (UInt16)((bgcnt >> 14) & 0b11);
+            UInt16 screenBaseBlock = (UInt16)((bgcnt >> 8) & 0b1_1111);
+            UInt16 colorMode = (UInt16)((bgcnt >> 7) & 1);
+            UInt16 characterBaseBlock = (UInt16)((bgcnt >> 2) & 0b11);
+
+            UInt32 screenWidth = ((screenSize & 0b01) == 0) ? 256u : 512u;
+            UInt32 screenHeight = ((screenSize & 0b10) == 0) ? 256u : 512u;
+
+            const UInt32 ScreenBaseBlockSize = 2u * KB;
+            const UInt32 CharacterBaseBlockSize = 16u * KB;
+
+            UInt32 screenBaseBlockAddress = screenBaseBlock * ScreenBaseBlockSize;
+            UInt32 characterBaseBlockAddress = characterBaseBlock * CharacterBaseBlockSize;
+
+            UInt32 vOffset = bgvofs & 0x1ffu;
+            UInt32 hOffset = bghofs & 0x1ffu;
+
+            const UInt32 CharacterWidth = 8;
+            const UInt32 CharacterHeight = 8;
+
+            const UInt32 ScreenDataSizePerCharacter = 2;
+
+            UInt32 characterDataSize = (colorMode == 0) ? 32u : 64u;
+
+            const UInt32 ColorSize = 2;
+
+            for (UInt32 i = 0; i < PhysicalScreenSize; ++i)
+            {
+                UInt32 h = ((i % PhysicalScreenWidth) + hOffset) % screenWidth;
+                UInt32 v = ((i / PhysicalScreenWidth) + vOffset) % screenHeight;
+
+                UInt32 screenCharacterNumber = (((v % 256) / CharacterHeight) * (256 / CharacterWidth)) + ((h % 256) / CharacterWidth);
+
+                if (h >= 256)
+                    screenCharacterNumber += 0x400;
+
+                if (v >= 256)
+                    screenCharacterNumber += 0x400 * (screenWidth / 256);
+
+                UInt32 screenDataAddress = screenBaseBlockAddress + (screenCharacterNumber * ScreenDataSizePerCharacter);
+
+                unsafe
+                {
+                    UInt16 screenData = Unsafe.Read<UInt16>((Byte*)VRAM + screenDataAddress);
+
+                    UInt16 palette = (UInt16)(screenData >> 12);
+                    UInt16 verticalFlip = (UInt16)((screenData >> 11) & 1);
+                    UInt16 horizontalFlip = (UInt16)((screenData >> 10) & 1);
+                    UInt16 characterNumber = (UInt16)(screenData & 0x3ff);
+
+                    UInt32 characterDataAddress = characterBaseBlockAddress + (characterNumber * characterDataSize);
+
+                    // TODO: take colorMode into account
+                    if (verticalFlip == 0)
+                        characterDataAddress += (v % CharacterHeight) * 4;
+                    else
+                        characterDataAddress += (7 - (v % CharacterHeight)) * 4;
+
+                    // TODO: take colorMode into account
+                    if (horizontalFlip == 0)
+                        characterDataAddress += (h % CharacterWidth) / 2;
+                    else
+                        characterDataAddress += (7 - (h % CharacterWidth)) / 2;
+
+                    Byte characterData = Unsafe.Read<Byte>((Byte*)VRAM + characterDataAddress);
+
+                    Byte colorNumber = characterData;
+
+                    // TODO: take colorMode into account
+                    if (((h % CharacterWidth) % 2) == 0)
+                        colorNumber &= 0xf;
+                    else
+                        colorNumber >>= 4;
+
+                    UInt32 paletteAddress = (colorMode == 0) ? (palette * 16u * ColorSize) : 0u;
+
+                    UInt16 color = Unsafe.Read<UInt16>((Byte*)PaletteRAM + paletteAddress + (colorNumber * ColorSize));
+                    screenFrameBuffer[i] = color;
+                }
             }
         }
     }
