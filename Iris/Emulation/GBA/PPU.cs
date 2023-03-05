@@ -236,27 +236,27 @@ namespace Iris.Emulation.GBA
 
                     UInt32 characterDataAddress = characterBaseBlockAddress + (characterNumber * characterDataSize);
 
-                    // TODO: take colorMode into account
                     if (verticalFlip == 0)
-                        characterDataAddress += (v % CharacterHeight) * 4;
+                        characterDataAddress += (v % CharacterHeight) * (characterDataSize / CharacterHeight);
                     else
-                        characterDataAddress += (7 - (v % CharacterHeight)) * 4;
+                        characterDataAddress += (7 - (v % CharacterHeight)) * (characterDataSize / CharacterHeight);
 
-                    // TODO: take colorMode into account
                     if (horizontalFlip == 0)
-                        characterDataAddress += (h % CharacterWidth) / 2;
+                        characterDataAddress += (h % CharacterWidth) / ((CharacterHeight * CharacterWidth) / characterDataSize);
                     else
-                        characterDataAddress += (7 - (h % CharacterWidth)) / 2;
+                        characterDataAddress += (7 - (h % CharacterWidth)) / ((CharacterHeight * CharacterWidth) / characterDataSize);
 
                     Byte characterData = Unsafe.Read<Byte>((Byte*)VRAM + characterDataAddress);
 
                     Byte colorNumber = characterData;
 
-                    // TODO: take colorMode into account
-                    if (((h % CharacterWidth) % 2) == 0)
-                        colorNumber &= 0xf;
-                    else
-                        colorNumber >>= 4;
+                    if (colorMode == 0)
+                    {
+                        if ((h % 2) == 0)
+                            colorNumber &= 0xf;
+                        else
+                            colorNumber >>= 4;
+                    }
 
                     UInt32 paletteAddress = (colorMode == 0) ? (palette * 16u * ColorSize) : 0u;
 
