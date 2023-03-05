@@ -84,7 +84,6 @@ namespace Iris.Emulation.GBA
                 {
                     case 0b000:
                         {
-                            // 4bpp
                             UInt16 bg0 = (UInt16)((DISPCNT >> 8) & 1);
                             UInt16 bg1 = (UInt16)((DISPCNT >> 9) & 1);
                             UInt16 bg2 = (UInt16)((DISPCNT >> 10) & 1);
@@ -95,14 +94,14 @@ namespace Iris.Emulation.GBA
                             if (bg0 == 1)
                                 RenderBackground(0, screenFrameBuffer);
 
-                            //    if (bg1 == 1)
-                            //      RenderBackground(1, screenFrameBuffer);
+                            if (bg1 == 1)
+                                RenderBackground(1, screenFrameBuffer);
 
-                            //  if (bg2 == 1)
-                            //    RenderBackground(2, screenFrameBuffer);
+                            if (bg2 == 1)
+                                RenderBackground(2, screenFrameBuffer);
 
-                            //if (bg3 == 1)
-                            //  RenderBackground(3, screenFrameBuffer);
+                            if (bg3 == 1)
+                                RenderBackground(3, screenFrameBuffer);
 
                             _callbackInterface.DrawFrame(screenFrameBuffer);
                             break;
