@@ -296,7 +296,7 @@ namespace Iris.Emulation.GBA
                             0x208 => GetLowByte(_IME),
                             0x209 => GetHighByte(_IME),
 
-                            _ => throw new Exception(string.Format("Emulation.GBA.Memory: Unhandled read from address 0x{0:x8}", address)),
+                            _ => throw new Exception(string.Format("Emulation.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address)),
                         };
                     }
 
@@ -352,7 +352,7 @@ namespace Iris.Emulation.GBA
                     break;
             }
 
-            throw new Exception(string.Format("Emulation.GBA.Memory: Unhandled read from address 0x{0:x8}", address));
+            throw new Exception(string.Format("Emulation.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address));
         }
 
         private UInt16 ReadMemory16(UInt32 address)
@@ -432,7 +432,7 @@ namespace Iris.Emulation.GBA
                             0x202 => _IF,
                             0x204 => _WAITCNT,
                             0x208 => _IME,
-                            _ => throw new Exception(string.Format("Emulation.GBA.Memory: Unhandled read from address 0x{0:x8}", address)),
+                            _ => throw new Exception(string.Format("Emulation.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address)),
                         };
                     }
 
@@ -488,7 +488,7 @@ namespace Iris.Emulation.GBA
                     break;
             }
 
-            throw new Exception(string.Format("Emulation.GBA.Memory: Unhandled read from address 0x{0:x8}", address));
+            throw new Exception(string.Format("Emulation.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address));
         }
 
         private UInt32 ReadMemory32(UInt32 address)
@@ -522,10 +522,11 @@ namespace Iris.Emulation.GBA
                         return offset switch
                         {
                             0x004 => (UInt32)((_PPU.VCOUNT << 16) | _PPU.DISPSTAT),
+                            0x0b8 => (UInt32)(_DMA0CNT_H << 16),
                             0x0c4 => (UInt32)(_DMA1CNT_H << 16),
                             0x0d0 => (UInt32)(_DMA2CNT_H << 16),
                             0x200 => (UInt32)((_IF << 16) | _IE),
-                            _ => throw new Exception(string.Format("Emulation.GBA.Memory: Unhandled read from address 0x{0:x8}", address)),
+                            _ => throw new Exception(string.Format("Emulation.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address)),
                         };
                     }
 
@@ -581,7 +582,7 @@ namespace Iris.Emulation.GBA
                     break;
             }
 
-            throw new Exception(string.Format("Emulation.GBA.Memory: Unhandled read from address 0x{0:x8}", address));
+            throw new Exception(string.Format("Emulation.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address));
         }
 
         private void WriteMemory8(UInt32 address, Byte value)
@@ -864,6 +865,41 @@ namespace Iris.Emulation.GBA
                                 SetHighByte(ref _SOUNDBIAS, value);
                                 break;
 
+                            case 0x0b0:
+                                SetLowByte(ref _DMA0SAD_L, value);
+                                break;
+                            case 0x0b1:
+                                SetHighByte(ref _DMA0SAD_L, value);
+                                break;
+
+                            case 0x0b2:
+                                SetLowByte(ref _DMA0SAD_H, value);
+                                break;
+                            case 0x0b3:
+                                SetHighByte(ref _DMA0SAD_H, value);
+                                break;
+
+                            case 0x0b4:
+                                SetLowByte(ref _DMA0DAD_L, value);
+                                break;
+                            case 0x0b5:
+                                SetHighByte(ref _DMA0DAD_L, value);
+                                break;
+
+                            case 0x0b6:
+                                SetLowByte(ref _DMA0DAD_H, value);
+                                break;
+                            case 0x0b7:
+                                SetHighByte(ref _DMA0DAD_H, value);
+                                break;
+
+                            case 0x0b8:
+                                SetLowByte(ref _DMA0CNT_L, value);
+                                break;
+                            case 0x0b9:
+                                SetHighByte(ref _DMA0CNT_L, value);
+                                break;
+
                             case 0x0ba:
                                 SetLowByte(ref _DMA0CNT_H, value);
                                 break;
@@ -1116,7 +1152,7 @@ namespace Iris.Emulation.GBA
                                 break;
 
                             default:
-                                throw new Exception(string.Format("Emulation.GBA.Memory: Unhandled write to address 0x{0:x8}", address));
+                                throw new Exception(string.Format("Emulation.GBA.Core.Memory: Unhandled write to address 0x{0:x8}", address));
                         }
                     }
                     break;
@@ -1131,7 +1167,7 @@ namespace Iris.Emulation.GBA
                     break;
 
                 default:
-                    throw new Exception(string.Format("Emulation.GBA.Memory: Unhandled write to address 0x{0:x8}", address));
+                    throw new Exception(string.Format("Emulation.GBA.Core.Memory: Unhandled write to address 0x{0:x8}", address));
             }
         }
 
@@ -1272,6 +1308,21 @@ namespace Iris.Emulation.GBA
                             case 0x088:
                                 _SOUNDBIAS = value;
                                 break;
+                            case 0x0b0:
+                                _DMA0SAD_L = value;
+                                break;
+                            case 0x0b2:
+                                _DMA0SAD_H = value;
+                                break;
+                            case 0x0b4:
+                                _DMA0DAD_L = value;
+                                break;
+                            case 0x0b6:
+                                _DMA0DAD_H = value;
+                                break;
+                            case 0x0b8:
+                                _DMA0CNT_L = value;
+                                break;
                             case 0x0ba:
                                 _DMA0CNT_H = value;
                                 break;
@@ -1381,7 +1432,7 @@ namespace Iris.Emulation.GBA
                                 UpdateInterrupts();
                                 break;
                             default:
-                                throw new Exception(string.Format("Emulation.GBA.Memory: Unhandled write to address 0x{0:x8}", address));
+                                throw new Exception(string.Format("Emulation.GBA.Core.Memory: Unhandled write to address 0x{0:x8}", address));
                         }
                     }
                     break;
@@ -1396,7 +1447,7 @@ namespace Iris.Emulation.GBA
                     break;
 
                 default:
-                    throw new Exception(string.Format("Emulation.GBA.Memory: Unhandled write to address 0x{0:x8}", address));
+                    throw new Exception(string.Format("Emulation.GBA.Core.Memory: Unhandled write to address 0x{0:x8}", address));
             }
         }
 
@@ -1443,6 +1494,18 @@ namespace Iris.Emulation.GBA
                                 _PPU.BG0HOFS = GetLowHalfword(value);
                                 _PPU.BG0VOFS = GetHighHalfword(value);
                                 break;
+                            case 0x0b0:
+                                _DMA0SAD_L = GetLowHalfword(value);
+                                _DMA0SAD_H = GetHighHalfword(value);
+                                break;
+                            case 0x0b4:
+                                _DMA0DAD_L = GetLowHalfword(value);
+                                _DMA0DAD_H = GetHighHalfword(value);
+                                break;
+                            case 0x0b8:
+                                _DMA0CNT_L = GetLowHalfword(value);
+                                _DMA0CNT_H = GetHighHalfword(value);
+                                break;
                             case 0x0bc:
                                 _DMA1SAD_L = GetLowHalfword(value);
                                 _DMA1SAD_H = GetHighHalfword(value);
@@ -1467,12 +1530,20 @@ namespace Iris.Emulation.GBA
                                 _DMA2CNT_L = GetLowHalfword(value);
                                 _DMA2CNT_H = GetHighHalfword(value);
                                 break;
+                            case 0x10c:
+                                _TM3CNT_L = GetLowHalfword(value);
+                                _TM3CNT_H = GetHighHalfword(value);
+                                break;
+                            case 0x128:
+                                _SIOCNT = GetLowHalfword(value);
+                                _SIODATA_SEND = GetHighHalfword(value);
+                                break;
                             case 0x208:
                                 _IME = GetLowHalfword(value);
                                 // 16 upper bits are unused
                                 break;
                             default:
-                                throw new Exception(string.Format("Emulation.GBA.Memory: Unhandled write to address 0x{0:x8}", address));
+                                throw new Exception(string.Format("Emulation.GBA.Core.Memory: Unhandled write to address 0x{0:x8}", address));
                         }
                     }
                     break;
@@ -1487,7 +1558,7 @@ namespace Iris.Emulation.GBA
                     break;
 
                 default:
-                    throw new Exception(string.Format("Emulation.GBA.Memory: Unhandled write to address 0x{0:x8}", address));
+                    throw new Exception(string.Format("Emulation.GBA.Core.Memory: Unhandled write to address 0x{0:x8}", address));
             }
         }
     }

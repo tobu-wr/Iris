@@ -2,13 +2,13 @@
 {
     internal sealed partial class Core
     {
-        //private UInt16 _DMA0SAD_L;
-        //private UInt16 _DMA0SAD_H;
+        private UInt16 _DMA0SAD_L;
+        private UInt16 _DMA0SAD_H;
 
-        //private UInt16 _DMA0DAD_L;
-        //private UInt16 _DMA0DAD_H;
+        private UInt16 _DMA0DAD_L;
+        private UInt16 _DMA0DAD_H;
 
-        //private UInt16 _DMA0CNT_L;
+        private UInt16 _DMA0CNT_L;
         private UInt16 _DMA0CNT_H;
 
         private UInt16 _DMA1SAD_L;
