@@ -66,6 +66,9 @@
 
             switch (function)
             {
+                case 0x01:
+                    RegisterRamReset();
+                    break;
                 case 0x05:
                     VBlankIntrWait();
                     break;
@@ -112,6 +115,11 @@
             _CPU.Reg[0] = 0x400_0000;
             _CPU.Reg[CPU.Core.LR] = 0x138;
             _CPU.NextInstructionAddress = ReadMemory32(0x300_7ffc);
+        }
+
+        private void RegisterRamReset()
+        {
+            // TODO
         }
 
         private void VBlankIntrWait()
