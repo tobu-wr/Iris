@@ -569,6 +569,7 @@ namespace Iris.Emulation.GBA
                             0x0b8 => (UInt32)(_DMA0CNT_H << 16),
                             0x0c4 => (UInt32)(_DMA1CNT_H << 16),
                             0x0d0 => (UInt32)(_DMA2CNT_H << 16),
+                            0x0dc => (UInt32)(_DMA3CNT_H << 16),
                             0x200 => (UInt32)((_IF << 16) | _IE),
                             _ => throw new Exception(string.Format("Emulation.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address)),
                         };
@@ -1112,6 +1113,41 @@ namespace Iris.Emulation.GBA
                                 SetHighByte(ref _DMA2CNT_H, value);
                                 break;
 
+                            case 0x0d4:
+                                SetLowByte(ref _DMA3SAD_L, value);
+                                break;
+                            case 0x0d5:
+                                SetHighByte(ref _DMA3SAD_L, value);
+                                break;
+
+                            case 0x0d6:
+                                SetLowByte(ref _DMA3SAD_H, value);
+                                break;
+                            case 0x0d7:
+                                SetHighByte(ref _DMA3SAD_H, value);
+                                break;
+
+                            case 0x0d8:
+                                SetLowByte(ref _DMA3DAD_L, value);
+                                break;
+                            case 0x0d9:
+                                SetHighByte(ref _DMA3DAD_L, value);
+                                break;
+
+                            case 0x0da:
+                                SetLowByte(ref _DMA3DAD_H, value);
+                                break;
+                            case 0x0db:
+                                SetHighByte(ref _DMA3DAD_H, value);
+                                break;
+
+                            case 0x0dc:
+                                SetLowByte(ref _DMA3CNT_L, value);
+                                break;
+                            case 0x0dd:
+                                SetHighByte(ref _DMA3CNT_L, value);
+                                break;
+
                             case 0x0de:
                                 SetLowByte(ref _DMA3CNT_H, value);
                                 break;
@@ -1516,6 +1552,21 @@ namespace Iris.Emulation.GBA
                             case 0x0d2:
                                 _DMA2CNT_H = value;
                                 break;
+                            case 0x0d4:
+                                _DMA3SAD_L = value;
+                                break;
+                            case 0x0d6:
+                                _DMA3SAD_H = value;
+                                break;
+                            case 0x0d8:
+                                _DMA3DAD_L = value;
+                                break;
+                            case 0x0da:
+                                _DMA3DAD_H = value;
+                                break;
+                            case 0x0dc:
+                                _DMA3CNT_L = value;
+                                break;
                             case 0x0de:
                                 _DMA3CNT_H = value;
                                 break;
@@ -1699,6 +1750,18 @@ namespace Iris.Emulation.GBA
                             case 0x0d0:
                                 _DMA2CNT_L = GetLowHalfword(value);
                                 _DMA2CNT_H = GetHighHalfword(value);
+                                break;
+                            case 0x0d4:
+                                _DMA3SAD_L = GetLowHalfword(value);
+                                _DMA3SAD_H = GetHighHalfword(value);
+                                break;
+                            case 0x0d8:
+                                _DMA3DAD_L = GetLowHalfword(value);
+                                _DMA3DAD_H = GetHighHalfword(value);
+                                break;
+                            case 0x0dc:
+                                _DMA3CNT_L = GetLowHalfword(value);
+                                _DMA3CNT_H = GetHighHalfword(value);
                                 break;
                             case 0x10c:
                                 _TM3CNT_L = GetLowHalfword(value);
