@@ -565,7 +565,10 @@ namespace Iris.Emulation.GBA
 
                         return offset switch
                         {
+                            0x000 => (UInt32)(_PPU.DISPCNT),
                             0x004 => (UInt32)((_PPU.VCOUNT << 16) | _PPU.DISPSTAT),
+                            0x008 => (UInt32)((_PPU.BG1CNT << 16) | _PPU.BG0CNT),
+                            0x00c => (UInt32)((_PPU.BG3CNT << 16) | _PPU.BG2CNT),
                             0x0b8 => (UInt32)(_DMA0CNT_H << 16),
                             0x0c4 => (UInt32)(_DMA1CNT_H << 16),
                             0x0d0 => (UInt32)(_DMA2CNT_H << 16),
@@ -1770,6 +1773,10 @@ namespace Iris.Emulation.GBA
                             case 0x128:
                                 _SIOCNT = GetLowHalfword(value);
                                 _SIODATA_SEND = GetHighHalfword(value);
+                                break;
+                            case 0x204:
+                                _WAITCNT = GetLowHalfword(value);
+                                // 16 upper bits are unused
                                 break;
                             case 0x208:
                                 _IME = GetLowHalfword(value);
