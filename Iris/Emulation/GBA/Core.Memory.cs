@@ -188,6 +188,9 @@ namespace Iris.Emulation.GBA
                             0x052 => GetLowByte(_PPU.BLDALPHA),
                             0x053 => GetHighByte(_PPU.BLDALPHA),
 
+                            0x060 => GetLowByte(_SOUND1CNT_L),
+                            0x061 => GetHighByte(_SOUND1CNT_L),
+
                             0x062 => GetLowByte(_SOUND1CNT_H),
                             0x063 => GetHighByte(_SOUND1CNT_H),
 
@@ -202,6 +205,12 @@ namespace Iris.Emulation.GBA
 
                             0x070 => GetLowByte(_SOUND3CNT_L),
                             0x071 => GetHighByte(_SOUND3CNT_L),
+
+                            0x072 => GetLowByte(_SOUND3CNT_H),
+                            0x073 => GetHighByte(_SOUND3CNT_H),
+
+                            0x074 => GetLowByte(_SOUND3CNT_X),
+                            0x075 => GetHighByte(_SOUND3CNT_X),
 
                             0x078 => GetLowByte(_SOUND4CNT_L),
                             0x079 => GetHighByte(_SOUND4CNT_L),
@@ -220,6 +229,30 @@ namespace Iris.Emulation.GBA
 
                             0x088 => GetLowByte(_SOUNDBIAS),
                             0x089 => GetHighByte(_SOUNDBIAS),
+
+                            0x090 => GetLowByte(_WAVE_RAM0_L),
+                            0x091 => GetHighByte(_WAVE_RAM0_L),
+
+                            0x092 => GetLowByte(_WAVE_RAM0_H),
+                            0x093 => GetHighByte(_WAVE_RAM0_H),
+
+                            0x094 => GetLowByte(_WAVE_RAM1_L),
+                            0x095 => GetHighByte(_WAVE_RAM1_L),
+
+                            0x096 => GetLowByte(_WAVE_RAM1_H),
+                            0x097 => GetHighByte(_WAVE_RAM1_H),
+
+                            0x098 => GetLowByte(_WAVE_RAM2_L),
+                            0x099 => GetHighByte(_WAVE_RAM2_L),
+
+                            0x09a => GetLowByte(_WAVE_RAM2_H),
+                            0x09b => GetHighByte(_WAVE_RAM2_H),
+
+                            0x09c => GetLowByte(_WAVE_RAM3_L),
+                            0x09d => GetHighByte(_WAVE_RAM3_L),
+
+                            0x09e => GetLowByte(_WAVE_RAM3_H),
+                            0x09f => GetHighByte(_WAVE_RAM3_H),
 
                             0x0ba => GetLowByte(_DMA0CNT_H),
                             0x0bb => GetHighByte(_DMA0CNT_H),
@@ -396,17 +429,28 @@ namespace Iris.Emulation.GBA
                             0x04a => _PPU.WINOUT,
                             0x050 => _PPU.BLDCNT,
                             0x052 => _PPU.BLDALPHA,
+                            0x060 => _SOUND1CNT_L,
                             0x062 => _SOUND1CNT_H,
                             0x064 => _SOUND1CNT_X,
                             0x068 => _SOUND2CNT_L,
                             0x06c => _SOUND2CNT_H,
                             0x070 => _SOUND3CNT_L,
+                            0x072 => _SOUND3CNT_H,
+                            0x074 => _SOUND3CNT_X,
                             0x078 => _SOUND4CNT_L,
                             0x07c => _SOUND4CNT_H,
                             0x080 => _SOUNDCNT_L,
                             0x082 => _SOUNDCNT_H,
                             0x084 => _SOUNDCNT_X,
                             0x088 => _SOUNDBIAS,
+                            0x090 => _WAVE_RAM0_L,
+                            0x092 => _WAVE_RAM0_H,
+                            0x094 => _WAVE_RAM1_L,
+                            0x096 => _WAVE_RAM1_H,
+                            0x098 => _WAVE_RAM2_L,
+                            0x09a => _WAVE_RAM2_H,
+                            0x09c => _WAVE_RAM3_L,
+                            0x09e => _WAVE_RAM3_H,
                             0x0ba => _DMA0CNT_H,
                             0x0c6 => _DMA1CNT_H,
                             0x0d2 => _DMA2CNT_H,
@@ -788,6 +832,13 @@ namespace Iris.Emulation.GBA
                                 SetHighByte(ref _PPU.BLDY, value);
                                 break;
 
+                            case 0x060:
+                                SetLowByte(ref _SOUND1CNT_L, value);
+                                break;
+                            case 0x061:
+                                SetHighByte(ref _SOUND1CNT_L, value);
+                                break;
+
                             case 0x062:
                                 SetLowByte(ref _SOUND1CNT_H, value);
                                 break;
@@ -821,6 +872,20 @@ namespace Iris.Emulation.GBA
                                 break;
                             case 0x071:
                                 SetHighByte(ref _SOUND3CNT_L, value);
+                                break;
+
+                            case 0x072:
+                                SetLowByte(ref _SOUND3CNT_H, value);
+                                break;
+                            case 0x073:
+                                SetHighByte(ref _SOUND3CNT_H, value);
+                                break;
+
+                            case 0x074:
+                                SetLowByte(ref _SOUND3CNT_X, value);
+                                break;
+                            case 0x075:
+                                SetHighByte(ref _SOUND3CNT_X, value);
                                 break;
 
                             case 0x078:
@@ -863,6 +928,62 @@ namespace Iris.Emulation.GBA
                                 break;
                             case 0x089:
                                 SetHighByte(ref _SOUNDBIAS, value);
+                                break;
+
+                            case 0x090:
+                                SetLowByte(ref _WAVE_RAM0_L, value);
+                                break;
+                            case 0x091:
+                                SetHighByte(ref _WAVE_RAM0_L, value);
+                                break;
+
+                            case 0x092:
+                                SetLowByte(ref _WAVE_RAM0_H, value);
+                                break;
+                            case 0x093:
+                                SetHighByte(ref _WAVE_RAM0_H, value);
+                                break;
+
+                            case 0x094:
+                                SetLowByte(ref _WAVE_RAM1_L, value);
+                                break;
+                            case 0x095:
+                                SetHighByte(ref _WAVE_RAM1_L, value);
+                                break;
+
+                            case 0x096:
+                                SetLowByte(ref _WAVE_RAM1_H, value);
+                                break;
+                            case 0x097:
+                                SetHighByte(ref _WAVE_RAM1_H, value);
+                                break;
+
+                            case 0x098:
+                                SetLowByte(ref _WAVE_RAM2_L, value);
+                                break;
+                            case 0x099:
+                                SetHighByte(ref _WAVE_RAM2_L, value);
+                                break;
+
+                            case 0x09a:
+                                SetLowByte(ref _WAVE_RAM2_H, value);
+                                break;
+                            case 0x09b:
+                                SetHighByte(ref _WAVE_RAM2_H, value);
+                                break;
+
+                            case 0x09c:
+                                SetLowByte(ref _WAVE_RAM3_L, value);
+                                break;
+                            case 0x09d:
+                                SetHighByte(ref _WAVE_RAM3_L, value);
+                                break;
+
+                            case 0x09e:
+                                SetLowByte(ref _WAVE_RAM3_H, value);
+                                break;
+                            case 0x09f:
+                                SetHighByte(ref _WAVE_RAM3_H, value);
                                 break;
 
                             case 0x0b0:
@@ -1275,6 +1396,9 @@ namespace Iris.Emulation.GBA
                             case 0x054:
                                 _PPU.BLDY = value;
                                 break;
+                            case 0x060:
+                                _SOUND1CNT_L = value;
+                                break;
                             case 0x062:
                                 _SOUND1CNT_H = value;
                                 break;
@@ -1289,6 +1413,12 @@ namespace Iris.Emulation.GBA
                                 break;
                             case 0x070:
                                 _SOUND3CNT_L = value;
+                                break;
+                            case 0x072:
+                                _SOUND3CNT_H = value;
+                                break;
+                            case 0x074:
+                                _SOUND3CNT_X = value;
                                 break;
                             case 0x078:
                                 _SOUND4CNT_L = value;
@@ -1307,6 +1437,30 @@ namespace Iris.Emulation.GBA
                                 break;
                             case 0x088:
                                 _SOUNDBIAS = value;
+                                break;
+                            case 0x090:
+                                _WAVE_RAM0_L = value;
+                                break;
+                            case 0x092:
+                                _WAVE_RAM0_H = value;
+                                break;
+                            case 0x094:
+                                _WAVE_RAM1_L = value;
+                                break;
+                            case 0x096:
+                                _WAVE_RAM1_H = value;
+                                break;
+                            case 0x098:
+                                _WAVE_RAM2_L = value;
+                                break;
+                            case 0x09a:
+                                _WAVE_RAM2_H = value;
+                                break;
+                            case 0x09c:
+                                _WAVE_RAM3_L = value;
+                                break;
+                            case 0x09e:
+                                _WAVE_RAM3_H = value;
                                 break;
                             case 0x0b0:
                                 _DMA0SAD_L = value;
@@ -1493,6 +1647,22 @@ namespace Iris.Emulation.GBA
                             case 0x10:
                                 _PPU.BG0HOFS = GetLowHalfword(value);
                                 _PPU.BG0VOFS = GetHighHalfword(value);
+                                break;
+                            case 0x090:
+                                _WAVE_RAM0_L = GetLowHalfword(value);
+                                _WAVE_RAM0_H = GetHighHalfword(value);
+                                break;
+                            case 0x094:
+                                _WAVE_RAM1_L = GetLowHalfword(value);
+                                _WAVE_RAM1_H = GetHighHalfword(value);
+                                break;
+                            case 0x098:
+                                _WAVE_RAM2_L = GetLowHalfword(value);
+                                _WAVE_RAM2_H = GetHighHalfword(value);
+                                break;
+                            case 0x09c:
+                                _WAVE_RAM3_L = GetLowHalfword(value);
+                                _WAVE_RAM3_H = GetHighHalfword(value);
                                 break;
                             case 0x0b0:
                                 _DMA0SAD_L = GetLowHalfword(value);
