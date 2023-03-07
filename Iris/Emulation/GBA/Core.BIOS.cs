@@ -245,12 +245,12 @@
 
             while (destination < lastDestination)
             {
-                Byte flag = ReadMemory8(source);
+                Byte flags = ReadMemory8(source);
                 ++source;
 
                 for (int i = 0; i < 8; ++i)
                 {
-                    Byte blockType = (Byte)((flag << i) & 0x80);
+                    Byte blockType = (Byte)((flags << i) & 0x80);
 
                     // uncompressed
                     if (blockType == 0)
@@ -268,8 +268,8 @@
 
                         UInt16 disp = (UInt16)((((blockHeader & 0xf) << 8) | (blockHeader >> 8)) + 1);
                         UInt16 blockSize = (UInt16)(((blockHeader >> 4) & 0xf) + 3);
-
-                        for (int j = 0; j < blockSize; ++j)
+                            
+                        for (int j = 0; j < blockSize; j += 2)
                         {
                             WriteMemory16(destination, ReadMemory16(destination - disp));
                             destination += 2;
