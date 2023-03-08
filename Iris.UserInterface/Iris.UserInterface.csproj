@@ -9,4 +9,8 @@
     <TieredPGO>true</TieredPGO>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Iris\Iris.EmulationCore.csproj" />
+  </ItemGroup>
+
 </Project>
