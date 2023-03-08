@@ -87,6 +87,9 @@
                 case 0x12:
                     LZ77UnCompReadNormalWrite16bit();
                     break;
+                case 0x28:
+                    SoundDriverVSyncOff();
+                    break;
                 case 0xff:
                     ReturnFromIRQ();
                     break;
@@ -293,6 +296,11 @@
                     }
                 }
             }
+        }
+
+        private void SoundDriverVSyncOff()
+        {
+            // TODO
         }
 
         // IRQ handler end
