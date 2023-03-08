@@ -2,7 +2,7 @@
 {
     internal sealed partial class Core
     {
-        private readonly CPU.Core _CPU;
+        private readonly CPU _CPU;
         private readonly PPU _PPU;
 
         private UInt16 _WAITCNT;
@@ -11,7 +11,7 @@
 
         internal Core(PPU.CallbackInterface.DrawFrame_Delegate drawFrame)
         {
-            CPU.Core.CallbackInterface cpuCallbackInterface = new()
+            CPU.CallbackInterface cpuCallbackInterface = new()
             {
                 ReadMemory8 = ReadMemory8,
                 ReadMemory16 = ReadMemory16,
@@ -29,7 +29,7 @@
                 RequestVBlankInterrupt = () => RequestInterrupt(Interrupt.VBlank)
             };
 
-            _CPU = new(CPU.Core.Architecture.ARMv4T, cpuCallbackInterface);
+            _CPU = new(CPU.Architecture.ARMv4T, cpuCallbackInterface);
             _PPU = new(ppuCallbackInterface);
 
             InitPageTables();
@@ -65,7 +65,7 @@
             _WAITCNT = 0;
             _IME = 0;
 
-            _CPU.NIRQ = CPU.Core.Signal.High;
+            _CPU.NIRQ = CPU.Signal.High;
         }
 
         internal bool IsRunning()

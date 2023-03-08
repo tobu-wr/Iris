@@ -32,7 +32,7 @@
 
         private void UpdateInterrupts()
         {
-            _CPU.NIRQ = ((_IME == 0) || (_IE & _IF) == 0) ? CPU.Core.Signal.High : CPU.Core.Signal.Low;
+            _CPU.NIRQ = ((_IME == 0) || (_IE & _IF) == 0) ? CPU.Signal.High : CPU.Signal.Low;
         }
     }
 }
