@@ -2,7 +2,7 @@
 {
     internal sealed partial class Core
     {
-        internal enum Interrupt
+        private enum Interrupt
         {
             VBlank = 1 << 0,
             //HBlank = 1 << 1,
@@ -24,7 +24,7 @@
         private UInt16 _IF;
         private UInt16 _IME;
 
-        internal void RequestInterrupt(Interrupt interrupt)
+        private void RequestInterrupt(Interrupt interrupt)
         {
             _IF |= (UInt16)interrupt;
             UpdateInterrupts();

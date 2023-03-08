@@ -26,7 +26,7 @@
             PPU.CallbackInterface ppuCallbackInterface = new()
             {
                 DrawFrame = drawFrame,
-                RequestInterrupt = RequestInterrupt
+                RequestVBlankInterrupt = () => RequestInterrupt(Interrupt.VBlank)
             };
 
             _CPU = new(CPU.Core.Architecture.ARMv4T, cpuCallbackInterface);
