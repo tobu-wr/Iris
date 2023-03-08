@@ -2,14 +2,14 @@
 {
     internal sealed partial class Core
     {
-        private readonly CPU.Core _cpu;
+        private readonly CPU _cpu;
         private readonly PPU _ppu;
 
         private bool _running = false;
 
         internal Core(PPU.DrawFrame_Delegate drawFrameCallback)
         {
-            CPU.Core.CallbackInterface cpuCallbackInterface = new()
+            CPU.CallbackInterface cpuCallbackInterface = new()
             {
                 ReadMemory8 = ReadMemory8,
                 ReadMemory16 = ReadMemory16,
@@ -21,7 +21,7 @@
                 HandleIRQ = HandleIRQ
             };
 
-            _cpu = new(CPU.Core.Architecture.ARMv5TE, cpuCallbackInterface);
+            _cpu = new(CPU.Architecture.ARMv5TE, cpuCallbackInterface);
             _ppu = new(drawFrameCallback);
         }
 
@@ -29,7 +29,7 @@
         {
             BIOS_Reset();
 
-            _cpu.NIRQ = CPU.Core.Signal.High;
+            _cpu.NIRQ = CPU.Signal.High;
         }
 
         internal bool IsRunning()

@@ -8,7 +8,7 @@
 
             // TODO
 
-            _cpu.Reg[CPU.Core.PC] = ROMAddress;
+            _cpu.Reg[CPU.PC] = ROMAddress;
             _cpu.NextInstructionAddress = ROMAddress;
         }
 
