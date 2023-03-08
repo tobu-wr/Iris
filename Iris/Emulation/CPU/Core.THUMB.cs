@@ -1,19 +1,19 @@
 ﻿using System.Numerics;
 
-namespace Iris.Emulation.CPU
+namespace Iris.Emulation
 {
-    internal sealed partial class Core
+    internal sealed partial class CPU
     {
         // This doesn't compile and I don't know why :(
-        //private unsafe readonly record struct THUMB_InstructionListEntry(UInt16 Mask, UInt16 Expected, delegate*<Core, UInt16, void> Handler);
+        //private unsafe readonly record struct THUMB_InstructionListEntry(UInt16 Mask, UInt16 Expected, delegate*<CPU, UInt16, void> Handler);
 
         private readonly struct THUMB_InstructionListEntry
         {
             internal readonly UInt16 Mask;
             internal readonly UInt16 Expected;
-            internal unsafe readonly delegate*<Core, UInt16, void> Handler;
+            internal unsafe readonly delegate*<CPU, UInt16, void> Handler;
 
-            internal unsafe THUMB_InstructionListEntry(UInt16 mask, UInt16 expected, delegate*<Core, UInt16, void> handler)
+            internal unsafe THUMB_InstructionListEntry(UInt16 mask, UInt16 expected, delegate*<CPU, UInt16, void> handler)
             {
                 Mask = mask;
                 Expected = expected;
@@ -21,7 +21,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private unsafe readonly delegate*<Core, UInt16, void>[] THUMB_InstructionLUT = new delegate*<Core, UInt16, void>[1 << 10];
+        private unsafe readonly delegate*<CPU, UInt16, void>[] THUMB_InstructionLUT = new delegate*<CPU, UInt16, void>[1 << 10];
 
         private static UInt16 THUMB_InstructionLUTHash(UInt16 value)
         {
@@ -221,12 +221,12 @@ namespace Iris.Emulation.CPU
                 Reg[i] = value;
         }
 
-        private static void THUMB_UNKNOWN(Core cpu, UInt16 instruction)
+        private static void THUMB_UNKNOWN(CPU cpu, UInt16 instruction)
         {
-            throw new Exception(string.Format("Emulation.CPU.Core.THUMB: Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, cpu.NextInstructionAddress - 2));
+            throw new Exception(string.Format("Emulation.CPU.THUMB: Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, cpu.NextInstructionAddress - 2));
         }
 
-        private static void THUMB_ADC(Core cpu, UInt16 instruction)
+        private static void THUMB_ADC(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -243,7 +243,7 @@ namespace Iris.Emulation.CPU
             cpu.SetFlag(Flag.V, OverflowFrom_Addition(leftOperand, (UInt32)rightOperand, cpu.Reg[rd]));
         }
 
-        private static void THUMB_ADD1(Core cpu, UInt16 instruction)
+        private static void THUMB_ADD1(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -261,7 +261,7 @@ namespace Iris.Emulation.CPU
             cpu.SetFlag(Flag.V, OverflowFrom_Addition(leftOperand, rightOperand, cpu.Reg[rd]));
         }
 
-        private static void THUMB_ADD2(Core cpu, UInt16 instruction)
+        private static void THUMB_ADD2(CPU cpu, UInt16 instruction)
         {
             UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -278,7 +278,7 @@ namespace Iris.Emulation.CPU
             cpu.SetFlag(Flag.V, OverflowFrom_Addition(leftOperand, rightOperand, cpu.Reg[rd]));
         }
 
-        private static void THUMB_ADD3(Core cpu, UInt16 instruction)
+        private static void THUMB_ADD3(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -296,7 +296,7 @@ namespace Iris.Emulation.CPU
             cpu.SetFlag(Flag.V, OverflowFrom_Addition(leftOperand, rightOperand, cpu.Reg[rd]));
         }
 
-        private static void THUMB_ADD4(Core cpu, UInt16 instruction)
+        private static void THUMB_ADD4(CPU cpu, UInt16 instruction)
         {
             UInt16 h1 = (UInt16)((instruction >> 7) & 1);
             UInt16 h2 = (UInt16)((instruction >> 6) & 1);
@@ -309,7 +309,7 @@ namespace Iris.Emulation.CPU
             cpu.THUMB_SetReg(rd, cpu.Reg[rd] + cpu.Reg[rm]);
         }
 
-        private static void THUMB_ADD5(Core cpu, UInt16 instruction)
+        private static void THUMB_ADD5(CPU cpu, UInt16 instruction)
         {
             UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -317,7 +317,7 @@ namespace Iris.Emulation.CPU
             cpu.Reg[rd] = (cpu.Reg[PC] & 0xffff_fffc) + (imm * 4u);
         }
 
-        private static void THUMB_ADD6(Core cpu, UInt16 instruction)
+        private static void THUMB_ADD6(CPU cpu, UInt16 instruction)
         {
             UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -325,14 +325,14 @@ namespace Iris.Emulation.CPU
             cpu.Reg[rd] = cpu.Reg[SP] + (imm * 4u);
         }
 
-        private static void THUMB_ADD7(Core cpu, UInt16 instruction)
+        private static void THUMB_ADD7(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)(instruction & 0x7f);
 
             cpu.Reg[SP] += imm * 4u;
         }
 
-        private static void THUMB_AND(Core cpu, UInt16 instruction)
+        private static void THUMB_AND(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -343,7 +343,7 @@ namespace Iris.Emulation.CPU
             cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
-        private static void THUMB_ASR1(Core cpu, UInt16 instruction)
+        private static void THUMB_ASR1(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
@@ -366,7 +366,7 @@ namespace Iris.Emulation.CPU
             cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
-        private static void THUMB_ASR2(Core cpu, UInt16 instruction)
+        private static void THUMB_ASR2(CPU cpu, UInt16 instruction)
         {
             UInt16 rs = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -392,7 +392,7 @@ namespace Iris.Emulation.CPU
             cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
-        private static void THUMB_B1(Core cpu, UInt16 instruction)
+        private static void THUMB_B1(CPU cpu, UInt16 instruction)
         {
             UInt16 cond = (UInt16)((instruction >> 8) & 0b1111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -401,14 +401,14 @@ namespace Iris.Emulation.CPU
                 cpu.THUMB_SetPC(cpu.Reg[PC] + (SignExtend(imm, 8) << 1));
         }
 
-        private static void THUMB_B2(Core cpu, UInt16 instruction)
+        private static void THUMB_B2(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)(instruction & 0x7ff);
 
             cpu.THUMB_SetPC(cpu.Reg[PC] + (SignExtend(imm, 11) << 1));
         }
 
-        private static void THUMB_BIC(Core cpu, UInt16 instruction)
+        private static void THUMB_BIC(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -419,7 +419,7 @@ namespace Iris.Emulation.CPU
             cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
-        private static void THUMB_BL(Core cpu, UInt16 instruction)
+        private static void THUMB_BL(CPU cpu, UInt16 instruction)
         {
             UInt16 h = (UInt16)((instruction >> 11) & 0b11);
             UInt16 offset = (UInt16)(instruction & 0x7ff);
@@ -438,7 +438,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void THUMB_BX(Core cpu, UInt16 instruction)
+        private static void THUMB_BX(CPU cpu, UInt16 instruction)
         {
             UInt16 h2 = (UInt16)((instruction >> 6) & 1);
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
@@ -449,7 +449,7 @@ namespace Iris.Emulation.CPU
             cpu.THUMB_SetPC(cpu.Reg[rm]);
         }
 
-        private static void THUMB_CMN(Core cpu, UInt16 instruction)
+        private static void THUMB_CMN(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rn = (UInt16)(instruction & 0b111);
@@ -466,7 +466,7 @@ namespace Iris.Emulation.CPU
             cpu.SetFlag(Flag.V, OverflowFrom_Addition(leftOperand, rightOperand, aluOut));
         }
 
-        private static void THUMB_CMP1(Core cpu, UInt16 instruction)
+        private static void THUMB_CMP1(CPU cpu, UInt16 instruction)
         {
             UInt16 rn = (UInt16)((instruction >> 8) & 0b111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -482,7 +482,7 @@ namespace Iris.Emulation.CPU
             cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, rightOperand, aluOut));
         }
 
-        private static void THUMB_CMP2(Core cpu, UInt16 instruction)
+        private static void THUMB_CMP2(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rn = (UInt16)(instruction & 0b111);
@@ -498,7 +498,7 @@ namespace Iris.Emulation.CPU
             cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, rightOperand, aluOut));
         }
 
-        private static void THUMB_CMP3(Core cpu, UInt16 instruction)
+        private static void THUMB_CMP3(CPU cpu, UInt16 instruction)
         {
             UInt16 h1 = (UInt16)((instruction >> 7) & 1);
             UInt16 h2 = (UInt16)((instruction >> 6) & 1);
@@ -519,7 +519,7 @@ namespace Iris.Emulation.CPU
             cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, rightOperand, aluOut));
         }
 
-        private static void THUMB_EOR(Core cpu, UInt16 instruction)
+        private static void THUMB_EOR(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -530,7 +530,7 @@ namespace Iris.Emulation.CPU
             cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
-        private static void THUMB_LDMIA(Core cpu, UInt16 instruction)
+        private static void THUMB_LDMIA(CPU cpu, UInt16 instruction)
         {
             UInt16 rn = (UInt16)((instruction >> 8) & 0b111);
             UInt16 registerList = (UInt16)(instruction & 0xff);
@@ -557,7 +557,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void THUMB_LDR1(Core cpu, UInt16 instruction)
+        private static void THUMB_LDR1(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -568,7 +568,7 @@ namespace Iris.Emulation.CPU
             cpu.Reg[rd] = data;
         }
 
-        private static void THUMB_LDR2(Core cpu, UInt16 instruction)
+        private static void THUMB_LDR2(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -579,7 +579,7 @@ namespace Iris.Emulation.CPU
             cpu.Reg[rd] = data;
         }
 
-        private static void THUMB_LDR3(Core cpu, UInt16 instruction)
+        private static void THUMB_LDR3(CPU cpu, UInt16 instruction)
         {
             UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -589,7 +589,7 @@ namespace Iris.Emulation.CPU
             cpu.Reg[rd] = data;
         }
 
-        private static void THUMB_LDR4(Core cpu, UInt16 instruction)
+        private static void THUMB_LDR4(CPU cpu, UInt16 instruction)
         {
             UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -599,7 +599,7 @@ namespace Iris.Emulation.CPU
             cpu.Reg[rd] = data;
         }
 
-        private static void THUMB_LDRB1(Core cpu, UInt16 instruction)
+        private static void THUMB_LDRB1(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -610,7 +610,7 @@ namespace Iris.Emulation.CPU
             cpu.Reg[rd] = data;
         }
 
-        private static void THUMB_LDRB2(Core cpu, UInt16 instruction)
+        private static void THUMB_LDRB2(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -621,7 +621,7 @@ namespace Iris.Emulation.CPU
             cpu.Reg[rd] = data;
         }
 
-        private static void THUMB_LDRH1(Core cpu, UInt16 instruction)
+        private static void THUMB_LDRH1(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -632,7 +632,7 @@ namespace Iris.Emulation.CPU
             cpu.Reg[rd] = data;
         }
 
-        private static void THUMB_LDRH2(Core cpu, UInt16 instruction)
+        private static void THUMB_LDRH2(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -643,7 +643,7 @@ namespace Iris.Emulation.CPU
             cpu.Reg[rd] = data;
         }
 
-        private static void THUMB_LDRSB(Core cpu, UInt16 instruction)
+        private static void THUMB_LDRSB(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -654,7 +654,7 @@ namespace Iris.Emulation.CPU
             cpu.Reg[rd] = SignExtend(data, 8);
         }
 
-        private static void THUMB_LDRSH(Core cpu, UInt16 instruction)
+        private static void THUMB_LDRSH(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -674,7 +674,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void THUMB_LSL1(Core cpu, UInt16 instruction)
+        private static void THUMB_LSL1(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
@@ -696,7 +696,7 @@ namespace Iris.Emulation.CPU
             cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
-        private static void THUMB_LSL2(Core cpu, UInt16 instruction)
+        private static void THUMB_LSL2(CPU cpu, UInt16 instruction)
         {
             UInt16 rs = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -727,7 +727,7 @@ namespace Iris.Emulation.CPU
             cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
-        private static void THUMB_LSR1(Core cpu, UInt16 instruction)
+        private static void THUMB_LSR1(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
@@ -750,7 +750,7 @@ namespace Iris.Emulation.CPU
             cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
-        private static void THUMB_LSR2(Core cpu, UInt16 instruction)
+        private static void THUMB_LSR2(CPU cpu, UInt16 instruction)
         {
             UInt16 rs = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -781,7 +781,7 @@ namespace Iris.Emulation.CPU
             cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
-        private static void THUMB_MOV1(Core cpu, UInt16 instruction)
+        private static void THUMB_MOV1(CPU cpu, UInt16 instruction)
         {
             UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -792,7 +792,7 @@ namespace Iris.Emulation.CPU
             cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
-        private static void THUMB_MOV3(Core cpu, UInt16 instruction)
+        private static void THUMB_MOV3(CPU cpu, UInt16 instruction)
         {
             UInt16 h1 = (UInt16)((instruction >> 7) & 1);
             UInt16 h2 = (UInt16)((instruction >> 6) & 1);
@@ -805,7 +805,7 @@ namespace Iris.Emulation.CPU
             cpu.THUMB_SetReg(rd, cpu.Reg[rm]);
         }
 
-        private static void THUMB_MUL(Core cpu, UInt16 instruction)
+        private static void THUMB_MUL(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -816,7 +816,7 @@ namespace Iris.Emulation.CPU
             cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
-        private static void THUMB_MVN(Core cpu, UInt16 instruction)
+        private static void THUMB_MVN(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -827,7 +827,7 @@ namespace Iris.Emulation.CPU
             cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
-        private static void THUMB_NEG(Core cpu, UInt16 instruction)
+        private static void THUMB_NEG(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -843,7 +843,7 @@ namespace Iris.Emulation.CPU
             cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, rightOperand, cpu.Reg[rd]));
         }
 
-        private static void THUMB_ORR(Core cpu, UInt16 instruction)
+        private static void THUMB_ORR(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -854,7 +854,7 @@ namespace Iris.Emulation.CPU
             cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
-        private static void THUMB_POP(Core cpu, UInt16 instruction)
+        private static void THUMB_POP(CPU cpu, UInt16 instruction)
         {
             UInt16 r = (UInt16)((instruction >> 8) & 1);
             UInt16 registerList = (UInt16)(instruction & 0xff);
@@ -875,7 +875,7 @@ namespace Iris.Emulation.CPU
                 cpu.THUMB_SetPC(cpu._callbackInterface.ReadMemory32(address));
         }
 
-        private static void THUMB_PUSH(Core cpu, UInt16 instruction)
+        private static void THUMB_PUSH(CPU cpu, UInt16 instruction)
         {
             UInt16 r = (UInt16)((instruction >> 8) & 1);
             UInt16 registerList = (UInt16)(instruction & 0xff);
@@ -896,7 +896,7 @@ namespace Iris.Emulation.CPU
                 cpu._callbackInterface.WriteMemory32(address, cpu.Reg[LR]);
         }
 
-        private static void THUMB_ROR(Core cpu, UInt16 instruction)
+        private static void THUMB_ROR(CPU cpu, UInt16 instruction)
         {
             UInt16 rs = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -919,7 +919,7 @@ namespace Iris.Emulation.CPU
             cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
-        private static void THUMB_SBC(Core cpu, UInt16 instruction)
+        private static void THUMB_SBC(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -935,7 +935,7 @@ namespace Iris.Emulation.CPU
             cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, (UInt32)rightOperand, cpu.Reg[rd]));
         }
 
-        private static void THUMB_STMIA(Core cpu, UInt16 instruction)
+        private static void THUMB_STMIA(CPU cpu, UInt16 instruction)
         {
             UInt16 rn = (UInt16)((instruction >> 8) & 0b111);
             UInt16 registerList = (UInt16)(instruction & 0xff);
@@ -967,7 +967,7 @@ namespace Iris.Emulation.CPU
             }
         }
 
-        private static void THUMB_STR1(Core cpu, UInt16 instruction)
+        private static void THUMB_STR1(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -977,7 +977,7 @@ namespace Iris.Emulation.CPU
             cpu._callbackInterface.WriteMemory32(address, cpu.Reg[rd]);
         }
 
-        private static void THUMB_STR2(Core cpu, UInt16 instruction)
+        private static void THUMB_STR2(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -987,7 +987,7 @@ namespace Iris.Emulation.CPU
             cpu._callbackInterface.WriteMemory32(address, cpu.Reg[rd]);
         }
 
-        private static void THUMB_STR3(Core cpu, UInt16 instruction)
+        private static void THUMB_STR3(CPU cpu, UInt16 instruction)
         {
             UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -996,7 +996,7 @@ namespace Iris.Emulation.CPU
             cpu._callbackInterface.WriteMemory32(address, cpu.Reg[rd]);
         }
 
-        private static void THUMB_STRB1(Core cpu, UInt16 instruction)
+        private static void THUMB_STRB1(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -1006,7 +1006,7 @@ namespace Iris.Emulation.CPU
             cpu._callbackInterface.WriteMemory8(address, (Byte)cpu.Reg[rd]);
         }
 
-        private static void THUMB_STRB2(Core cpu, UInt16 instruction)
+        private static void THUMB_STRB2(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -1016,7 +1016,7 @@ namespace Iris.Emulation.CPU
             cpu._callbackInterface.WriteMemory8(address, (Byte)cpu.Reg[rd]);
         }
 
-        private static void THUMB_STRH1(Core cpu, UInt16 instruction)
+        private static void THUMB_STRH1(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -1026,7 +1026,7 @@ namespace Iris.Emulation.CPU
             cpu._callbackInterface.WriteMemory16(address, (UInt16)cpu.Reg[rd]);
         }
 
-        private static void THUMB_STRH2(Core cpu, UInt16 instruction)
+        private static void THUMB_STRH2(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -1036,7 +1036,7 @@ namespace Iris.Emulation.CPU
             cpu._callbackInterface.WriteMemory16(address, (UInt16)cpu.Reg[rd]);
         }
 
-        private static void THUMB_SUB1(Core cpu, UInt16 instruction)
+        private static void THUMB_SUB1(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -1053,7 +1053,7 @@ namespace Iris.Emulation.CPU
             cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, rightOperand, cpu.Reg[rd]));
         }
 
-        private static void THUMB_SUB2(Core cpu, UInt16 instruction)
+        private static void THUMB_SUB2(CPU cpu, UInt16 instruction)
         {
             UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -1069,7 +1069,7 @@ namespace Iris.Emulation.CPU
             cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, rightOperand, cpu.Reg[rd]));
         }
 
-        private static void THUMB_SUB3(Core cpu, UInt16 instruction)
+        private static void THUMB_SUB3(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -1086,21 +1086,21 @@ namespace Iris.Emulation.CPU
             cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, rightOperand, cpu.Reg[rd]));
         }
 
-        private static void THUMB_SUB4(Core cpu, UInt16 instruction)
+        private static void THUMB_SUB4(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)(instruction & 0x7f);
 
             cpu.Reg[SP] -= (UInt32)imm << 2;
         }
 
-        private static void THUMB_SWI(Core cpu, UInt16 instruction)
+        private static void THUMB_SWI(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)(instruction & 0xff);
 
             cpu._callbackInterface.HandleSWI((UInt32)(imm << 16));
         }
 
-        private static void THUMB_TST(Core cpu, UInt16 instruction)
+        private static void THUMB_TST(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rn = (UInt16)(instruction & 0b111);

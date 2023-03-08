@@ -1,6 +1,6 @@
-﻿namespace Iris.Emulation.CPU
+﻿namespace Iris.Emulation
 {
-    internal sealed partial class Core
+    internal sealed partial class CPU
     {
         internal enum Architecture
         {
@@ -75,7 +75,7 @@
         internal UInt32 NextInstructionAddress;
         internal Signal NIRQ;
 
-        internal Core(Architecture architecture, CallbackInterface callbackInterface)
+        internal CPU(Architecture architecture, CallbackInterface callbackInterface)
         {
             _architecture = architecture;
             _callbackInterface = callbackInterface;
