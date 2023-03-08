@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Iris.Emulation.GBA
@@ -91,17 +90,17 @@ namespace Iris.Emulation.GBA
 
                             UInt16[] screenFrameBuffer = new UInt16[PhysicalScreenSize];
 
-                            if (bg0 == 1)
-                                RenderBackground(0, screenFrameBuffer);
-
-                            if (bg1 == 1)
-                                RenderBackground(1, screenFrameBuffer);
+                            if (bg3 == 1)
+                                RenderBackground(3, screenFrameBuffer);
 
                             if (bg2 == 1)
                                 RenderBackground(2, screenFrameBuffer);
 
-                            if (bg3 == 1)
-                                RenderBackground(3, screenFrameBuffer);
+                            if (bg1 == 1)
+                                RenderBackground(1, screenFrameBuffer);
+
+                            if (bg0 == 1)
+                                RenderBackground(0, screenFrameBuffer);
 
                             _callbackInterface.DrawFrame(screenFrameBuffer);
                             break;
@@ -256,6 +255,9 @@ namespace Iris.Emulation.GBA
                         else
                             colorNumber >>= 4;
                     }
+
+                    if ((colorNumber == 0) && (bg != 3))
+                        continue;
 
                     UInt32 paletteAddress = (colorMode == 0) ? (palette * 16u * ColorSize) : 0u;
 

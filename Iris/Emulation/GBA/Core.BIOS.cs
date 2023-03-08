@@ -69,6 +69,9 @@
                 case 0x01:
                     RegisterRamReset();
                     break;
+                case 0x02:
+                    Halt();
+                    break;
                 case 0x05:
                     VBlankIntrWait();
                     break;
@@ -118,6 +121,11 @@
         }
 
         private void RegisterRamReset()
+        {
+            // TODO
+        }
+
+        private void Halt()
         {
             // TODO
         }
