@@ -88,7 +88,7 @@
                     ReturnFromIRQ();
                     break;
                 default:
-                    throw new Exception(string.Format("Emulation.GBA.Core: Unknown BIOS function 0x{0:x2}", function));
+                    throw new Exception(string.Format("Emulation.GBA.Core.BIOS: Unknown BIOS function 0x{0:x2}", function));
             }
         }
 
@@ -248,8 +248,8 @@
             UInt32 dataHeader = ReadMemory32(source);
             source += 4;
 
-            UInt32 decompressedDataSize = dataHeader >> 8;
-            UInt32 lastDestination = destination + decompressedDataSize;
+            UInt32 dataSize = dataHeader >> 8;
+            UInt32 lastDestination = destination + dataSize;
 
             while (destination < lastDestination)
             {
@@ -274,12 +274,12 @@
                         UInt16 blockHeader = ReadMemory16(source);
                         source += 2;
 
-                        UInt16 disp = (UInt16)((((blockHeader & 0xf) << 8) | (blockHeader >> 8)) + 1);
+                        UInt16 offset = (UInt16)((((blockHeader & 0xf) << 8) | (blockHeader >> 8)) + 1);
                         UInt16 blockSize = (UInt16)(((blockHeader >> 4) & 0xf) + 3);
-                            
+
                         for (int j = 0; j < blockSize; j += 2)
                         {
-                            WriteMemory16(destination, ReadMemory16(destination - disp));
+                            WriteMemory16(destination, ReadMemory16(destination - offset));
                             destination += 2;
                         }
                     }
