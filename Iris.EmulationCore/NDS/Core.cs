@@ -2,14 +2,14 @@
 
 namespace Iris.EmulationCore.NDS
 {
-    public sealed partial class Core
+    public sealed partial class Core : ICore
     {
         private readonly CPU _cpu;
         private readonly PPU _ppu;
 
         private bool _running = false;
 
-        public Core(PPU.DrawFrame_Delegate drawFrameCallback)
+        public Core(DrawFrame_Delegate drawFrameCallback)
         {
             CPU.CallbackInterface cpuCallbackInterface = new()
             {
@@ -27,19 +27,19 @@ namespace Iris.EmulationCore.NDS
             _ppu = new(drawFrameCallback);
         }
 
-        internal void Reset()
+        public void Reset()
         {
             BIOS_Reset();
 
             _cpu.NIRQ = CPU.Signal.High;
         }
 
-        internal bool IsRunning()
+        public bool IsRunning()
         {
             return _running;
         }
 
-        internal void Run()
+        public void Run()
         {
             _running = true;
 
@@ -50,7 +50,7 @@ namespace Iris.EmulationCore.NDS
             }
         }
 
-        internal void Pause()
+        public void Pause()
         {
             _running = false;
         }
