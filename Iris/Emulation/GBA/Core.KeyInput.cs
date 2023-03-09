@@ -16,7 +16,7 @@
             L = 9,
         }
 
-        internal enum KeyStatus
+        public enum KeyStatus
         {
             Input = 0,
             NoInput = 1
@@ -25,7 +25,7 @@
         private UInt16 _KEYINPUT;
         private UInt16 _KEYCNT;
 
-        internal void SetKeyStatus(Keys key, KeyStatus status)
+        public void SetKeyStatus(Keys key, KeyStatus status)
         {
             _KEYINPUT = (UInt16)((_KEYINPUT & ~(1 << (int)key)) | ((int)status << (int)key));
         }

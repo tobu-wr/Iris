@@ -1,5 +1,4 @@
 using System.Drawing.Imaging;
-using System.Windows.Forms;
 
 namespace Iris.UserInterface
 {
@@ -30,7 +29,7 @@ namespace Iris.UserInterface
 
             _GBA = new(DrawFrame);
 
-            _performanceUpdateTimer.Elapsed += new System.Timers.ElapsedEventHandler(PerformanceUpdateTimer_Elapsed);
+            _performanceUpdateTimer.Elapsed += PerformanceUpdateTimer_Elapsed;
 
             if (args.Length > 0 && LoadROM(args[0]))
             {
@@ -210,6 +209,18 @@ namespace Iris.UserInterface
             menuStrip1.Invoke(() => toolStripStatusLabel3.Text = "FPS: " + fps);
             Console.WriteLine("UserInterface.MainWindow: FPS: {0}", fps);
             _frameCount = 0;
+        }
+
+        private void MainWindow_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (KeyMapping.TryGetValue(e.KeyCode, out Emulation.GBA.Core.Keys value))
+                _GBA.SetKeyStatus(value, Emulation.GBA.Core.KeyStatus.Input);
+        }
+
+        private void MainWindow_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (KeyMapping.TryGetValue(e.KeyCode, out Emulation.GBA.Core.Keys value))
+                _GBA.SetKeyStatus(value, Emulation.GBA.Core.KeyStatus.NoInput);
         }
     }
 }
