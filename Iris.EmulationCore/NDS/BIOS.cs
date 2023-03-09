@@ -1,4 +1,6 @@
-﻿namespace Iris.Emulation.NDS
+﻿using Iris.Emulation.Common;
+
+namespace Iris.Emulation.NDS
 {
     public sealed partial class Core
     {
