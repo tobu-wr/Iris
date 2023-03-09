@@ -44,7 +44,7 @@
             runToolStripMenuItem = new ToolStripMenuItem();
             pauseToolStripMenuItem = new ToolStripMenuItem();
             restartToolStripMenuItem = new ToolStripMenuItem();
-            screenBox = new PictureBox();
+            screenBox = new ScreenBox();
             statusStrip1.SuspendLayout();
             menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)screenBox).BeginInit();
@@ -216,6 +216,6 @@
         private ToolStripMenuItem runToolStripMenuItem;
         private ToolStripMenuItem pauseToolStripMenuItem;
         private ToolStripMenuItem restartToolStripMenuItem;
-        private PictureBox screenBox;
+        private ScreenBox screenBox;
     }
 }
