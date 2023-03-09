@@ -126,7 +126,11 @@ namespace Iris.UserInterface
             if (running)
                 Pause();
 
-            OpenFileDialog dialog = new();
+            OpenFileDialog dialog = new()
+            {
+                Filter = "GBA ROM files (*.gba)|*.gba"
+            };
+
             if (dialog.ShowDialog() == DialogResult.OK)
             {
                 if (LoadROM(dialog.FileName) && !running)
