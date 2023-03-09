@@ -1,13 +1,13 @@
 ﻿namespace Iris.Emulation.NDS
 {
-    internal sealed partial class Core
+    public sealed partial class Core
     {
         private readonly CPU _cpu;
         private readonly PPU _ppu;
 
         private bool _running = false;
 
-        internal Core(PPU.DrawFrame_Delegate drawFrameCallback)
+        public Core(PPU.DrawFrame_Delegate drawFrameCallback)
         {
             CPU.CallbackInterface cpuCallbackInterface = new()
             {

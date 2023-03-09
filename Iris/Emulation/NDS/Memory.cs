@@ -1,6 +1,6 @@
 ﻿namespace Iris.Emulation.NDS
 {
-    internal sealed partial class Core
+    public sealed partial class Core
     {
         private const int KB = 1024;
 
