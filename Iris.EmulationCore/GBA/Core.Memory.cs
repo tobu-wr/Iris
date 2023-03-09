@@ -329,7 +329,7 @@ namespace Iris.EmulationCore.GBA
                             0x208 => GetLowByte(_IME),
                             0x209 => GetHighByte(_IME),
 
-                            _ => throw new Exception(string.Format("Emulation.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address)),
+                            _ => throw new Exception(string.Format("Iris.EmulationCore.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address)),
                         };
                     }
 
@@ -385,7 +385,7 @@ namespace Iris.EmulationCore.GBA
                     break;
             }
 
-            throw new Exception(string.Format("Emulation.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address));
+            throw new Exception(string.Format("Iris.EmulationCore.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address));
         }
 
         private UInt16 ReadMemory16(UInt32 address)
@@ -476,7 +476,7 @@ namespace Iris.EmulationCore.GBA
                             0x202 => _IF,
                             0x204 => _WAITCNT,
                             0x208 => _IME,
-                            _ => throw new Exception(string.Format("Emulation.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address)),
+                            _ => throw new Exception(string.Format("Iris.EmulationCore.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address)),
                         };
                     }
 
@@ -532,7 +532,7 @@ namespace Iris.EmulationCore.GBA
                     break;
             }
 
-            throw new Exception(string.Format("Emulation.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address));
+            throw new Exception(string.Format("Iris.EmulationCore.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address));
         }
 
         private UInt32 ReadMemory32(UInt32 address)
@@ -574,7 +574,7 @@ namespace Iris.EmulationCore.GBA
                             0x0d0 => (UInt32)(_DMA2CNT_H << 16),
                             0x0dc => (UInt32)(_DMA3CNT_H << 16),
                             0x200 => (UInt32)((_IF << 16) | _IE),
-                            _ => throw new Exception(string.Format("Emulation.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address)),
+                            _ => throw new Exception(string.Format("Iris.EmulationCore.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address)),
                         };
                     }
 
@@ -630,7 +630,7 @@ namespace Iris.EmulationCore.GBA
                     break;
             }
 
-            throw new Exception(string.Format("Emulation.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address));
+            throw new Exception(string.Format("Iris.EmulationCore.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address));
         }
 
         private void WriteMemory8(UInt32 address, Byte value)
@@ -1312,7 +1312,7 @@ namespace Iris.EmulationCore.GBA
                                 break;
 
                             default:
-                                throw new Exception(string.Format("Emulation.GBA.Core.Memory: Unhandled write to address 0x{0:x8}", address));
+                                throw new Exception(string.Format("Iris.EmulationCore.GBA.Core.Memory: Unhandled write to address 0x{0:x8}", address));
                         }
                     }
                     break;
@@ -1327,7 +1327,7 @@ namespace Iris.EmulationCore.GBA
                     break;
 
                 default:
-                    throw new Exception(string.Format("Emulation.GBA.Core.Memory: Unhandled write to address 0x{0:x8}", address));
+                    throw new Exception(string.Format("Iris.EmulationCore.GBA.Core.Memory: Unhandled write to address 0x{0:x8}", address));
             }
         }
 
@@ -1640,7 +1640,7 @@ namespace Iris.EmulationCore.GBA
                                 UpdateInterrupts();
                                 break;
                             default:
-                                throw new Exception(string.Format("Emulation.GBA.Core.Memory: Unhandled write to address 0x{0:x8}", address));
+                                throw new Exception(string.Format("Iris.EmulationCore.GBA.Core.Memory: Unhandled write to address 0x{0:x8}", address));
                         }
                     }
                     break;
@@ -1655,7 +1655,7 @@ namespace Iris.EmulationCore.GBA
                     break;
 
                 default:
-                    throw new Exception(string.Format("Emulation.GBA.Core.Memory: Unhandled write to address 0x{0:x8}", address));
+                    throw new Exception(string.Format("Iris.EmulationCore.GBA.Core.Memory: Unhandled write to address 0x{0:x8}", address));
             }
         }
 
@@ -1783,7 +1783,7 @@ namespace Iris.EmulationCore.GBA
                                 // 16 upper bits are unused
                                 break;
                             default:
-                                throw new Exception(string.Format("Emulation.GBA.Core.Memory: Unhandled write to address 0x{0:x8}", address));
+                                throw new Exception(string.Format("Iris.EmulationCore.GBA.Core.Memory: Unhandled write to address 0x{0:x8}", address));
                         }
                     }
                     break;
@@ -1798,7 +1798,7 @@ namespace Iris.EmulationCore.GBA
                     break;
 
                 default:
-                    throw new Exception(string.Format("Emulation.GBA.Core.Memory: Unhandled write to address 0x{0:x8}", address));
+                    throw new Exception(string.Format("Iris.EmulationCore.GBA.Core.Memory: Unhandled write to address 0x{0:x8}", address));
             }
         }
     }

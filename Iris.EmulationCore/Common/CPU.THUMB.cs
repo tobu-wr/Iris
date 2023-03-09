@@ -220,7 +220,7 @@ namespace Iris.EmulationCore.Common
 
         private static void THUMB_UNKNOWN(CPU cpu, UInt16 instruction)
         {
-            throw new Exception(string.Format("Emulation.CPU.THUMB: Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, cpu.NextInstructionAddress - 2));
+            throw new Exception(string.Format("Iris.EmulationCore.Common.CPU.THUMB: Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, cpu.NextInstructionAddress - 2));
         }
 
         private static void THUMB_ADC(CPU cpu, UInt16 instruction)

@@ -16,12 +16,12 @@ namespace Iris.EmulationCore.NDS
 
         private void HandleSWI(UInt32 value)
         {
-            throw new NotImplementedException("Emulation.NDS.Core: HandleSWI unimplemented");
+            throw new NotImplementedException("Iris.EmulationCore.NDS.Core.BIOS: HandleSWI unimplemented");
         }
 
         private void HandleIRQ()
         {
-            throw new NotImplementedException("Emulation.NDS.Core: HandleIRQ unimplemented");
+            throw new NotImplementedException("Iris.EmulationCore.NDS.Core.BIOS: HandleIRQ unimplemented");
         }
     }
 }

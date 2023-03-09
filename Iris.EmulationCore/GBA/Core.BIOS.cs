@@ -96,7 +96,7 @@ namespace Iris.EmulationCore.GBA
                     ReturnFromIRQ();
                     break;
                 default:
-                    throw new Exception(string.Format("Emulation.GBA.Core.BIOS: Unknown BIOS function 0x{0:x2}", function));
+                    throw new Exception(string.Format("Iris.EmulationCore.GBA.Core.BIOS: Unknown BIOS function 0x{0:x2}", function));
             }
         }
 

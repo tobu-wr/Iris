@@ -130,7 +130,7 @@ namespace Iris.EmulationCore.GBA
                             break;
                         }
                     default:
-                        Console.WriteLine("PPU: BG mode {0} unimplemented", bgMode);
+                        Console.WriteLine("Iris.EmulationCore.GBA.PPU: BG mode {0} unimplemented", bgMode);
                         break;
                 }
 
