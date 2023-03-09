@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace Iris.Emulation
+namespace Iris.Emulation.Common
 {
     internal sealed partial class CPU
     {
