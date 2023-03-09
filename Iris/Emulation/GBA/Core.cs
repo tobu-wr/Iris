@@ -1,6 +1,6 @@
 ﻿namespace Iris.Emulation.GBA
 {
-    internal sealed partial class Core
+    public sealed partial class Core
     {
         private readonly CPU _CPU;
         private readonly PPU _PPU;
@@ -9,7 +9,7 @@
 
         private bool _running;
 
-        internal Core(PPU.CallbackInterface.DrawFrame_Delegate drawFrame)
+        public Core(PPU.CallbackInterface.DrawFrame_Delegate drawFrame)
         {
             CPU.CallbackInterface cpuCallbackInterface = new()
             {

@@ -1,6 +1,6 @@
 ﻿namespace Iris.Emulation.GBA
 {
-    internal sealed partial class Core
+    public sealed partial class Core
     {
         private UInt16 _TM0CNT_L;
         private UInt16 _TM0CNT_H;

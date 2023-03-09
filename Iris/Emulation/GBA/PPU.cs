@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Iris.Emulation.GBA
 {
-    internal sealed class PPU
+    public sealed class PPU
     {
         private const int KB = 1024;
 
@@ -53,9 +53,9 @@ namespace Iris.Emulation.GBA
         private const UInt32 HorizontalLineCount = 228;
         private const UInt32 PhysicalScreenSize = PhysicalScreenWidth * PhysicalScreenHeight;
 
-        internal struct CallbackInterface
+        public struct CallbackInterface
         {
-            internal delegate void DrawFrame_Delegate(UInt16[] frameBuffer);
+            public delegate void DrawFrame_Delegate(UInt16[] frameBuffer);
             internal delegate void RequestInterrupt_Delegate();
 
             internal DrawFrame_Delegate DrawFrame;

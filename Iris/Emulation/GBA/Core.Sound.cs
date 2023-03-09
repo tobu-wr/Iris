@@ -1,6 +1,6 @@
 ﻿namespace Iris.Emulation.GBA
 {
-    internal sealed partial class Core
+    public sealed partial class Core
     {
         private UInt16 _SOUND1CNT_L;
         private UInt16 _SOUND1CNT_H;
