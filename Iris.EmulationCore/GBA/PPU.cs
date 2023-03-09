@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using Iris.EmulationCore.Common;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Iris.EmulationCore.GBA
@@ -55,7 +56,6 @@ namespace Iris.EmulationCore.GBA
 
         public struct CallbackInterface
         {
-            public delegate void DrawFrame_Delegate(UInt16[] frameBuffer);
             internal delegate void RequestInterrupt_Delegate();
 
             internal DrawFrame_Delegate DrawFrame;
