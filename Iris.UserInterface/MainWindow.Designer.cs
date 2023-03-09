@@ -29,9 +29,9 @@
         private void InitializeComponent()
         {
             statusStrip1 = new StatusStrip();
-            toolStripStatusLabel1 = new ToolStripStatusLabel();
+            statusToolStripStatusLabel = new ToolStripStatusLabel();
             toolStripStatusLabel2 = new ToolStripStatusLabel();
-            toolStripStatusLabel3 = new ToolStripStatusLabel();
+            fpsToolStripStatusLabel = new ToolStripStatusLabel();
             menuStrip1 = new MenuStrip();
             fileToolStripMenuItem = new ToolStripMenuItem();
             loadROMToolStripMenuItem = new ToolStripMenuItem();
@@ -52,18 +52,18 @@
             // 
             // statusStrip1
             // 
-            statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripStatusLabel1, toolStripStatusLabel2, toolStripStatusLabel3 });
+            statusStrip1.Items.AddRange(new ToolStripItem[] { statusToolStripStatusLabel, toolStripStatusLabel2, fpsToolStripStatusLabel });
             statusStrip1.Location = new Point(0, 428);
             statusStrip1.Name = "statusStrip1";
             statusStrip1.Size = new Size(800, 22);
             statusStrip1.TabIndex = 0;
             statusStrip1.Text = "statusStrip1";
             // 
-            // toolStripStatusLabel1
+            // statusToolStripStatusLabel
             // 
-            toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            toolStripStatusLabel1.Size = new Size(92, 17);
-            toolStripStatusLabel1.Text = "No ROM loaded";
+            statusToolStripStatusLabel.Name = "statusToolStripStatusLabel";
+            statusToolStripStatusLabel.Size = new Size(92, 17);
+            statusToolStripStatusLabel.Text = "No ROM loaded";
             // 
             // toolStripStatusLabel2
             // 
@@ -71,11 +71,11 @@
             toolStripStatusLabel2.Size = new Size(12, 17);
             toolStripStatusLabel2.Text = "-";
             // 
-            // toolStripStatusLabel3
+            // fpsToolStripStatusLabel
             // 
-            toolStripStatusLabel3.Name = "toolStripStatusLabel3";
-            toolStripStatusLabel3.Size = new Size(38, 17);
-            toolStripStatusLabel3.Text = "FPS: 0";
+            fpsToolStripStatusLabel.Name = "fpsToolStripStatusLabel";
+            fpsToolStripStatusLabel.Size = new Size(38, 17);
+            fpsToolStripStatusLabel.Text = "FPS: 0";
             // 
             // menuStrip1
             // 
@@ -98,7 +98,7 @@
             loadROMToolStripMenuItem.Name = "loadROMToolStripMenuItem";
             loadROMToolStripMenuItem.Size = new Size(139, 22);
             loadROMToolStripMenuItem.Text = "Load &ROM...";
-            loadROMToolStripMenuItem.Click += loadROMToolStripMenuItem_Click;
+            loadROMToolStripMenuItem.Click += LoadROMToolStripMenuItem_Click;
             // 
             // toolStripSeparator1
             // 
@@ -111,7 +111,7 @@
             loadStateToolStripMenuItem.Name = "loadStateToolStripMenuItem";
             loadStateToolStripMenuItem.Size = new Size(139, 22);
             loadStateToolStripMenuItem.Text = "&Load state...";
-            loadStateToolStripMenuItem.Click += loadStateToolStripMenuItem_Click;
+            loadStateToolStripMenuItem.Click += LoadStateToolStripMenuItem_Click;
             // 
             // saveStateToolStripMenuItem
             // 
@@ -119,7 +119,7 @@
             saveStateToolStripMenuItem.Name = "saveStateToolStripMenuItem";
             saveStateToolStripMenuItem.Size = new Size(139, 22);
             saveStateToolStripMenuItem.Text = "&Save state...";
-            saveStateToolStripMenuItem.Click += saveStateToolStripMenuItem_Click;
+            saveStateToolStripMenuItem.Click += SaveStateToolStripMenuItem_Click;
             // 
             // toolStripSeparator2
             // 
@@ -131,7 +131,7 @@
             quitToolStripMenuItem.Name = "quitToolStripMenuItem";
             quitToolStripMenuItem.Size = new Size(139, 22);
             quitToolStripMenuItem.Text = "&Quit";
-            quitToolStripMenuItem.Click += quitToolStripMenuItem_Click;
+            quitToolStripMenuItem.Click += QuitToolStripMenuItem_Click;
             // 
             // emulationToolStripMenuItem
             // 
@@ -146,7 +146,7 @@
             runToolStripMenuItem.Name = "runToolStripMenuItem";
             runToolStripMenuItem.Size = new Size(110, 22);
             runToolStripMenuItem.Text = "R&un";
-            runToolStripMenuItem.Click += runToolStripMenuItem_Click;
+            runToolStripMenuItem.Click += RunToolStripMenuItem_Click;
             // 
             // pauseToolStripMenuItem
             // 
@@ -154,7 +154,7 @@
             pauseToolStripMenuItem.Name = "pauseToolStripMenuItem";
             pauseToolStripMenuItem.Size = new Size(110, 22);
             pauseToolStripMenuItem.Text = "&Pause";
-            pauseToolStripMenuItem.Click += pauseToolStripMenuItem_Click;
+            pauseToolStripMenuItem.Click += PauseToolStripMenuItem_Click;
             // 
             // restartToolStripMenuItem
             // 
@@ -162,7 +162,7 @@
             restartToolStripMenuItem.Name = "restartToolStripMenuItem";
             restartToolStripMenuItem.Size = new Size(110, 22);
             restartToolStripMenuItem.Text = "R&estart";
-            restartToolStripMenuItem.Click += restartToolStripMenuItem_Click;
+            restartToolStripMenuItem.Click += RestartToolStripMenuItem_Click;
             // 
             // screenBox
             // 
@@ -201,9 +201,9 @@
         #endregion
 
         private StatusStrip statusStrip1;
-        private ToolStripStatusLabel toolStripStatusLabel1;
+        private ToolStripStatusLabel statusToolStripStatusLabel;
         private ToolStripStatusLabel toolStripStatusLabel2;
-        private ToolStripStatusLabel toolStripStatusLabel3;
+        private ToolStripStatusLabel fpsToolStripStatusLabel;
         private MenuStrip menuStrip1;
         private ToolStripMenuItem fileToolStripMenuItem;
         private ToolStripMenuItem loadROMToolStripMenuItem;

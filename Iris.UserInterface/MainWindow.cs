@@ -38,7 +38,7 @@ namespace Iris.UserInterface
                 runToolStripMenuItem.Enabled = true;
                 pauseToolStripMenuItem.Enabled = false;
                 restartToolStripMenuItem.Enabled = true;
-                toolStripStatusLabel1.Text = "Paused";
+                statusToolStripStatusLabel.Text = "Paused";
             }
         }
 
@@ -89,7 +89,7 @@ namespace Iris.UserInterface
         {
             runToolStripMenuItem.Enabled = false;
             pauseToolStripMenuItem.Enabled = true;
-            toolStripStatusLabel1.Text = "Running";
+            statusToolStripStatusLabel.Text = "Running";
 
             Task.Run(() =>
             {
@@ -112,15 +112,15 @@ namespace Iris.UserInterface
         {
             runToolStripMenuItem.Enabled = true;
             pauseToolStripMenuItem.Enabled = false;
-            toolStripStatusLabel1.Text = "Paused";
+            statusToolStripStatusLabel.Text = "Paused";
             _GBA.Pause();
 
             _performanceUpdateTimer.Stop();
-            toolStripStatusLabel3.Text = "FPS: 0";
+            fpsToolStripStatusLabel.Text = "FPS: 0";
             _frameCount = 0;
         }
 
-        private void loadROMToolStripMenuItem_Click(object sender, EventArgs e)
+        private void LoadROMToolStripMenuItem_Click(object sender, EventArgs e)
         {
             bool running = _GBA.IsRunning();
             if (running)
@@ -136,7 +136,7 @@ namespace Iris.UserInterface
                     runToolStripMenuItem.Enabled = true;
                     pauseToolStripMenuItem.Enabled = false;
                     restartToolStripMenuItem.Enabled = true;
-                    toolStripStatusLabel1.Text = "Paused";
+                    statusToolStripStatusLabel.Text = "Paused";
                 }
             }
 
@@ -144,7 +144,7 @@ namespace Iris.UserInterface
                 Run();
         }
 
-        private void loadStateToolStripMenuItem_Click(object sender, EventArgs e)
+        private void LoadStateToolStripMenuItem_Click(object sender, EventArgs e)
         {
             bool running = _GBA.IsRunning();
             if (running)
@@ -160,7 +160,7 @@ namespace Iris.UserInterface
                 Run();
         }
 
-        private void saveStateToolStripMenuItem_Click(object sender, EventArgs e)
+        private void SaveStateToolStripMenuItem_Click(object sender, EventArgs e)
         {
             bool running = _GBA.IsRunning();
             if (running)
@@ -176,22 +176,22 @@ namespace Iris.UserInterface
                 Run();
         }
 
-        private void quitToolStripMenuItem_Click(object sender, EventArgs e)
+        private void QuitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Application.Exit();
         }
 
-        private void runToolStripMenuItem_Click(object sender, EventArgs e)
+        private void RunToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Run();
         }
 
-        private void pauseToolStripMenuItem_Click(object sender, EventArgs e)
+        private void PauseToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Pause();
         }
 
-        private void restartToolStripMenuItem_Click(object sender, EventArgs e)
+        private void RestartToolStripMenuItem_Click(object sender, EventArgs e)
         {
             bool running = _GBA.IsRunning();
             if (running)
@@ -206,7 +206,7 @@ namespace Iris.UserInterface
         private void PerformanceUpdateTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
         {
             int fps = (int)(_frameCount * 1000 / _performanceUpdateTimer.Interval);
-            menuStrip1.Invoke(() => toolStripStatusLabel3.Text = "FPS: " + fps);
+            menuStrip1.Invoke(() => fpsToolStripStatusLabel.Text = "FPS: " + fps);
             Console.WriteLine("UserInterface.MainWindow: FPS: {0}", fps);
             _frameCount = 0;
         }
