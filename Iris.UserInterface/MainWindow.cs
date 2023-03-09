@@ -4,21 +4,21 @@ namespace Iris.UserInterface
 {
     public partial class MainWindow : Form
     {
-        private static readonly Dictionary<Keys, Emulation.GBA.Core.Keys> KeyMapping = new()
+        private static readonly Dictionary<Keys, EmulationCore.GBA.Core.Keys> KeyMapping = new()
         {
-            { Keys.A, Emulation.GBA.Core.Keys.A },
-            { Keys.Z, Emulation.GBA.Core.Keys.B},
-            { Keys.Space, Emulation.GBA.Core.Keys.Select},
-            { Keys.Enter, Emulation.GBA.Core.Keys.Start},
-            { Keys.Right, Emulation.GBA.Core.Keys.Right},
-            { Keys.Left, Emulation.GBA.Core.Keys.Left},
-            { Keys.Up, Emulation.GBA.Core.Keys.Up},
-            { Keys.Down, Emulation.GBA.Core.Keys.Down},
-            { Keys.S, Emulation.GBA.Core.Keys.R},
-            { Keys.Q, Emulation.GBA.Core.Keys.L},
+            { Keys.A, EmulationCore.GBA.Core.Keys.A },
+            { Keys.Z, EmulationCore.GBA.Core.Keys.B},
+            { Keys.Space, EmulationCore.GBA.Core.Keys.Select},
+            { Keys.Enter, EmulationCore.GBA.Core.Keys.Start},
+            { Keys.Right, EmulationCore.GBA.Core.Keys.Right},
+            { Keys.Left, EmulationCore.GBA.Core.Keys.Left},
+            { Keys.Up, EmulationCore.GBA.Core.Keys.Up},
+            { Keys.Down, EmulationCore.GBA.Core.Keys.Down},
+            { Keys.S, EmulationCore.GBA.Core.Keys.R},
+            { Keys.Q, EmulationCore.GBA.Core.Keys.L},
         };
 
-        private readonly Emulation.GBA.Core _GBA;
+        private readonly EmulationCore.GBA.Core _GBA;
 
         private int _frameCount = 0;
         private readonly System.Timers.Timer _performanceUpdateTimer = new(1000);
@@ -213,14 +213,14 @@ namespace Iris.UserInterface
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
-            if (KeyMapping.TryGetValue(e.KeyCode, out Emulation.GBA.Core.Keys value))
-                _GBA.SetKeyStatus(value, Emulation.GBA.Core.KeyStatus.Input);
+            if (KeyMapping.TryGetValue(e.KeyCode, out EmulationCore.GBA.Core.Keys value))
+                _GBA.SetKeyStatus(value, EmulationCore.GBA.Core.KeyStatus.Input);
         }
 
         private void MainWindow_KeyUp(object sender, KeyEventArgs e)
         {
-            if (KeyMapping.TryGetValue(e.KeyCode, out Emulation.GBA.Core.Keys value))
-                _GBA.SetKeyStatus(value, Emulation.GBA.Core.KeyStatus.NoInput);
+            if (KeyMapping.TryGetValue(e.KeyCode, out EmulationCore.GBA.Core.Keys value))
+                _GBA.SetKeyStatus(value, EmulationCore.GBA.Core.KeyStatus.NoInput);
         }
     }
 }

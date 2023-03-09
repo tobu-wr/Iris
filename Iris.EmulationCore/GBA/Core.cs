@@ -1,6 +1,6 @@
-﻿using Iris.Emulation.Common;
+﻿using Iris.EmulationCore.Common;
 
-namespace Iris.Emulation.GBA
+namespace Iris.EmulationCore.GBA
 {
     public sealed partial class Core
     {

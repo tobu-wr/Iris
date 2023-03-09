@@ -1,7 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace Iris.Emulation.GBA
+namespace Iris.EmulationCore.GBA
 {
     public sealed partial class Core
     {

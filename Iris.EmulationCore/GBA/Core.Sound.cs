@@ -1,4 +1,4 @@
-﻿namespace Iris.Emulation.GBA
+﻿namespace Iris.EmulationCore.GBA
 {
     public sealed partial class Core
     {

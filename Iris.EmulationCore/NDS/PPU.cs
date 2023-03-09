@@ -1,4 +1,4 @@
-﻿namespace Iris.Emulation.NDS
+﻿namespace Iris.EmulationCore.NDS
 {
     public sealed class PPU
     {
