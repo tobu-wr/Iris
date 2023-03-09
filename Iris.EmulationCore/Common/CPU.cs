@@ -8,7 +8,7 @@
             ARMv5TE
         }
 
-        // could have used function pointers (delegate*) for performance instead of delegates but it's less flexible
+        // could have used function pointers (delegate*) for performance instead of delegates but it's less flexible (cannot use non-static function for instance)
         internal struct CallbackInterface
         {
             internal delegate Byte ReadMemory8_Delegate(UInt32 address);
