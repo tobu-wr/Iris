@@ -35,7 +35,7 @@
             InitPageTables();
         }
 
-        internal void Reset()
+        public void Reset()
         {
             BIOS_Reset();
 
@@ -68,12 +68,12 @@
             _CPU.NIRQ = CPU.Signal.High;
         }
 
-        internal bool IsRunning()
+        public bool IsRunning()
         {
             return _running;
         }
 
-        internal void Run()
+        public void Run()
         {
             _running = true;
 
@@ -84,7 +84,7 @@
             }
         }
 
-        internal void Pause()
+        public void Pause()
         {
             _running = false;
         }

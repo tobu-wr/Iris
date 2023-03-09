@@ -2,7 +2,7 @@
 {
     public sealed partial class Core
     {
-        internal enum Keys
+        public enum Keys
         {
             A = 0,
             B = 1,

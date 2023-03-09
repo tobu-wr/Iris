@@ -105,7 +105,7 @@ namespace Iris.Emulation.GBA
             MapMemory(_SRAM, 64, 0x0e00_0000, 0x1000_0000, MemoryFlag.Read8 | MemoryFlag.Write8 | MemoryFlag.Mirrored);
         }
 
-        internal void LoadROM(string filename)
+        public void LoadROM(string filename)
         {
             Byte[] data = File.ReadAllBytes(filename);
 
