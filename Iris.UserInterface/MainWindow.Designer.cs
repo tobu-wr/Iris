@@ -44,8 +44,10 @@
             runToolStripMenuItem = new ToolStripMenuItem();
             pauseToolStripMenuItem = new ToolStripMenuItem();
             restartToolStripMenuItem = new ToolStripMenuItem();
+            screenBox = new PictureBox();
             statusStrip1.SuspendLayout();
             menuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)screenBox).BeginInit();
             SuspendLayout();
             // 
             // statusStrip1
@@ -94,20 +96,20 @@
             // loadROMToolStripMenuItem
             // 
             loadROMToolStripMenuItem.Name = "loadROMToolStripMenuItem";
-            loadROMToolStripMenuItem.Size = new Size(180, 22);
+            loadROMToolStripMenuItem.Size = new Size(139, 22);
             loadROMToolStripMenuItem.Text = "Load &ROM...";
             loadROMToolStripMenuItem.Click += loadROMToolStripMenuItem_Click;
             // 
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new Size(177, 6);
+            toolStripSeparator1.Size = new Size(136, 6);
             // 
             // loadStateToolStripMenuItem
             // 
             loadStateToolStripMenuItem.Enabled = false;
             loadStateToolStripMenuItem.Name = "loadStateToolStripMenuItem";
-            loadStateToolStripMenuItem.Size = new Size(180, 22);
+            loadStateToolStripMenuItem.Size = new Size(139, 22);
             loadStateToolStripMenuItem.Text = "&Load state...";
             loadStateToolStripMenuItem.Click += loadStateToolStripMenuItem_Click;
             // 
@@ -115,19 +117,19 @@
             // 
             saveStateToolStripMenuItem.Enabled = false;
             saveStateToolStripMenuItem.Name = "saveStateToolStripMenuItem";
-            saveStateToolStripMenuItem.Size = new Size(180, 22);
+            saveStateToolStripMenuItem.Size = new Size(139, 22);
             saveStateToolStripMenuItem.Text = "&Save state...";
             saveStateToolStripMenuItem.Click += saveStateToolStripMenuItem_Click;
             // 
             // toolStripSeparator2
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new Size(177, 6);
+            toolStripSeparator2.Size = new Size(136, 6);
             // 
             // quitToolStripMenuItem
             // 
             quitToolStripMenuItem.Name = "quitToolStripMenuItem";
-            quitToolStripMenuItem.Size = new Size(180, 22);
+            quitToolStripMenuItem.Size = new Size(139, 22);
             quitToolStripMenuItem.Text = "&Quit";
             quitToolStripMenuItem.Click += quitToolStripMenuItem_Click;
             // 
@@ -142,7 +144,7 @@
             // 
             runToolStripMenuItem.Enabled = false;
             runToolStripMenuItem.Name = "runToolStripMenuItem";
-            runToolStripMenuItem.Size = new Size(180, 22);
+            runToolStripMenuItem.Size = new Size(110, 22);
             runToolStripMenuItem.Text = "R&un";
             runToolStripMenuItem.Click += runToolStripMenuItem_Click;
             // 
@@ -150,7 +152,7 @@
             // 
             pauseToolStripMenuItem.Enabled = false;
             pauseToolStripMenuItem.Name = "pauseToolStripMenuItem";
-            pauseToolStripMenuItem.Size = new Size(180, 22);
+            pauseToolStripMenuItem.Size = new Size(110, 22);
             pauseToolStripMenuItem.Text = "&Pause";
             pauseToolStripMenuItem.Click += pauseToolStripMenuItem_Click;
             // 
@@ -158,15 +160,26 @@
             // 
             restartToolStripMenuItem.Enabled = false;
             restartToolStripMenuItem.Name = "restartToolStripMenuItem";
-            restartToolStripMenuItem.Size = new Size(180, 22);
+            restartToolStripMenuItem.Size = new Size(110, 22);
             restartToolStripMenuItem.Text = "R&estart";
             restartToolStripMenuItem.Click += restartToolStripMenuItem_Click;
+            // 
+            // screenBox
+            // 
+            screenBox.Dock = DockStyle.Fill;
+            screenBox.Location = new Point(0, 24);
+            screenBox.Name = "screenBox";
+            screenBox.Size = new Size(800, 404);
+            screenBox.SizeMode = PictureBoxSizeMode.StretchImage;
+            screenBox.TabIndex = 2;
+            screenBox.TabStop = false;
             // 
             // MainWindow
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(screenBox);
             Controls.Add(statusStrip1);
             Controls.Add(menuStrip1);
             MainMenuStrip = menuStrip1;
@@ -178,6 +191,7 @@
             statusStrip1.PerformLayout();
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)screenBox).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -200,5 +214,6 @@
         private ToolStripMenuItem runToolStripMenuItem;
         private ToolStripMenuItem pauseToolStripMenuItem;
         private ToolStripMenuItem restartToolStripMenuItem;
+        private PictureBox screenBox;
     }
 }
