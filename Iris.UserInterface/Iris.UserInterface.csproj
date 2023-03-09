@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Iris\Iris.EmulationCore.csproj" />
+    <ProjectReference Include="..\Iris.EmulationCore\Iris.EmulationCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>
