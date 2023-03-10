@@ -1,33 +1,30 @@
-﻿namespace Iris.EmulationCore.GBA
+﻿using Iris.EmulationCore.Common;
+
+namespace Iris.EmulationCore.GBA
 {
     public sealed partial class Core
     {
-        public enum Keys
-        {
-            A = 0,
-            B = 1,
-            Select = 2,
-            Start = 3,
-            Right = 4,
-            Left = 5,
-            Up = 6,
-            Down = 7,
-            R = 8,
-            L = 9,
-        }
-
-        public enum KeyStatus
-        {
-            Input = 0,
-            NoInput = 1
-        }
-
         private UInt16 _KEYINPUT;
         private UInt16 _KEYCNT;
 
-        public void SetKeyStatus(Keys key, KeyStatus status)
+        public void SetKeyStatus(Key key, KeyStatus status)
         {
-            _KEYINPUT = (UInt16)((_KEYINPUT & ~(1 << (int)key)) | ((int)status << (int)key));
+            int pos = key switch
+            {
+                Key.A => 0,
+                Key.B => 1,
+                Key.Select => 2,
+                Key.Start => 3,
+                Key.Right => 4,
+                Key.Left => 5,
+                Key.Up => 6,
+                Key.Down => 7,
+                Key.R => 8,
+                Key.L => 9,
+                _ => throw new Exception("Iris.EmulationCore.GBA.Core.KeyInput: Wrong key"),
+            };
+
+            _KEYINPUT = (UInt16)((_KEYINPUT & ~(1 << pos)) | ((int)status << pos));
         }
     }
 }
