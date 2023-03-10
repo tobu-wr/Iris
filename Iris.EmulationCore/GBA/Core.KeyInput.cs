@@ -9,20 +9,43 @@ namespace Iris.EmulationCore.GBA
 
         public void SetKeyStatus(Key key, KeyStatus status)
         {
-            int pos = key switch
+            int pos;
+
+            switch (key)
             {
-                Key.A => 0,
-                Key.B => 1,
-                Key.Select => 2,
-                Key.Start => 3,
-                Key.Right => 4,
-                Key.Left => 5,
-                Key.Up => 6,
-                Key.Down => 7,
-                Key.R => 8,
-                Key.L => 9,
-                _ => throw new Exception("Iris.EmulationCore.GBA.Core.KeyInput: Wrong key"),
-            };
+                case Key.A:
+                    pos = 0;
+                    break;
+                case Key.B:
+                    pos = 1;
+                    break;
+                case Key.Select:
+                    pos = 2;
+                    break;
+                case Key.Start:
+                    pos = 3;
+                    break;
+                case Key.Right:
+                    pos = 4;
+                    break;
+                case Key.Left:
+                    pos = 5;
+                    break;
+                case Key.Up:
+                    pos = 6;
+                    break;
+                case Key.Down:
+                    pos = 7;
+                    break;
+                case Key.R:
+                    pos = 8;
+                    break;
+                case Key.L:
+                    pos = 9;
+                    break;
+                default:
+                    return;
+            }
 
             _KEYINPUT = (UInt16)((_KEYINPUT & ~(1 << pos)) | ((int)status << pos));
         }
