@@ -182,6 +182,7 @@
             Controls.Add(screenBox);
             Controls.Add(statusStrip1);
             Controls.Add(menuStrip1);
+            DoubleBuffered = true;
             MainMenuStrip = menuStrip1;
             Name = "MainWindow";
             ShowIcon = false;

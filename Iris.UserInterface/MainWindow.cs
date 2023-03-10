@@ -4,22 +4,23 @@ namespace Iris.UserInterface
 {
     public partial class MainWindow : Form
     {
-        private static readonly Dictionary<Keys, EmulationCore.GBA.Core.Keys> KeyMapping = new()
+        private static readonly Dictionary<Keys, EmulationCore.Common.Key> KeyMapping = new()
         {
-            { Keys.A, EmulationCore.GBA.Core.Keys.A },
-            { Keys.Z, EmulationCore.GBA.Core.Keys.B},
-            { Keys.Space, EmulationCore.GBA.Core.Keys.Select},
-            { Keys.Enter, EmulationCore.GBA.Core.Keys.Start},
-            { Keys.Right, EmulationCore.GBA.Core.Keys.Right},
-            { Keys.Left, EmulationCore.GBA.Core.Keys.Left},
-            { Keys.Up, EmulationCore.GBA.Core.Keys.Up},
-            { Keys.Down, EmulationCore.GBA.Core.Keys.Down},
-            { Keys.S, EmulationCore.GBA.Core.Keys.R},
-            { Keys.Q, EmulationCore.GBA.Core.Keys.L},
+            { Keys.A, EmulationCore.Common.Key.A },
+            { Keys.Z, EmulationCore.Common.Key.B },
+            { Keys.Space, EmulationCore.Common.Key.Select },
+            { Keys.Enter, EmulationCore.Common.Key.Start },
+            { Keys.Right, EmulationCore.Common.Key.Right },
+            { Keys.Left, EmulationCore.Common.Key.Left },
+            { Keys.Up, EmulationCore.Common.Key.Up },
+            { Keys.Down, EmulationCore.Common.Key.Down },
+            { Keys.S, EmulationCore.Common.Key.R },
+            { Keys.Q, EmulationCore.Common.Key.L },
+            { Keys.E, EmulationCore.Common.Key.X },
+            { Keys.R, EmulationCore.Common.Key.Y },
         };
 
-        private readonly EmulationCore.GBA.Core _GBA;
-
+        private readonly EmulationCore.Common.ICore _core;
         private int _frameCount = 0;
         private readonly System.Timers.Timer _performanceUpdateTimer = new(1000);
 
@@ -27,8 +28,7 @@ namespace Iris.UserInterface
         {
             InitializeComponent();
 
-            _GBA = new(DrawFrame);
-
+            _core = new EmulationCore.GBA.Core(DrawFrame);
             _performanceUpdateTimer.Elapsed += PerformanceUpdateTimer_Elapsed;
 
             if (args.Length > 0 && LoadROM(args[0]))
@@ -46,13 +46,14 @@ namespace Iris.UserInterface
         {
             const int ScreenWidth = 240;
             const int ScreenHeight = 160;
+            const int PixelCount = ScreenWidth * ScreenHeight;
             const PixelFormat PixelFormat = PixelFormat.Format16bppRgb555;
 
             Bitmap bitmap = new(ScreenWidth, ScreenHeight, PixelFormat);
             BitmapData data = bitmap.LockBits(new Rectangle(0, 0, ScreenWidth, ScreenHeight), ImageLockMode.WriteOnly, PixelFormat);
 
-            const int PixelCount = ScreenWidth * ScreenHeight;
             Int16[] buffer = new Int16[PixelCount];
+
             for (int i = 0; i < PixelCount; ++i)
             {
                 UInt16 gbaColor = frameBuffer[i]; // BGR format
@@ -64,6 +65,7 @@ namespace Iris.UserInterface
 
             System.Runtime.InteropServices.Marshal.Copy(buffer, 0, data.Scan0, PixelCount);
             bitmap.UnlockBits(data);
+
             screenBox.Invoke(() => screenBox.Image = bitmap);
             screenBox.Invalidate();
 
@@ -74,8 +76,8 @@ namespace Iris.UserInterface
         {
             try
             {
-                _GBA.LoadROM(fileName);
-                _GBA.Reset();
+                _core.LoadROM(fileName);
+                _core.Reset();
                 return true;
             }
             catch
@@ -95,12 +97,12 @@ namespace Iris.UserInterface
             {
                 try
                 {
-                    _GBA.Run();
+                    _core.Run();
                 }
                 catch (Exception ex)
                 {
                     Pause();
-                    _GBA.Reset();
+                    _core.Reset();
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             });
@@ -113,7 +115,7 @@ namespace Iris.UserInterface
             runToolStripMenuItem.Enabled = true;
             pauseToolStripMenuItem.Enabled = false;
             statusToolStripStatusLabel.Text = "Paused";
-            _GBA.Pause();
+            _core.Pause();
 
             _performanceUpdateTimer.Stop();
             fpsToolStripStatusLabel.Text = "FPS: 0";
@@ -122,7 +124,8 @@ namespace Iris.UserInterface
 
         private void LoadROMToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            bool running = _GBA.IsRunning();
+            bool running = _core.IsRunning();
+
             if (running)
                 Pause();
 
@@ -150,11 +153,13 @@ namespace Iris.UserInterface
 
         private void LoadStateToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            bool running = _GBA.IsRunning();
+            bool running = _core.IsRunning();
+
             if (running)
                 Pause();
 
             OpenFileDialog dialog = new();
+
             if (dialog.ShowDialog() == DialogResult.OK)
             {
                 // TODO
@@ -166,11 +171,13 @@ namespace Iris.UserInterface
 
         private void SaveStateToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            bool running = _GBA.IsRunning();
+            bool running = _core.IsRunning();
+
             if (running)
                 Pause();
 
             SaveFileDialog dialog = new();
+
             if (dialog.ShowDialog(this) == DialogResult.OK)
             {
                 // TODO
@@ -197,11 +204,12 @@ namespace Iris.UserInterface
 
         private void RestartToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            bool running = _GBA.IsRunning();
+            bool running = _core.IsRunning();
+
             if (running)
                 Pause();
 
-            _GBA.Reset();
+            _core.Reset();
 
             if (running)
                 Run();
@@ -217,14 +225,14 @@ namespace Iris.UserInterface
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
-            if (KeyMapping.TryGetValue(e.KeyCode, out EmulationCore.GBA.Core.Keys value))
-                _GBA.SetKeyStatus(value, EmulationCore.GBA.Core.KeyStatus.Input);
+            if (KeyMapping.TryGetValue(e.KeyCode, out EmulationCore.Common.Key value))
+                _core.SetKeyStatus(value, EmulationCore.Common.KeyStatus.Input);
         }
 
         private void MainWindow_KeyUp(object sender, KeyEventArgs e)
         {
-            if (KeyMapping.TryGetValue(e.KeyCode, out EmulationCore.GBA.Core.Keys value))
-                _GBA.SetKeyStatus(value, EmulationCore.GBA.Core.KeyStatus.NoInput);
+            if (KeyMapping.TryGetValue(e.KeyCode, out EmulationCore.Common.Key value))
+                _core.SetKeyStatus(value, EmulationCore.Common.KeyStatus.NoInput);
         }
     }
 }
