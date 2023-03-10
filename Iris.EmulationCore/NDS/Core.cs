@@ -54,5 +54,10 @@ namespace Iris.EmulationCore.NDS
         {
             _running = false;
         }
+
+        public void SetKeyStatus(Key key, KeyStatus status)
+        {
+            // TODO
+        }
     }
 }
