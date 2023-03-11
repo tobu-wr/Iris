@@ -7,40 +7,40 @@ namespace Iris.EmulationCore.GBA
         private UInt16 _KEYINPUT;
         private UInt16 _KEYCNT;
 
-        public void SetKeyStatus(Key key, KeyStatus status)
+        public void SetKeyStatus(ICore.Key key, ICore.KeyStatus status)
         {
             int pos;
 
             switch (key)
             {
-                case Key.A:
+                case ICore.Key.A:
                     pos = 0;
                     break;
-                case Key.B:
+                case ICore.Key.B:
                     pos = 1;
                     break;
-                case Key.Select:
+                case ICore.Key.Select:
                     pos = 2;
                     break;
-                case Key.Start:
+                case ICore.Key.Start:
                     pos = 3;
                     break;
-                case Key.Right:
+                case ICore.Key.Right:
                     pos = 4;
                     break;
-                case Key.Left:
+                case ICore.Key.Left:
                     pos = 5;
                     break;
-                case Key.Up:
+                case ICore.Key.Up:
                     pos = 6;
                     break;
-                case Key.Down:
+                case ICore.Key.Down:
                     pos = 7;
                     break;
-                case Key.R:
+                case ICore.Key.R:
                     pos = 8;
                     break;
-                case Key.L:
+                case ICore.Key.L:
                     pos = 9;
                     break;
                 default:

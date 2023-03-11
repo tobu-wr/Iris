@@ -4,20 +4,20 @@ namespace Iris.UserInterface
 {
     public partial class MainWindow : Form
     {
-        private static readonly Dictionary<Keys, EmulationCore.Common.Key> KeyMapping = new()
+        private static readonly Dictionary<Keys, EmulationCore.Common.ICore.Key> KeyMapping = new()
         {
-            { Keys.A, EmulationCore.Common.Key.A },
-            { Keys.Z, EmulationCore.Common.Key.B },
-            { Keys.Space, EmulationCore.Common.Key.Select },
-            { Keys.Enter, EmulationCore.Common.Key.Start },
-            { Keys.Right, EmulationCore.Common.Key.Right },
-            { Keys.Left, EmulationCore.Common.Key.Left },
-            { Keys.Up, EmulationCore.Common.Key.Up },
-            { Keys.Down, EmulationCore.Common.Key.Down },
-            { Keys.S, EmulationCore.Common.Key.R },
-            { Keys.Q, EmulationCore.Common.Key.L },
-            { Keys.E, EmulationCore.Common.Key.X },
-            { Keys.R, EmulationCore.Common.Key.Y },
+            { Keys.A, EmulationCore.Common.ICore.Key.A },
+            { Keys.Z, EmulationCore.Common.ICore.Key.B },
+            { Keys.Space, EmulationCore.Common.ICore.Key.Select },
+            { Keys.Enter, EmulationCore.Common.ICore.Key.Start },
+            { Keys.Right, EmulationCore.Common.ICore.Key.Right },
+            { Keys.Left, EmulationCore.Common.ICore.Key.Left },
+            { Keys.Up, EmulationCore.Common.ICore.Key.Up },
+            { Keys.Down, EmulationCore.Common.ICore.Key.Down },
+            { Keys.S, EmulationCore.Common.ICore.Key.R },
+            { Keys.Q, EmulationCore.Common.ICore.Key.L },
+            { Keys.E, EmulationCore.Common.ICore.Key.X },
+            { Keys.R, EmulationCore.Common.ICore.Key.Y },
         };
 
         private readonly EmulationCore.Common.ICore _core;
@@ -225,14 +225,14 @@ namespace Iris.UserInterface
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
-            if (KeyMapping.TryGetValue(e.KeyCode, out EmulationCore.Common.Key value))
-                _core.SetKeyStatus(value, EmulationCore.Common.KeyStatus.Input);
+            if (KeyMapping.TryGetValue(e.KeyCode, out EmulationCore.Common.ICore.Key value))
+                _core.SetKeyStatus(value, EmulationCore.Common.ICore.KeyStatus.Input);
         }
 
         private void MainWindow_KeyUp(object sender, KeyEventArgs e)
         {
-            if (KeyMapping.TryGetValue(e.KeyCode, out EmulationCore.Common.Key value))
-                _core.SetKeyStatus(value, EmulationCore.Common.KeyStatus.NoInput);
+            if (KeyMapping.TryGetValue(e.KeyCode, out EmulationCore.Common.ICore.Key value))
+                _core.SetKeyStatus(value, EmulationCore.Common.ICore.KeyStatus.NoInput);
         }
     }
 }
