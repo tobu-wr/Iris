@@ -269,9 +269,9 @@ namespace Iris.EmulationCore.GBA
                 Byte flags = ReadMemory8(source);
                 ++source;
 
-                for (int i = 0; i < 8; ++i)
+                for (int i = 7; i >= 0; --i)
                 {
-                    Byte blockType = (Byte)((flags << i) & 0x80);
+                    Byte blockType = (Byte)((flags >> i) & 1);
 
                     // uncompressed
                     if (blockType == 0)
