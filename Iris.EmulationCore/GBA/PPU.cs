@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace Iris.EmulationCore.GBA
 {
-    public sealed class PPU
+    internal sealed class PPU
     {
         private const int KB = 1024;
 
@@ -54,7 +54,7 @@ namespace Iris.EmulationCore.GBA
         private const UInt32 HorizontalLineCount = 228;
         private const UInt32 PhysicalScreenSize = PhysicalScreenWidth * PhysicalScreenHeight;
 
-        public struct CallbackInterface
+        internal struct CallbackInterface
         {
             internal delegate void RequestInterrupt_Delegate();
 
@@ -65,33 +65,33 @@ namespace Iris.EmulationCore.GBA
         private readonly CallbackInterface _callbackInterface;
         private UInt32 _cycleCounter;
 
-        private bool _disposed;
+        //private bool _disposed;
 
         internal PPU(CallbackInterface callbackInterface)
         {
             _callbackInterface = callbackInterface;
         }
 
-        ~PPU()
-        {
-            Marshal.FreeHGlobal(PaletteRAM);
-            Marshal.FreeHGlobal(VRAM);
-            Marshal.FreeHGlobal(OAM);
-        }
+        //~PPU()
+        //{
+        //    Marshal.FreeHGlobal(PaletteRAM);
+        //    Marshal.FreeHGlobal(VRAM);
+        //    Marshal.FreeHGlobal(OAM);
+        //}
 
-        public void Dispose()
-        {
-            if (_disposed)
-                return;
+        //internal void Dispose()
+        //{
+        //    if (_disposed)
+        //        return;
 
-            Marshal.FreeHGlobal(PaletteRAM);
-            Marshal.FreeHGlobal(VRAM);
-            Marshal.FreeHGlobal(OAM);
+        //    Marshal.FreeHGlobal(PaletteRAM);
+        //    Marshal.FreeHGlobal(VRAM);
+        //    Marshal.FreeHGlobal(OAM);
 
-            GC.SuppressFinalize(this);
+        //    GC.SuppressFinalize(this);
 
-            _disposed = true;
-        }
+        //    _disposed = true;
+        //}
 
         internal void Step()
         {
