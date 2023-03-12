@@ -40,6 +40,8 @@ namespace Iris.EmulationCore.GBA
 
         private void MapMemory(IntPtr data, int pageCount, UInt32 startAddress, UInt32 endAddress, MemoryFlag flags)
         {
+            const int PageSize = 1 * KB;
+
             int startTablePageIndex = (int)(startAddress >> 10);
             int endPageTableIndex = (int)(endAddress >> 10);
 
@@ -55,7 +57,7 @@ namespace Iris.EmulationCore.GBA
             {
                 if (pageIndex < pageCount)
                 {
-                    int pageOffset = pageIndex * KB;
+                    int pageOffset = pageIndex * PageSize;
                     IntPtr page = data + pageOffset;
                     _read8PageTable[pageTableIndex] = readable8 ? page : IntPtr.Zero;
                     _read16PageTable[pageTableIndex] = readable16 ? page : IntPtr.Zero;
@@ -66,7 +68,7 @@ namespace Iris.EmulationCore.GBA
                 }
                 else if (mirrored)
                 {
-                    int pageOffset = (pageIndex % pageCount) * KB;
+                    int pageOffset = (pageIndex % pageCount) * PageSize;
                     IntPtr page = data + pageOffset;
                     _read8PageTable[pageTableIndex] = readable8 ? page : IntPtr.Zero;
                     _read16PageTable[pageTableIndex] = readable16 ? page : IntPtr.Zero;
@@ -88,7 +90,7 @@ namespace Iris.EmulationCore.GBA
 
             if (writable8 || writable16 || writable32)
             {
-                int length = pageCount * KB;
+                int length = pageCount * PageSize;
 
                 for (int offset = 0; offset < length; ++offset)
                     Marshal.WriteByte(data, offset, 0);
