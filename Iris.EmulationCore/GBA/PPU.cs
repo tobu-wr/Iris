@@ -63,11 +63,34 @@ namespace Iris.EmulationCore.GBA
         }
 
         private readonly CallbackInterface _callbackInterface;
-        private UInt32 _cycleCounter = 0;
+        private UInt32 _cycleCounter;
+
+        private bool _disposed;
 
         internal PPU(CallbackInterface callbackInterface)
         {
             _callbackInterface = callbackInterface;
+        }
+
+        ~PPU()
+        {
+            Marshal.FreeHGlobal(PaletteRAM);
+            Marshal.FreeHGlobal(VRAM);
+            Marshal.FreeHGlobal(OAM);
+        }
+
+        public void Dispose()
+        {
+            if (_disposed)
+                return;
+
+            Marshal.FreeHGlobal(PaletteRAM);
+            Marshal.FreeHGlobal(VRAM);
+            Marshal.FreeHGlobal(OAM);
+
+            GC.SuppressFinalize(this);
+
+            _disposed = true;
         }
 
         internal void Step()
