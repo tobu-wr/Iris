@@ -8,9 +8,13 @@ namespace Iris.EmulationCore.GBA
     {
         private const int KB = 1024;
 
-        internal readonly IntPtr PaletteRAM = Marshal.AllocHGlobal(1 * KB);
-        internal readonly IntPtr VRAM = Marshal.AllocHGlobal(96 * KB);
-        internal readonly IntPtr OAM = Marshal.AllocHGlobal(1 * KB);
+        internal const int PaletteRAMSize = 1 * KB;
+        internal const int VRAMSize = 96 * KB;
+        internal const int OAMSize = 1 * KB;
+
+        internal readonly IntPtr PaletteRAM = Marshal.AllocHGlobal(PaletteRAMSize);
+        internal readonly IntPtr VRAM = Marshal.AllocHGlobal(VRAMSize);
+        internal readonly IntPtr OAM = Marshal.AllocHGlobal(OAMSize);
 
         internal UInt16 DISPSTAT;
         internal UInt16 DISPCNT;

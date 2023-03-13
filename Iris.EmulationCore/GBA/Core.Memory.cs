@@ -24,24 +24,28 @@ namespace Iris.EmulationCore.GBA
 
         private const int KB = 1024;
 
-        private IntPtr _ROM;
         private int _ROMSize;
+        private const int SRAMSize = 64 * KB;
+        private const int EWRAMSize = 256 * KB;
+        private const int IWRAMSize = 32 * KB;
 
-        private readonly IntPtr _SRAM = Marshal.AllocHGlobal(64 * KB);
-        private readonly IntPtr _eWRAM = Marshal.AllocHGlobal(256 * KB);
-        private readonly IntPtr _iWRAM = Marshal.AllocHGlobal(32 * KB);
+        private IntPtr _ROM;
+        private readonly IntPtr _SRAM = Marshal.AllocHGlobal(SRAMSize);
+        private readonly IntPtr _eWRAM = Marshal.AllocHGlobal(EWRAMSize);
+        private readonly IntPtr _iWRAM = Marshal.AllocHGlobal(IWRAMSize);
 
-        private readonly IntPtr[] _read8PageTable = new IntPtr[1 << 18];
-        private readonly IntPtr[] _read16PageTable = new IntPtr[1 << 18];
-        private readonly IntPtr[] _read32PageTable = new IntPtr[1 << 18];
-        private readonly IntPtr[] _write8PageTable = new IntPtr[1 << 18];
-        private readonly IntPtr[] _write16PageTable = new IntPtr[1 << 18];
-        private readonly IntPtr[] _write32PageTable = new IntPtr[1 << 18];
+        private const int PageSize = 1 * KB;
+        private const int PageTableSize = 1 << 18;
+
+        private readonly IntPtr[] _read8PageTable = new IntPtr[PageTableSize];
+        private readonly IntPtr[] _read16PageTable = new IntPtr[PageTableSize];
+        private readonly IntPtr[] _read32PageTable = new IntPtr[PageTableSize];
+        private readonly IntPtr[] _write8PageTable = new IntPtr[PageTableSize];
+        private readonly IntPtr[] _write16PageTable = new IntPtr[PageTableSize];
+        private readonly IntPtr[] _write32PageTable = new IntPtr[PageTableSize];
 
         private void MapMemory(IntPtr data, int pageCount, UInt32 startAddress, UInt32 endAddress, MemoryFlag flags)
         {
-            const int PageSize = 1 * KB;
-
             int startTablePageIndex = (int)(startAddress >> 10);
             int endPageTableIndex = (int)(endAddress >> 10);
 
@@ -99,26 +103,27 @@ namespace Iris.EmulationCore.GBA
 
         private void InitPageTables()
         {
-            MapMemory(_eWRAM, 256, 0x0200_0000, 0x0300_0000, MemoryFlag.All);
-            MapMemory(_iWRAM, 32, 0x0300_0000, 0x0400_0000, MemoryFlag.All);
-            MapMemory(_PPU.PaletteRAM, 1, 0x0500_0000, 0x0600_0000, MemoryFlag.All & ~(MemoryFlag.Read8 | MemoryFlag.Write8));
-            MapMemory(_PPU.VRAM, 96, 0x0600_0000, 0x0700_0000, MemoryFlag.All & ~(MemoryFlag.Read8 | MemoryFlag.Write8));
-            MapMemory(_PPU.OAM, 1, 0x0700_0000, 0x0800_0000, MemoryFlag.All & ~(MemoryFlag.Read8 | MemoryFlag.Write8));
-            MapMemory(_SRAM, 64, 0x0e00_0000, 0x1000_0000, MemoryFlag.Read8 | MemoryFlag.Write8 | MemoryFlag.Mirrored);
+            MapMemory(_eWRAM, EWRAMSize / PageSize, 0x0200_0000, 0x0300_0000, MemoryFlag.All);
+            MapMemory(_iWRAM, IWRAMSize / PageSize, 0x0300_0000, 0x0400_0000, MemoryFlag.All);
+            MapMemory(_PPU.PaletteRAM, PPU.PaletteRAMSize / PageSize, 0x0500_0000, 0x0600_0000, MemoryFlag.All & ~(MemoryFlag.Read8 | MemoryFlag.Write8));
+            MapMemory(_PPU.VRAM, PPU.VRAMSize / PageSize, 0x0600_0000, 0x0700_0000, MemoryFlag.All & ~(MemoryFlag.Read8 | MemoryFlag.Write8));
+            MapMemory(_PPU.OAM, PPU.OAMSize / PageSize, 0x0700_0000, 0x0800_0000, MemoryFlag.All & ~(MemoryFlag.Read8 | MemoryFlag.Write8));
+            MapMemory(_SRAM, SRAMSize / PageSize, 0x0e00_0000, 0x1000_0000, MemoryFlag.Read8 | MemoryFlag.Write8 | MemoryFlag.Mirrored);
         }
 
         public void LoadROM(string filename)
         {
             Byte[] data = File.ReadAllBytes(filename);
 
+            _ROMSize = data.Length;
+
             if (_ROM != IntPtr.Zero)
                 Marshal.FreeHGlobal(_ROM);
 
-            _ROMSize = data.Length;
             _ROM = Marshal.AllocHGlobal(_ROMSize);
             Marshal.Copy(data, 0, _ROM, _ROMSize);
 
-            int pageCount = _ROMSize / KB;
+            int pageCount = _ROMSize / PageSize;
             MapMemory(_ROM, pageCount, 0x0800_0000, 0x0a00_0000, MemoryFlag.AllRead);
             MapMemory(_ROM, pageCount, 0x0a00_0000, 0x0c00_0000, MemoryFlag.AllRead);
             MapMemory(_ROM, pageCount, 0x0c00_0000, 0x0e00_0000, MemoryFlag.AllRead);
