@@ -1,6 +1,6 @@
 # Iris
 
-Iris is a GameBoy Advance emulator (and maybe DS in the future).
+Iris is a WIP GameBoy Advance emulator (and maybe DS in the future). I wanted to emulate the GameBoy Advance and needed a project as a playground to learn the C# language so I started this.
 
 ## Features
 
