@@ -11,6 +11,12 @@ Iris is a WIP GameBoy Advance emulator (and maybe DS in the future). I wanted to
 
 TBD
 
+## Screenshots
+<p align="center">
+  <img src="Screenshots/Capture.png"/>
+  <img src="Screenshots/Capture-2.png"/>
+</p>
+
 ## Resources used
 
 - The Official Gameboy Advance Programming Manual
