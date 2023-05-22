@@ -13,8 +13,8 @@ TBD
 
 ## Screenshots
 <p align="center">
-  <img src="Screenshots/Capture.png"/>
-  <img src="Screenshots/Capture-2.png"/>
+  <img src="Screenshots/Capture.PNG"/>
+  <img src="Screenshots/Capture-2.PNG"/>
 </p>
 
 ## Resources used
