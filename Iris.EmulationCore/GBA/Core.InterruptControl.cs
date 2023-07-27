@@ -1,4 +1,4 @@
-﻿using Iris.EmulationCore.Common;
+﻿using Iris.CPU;
 
 namespace Iris.EmulationCore.GBA
 {
@@ -34,7 +34,7 @@ namespace Iris.EmulationCore.GBA
 
         private void UpdateInterrupts()
         {
-            _CPU.NIRQ = ((_IME == 0) || (_IE & _IF) == 0) ? CPU.Signal.High : CPU.Signal.Low;
+            _CPU.NIRQ = ((_IME == 0) || (_IE & _IF) == 0) ? CPU.CPU.Signal.High : CPU.CPU.Signal.Low;
         }
     }
 }

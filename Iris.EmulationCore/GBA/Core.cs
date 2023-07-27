@@ -1,11 +1,11 @@
 ﻿using Iris.Common;
-using Iris.EmulationCore.Common;
+using Iris.CPU;
 
 namespace Iris.EmulationCore.GBA
 {
     public sealed partial class Core : ISystemCore
     {
-        private readonly CPU _CPU;
+        private readonly CPU.CPU _CPU;
         private readonly PPU _PPU;
 
         private UInt16 _WAITCNT;
@@ -14,7 +14,7 @@ namespace Iris.EmulationCore.GBA
 
         public Core(DrawFrame_Delegate drawFrame)
         {
-            CPU.CallbackInterface cpuCallbackInterface = new()
+            CPU.CPU.CallbackInterface cpuCallbackInterface = new()
             {
                 ReadMemory8 = ReadMemory8,
                 ReadMemory16 = ReadMemory16,
@@ -32,7 +32,7 @@ namespace Iris.EmulationCore.GBA
                 RequestVBlankInterrupt = () => RequestInterrupt(Interrupt.VBlank)
             };
 
-            _CPU = new(CPU.Architecture.ARMv4T, cpuCallbackInterface);
+            _CPU = new(CPU.CPU.Architecture.ARMv4T, cpuCallbackInterface);
             _PPU = new(ppuCallbackInterface);
 
             InitPageTables();
@@ -68,7 +68,7 @@ namespace Iris.EmulationCore.GBA
             _WAITCNT = 0;
             _IME = 0;
 
-            _CPU.NIRQ = CPU.Signal.High;
+            _CPU.NIRQ = CPU.CPU.Signal.High;
         }
 
         public bool IsRunning()

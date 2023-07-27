@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Iris.Common\Iris.Common.csproj" />
+    <ProjectReference Include="..\Iris.CPU\Iris.CPU.csproj" />
   </ItemGroup>
 
 </Project>

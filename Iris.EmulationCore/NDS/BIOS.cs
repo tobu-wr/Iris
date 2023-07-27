@@ -1,4 +1,4 @@
-﻿using Iris.EmulationCore.Common;
+﻿using Iris.CPU;
 
 namespace Iris.EmulationCore.NDS
 {
@@ -10,7 +10,7 @@ namespace Iris.EmulationCore.NDS
 
             // TODO
 
-            _cpu.Reg[CPU.PC] = ROMAddress;
+            _cpu.Reg[CPU.CPU.PC] = ROMAddress;
             _cpu.NextInstructionAddress = ROMAddress;
         }
 

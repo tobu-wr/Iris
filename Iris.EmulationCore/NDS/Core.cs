@@ -1,18 +1,17 @@
 ﻿using Iris.Common;
-using Iris.EmulationCore.Common;
 
 namespace Iris.EmulationCore.NDS
 {
     public sealed partial class Core : ISystemCore
     {
-        private readonly CPU _cpu;
+        private readonly CPU.CPU _cpu;
         private readonly PPU _ppu;
 
         private bool _running = false;
 
         public Core(DrawFrame_Delegate drawFrameCallback)
         {
-            CPU.CallbackInterface cpuCallbackInterface = new()
+            CPU.CPU.CallbackInterface cpuCallbackInterface = new()
             {
                 ReadMemory8 = ReadMemory8,
                 ReadMemory16 = ReadMemory16,
@@ -24,7 +23,7 @@ namespace Iris.EmulationCore.NDS
                 HandleIRQ = HandleIRQ
             };
 
-            _cpu = new(CPU.Architecture.ARMv5TE, cpuCallbackInterface);
+            _cpu = new(CPU.CPU.Architecture.ARMv5TE, cpuCallbackInterface);
             _ppu = new(drawFrameCallback);
         }
 
@@ -32,7 +31,7 @@ namespace Iris.EmulationCore.NDS
         {
             BIOS_Reset();
 
-            _cpu.NIRQ = CPU.Signal.High;
+            _cpu.NIRQ = CPU.CPU.Signal.High;
         }
 
         public bool IsRunning()

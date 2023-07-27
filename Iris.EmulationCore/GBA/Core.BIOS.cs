@@ -1,6 +1,4 @@
-﻿using Iris.EmulationCore.Common;
-
-namespace Iris.EmulationCore.GBA
+﻿namespace Iris.EmulationCore.GBA
 {
     public sealed partial class Core
     {
@@ -11,8 +9,8 @@ namespace Iris.EmulationCore.GBA
             for (int i = 0; i <= 12; ++i)
                 _CPU.Reg[i] = 0;
 
-            _CPU.Reg[CPU.SP] = 0x300_7f00;
-            _CPU.Reg[CPU.LR] = ROMAddress;
+            _CPU.Reg[CPU.CPU.SP] = 0x300_7f00;
+            _CPU.Reg[CPU.CPU.LR] = ROMAddress;
 
             _CPU.Reg13_svc = 0x300_7fe0;
             _CPU.Reg14_svc = 0;
@@ -109,11 +107,11 @@ namespace Iris.EmulationCore.GBA
 
             void PushToStack(UInt32 value)
             {
-                _CPU.Reg[CPU.SP] -= 4;
-                WriteMemory32(_CPU.Reg[CPU.SP], value);
+                _CPU.Reg[CPU.CPU.SP] -= 4;
+                WriteMemory32(_CPU.Reg[CPU.CPU.SP], value);
             }
 
-            PushToStack(_CPU.Reg[CPU.LR]);
+            PushToStack(_CPU.Reg[CPU.CPU.LR]);
             PushToStack(_CPU.Reg[12]);
             PushToStack(_CPU.Reg[3]);
             PushToStack(_CPU.Reg[2]);
@@ -121,7 +119,7 @@ namespace Iris.EmulationCore.GBA
             PushToStack(_CPU.Reg[0]);
 
             _CPU.Reg[0] = 0x400_0000;
-            _CPU.Reg[CPU.LR] = 0x138;
+            _CPU.Reg[CPU.CPU.LR] = 0x138;
             _CPU.NextInstructionAddress = ReadMemory32(0x300_7ffc);
         }
 
@@ -310,8 +308,8 @@ namespace Iris.EmulationCore.GBA
         {
             UInt32 PopFromStack()
             {
-                UInt32 value = ReadMemory32(_CPU.Reg[CPU.SP]);
-                _CPU.Reg[CPU.SP] += 4;
+                UInt32 value = ReadMemory32(_CPU.Reg[CPU.CPU.SP]);
+                _CPU.Reg[CPU.CPU.SP] += 4;
                 return value;
             }
 
@@ -320,9 +318,9 @@ namespace Iris.EmulationCore.GBA
             _CPU.Reg[2] = PopFromStack();
             _CPU.Reg[3] = PopFromStack();
             _CPU.Reg[12] = PopFromStack();
-            _CPU.Reg[CPU.LR] = PopFromStack();
+            _CPU.Reg[CPU.CPU.LR] = PopFromStack();
 
-            _CPU.NextInstructionAddress = _CPU.Reg[CPU.LR] - 4;
+            _CPU.NextInstructionAddress = _CPU.Reg[CPU.CPU.LR] - 4;
             _CPU.SetCPSR(_CPU.SPSR);
         }
     }
