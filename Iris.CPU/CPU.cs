@@ -45,13 +45,13 @@
         }
 
         private const UInt32 ModeMask = 0b1_1111;
-        public const UInt32 UserMode = 0b1_0000;
-        public const UInt32 SystemMode = 0b1_1111;
-        public const UInt32 SupervisorMode = 0b1_0011;
-        public const UInt32 AbortMode = 0b1_0111;
-        public const UInt32 UndefinedMode = 0b1_1011;
-        public const UInt32 InterruptMode = 0b1_0010;
-        public const UInt32 FastInterruptMode = 0b1_0001;
+        private const UInt32 UserMode = 0b1_0000;
+        private const UInt32 SystemMode = 0b1_1111;
+        private const UInt32 SupervisorMode = 0b1_0011;
+        private const UInt32 AbortMode = 0b1_0111;
+        private const UInt32 UndefinedMode = 0b1_1011;
+        private const UInt32 InterruptMode = 0b1_0010;
+        private const UInt32 FastInterruptMode = 0b1_0001;
 
         public const UInt32 SP = 13;
         public const UInt32 LR = 14;
