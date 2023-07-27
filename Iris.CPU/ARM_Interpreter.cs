@@ -2,17 +2,15 @@
 
 namespace Iris.CPU
 {
-
-
     internal sealed class ARM_Interpreter
     {
-        private readonly struct ARM_InstructionListEntry
+        private readonly struct InstructionListEntry
         {
             internal readonly UInt32 Mask;
             internal readonly UInt32 Expected;
             internal unsafe readonly delegate*<CPU, UInt32, void> Handler;
 
-            internal unsafe ARM_InstructionListEntry(UInt32 mask, UInt32 expected, delegate*<CPU, UInt32, void> handler)
+            internal unsafe InstructionListEntry(UInt32 mask, UInt32 expected, delegate*<CPU, UInt32, void> handler)
             {
                 Mask = mask;
                 Expected = expected;
@@ -20,222 +18,222 @@ namespace Iris.CPU
             }
         }
 
-        private unsafe readonly delegate*<CPU, UInt32, void>[] ARM_InstructionLUT = new delegate*<CPU, UInt32, void>[1 << 12];
+        private unsafe readonly delegate*<CPU, UInt32, void>[] InstructionLUT = new delegate*<CPU, UInt32, void>[1 << 12];
 
-        private static UInt32 ARM_InstructionLUTHash(UInt32 value)
+        private static UInt32 InstructionLUTHash(UInt32 value)
         {
             return ((value >> 16) & 0xff0) | ((value >> 4) & 0x00f);
         }
 
-        private unsafe void ARM_InitInstructionLUT()
+        private unsafe void InitInstructionLUT()
         {
-            ARM_InstructionListEntry[] ARM_InstructionList = new ARM_InstructionListEntry[]
+            InstructionListEntry[] InstructionList = new InstructionListEntry[]
             {
                 // ADC
-                new(0x0fe0_0000, 0x02a0_0000, &ARM_ADC), // I bit is 1
-                new(0x0fe0_0090, 0x00a0_0000, &ARM_ADC), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0fe0_0090, 0x00a0_0080, &ARM_ADC), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0fe0_0090, 0x00a0_0010, &ARM_ADC), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0fe0_0000, 0x02a0_0000, &ADC), // I bit is 1
+                new(0x0fe0_0090, 0x00a0_0000, &ADC), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x00a0_0080, &ADC), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x00a0_0010, &ADC), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // ADD
-                new(0x0fe0_0000, 0x0280_0000, &ARM_ADD), // I bit is 1
-                new(0x0fe0_0090, 0x0080_0000, &ARM_ADD), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0fe0_0090, 0x0080_0080, &ARM_ADD), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0fe0_0090, 0x0080_0010, &ARM_ADD), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0fe0_0000, 0x0280_0000, &ADD), // I bit is 1
+                new(0x0fe0_0090, 0x0080_0000, &ADD), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x0080_0080, &ADD), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x0080_0010, &ADD), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // AND
-                new(0x0fe0_0000, 0x0200_0000, &ARM_AND), // I bit is 1
-                new(0x0fe0_0090, 0x0000_0000, &ARM_AND), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0fe0_0090, 0x0000_0080, &ARM_AND), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0fe0_0090, 0x0000_0010, &ARM_AND), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0fe0_0000, 0x0200_0000, &AND), // I bit is 1
+                new(0x0fe0_0090, 0x0000_0000, &AND), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x0000_0080, &AND), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x0000_0010, &AND), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // B
-                new(0x0f00_0000, 0x0a00_0000, &ARM_B),
+                new(0x0f00_0000, 0x0a00_0000, &B),
 
                 // BL
-                new(0x0f00_0000, 0x0b00_0000, &ARM_BL),
+                new(0x0f00_0000, 0x0b00_0000, &BL),
 
                 // BIC
-                new(0x0fe0_0000, 0x03c0_0000, &ARM_BIC), // I bit is 1
-                new(0x0fe0_0090, 0x01c0_0000, &ARM_BIC), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0fe0_0090, 0x01c0_0080, &ARM_BIC), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0fe0_0090, 0x01c0_0010, &ARM_BIC), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0fe0_0000, 0x03c0_0000, &BIC), // I bit is 1
+                new(0x0fe0_0090, 0x01c0_0000, &BIC), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x01c0_0080, &BIC), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x01c0_0010, &BIC), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // BX
-                new(0x0fff_fff0, 0x012f_ff10, &ARM_BX),
+                new(0x0fff_fff0, 0x012f_ff10, &BX),
 
                 // CMN
-                new(0x0ff0_f000, 0x0370_0000, &ARM_CMN), // I bit is 1
-                new(0x0ff0_f090, 0x0170_0000, &ARM_CMN), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0ff0_f090, 0x0170_0080, &ARM_CMN), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0ff0_f090, 0x0170_0010, &ARM_CMN), // I bit is 0, bit[7] is 0 and bit[4] is 1
-                new(0x0ff0_f000, 0x0370_f000, &ARM_CMN), // I bit is 1
-                new(0x0ff0_f090, 0x0170_f000, &ARM_CMN), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0ff0_f090, 0x0170_f080, &ARM_CMN), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0ff0_f090, 0x0170_f010, &ARM_CMN), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0ff0_f000, 0x0370_0000, &CMN), // I bit is 1
+                new(0x0ff0_f090, 0x0170_0000, &CMN), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0ff0_f090, 0x0170_0080, &CMN), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0ff0_f090, 0x0170_0010, &CMN), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0ff0_f000, 0x0370_f000, &CMN), // I bit is 1
+                new(0x0ff0_f090, 0x0170_f000, &CMN), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0ff0_f090, 0x0170_f080, &CMN), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0ff0_f090, 0x0170_f010, &CMN), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // CMP
-                new(0x0ff0_f000, 0x0350_0000, &ARM_CMP), // I bit is 1
-                new(0x0ff0_f090, 0x0150_0000, &ARM_CMP), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0ff0_f090, 0x0150_0080, &ARM_CMP), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0ff0_f090, 0x0150_0010, &ARM_CMP), // I bit is 0, bit[7] is 0 and bit[4] is 1
-                new(0x0ff0_f000, 0x0350_f000, &ARM_CMP), // I bit is 1
-                new(0x0ff0_f090, 0x0150_f000, &ARM_CMP), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0ff0_f090, 0x0150_f080, &ARM_CMP), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0ff0_f090, 0x0150_f010, &ARM_CMP), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0ff0_f000, 0x0350_0000, &CMP), // I bit is 1
+                new(0x0ff0_f090, 0x0150_0000, &CMP), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0ff0_f090, 0x0150_0080, &CMP), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0ff0_f090, 0x0150_0010, &CMP), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0ff0_f000, 0x0350_f000, &CMP), // I bit is 1
+                new(0x0ff0_f090, 0x0150_f000, &CMP), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0ff0_f090, 0x0150_f080, &CMP), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0ff0_f090, 0x0150_f010, &CMP), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // EOR
-                new(0x0fe0_0000, 0x0220_0000, &ARM_EOR), // I bit is 1
-                new(0x0fe0_0090, 0x0020_0000, &ARM_EOR), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0fe0_0090, 0x0020_0080, &ARM_EOR), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0fe0_0090, 0x0020_0010, &ARM_EOR), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0fe0_0000, 0x0220_0000, &EOR), // I bit is 1
+                new(0x0fe0_0090, 0x0020_0000, &EOR), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x0020_0080, &EOR), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x0020_0010, &EOR), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // LDM
-                new(0x0e50_0000, 0x0810_0000, &ARM_LDM1),
-                new(0x0e50_8000, 0x0850_0000, &ARM_LDM2),
-                //new(0x0e50_8000, 0x0850_8000, &ARM_LDM3),
+                new(0x0e50_0000, 0x0810_0000, &LDM1),
+                new(0x0e50_8000, 0x0850_0000, &LDM2),
+                //new(0x0e50_8000, 0x0850_8000, &LDM3),
 
                 // LDR
-                new(0x0c50_0000, 0x0410_0000, &ARM_LDR),
+                new(0x0c50_0000, 0x0410_0000, &LDR),
 
                 // LDRB
-                new(0x0c50_0000, 0x0450_0000, &ARM_LDRB),
+                new(0x0c50_0000, 0x0450_0000, &LDRB),
 
                 // LDRH
-                new(0x0e10_00f0, 0x0010_00b0, &ARM_LDRH),
+                new(0x0e10_00f0, 0x0010_00b0, &LDRH),
 
                 // LDRSB
-                new(0x0e10_00f0, 0x0010_00d0, &ARM_LDRSB),
+                new(0x0e10_00f0, 0x0010_00d0, &LDRSB),
 
                 // LDRSH
-                new(0x0e10_00f0, 0x0010_00f0, &ARM_LDRSH),
+                new(0x0e10_00f0, 0x0010_00f0, &LDRSH),
 
                 // MLA
-                new(0x0fe0_00f0, 0x0020_0090, &ARM_MLA),
+                new(0x0fe0_00f0, 0x0020_0090, &MLA),
 
                 // MOV
-                new(0x0fef_0000, 0x03a0_0000, &ARM_MOV), // I bit is 1
-                new(0x0fef_0090, 0x01a0_0000, &ARM_MOV), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0fef_0090, 0x01a0_0080, &ARM_MOV), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0fef_0090, 0x01a0_0010, &ARM_MOV), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0fef_0000, 0x03a0_0000, &MOV), // I bit is 1
+                new(0x0fef_0090, 0x01a0_0000, &MOV), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fef_0090, 0x01a0_0080, &MOV), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fef_0090, 0x01a0_0010, &MOV), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // MRS
-                new(0x0fbf_0fff, 0x010f_0000, &ARM_MRS),
+                new(0x0fbf_0fff, 0x010f_0000, &MRS),
 
                 // MSR
-                new(0x0fb0_f000, 0x0320_f000, &ARM_MSR), // Immediate operand
-                new(0x0fb0_fff0, 0x0120_f000, &ARM_MSR), // Register operand
+                new(0x0fb0_f000, 0x0320_f000, &MSR), // Immediate operand
+                new(0x0fb0_fff0, 0x0120_f000, &MSR), // Register operand
 
                 // MUL
-                new(0x0fe0_f0f0, 0x0000_0090, &ARM_MUL),
+                new(0x0fe0_f0f0, 0x0000_0090, &MUL),
 
                 // MVN
-                new(0x0fef_0000, 0x03e0_0000, &ARM_MVN), // I bit is 1
-                new(0x0fef_0090, 0x01e0_0000, &ARM_MVN), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0fef_0090, 0x01e0_0080, &ARM_MVN), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0fef_0090, 0x01e0_0010, &ARM_MVN), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0fef_0000, 0x03e0_0000, &MVN), // I bit is 1
+                new(0x0fef_0090, 0x01e0_0000, &MVN), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fef_0090, 0x01e0_0080, &MVN), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fef_0090, 0x01e0_0010, &MVN), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // ORR
-                new(0x0fe0_0000, 0x0380_0000, &ARM_ORR), // I bit is 1
-                new(0x0fe0_0090, 0x0180_0000, &ARM_ORR), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0fe0_0090, 0x0180_0080, &ARM_ORR), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0fe0_0090, 0x0180_0010, &ARM_ORR), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0fe0_0000, 0x0380_0000, &ORR), // I bit is 1
+                new(0x0fe0_0090, 0x0180_0000, &ORR), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x0180_0080, &ORR), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x0180_0010, &ORR), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // RSB
-                new(0x0fe0_0000, 0x0260_0000, &ARM_RSB), // I bit is 1
-                new(0x0fe0_0090, 0x0060_0000, &ARM_RSB), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0fe0_0090, 0x0060_0080, &ARM_RSB), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0fe0_0090, 0x0060_0010, &ARM_RSB), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0fe0_0000, 0x0260_0000, &RSB), // I bit is 1
+                new(0x0fe0_0090, 0x0060_0000, &RSB), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x0060_0080, &RSB), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x0060_0010, &RSB), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // RSC
-                new(0x0fe0_0000, 0x02e0_0000, &ARM_RSC), // I bit is 1
-                new(0x0fe0_0090, 0x00e0_0000, &ARM_RSC), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0fe0_0090, 0x00e0_0080, &ARM_RSC), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0fe0_0090, 0x00e0_0010, &ARM_RSC), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0fe0_0000, 0x02e0_0000, &RSC), // I bit is 1
+                new(0x0fe0_0090, 0x00e0_0000, &RSC), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x00e0_0080, &RSC), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x00e0_0010, &RSC), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // SBC
-                new(0x0fe0_0000, 0x02c0_0000, &ARM_SBC), // I bit is 1
-                new(0x0fe0_0090, 0x00c0_0000, &ARM_SBC), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0fe0_0090, 0x00c0_0080, &ARM_SBC), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0fe0_0090, 0x00c0_0010, &ARM_SBC), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0fe0_0000, 0x02c0_0000, &SBC), // I bit is 1
+                new(0x0fe0_0090, 0x00c0_0000, &SBC), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x00c0_0080, &SBC), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x00c0_0010, &SBC), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // SMLAL
-                new(0x0fe0_00f0, 0x00e0_0090, &ARM_SMLAL),
+                new(0x0fe0_00f0, 0x00e0_0090, &SMLAL),
 
                 // SMULL
-                new(0x0fe0_00f0, 0x00c0_0090, &ARM_SMULL),
+                new(0x0fe0_00f0, 0x00c0_0090, &SMULL),
 
                 // STM
-                new(0x0e50_0000, 0x0800_0000, &ARM_STM1),
-                new(0x0e70_0000, 0x0840_0000, &ARM_STM2),
+                new(0x0e50_0000, 0x0800_0000, &STM1),
+                new(0x0e70_0000, 0x0840_0000, &STM2),
 
                 // STR
-                new(0x0c50_0000, 0x0400_0000, &ARM_STR),
+                new(0x0c50_0000, 0x0400_0000, &STR),
 
                 // STRB
-                new(0x0c50_0000, 0x0440_0000, &ARM_STRB),
+                new(0x0c50_0000, 0x0440_0000, &STRB),
 
                 // STRH
-                new(0x0e10_00f0, 0x0000_00b0, &ARM_STRH),
+                new(0x0e10_00f0, 0x0000_00b0, &STRH),
 
                 // SUB
-                new(0x0fe0_0000, 0x0240_0000, &ARM_SUB), // I bit is 1
-                new(0x0fe0_0090, 0x0040_0000, &ARM_SUB), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0fe0_0090, 0x0040_0080, &ARM_SUB), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0fe0_0090, 0x0040_0010, &ARM_SUB), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0fe0_0000, 0x0240_0000, &SUB), // I bit is 1
+                new(0x0fe0_0090, 0x0040_0000, &SUB), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x0040_0080, &SUB), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x0040_0010, &SUB), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // SWI
-                new(0x0f00_0000, 0x0f00_0000, &ARM_SWI),
+                new(0x0f00_0000, 0x0f00_0000, &SWI),
 
                 // SWP
-                new(0x0ff0_0ff0, 0x0100_0090, &ARM_SWP),
+                new(0x0ff0_0ff0, 0x0100_0090, &SWP),
 
                 // SWPB
-                new(0x0ff0_0ff0, 0x0140_0090, &ARM_SWPB),
+                new(0x0ff0_0ff0, 0x0140_0090, &SWPB),
 
                 // TEQ
-                new(0x0ff0_f000, 0x0330_0000, &ARM_TEQ), // I bit is 1
-                new(0x0ff0_f090, 0x0130_0000, &ARM_TEQ), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0ff0_f090, 0x0130_0080, &ARM_TEQ), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0ff0_f090, 0x0130_0010, &ARM_TEQ), // I bit is 0, bit[7] is 0 and bit[4] is 1
-                new(0x0ff0_f000, 0x0330_f000, &ARM_TEQ), // I bit is 1
-                new(0x0ff0_f090, 0x0130_f000, &ARM_TEQ), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0ff0_f090, 0x0130_f080, &ARM_TEQ), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0ff0_f090, 0x0130_f010, &ARM_TEQ), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0ff0_f000, 0x0330_0000, &TEQ), // I bit is 1
+                new(0x0ff0_f090, 0x0130_0000, &TEQ), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0ff0_f090, 0x0130_0080, &TEQ), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0ff0_f090, 0x0130_0010, &TEQ), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0ff0_f000, 0x0330_f000, &TEQ), // I bit is 1
+                new(0x0ff0_f090, 0x0130_f000, &TEQ), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0ff0_f090, 0x0130_f080, &TEQ), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0ff0_f090, 0x0130_f010, &TEQ), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // TST
-                new(0x0ff0_f000, 0x0310_0000, &ARM_TST), // I bit is 1
-                new(0x0ff0_f090, 0x0110_0000, &ARM_TST), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0ff0_f090, 0x0110_0080, &ARM_TST), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0ff0_f090, 0x0110_0010, &ARM_TST), // I bit is 0, bit[7] is 0 and bit[4] is 1
-                new(0x0ff0_f000, 0x0310_f000, &ARM_TST), // I bit is 1
-                new(0x0ff0_f090, 0x0110_f000, &ARM_TST), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0ff0_f090, 0x0110_f080, &ARM_TST), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0ff0_f090, 0x0110_f010, &ARM_TST), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0ff0_f000, 0x0310_0000, &TST), // I bit is 1
+                new(0x0ff0_f090, 0x0110_0000, &TST), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0ff0_f090, 0x0110_0080, &TST), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0ff0_f090, 0x0110_0010, &TST), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0ff0_f000, 0x0310_f000, &TST), // I bit is 1
+                new(0x0ff0_f090, 0x0110_f000, &TST), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0ff0_f090, 0x0110_f080, &TST), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0ff0_f090, 0x0110_f010, &TST), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // UMLAL
-                new(0x0fe0_00f0, 0x00a0_0090, &ARM_UMLAL),
+                new(0x0fe0_00f0, 0x00a0_0090, &UMLAL),
 
                 // UMULL
-                new(0x0fe0_00f0, 0x0080_0090, &ARM_UMULL),
+                new(0x0fe0_00f0, 0x0080_0090, &UMULL),
             };
 
-            for (UInt64 instruction = 0; instruction < (UInt64)ARM_InstructionLUT.LongLength; ++instruction)
+            for (UInt64 instruction = 0; instruction < (UInt64)InstructionLUT.LongLength; ++instruction)
             {
                 bool unknownInstruction = true;
 
-                foreach (ARM_InstructionListEntry entry in ARM_InstructionList)
+                foreach (InstructionListEntry entry in InstructionList)
                 {
-                    if ((instruction & ARM_InstructionLUTHash(entry.Mask)) == ARM_InstructionLUTHash(entry.Expected))
+                    if ((instruction & InstructionLUTHash(entry.Mask)) == InstructionLUTHash(entry.Expected))
                     {
-                        ARM_InstructionLUT[instruction] = entry.Handler;
+                        InstructionLUT[instruction] = entry.Handler;
                         unknownInstruction = false;
                         break;
                     }
                 }
 
                 if (unknownInstruction)
-                    ARM_InstructionLUT[instruction] = &ARM_UNKNOWN;
+                    InstructionLUT[instruction] = &UNKNOWN;
             }
         }
 
@@ -244,7 +242,7 @@ namespace Iris.CPU
         internal ARM_Interpreter(CPU CPU)
         {
             _CPU = CPU;
-            ARM_InitInstructionLUT();
+            InitInstructionLUT();
         }
 
         internal void Step()
@@ -260,7 +258,7 @@ namespace Iris.CPU
 
                 unsafe
                 {
-                    ARM_InstructionLUT[ARM_InstructionLUTHash(instruction)](_CPU, instruction);
+                    InstructionLUT[InstructionLUTHash(instruction)](_CPU, instruction);
                 }
             }
         }
@@ -630,12 +628,12 @@ namespace Iris.CPU
             return (startAddress, endAddress);
         }
 
-        private static void ARM_UNKNOWN(CPU cpu, UInt32 instruction)
+        private static void UNKNOWN(CPU cpu, UInt32 instruction)
         {
             throw new Exception(string.Format("Iris.CPU.ARM_Interpreter: Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, cpu.NextInstructionAddress - 4));
         }
 
-        private static void ARM_ADC(CPU cpu, UInt32 instruction)
+        private static void ADC(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -667,7 +665,7 @@ namespace Iris.CPU
             }
         }
 
-        private static void ARM_ADD(CPU cpu, UInt32 instruction)
+        private static void ADD(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -699,7 +697,7 @@ namespace Iris.CPU
             }
         }
 
-        private static void ARM_AND(CPU cpu, UInt32 instruction)
+        private static void AND(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -729,14 +727,14 @@ namespace Iris.CPU
             }
         }
 
-        private static void ARM_B(CPU cpu, UInt32 instruction)
+        private static void B(CPU cpu, UInt32 instruction)
         {
             UInt32 imm = instruction & 0xff_ffff;
 
             cpu._ARM_Interpreter.SetPC(cpu.Reg[CPU.PC] + (CPU.SignExtend(imm, 24) << 2));
         }
 
-        private static void ARM_BL(CPU cpu, UInt32 instruction)
+        private static void BL(CPU cpu, UInt32 instruction)
         {
             UInt32 imm = instruction & 0xff_ffff;
 
@@ -744,7 +742,7 @@ namespace Iris.CPU
             cpu._ARM_Interpreter.SetPC(cpu.Reg[CPU.PC] + (CPU.SignExtend(imm, 24) << 2));
         }
 
-        private static void ARM_BIC(CPU cpu, UInt32 instruction)
+        private static void BIC(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -774,7 +772,7 @@ namespace Iris.CPU
             }
         }
 
-        private static void ARM_BX(CPU cpu, UInt32 instruction)
+        private static void BX(CPU cpu, UInt32 instruction)
         {
             UInt32 rm = instruction & 0b1111;
 
@@ -782,7 +780,7 @@ namespace Iris.CPU
             cpu._ARM_Interpreter.SetPC(cpu.Reg[rm] & 0xffff_fffe);
         }
 
-        private static void ARM_CMN(CPU cpu, UInt32 instruction)
+        private static void CMN(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
@@ -813,7 +811,7 @@ namespace Iris.CPU
             }
         }
 
-        private static void ARM_CMP(CPU cpu, UInt32 instruction)
+        private static void CMP(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
@@ -843,7 +841,7 @@ namespace Iris.CPU
             }
         }
 
-        private static void ARM_EOR(CPU cpu, UInt32 instruction)
+        private static void EOR(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -873,7 +871,7 @@ namespace Iris.CPU
             }
         }
 
-        private static void ARM_LDM1(CPU cpu, UInt32 instruction)
+        private static void LDM1(CPU cpu, UInt32 instruction)
         {
             UInt32 registerList = instruction & 0xffff;
 
@@ -901,7 +899,7 @@ namespace Iris.CPU
             }
         }
 
-        private static void ARM_LDM2(CPU cpu, UInt32 instruction)
+        private static void LDM2(CPU cpu, UInt32 instruction)
         {
             UInt32 registerList = instruction & 0x7fff;
 
@@ -955,7 +953,7 @@ namespace Iris.CPU
             }
         }
 
-        private static void ARM_LDR(CPU cpu, UInt32 instruction)
+        private static void LDR(CPU cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
@@ -968,7 +966,7 @@ namespace Iris.CPU
                 cpu.Reg[rd] = data;
         }
 
-        private static void ARM_LDRB(CPU cpu, UInt32 instruction)
+        private static void LDRB(CPU cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
@@ -977,7 +975,7 @@ namespace Iris.CPU
             cpu._ARM_Interpreter.SetReg(rd, data);
         }
 
-        private static void ARM_LDRH(CPU cpu, UInt32 instruction)
+        private static void LDRH(CPU cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
@@ -986,7 +984,7 @@ namespace Iris.CPU
             cpu._ARM_Interpreter.SetReg(rd, data);
         }
 
-        private static void ARM_LDRSB(CPU cpu, UInt32 instruction)
+        private static void LDRSB(CPU cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
@@ -995,7 +993,7 @@ namespace Iris.CPU
             cpu._ARM_Interpreter.SetReg(rd, CPU.SignExtend(data, 8));
         }
 
-        private static void ARM_LDRSH(CPU cpu, UInt32 instruction)
+        private static void LDRSH(CPU cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
@@ -1013,7 +1011,7 @@ namespace Iris.CPU
             }
         }
 
-        private static void ARM_MLA(CPU cpu, UInt32 instruction)
+        private static void MLA(CPU cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rd = (instruction >> 16) & 0b1111;
@@ -1030,7 +1028,7 @@ namespace Iris.CPU
             }
         }
 
-        private static void ARM_MOV(CPU cpu, UInt32 instruction)
+        private static void MOV(CPU cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rd = (instruction >> 12) & 0b1111;
@@ -1054,7 +1052,7 @@ namespace Iris.CPU
             }
         }
 
-        private static void ARM_MRS(CPU cpu, UInt32 instruction)
+        private static void MRS(CPU cpu, UInt32 instruction)
         {
             UInt32 r = (instruction >> 22) & 1;
             UInt32 rd = (instruction >> 12) & 0b1111;
@@ -1062,7 +1060,7 @@ namespace Iris.CPU
             cpu._ARM_Interpreter.SetReg(rd, (r == 1) ? cpu.SPSR : cpu.CPSR);
         }
 
-        private static void ARM_MSR(CPU cpu, UInt32 instruction)
+        private static void MSR(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 r = (instruction >> 22) & 1;
@@ -1107,7 +1105,7 @@ namespace Iris.CPU
             }
         }
 
-        private static void ARM_MUL(CPU cpu, UInt32 instruction)
+        private static void MUL(CPU cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rd = (instruction >> 16) & 0b1111;
@@ -1123,7 +1121,7 @@ namespace Iris.CPU
             }
         }
 
-        private static void ARM_MVN(CPU cpu, UInt32 instruction)
+        private static void MVN(CPU cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rd = (instruction >> 12) & 0b1111;
@@ -1147,7 +1145,7 @@ namespace Iris.CPU
             }
         }
 
-        private static void ARM_ORR(CPU cpu, UInt32 instruction)
+        private static void ORR(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -1177,7 +1175,7 @@ namespace Iris.CPU
             }
         }
 
-        private static void ARM_RSB(CPU cpu, UInt32 instruction)
+        private static void RSB(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -1208,7 +1206,7 @@ namespace Iris.CPU
             }
         }
 
-        private static void ARM_RSC(CPU cpu, UInt32 instruction)
+        private static void RSC(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -1240,7 +1238,7 @@ namespace Iris.CPU
             }
         }
 
-        private static void ARM_SBC(CPU cpu, UInt32 instruction)
+        private static void SBC(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -1271,7 +1269,7 @@ namespace Iris.CPU
             }
         }
 
-        private static void ARM_SMLAL(CPU cpu, UInt32 instruction)
+        private static void SMLAL(CPU cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rdHi = (instruction >> 16) & 0b1111;
@@ -1292,7 +1290,7 @@ namespace Iris.CPU
             }
         }
 
-        private static void ARM_SMULL(CPU cpu, UInt32 instruction)
+        private static void SMULL(CPU cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rdHi = (instruction >> 16) & 0b1111;
@@ -1311,7 +1309,7 @@ namespace Iris.CPU
             }
         }
 
-        private static void ARM_STM1(CPU cpu, UInt32 instruction)
+        private static void STM1(CPU cpu, UInt32 instruction)
         {
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 registerList = instruction & 0xffff;
@@ -1346,7 +1344,7 @@ namespace Iris.CPU
             }
         }
 
-        private static void ARM_STM2(CPU cpu, UInt32 instruction)
+        private static void STM2(CPU cpu, UInt32 instruction)
         {
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 registerList = instruction & 0xffff;
@@ -1407,7 +1405,7 @@ namespace Iris.CPU
             }
         }
 
-        private static void ARM_STR(CPU cpu, UInt32 instruction)
+        private static void STR(CPU cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
@@ -1416,7 +1414,7 @@ namespace Iris.CPU
             cpu._callbackInterface.WriteMemory32(address, data);
         }
 
-        private static void ARM_STRB(CPU cpu, UInt32 instruction)
+        private static void STRB(CPU cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
@@ -1425,7 +1423,7 @@ namespace Iris.CPU
             cpu._callbackInterface.WriteMemory8(address, (Byte)data);
         }
 
-        private static void ARM_STRH(CPU cpu, UInt32 instruction)
+        private static void STRH(CPU cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
@@ -1434,7 +1432,7 @@ namespace Iris.CPU
             cpu._callbackInterface.WriteMemory16(address, (UInt16)data);
         }
 
-        private static void ARM_SUB(CPU cpu, UInt32 instruction)
+        private static void SUB(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -1465,14 +1463,14 @@ namespace Iris.CPU
             }
         }
 
-        private static void ARM_SWI(CPU cpu, UInt32 instruction)
+        private static void SWI(CPU cpu, UInt32 instruction)
         {
             UInt32 imm = instruction & 0xff_ffff;
 
             cpu._callbackInterface.HandleSWI(imm);
         }
 
-        private static void ARM_SWP(CPU cpu, UInt32 instruction)
+        private static void SWP(CPU cpu, UInt32 instruction)
         {
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
@@ -1483,7 +1481,7 @@ namespace Iris.CPU
             cpu._ARM_Interpreter.SetReg(rd, temp);
         }
 
-        private static void ARM_SWPB(CPU cpu, UInt32 instruction)
+        private static void SWPB(CPU cpu, UInt32 instruction)
         {
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
@@ -1494,7 +1492,7 @@ namespace Iris.CPU
             cpu._ARM_Interpreter.SetReg(rd, temp);
         }
 
-        private static void ARM_TEQ(CPU cpu, UInt32 instruction)
+        private static void TEQ(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
@@ -1523,7 +1521,7 @@ namespace Iris.CPU
             }
         }
 
-        private static void ARM_TST(CPU cpu, UInt32 instruction)
+        private static void TST(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
@@ -1552,7 +1550,7 @@ namespace Iris.CPU
             }
         }
 
-        private static void ARM_UMLAL(CPU cpu, UInt32 instruction)
+        private static void UMLAL(CPU cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rdHi = (instruction >> 16) & 0b1111;
@@ -1573,7 +1571,7 @@ namespace Iris.CPU
             }
         }
 
-        private static void ARM_UMULL(CPU cpu, UInt32 instruction)
+        private static void UMULL(CPU cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rdHi = (instruction >> 16) & 0b1111;
