@@ -72,8 +72,8 @@
         internal readonly Architecture _architecture;
         internal readonly CallbackInterface _callbackInterface;
 
-        internal readonly ARM_Interpreter _armInterpreter;
-        internal readonly THUMB_Interpreter _thumbInterpreter;
+        private readonly ARM_Interpreter _armInterpreter;
+        private readonly THUMB_Interpreter _thumbInterpreter;
 
         public UInt32 NextInstructionAddress;
         public Signal NIRQ;
