@@ -2,15 +2,15 @@
 
 namespace Iris.CPU
 {
-    internal sealed class THUMB_Interpreter
+    internal sealed class Interpreter
     {
-        private readonly struct THUMB_InstructionListEntry
+        private readonly struct InstructionListEntry
         {
             internal readonly UInt16 Mask;
             internal readonly UInt16 Expected;
             internal unsafe readonly delegate*<CPU, UInt16, void> Handler;
 
-            internal unsafe THUMB_InstructionListEntry(UInt16 mask, UInt16 expected, delegate*<CPU, UInt16, void> handler)
+            internal unsafe InstructionListEntry(UInt16 mask, UInt16 expected, delegate*<CPU, UInt16, void> handler)
             {
                 Mask = mask;
                 Expected = expected;
@@ -18,187 +18,187 @@ namespace Iris.CPU
             }
         }
 
-        private unsafe readonly delegate*<CPU, UInt16, void>[] THUMB_InstructionLUT = new delegate*<CPU, UInt16, void>[1 << 10];
+        private unsafe readonly delegate*<CPU, UInt16, void>[] InstructionLUT = new delegate*<CPU, UInt16, void>[1 << 10];
 
-        private static UInt16 THUMB_InstructionLUTHash(UInt16 value)
+        private static UInt16 InstructionLUTHash(UInt16 value)
         {
             return (UInt16)(value >> 6);
         }
 
-        private unsafe void THUMB_InitInstructionLUT()
+        private unsafe void InitInstructionLUT()
         {
-            THUMB_InstructionListEntry[] THUMB_InstructionList = new THUMB_InstructionListEntry[]
+            InstructionListEntry[] InstructionList = new InstructionListEntry[]
             {
                 // ADC
-                new(0xffc0, 0x4140, &THUMB_ADC),
+                new(0xffc0, 0x4140, &ADC),
 
                 // ADD
-                new(0xfe00, 0x1c00, &THUMB_ADD1),
-                new(0xf800, 0x3000, &THUMB_ADD2),
-                new(0xfe00, 0x1800, &THUMB_ADD3),
-                new(0xff00, 0x4400, &THUMB_ADD4),
-                new(0xf800, 0xa000, &THUMB_ADD5),
-                new(0xf800, 0xa800, &THUMB_ADD6),
-                new(0xff80, 0xb000, &THUMB_ADD7),
+                new(0xfe00, 0x1c00, &ADD1),
+                new(0xf800, 0x3000, &ADD2),
+                new(0xfe00, 0x1800, &ADD3),
+                new(0xff00, 0x4400, &ADD4),
+                new(0xf800, 0xa000, &ADD5),
+                new(0xf800, 0xa800, &ADD6),
+                new(0xff80, 0xb000, &ADD7),
 
                 // AND
-                new(0xffc0, 0x4000, &THUMB_AND),
+                new(0xffc0, 0x4000, &AND),
 
                 // ASR
-                new(0xf800, 0x1000, &THUMB_ASR1),
-                new(0xffc0, 0x4100, &THUMB_ASR2),
+                new(0xf800, 0x1000, &ASR1),
+                new(0xffc0, 0x4100, &ASR2),
 
                 // B
-                new(0xff00, 0xd000, &THUMB_B1), // condition field 0b0000
-                new(0xff00, 0xd100, &THUMB_B1), // condition field 0b0001
-                new(0xff00, 0xd200, &THUMB_B1), // condition field 0b0010
-                new(0xff00, 0xd300, &THUMB_B1), // condition field 0b0011
-                new(0xff00, 0xd400, &THUMB_B1), // condition field 0b0100
-                new(0xff00, 0xd500, &THUMB_B1), // condition field 0b0101
-                new(0xff00, 0xd600, &THUMB_B1), // condition field 0b0110
-                new(0xff00, 0xd700, &THUMB_B1), // condition field 0b0111
-                new(0xff00, 0xd800, &THUMB_B1), // condition field 0b1000
-                new(0xff00, 0xd900, &THUMB_B1), // condition field 0b1001
-                new(0xff00, 0xda00, &THUMB_B1), // condition field 0b1010
-                new(0xff00, 0xdb00, &THUMB_B1), // condition field 0b1011
-                new(0xff00, 0xdc00, &THUMB_B1), // condition field 0b1100
-                new(0xff00, 0xdd00, &THUMB_B1), // condition field 0b1101
-                new(0xf800, 0xe000, &THUMB_B2),
+                new(0xff00, 0xd000, &B1), // condition field 0b0000
+                new(0xff00, 0xd100, &B1), // condition field 0b0001
+                new(0xff00, 0xd200, &B1), // condition field 0b0010
+                new(0xff00, 0xd300, &B1), // condition field 0b0011
+                new(0xff00, 0xd400, &B1), // condition field 0b0100
+                new(0xff00, 0xd500, &B1), // condition field 0b0101
+                new(0xff00, 0xd600, &B1), // condition field 0b0110
+                new(0xff00, 0xd700, &B1), // condition field 0b0111
+                new(0xff00, 0xd800, &B1), // condition field 0b1000
+                new(0xff00, 0xd900, &B1), // condition field 0b1001
+                new(0xff00, 0xda00, &B1), // condition field 0b1010
+                new(0xff00, 0xdb00, &B1), // condition field 0b1011
+                new(0xff00, 0xdc00, &B1), // condition field 0b1100
+                new(0xff00, 0xdd00, &B1), // condition field 0b1101
+                new(0xf800, 0xe000, &B2),
 
                 // BIC
-                new(0xffc0, 0x4380, &THUMB_BIC),
+                new(0xffc0, 0x4380, &BIC),
 
                 // BL
-                new(0xf000, 0xf000, &THUMB_BL),
+                new(0xf000, 0xf000, &BL),
 
                 // BX
-                new(0xff80, 0x4700, &THUMB_BX),
+                new(0xff80, 0x4700, &BX),
 
                 // CMN
-                new(0xffc0, 0x42c0, &THUMB_CMN),
+                new(0xffc0, 0x42c0, &CMN),
 
                 // CMP
-                new(0xf800, 0x2800, &THUMB_CMP1),
-                new(0xffc0, 0x4280, &THUMB_CMP2),
-                new(0xff00, 0x4500, &THUMB_CMP3),
+                new(0xf800, 0x2800, &CMP1),
+                new(0xffc0, 0x4280, &CMP2),
+                new(0xff00, 0x4500, &CMP3),
 
                 // EOR
-                new(0xffc0, 0x4040, &THUMB_EOR),
+                new(0xffc0, 0x4040, &EOR),
 
                 // LDMIA
-                new(0xf800, 0xc800, &THUMB_LDMIA),
+                new(0xf800, 0xc800, &LDMIA),
 
                 // LDR
-                new(0xf800, 0x6800, &THUMB_LDR1),
-                new(0xfe00, 0x5800, &THUMB_LDR2),
-                new(0xf800, 0x4800, &THUMB_LDR3),
-                new(0xf800, 0x9800, &THUMB_LDR4),
+                new(0xf800, 0x6800, &LDR1),
+                new(0xfe00, 0x5800, &LDR2),
+                new(0xf800, 0x4800, &LDR3),
+                new(0xf800, 0x9800, &LDR4),
 
                 // LDRB
-                new(0xf800, 0x7800, &THUMB_LDRB1),
-                new(0xfe00, 0x5c00, &THUMB_LDRB2),
+                new(0xf800, 0x7800, &LDRB1),
+                new(0xfe00, 0x5c00, &LDRB2),
 
                 // LDRH
-                new(0xf800, 0x8800, &THUMB_LDRH1),
-                new(0xfe00, 0x5a00, &THUMB_LDRH2),
+                new(0xf800, 0x8800, &LDRH1),
+                new(0xfe00, 0x5a00, &LDRH2),
 
                 // LDRSB
-                new(0xfe00, 0x5600, &THUMB_LDRSB),
+                new(0xfe00, 0x5600, &LDRSB),
 
                 // LDRSH
-                new(0xfe00, 0x5e00, &THUMB_LDRSH),
+                new(0xfe00, 0x5e00, &LDRSH),
 
                 // LSL
-                new(0xf800, 0x0000, &THUMB_LSL1),
-                new(0xffc0, 0x4080, &THUMB_LSL2),
+                new(0xf800, 0x0000, &LSL1),
+                new(0xffc0, 0x4080, &LSL2),
 
                 // LSR
-                new(0xf800, 0x0800, &THUMB_LSR1),
-                new(0xffc0, 0x40c0, &THUMB_LSR2),
+                new(0xf800, 0x0800, &LSR1),
+                new(0xffc0, 0x40c0, &LSR2),
 
                 // MOV
-                new(0xf800, 0x2000, &THUMB_MOV1),
-                //new(0xffc0, 0x1c00, &THUMB_MOV2),
-                new(0xff00, 0x4600, &THUMB_MOV3),
+                new(0xf800, 0x2000, &MOV1),
+                //new(0xffc0, 0x1c00, &MOV2),
+                new(0xff00, 0x4600, &MOV3),
 
                 // MUL
-                new(0xffc0, 0x4340, &THUMB_MUL),
+                new(0xffc0, 0x4340, &MUL),
 
                 // MVN
-                new(0xffc0, 0x43c0, &THUMB_MVN),
+                new(0xffc0, 0x43c0, &MVN),
 
                 // NEG
-                new(0xffc0, 0x4240, &THUMB_NEG),
+                new(0xffc0, 0x4240, &NEG),
 
                 // ORR
-                new(0xffc0, 0x4300, &THUMB_ORR),
+                new(0xffc0, 0x4300, &ORR),
 
                 // POP
-                new(0xfe00, 0xbc00, &THUMB_POP),
+                new(0xfe00, 0xbc00, &POP),
 
                 // PUSH
-                new(0xfe00, 0xb400, &THUMB_PUSH),
+                new(0xfe00, 0xb400, &PUSH),
 
                 // ROR
-                new(0xffc0, 0x41c0, &THUMB_ROR),
+                new(0xffc0, 0x41c0, &ROR),
 
                 // SBC
-                new(0xffc0, 0x4180, &THUMB_SBC),
+                new(0xffc0, 0x4180, &SBC),
 
                 // STMIA
-                new(0xf800, 0xc000, &THUMB_STMIA),
+                new(0xf800, 0xc000, &STMIA),
 
                 // STR
-                new(0xf800, 0x6000, &THUMB_STR1),
-                new(0xfe00, 0x5000, &THUMB_STR2),
-                new(0xf800, 0x9000, &THUMB_STR3),
+                new(0xf800, 0x6000, &STR1),
+                new(0xfe00, 0x5000, &STR2),
+                new(0xf800, 0x9000, &STR3),
 
                 // STRB
-                new(0xf800, 0x7000, &THUMB_STRB1),
-                new(0xfe00, 0x5400, &THUMB_STRB2),
+                new(0xf800, 0x7000, &STRB1),
+                new(0xfe00, 0x5400, &STRB2),
 
                 // STRH
-                new(0xf800, 0x8000, &THUMB_STRH1),
-                new(0xfe00, 0x5200, &THUMB_STRH2),
+                new(0xf800, 0x8000, &STRH1),
+                new(0xfe00, 0x5200, &STRH2),
 
                 // SUB
-                new(0xfe00, 0x1e00, &THUMB_SUB1),
-                new(0xf800, 0x3800, &THUMB_SUB2),
-                new(0xfe00, 0x1a00, &THUMB_SUB3),
-                new(0xff80, 0xb080, &THUMB_SUB4),
+                new(0xfe00, 0x1e00, &SUB1),
+                new(0xf800, 0x3800, &SUB2),
+                new(0xfe00, 0x1a00, &SUB3),
+                new(0xff80, 0xb080, &SUB4),
 
                 // SWI
-                new(0xff00, 0xdf00, &THUMB_SWI),
+                new(0xff00, 0xdf00, &SWI),
 
                 // TST
-                new(0xffc0, 0x4200, &THUMB_TST),
+                new(0xffc0, 0x4200, &TST),
             };
 
-            for (UInt32 instruction = 0; instruction < THUMB_InstructionLUT.Length; ++instruction)
+            for (UInt32 instruction = 0; instruction < InstructionLUT.Length; ++instruction)
             {
                 bool unknownInstruction = true;
 
-                foreach (THUMB_InstructionListEntry entry in THUMB_InstructionList)
+                foreach (InstructionListEntry entry in InstructionList)
                 {
-                    if ((instruction & THUMB_InstructionLUTHash(entry.Mask)) == THUMB_InstructionLUTHash(entry.Expected))
+                    if ((instruction & InstructionLUTHash(entry.Mask)) == InstructionLUTHash(entry.Expected))
                     {
-                        THUMB_InstructionLUT[instruction] = entry.Handler;
+                        InstructionLUT[instruction] = entry.Handler;
                         unknownInstruction = false;
                         break;
                     }
                 }
 
                 if (unknownInstruction)
-                    THUMB_InstructionLUT[instruction] = &THUMB_UNKNOWN;
+                    InstructionLUT[instruction] = &UNKNOWN;
             }
         }
 
         private readonly CPU _CPU;
 
-        internal THUMB_Interpreter(CPU CPU)
+        internal Interpreter(CPU CPU)
         {
             _CPU = CPU;
-            THUMB_InitInstructionLUT();
+            InitInstructionLUT();
         }
 
         internal void Step()
@@ -209,7 +209,7 @@ namespace Iris.CPU
 
             unsafe
             {
-                THUMB_InstructionLUT[THUMB_InstructionLUTHash(instruction)](_CPU, instruction);
+                InstructionLUT[InstructionLUTHash(instruction)](_CPU, instruction);
             }
         }
 
@@ -226,12 +226,12 @@ namespace Iris.CPU
                 _CPU.Reg[i] = value;
         }
 
-        private static void THUMB_UNKNOWN(CPU cpu, UInt16 instruction)
+        private static void UNKNOWN(CPU cpu, UInt16 instruction)
         {
             throw new Exception(string.Format("Iris.EmulationCore.Common.CPU.THUMB: Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, cpu.NextInstructionAddress - 2));
         }
 
-        private static void THUMB_ADC(CPU cpu, UInt16 instruction)
+        private static void ADC(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -248,7 +248,7 @@ namespace Iris.CPU
             cpu.SetFlag(CPU.Flag.V, CPU.OverflowFrom_Addition(leftOperand, (UInt32)rightOperand, cpu.Reg[rd]));
         }
 
-        private static void THUMB_ADD1(CPU cpu, UInt16 instruction)
+        private static void ADD1(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -266,7 +266,7 @@ namespace Iris.CPU
             cpu.SetFlag(CPU.Flag.V, CPU.OverflowFrom_Addition(leftOperand, rightOperand, cpu.Reg[rd]));
         }
 
-        private static void THUMB_ADD2(CPU cpu, UInt16 instruction)
+        private static void ADD2(CPU cpu, UInt16 instruction)
         {
             UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -283,7 +283,7 @@ namespace Iris.CPU
             cpu.SetFlag(CPU.Flag.V, CPU.OverflowFrom_Addition(leftOperand, rightOperand, cpu.Reg[rd]));
         }
 
-        private static void THUMB_ADD3(CPU cpu, UInt16 instruction)
+        private static void ADD3(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -301,7 +301,7 @@ namespace Iris.CPU
             cpu.SetFlag(CPU.Flag.V, CPU.OverflowFrom_Addition(leftOperand, rightOperand, cpu.Reg[rd]));
         }
 
-        private static void THUMB_ADD4(CPU cpu, UInt16 instruction)
+        private static void ADD4(CPU cpu, UInt16 instruction)
         {
             UInt16 h1 = (UInt16)((instruction >> 7) & 1);
             UInt16 h2 = (UInt16)((instruction >> 6) & 1);
@@ -314,7 +314,7 @@ namespace Iris.CPU
             cpu._THUMB_Interpreter.SetReg(rd, cpu.Reg[rd] + cpu.Reg[rm]);
         }
 
-        private static void THUMB_ADD5(CPU cpu, UInt16 instruction)
+        private static void ADD5(CPU cpu, UInt16 instruction)
         {
             UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -322,7 +322,7 @@ namespace Iris.CPU
             cpu.Reg[rd] = (cpu.Reg[CPU.PC] & 0xffff_fffc) + (imm * 4u);
         }
 
-        private static void THUMB_ADD6(CPU cpu, UInt16 instruction)
+        private static void ADD6(CPU cpu, UInt16 instruction)
         {
             UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -330,14 +330,14 @@ namespace Iris.CPU
             cpu.Reg[rd] = cpu.Reg[CPU.SP] + (imm * 4u);
         }
 
-        private static void THUMB_ADD7(CPU cpu, UInt16 instruction)
+        private static void ADD7(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)(instruction & 0x7f);
 
             cpu.Reg[CPU.SP] += imm * 4u;
         }
 
-        private static void THUMB_AND(CPU cpu, UInt16 instruction)
+        private static void AND(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -348,7 +348,7 @@ namespace Iris.CPU
             cpu.SetFlag(CPU.Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
-        private static void THUMB_ASR1(CPU cpu, UInt16 instruction)
+        private static void ASR1(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
@@ -371,7 +371,7 @@ namespace Iris.CPU
             cpu.SetFlag(CPU.Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
-        private static void THUMB_ASR2(CPU cpu, UInt16 instruction)
+        private static void ASR2(CPU cpu, UInt16 instruction)
         {
             UInt16 rs = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -397,7 +397,7 @@ namespace Iris.CPU
             cpu.SetFlag(CPU.Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
-        private static void THUMB_B1(CPU cpu, UInt16 instruction)
+        private static void B1(CPU cpu, UInt16 instruction)
         {
             UInt16 cond = (UInt16)((instruction >> 8) & 0b1111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -406,14 +406,14 @@ namespace Iris.CPU
                 cpu._THUMB_Interpreter.SetPC(cpu.Reg[CPU.PC] + (CPU.SignExtend(imm, 8) << 1));
         }
 
-        private static void THUMB_B2(CPU cpu, UInt16 instruction)
+        private static void B2(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)(instruction & 0x7ff);
 
             cpu._THUMB_Interpreter.SetPC(cpu.Reg[CPU.PC] + (CPU.SignExtend(imm, 11) << 1));
         }
 
-        private static void THUMB_BIC(CPU cpu, UInt16 instruction)
+        private static void BIC(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -424,7 +424,7 @@ namespace Iris.CPU
             cpu.SetFlag(CPU.Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
-        private static void THUMB_BL(CPU cpu, UInt16 instruction)
+        private static void BL(CPU cpu, UInt16 instruction)
         {
             UInt16 h = (UInt16)((instruction >> 11) & 0b11);
             UInt16 offset = (UInt16)(instruction & 0x7ff);
@@ -435,7 +435,7 @@ namespace Iris.CPU
             }
             else if (h == 0b11)
             {
-                // save NextInstructionAddress because it's invalidated by THUMB_SetPC
+                // save NextInstructionAddress because it's invalidated by SetPC
                 UInt32 nextInstructionAddress = cpu.NextInstructionAddress;
 
                 cpu._THUMB_Interpreter.SetPC(cpu.Reg[CPU.LR] + (UInt32)(offset << 1));
@@ -443,7 +443,7 @@ namespace Iris.CPU
             }
         }
 
-        private static void THUMB_BX(CPU cpu, UInt16 instruction)
+        private static void BX(CPU cpu, UInt16 instruction)
         {
             UInt16 h2 = (UInt16)((instruction >> 6) & 1);
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
@@ -454,7 +454,7 @@ namespace Iris.CPU
             cpu._THUMB_Interpreter.SetPC(cpu.Reg[rm]);
         }
 
-        private static void THUMB_CMN(CPU cpu, UInt16 instruction)
+        private static void CMN(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rn = (UInt16)(instruction & 0b111);
@@ -471,7 +471,7 @@ namespace Iris.CPU
             cpu.SetFlag(CPU.Flag.V, CPU.OverflowFrom_Addition(leftOperand, rightOperand, aluOut));
         }
 
-        private static void THUMB_CMP1(CPU cpu, UInt16 instruction)
+        private static void CMP1(CPU cpu, UInt16 instruction)
         {
             UInt16 rn = (UInt16)((instruction >> 8) & 0b111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -487,7 +487,7 @@ namespace Iris.CPU
             cpu.SetFlag(CPU.Flag.V, CPU.OverflowFrom_Subtraction(leftOperand, rightOperand, aluOut));
         }
 
-        private static void THUMB_CMP2(CPU cpu, UInt16 instruction)
+        private static void CMP2(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rn = (UInt16)(instruction & 0b111);
@@ -503,7 +503,7 @@ namespace Iris.CPU
             cpu.SetFlag(CPU.Flag.V, CPU.OverflowFrom_Subtraction(leftOperand, rightOperand, aluOut));
         }
 
-        private static void THUMB_CMP3(CPU cpu, UInt16 instruction)
+        private static void CMP3(CPU cpu, UInt16 instruction)
         {
             UInt16 h1 = (UInt16)((instruction >> 7) & 1);
             UInt16 h2 = (UInt16)((instruction >> 6) & 1);
@@ -524,7 +524,7 @@ namespace Iris.CPU
             cpu.SetFlag(CPU.Flag.V, CPU.OverflowFrom_Subtraction(leftOperand, rightOperand, aluOut));
         }
 
-        private static void THUMB_EOR(CPU cpu, UInt16 instruction)
+        private static void EOR(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -535,7 +535,7 @@ namespace Iris.CPU
             cpu.SetFlag(CPU.Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
-        private static void THUMB_LDMIA(CPU cpu, UInt16 instruction)
+        private static void LDMIA(CPU cpu, UInt16 instruction)
         {
             UInt16 rn = (UInt16)((instruction >> 8) & 0b111);
             UInt16 registerList = (UInt16)(instruction & 0xff);
@@ -562,7 +562,7 @@ namespace Iris.CPU
             }
         }
 
-        private static void THUMB_LDR1(CPU cpu, UInt16 instruction)
+        private static void LDR1(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -573,7 +573,7 @@ namespace Iris.CPU
             cpu.Reg[rd] = data;
         }
 
-        private static void THUMB_LDR2(CPU cpu, UInt16 instruction)
+        private static void LDR2(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -584,7 +584,7 @@ namespace Iris.CPU
             cpu.Reg[rd] = data;
         }
 
-        private static void THUMB_LDR3(CPU cpu, UInt16 instruction)
+        private static void LDR3(CPU cpu, UInt16 instruction)
         {
             UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -594,7 +594,7 @@ namespace Iris.CPU
             cpu.Reg[rd] = data;
         }
 
-        private static void THUMB_LDR4(CPU cpu, UInt16 instruction)
+        private static void LDR4(CPU cpu, UInt16 instruction)
         {
             UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -604,7 +604,7 @@ namespace Iris.CPU
             cpu.Reg[rd] = data;
         }
 
-        private static void THUMB_LDRB1(CPU cpu, UInt16 instruction)
+        private static void LDRB1(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -615,7 +615,7 @@ namespace Iris.CPU
             cpu.Reg[rd] = data;
         }
 
-        private static void THUMB_LDRB2(CPU cpu, UInt16 instruction)
+        private static void LDRB2(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -626,7 +626,7 @@ namespace Iris.CPU
             cpu.Reg[rd] = data;
         }
 
-        private static void THUMB_LDRH1(CPU cpu, UInt16 instruction)
+        private static void LDRH1(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -637,7 +637,7 @@ namespace Iris.CPU
             cpu.Reg[rd] = data;
         }
 
-        private static void THUMB_LDRH2(CPU cpu, UInt16 instruction)
+        private static void LDRH2(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -648,7 +648,7 @@ namespace Iris.CPU
             cpu.Reg[rd] = data;
         }
 
-        private static void THUMB_LDRSB(CPU cpu, UInt16 instruction)
+        private static void LDRSB(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -659,7 +659,7 @@ namespace Iris.CPU
             cpu.Reg[rd] = CPU.SignExtend(data, 8);
         }
 
-        private static void THUMB_LDRSH(CPU cpu, UInt16 instruction)
+        private static void LDRSH(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -679,7 +679,7 @@ namespace Iris.CPU
             }
         }
 
-        private static void THUMB_LSL1(CPU cpu, UInt16 instruction)
+        private static void LSL1(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
@@ -701,7 +701,7 @@ namespace Iris.CPU
             cpu.SetFlag(CPU.Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
-        private static void THUMB_LSL2(CPU cpu, UInt16 instruction)
+        private static void LSL2(CPU cpu, UInt16 instruction)
         {
             UInt16 rs = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -732,7 +732,7 @@ namespace Iris.CPU
             cpu.SetFlag(CPU.Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
-        private static void THUMB_LSR1(CPU cpu, UInt16 instruction)
+        private static void LSR1(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
@@ -755,7 +755,7 @@ namespace Iris.CPU
             cpu.SetFlag(CPU.Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
-        private static void THUMB_LSR2(CPU cpu, UInt16 instruction)
+        private static void LSR2(CPU cpu, UInt16 instruction)
         {
             UInt16 rs = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -786,7 +786,7 @@ namespace Iris.CPU
             cpu.SetFlag(CPU.Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
-        private static void THUMB_MOV1(CPU cpu, UInt16 instruction)
+        private static void MOV1(CPU cpu, UInt16 instruction)
         {
             UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -797,7 +797,7 @@ namespace Iris.CPU
             cpu.SetFlag(CPU.Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
-        private static void THUMB_MOV3(CPU cpu, UInt16 instruction)
+        private static void MOV3(CPU cpu, UInt16 instruction)
         {
             UInt16 h1 = (UInt16)((instruction >> 7) & 1);
             UInt16 h2 = (UInt16)((instruction >> 6) & 1);
@@ -810,7 +810,7 @@ namespace Iris.CPU
             cpu._THUMB_Interpreter.SetReg(rd, cpu.Reg[rm]);
         }
 
-        private static void THUMB_MUL(CPU cpu, UInt16 instruction)
+        private static void MUL(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -821,7 +821,7 @@ namespace Iris.CPU
             cpu.SetFlag(CPU.Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
-        private static void THUMB_MVN(CPU cpu, UInt16 instruction)
+        private static void MVN(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -832,7 +832,7 @@ namespace Iris.CPU
             cpu.SetFlag(CPU.Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
-        private static void THUMB_NEG(CPU cpu, UInt16 instruction)
+        private static void NEG(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -848,7 +848,7 @@ namespace Iris.CPU
             cpu.SetFlag(CPU.Flag.V, CPU.OverflowFrom_Subtraction(leftOperand, rightOperand, cpu.Reg[rd]));
         }
 
-        private static void THUMB_ORR(CPU cpu, UInt16 instruction)
+        private static void ORR(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -859,7 +859,7 @@ namespace Iris.CPU
             cpu.SetFlag(CPU.Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
-        private static void THUMB_POP(CPU cpu, UInt16 instruction)
+        private static void POP(CPU cpu, UInt16 instruction)
         {
             UInt16 r = (UInt16)((instruction >> 8) & 1);
             UInt16 registerList = (UInt16)(instruction & 0xff);
@@ -880,7 +880,7 @@ namespace Iris.CPU
                 cpu._THUMB_Interpreter.SetPC(cpu._callbackInterface.ReadMemory32(address));
         }
 
-        private static void THUMB_PUSH(CPU cpu, UInt16 instruction)
+        private static void PUSH(CPU cpu, UInt16 instruction)
         {
             UInt16 r = (UInt16)((instruction >> 8) & 1);
             UInt16 registerList = (UInt16)(instruction & 0xff);
@@ -901,7 +901,7 @@ namespace Iris.CPU
                 cpu._callbackInterface.WriteMemory32(address, cpu.Reg[CPU.LR]);
         }
 
-        private static void THUMB_ROR(CPU cpu, UInt16 instruction)
+        private static void ROR(CPU cpu, UInt16 instruction)
         {
             UInt16 rs = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -924,7 +924,7 @@ namespace Iris.CPU
             cpu.SetFlag(CPU.Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
         }
 
-        private static void THUMB_SBC(CPU cpu, UInt16 instruction)
+        private static void SBC(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -940,7 +940,7 @@ namespace Iris.CPU
             cpu.SetFlag(CPU.Flag.V, CPU.OverflowFrom_Subtraction(leftOperand, (UInt32)rightOperand, cpu.Reg[rd]));
         }
 
-        private static void THUMB_STMIA(CPU cpu, UInt16 instruction)
+        private static void STMIA(CPU cpu, UInt16 instruction)
         {
             UInt16 rn = (UInt16)((instruction >> 8) & 0b111);
             UInt16 registerList = (UInt16)(instruction & 0xff);
@@ -972,7 +972,7 @@ namespace Iris.CPU
             }
         }
 
-        private static void THUMB_STR1(CPU cpu, UInt16 instruction)
+        private static void STR1(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -982,7 +982,7 @@ namespace Iris.CPU
             cpu._callbackInterface.WriteMemory32(address, cpu.Reg[rd]);
         }
 
-        private static void THUMB_STR2(CPU cpu, UInt16 instruction)
+        private static void STR2(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -992,7 +992,7 @@ namespace Iris.CPU
             cpu._callbackInterface.WriteMemory32(address, cpu.Reg[rd]);
         }
 
-        private static void THUMB_STR3(CPU cpu, UInt16 instruction)
+        private static void STR3(CPU cpu, UInt16 instruction)
         {
             UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -1001,7 +1001,7 @@ namespace Iris.CPU
             cpu._callbackInterface.WriteMemory32(address, cpu.Reg[rd]);
         }
 
-        private static void THUMB_STRB1(CPU cpu, UInt16 instruction)
+        private static void STRB1(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -1011,7 +1011,7 @@ namespace Iris.CPU
             cpu._callbackInterface.WriteMemory8(address, (Byte)cpu.Reg[rd]);
         }
 
-        private static void THUMB_STRB2(CPU cpu, UInt16 instruction)
+        private static void STRB2(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -1021,7 +1021,7 @@ namespace Iris.CPU
             cpu._callbackInterface.WriteMemory8(address, (Byte)cpu.Reg[rd]);
         }
 
-        private static void THUMB_STRH1(CPU cpu, UInt16 instruction)
+        private static void STRH1(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -1031,7 +1031,7 @@ namespace Iris.CPU
             cpu._callbackInterface.WriteMemory16(address, (UInt16)cpu.Reg[rd]);
         }
 
-        private static void THUMB_STRH2(CPU cpu, UInt16 instruction)
+        private static void STRH2(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -1041,7 +1041,7 @@ namespace Iris.CPU
             cpu._callbackInterface.WriteMemory16(address, (UInt16)cpu.Reg[rd]);
         }
 
-        private static void THUMB_SUB1(CPU cpu, UInt16 instruction)
+        private static void SUB1(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -1058,7 +1058,7 @@ namespace Iris.CPU
             cpu.SetFlag(CPU.Flag.V, CPU.OverflowFrom_Subtraction(leftOperand, rightOperand, cpu.Reg[rd]));
         }
 
-        private static void THUMB_SUB2(CPU cpu, UInt16 instruction)
+        private static void SUB2(CPU cpu, UInt16 instruction)
         {
             UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -1074,7 +1074,7 @@ namespace Iris.CPU
             cpu.SetFlag(CPU.Flag.V, CPU.OverflowFrom_Subtraction(leftOperand, rightOperand, cpu.Reg[rd]));
         }
 
-        private static void THUMB_SUB3(CPU cpu, UInt16 instruction)
+        private static void SUB3(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -1091,21 +1091,21 @@ namespace Iris.CPU
             cpu.SetFlag(CPU.Flag.V, CPU.OverflowFrom_Subtraction(leftOperand, rightOperand, cpu.Reg[rd]));
         }
 
-        private static void THUMB_SUB4(CPU cpu, UInt16 instruction)
+        private static void SUB4(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)(instruction & 0x7f);
 
             cpu.Reg[CPU.SP] -= (UInt32)imm << 2;
         }
 
-        private static void THUMB_SWI(CPU cpu, UInt16 instruction)
+        private static void SWI(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)(instruction & 0xff);
 
             cpu._callbackInterface.HandleSWI((UInt32)(imm << 16));
         }
 
-        private static void THUMB_TST(CPU cpu, UInt16 instruction)
+        private static void TST(CPU cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rn = (UInt16)(instruction & 0b111);
