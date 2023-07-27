@@ -1,4 +1,4 @@
-﻿using Iris.EmulationCore.Common;
+﻿using Iris.Common;
 
 namespace Iris.EmulationCore.NDS
 {

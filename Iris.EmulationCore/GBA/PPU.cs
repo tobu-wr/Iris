@@ -1,4 +1,4 @@
-﻿using Iris.EmulationCore.Common;
+﻿using Iris.Common;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 

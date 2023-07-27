@@ -1,4 +1,5 @@
-﻿using Iris.EmulationCore.Common;
+﻿using Iris.Common;
+using Iris.EmulationCore.Common;
 
 namespace Iris.EmulationCore.GBA
 {

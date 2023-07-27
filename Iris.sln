@@ -4,11 +4,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Iris.EmulationCore", "Iris.EmulationCore\Iris.EmulationCore.csproj", "{868C2844-220F-4B02-A7AB-CA329EE4DDD5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{01285C3A-5E79-46AA-8C43-A1B638ED9ACC} = {01285C3A-5E79-46AA-8C43-A1B638ED9ACC}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Iris.UserInterface", "Iris.UserInterface\Iris.UserInterface.csproj", "{5944569D-5CC4-4D74-8969-D880DFF366B4}"
 	ProjectSection(ProjectDependencies) = postProject
+		{01285C3A-5E79-46AA-8C43-A1B638ED9ACC} = {01285C3A-5E79-46AA-8C43-A1B638ED9ACC}
 		{868C2844-220F-4B02-A7AB-CA329EE4DDD5} = {868C2844-220F-4B02-A7AB-CA329EE4DDD5}
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Iris.Common", "Iris.Common\Iris.Common.csproj", "{01285C3A-5E79-46AA-8C43-A1B638ED9ACC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,6 +30,10 @@ Global
 		{5944569D-5CC4-4D74-8969-D880DFF366B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5944569D-5CC4-4D74-8969-D880DFF366B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5944569D-5CC4-4D74-8969-D880DFF366B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01285C3A-5E79-46AA-8C43-A1B638ED9ACC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01285C3A-5E79-46AA-8C43-A1B638ED9ACC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01285C3A-5E79-46AA-8C43-A1B638ED9ACC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01285C3A-5E79-46AA-8C43-A1B638ED9ACC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
