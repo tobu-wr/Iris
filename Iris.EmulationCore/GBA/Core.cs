@@ -3,7 +3,7 @@ using Iris.EmulationCore.Common;
 
 namespace Iris.EmulationCore.GBA
 {
-    public sealed partial class Core : ICore
+    public sealed partial class Core : ISystemCore
     {
         private readonly CPU _CPU;
         private readonly PPU _PPU;

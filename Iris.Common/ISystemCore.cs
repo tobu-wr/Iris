@@ -2,7 +2,7 @@
 {
     public delegate void DrawFrame_Delegate(UInt16[] frameBuffer);
 
-    public interface ICore
+    public interface ISystemCore
     {
         public enum Key
         {

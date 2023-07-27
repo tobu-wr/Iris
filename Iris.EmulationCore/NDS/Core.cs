@@ -3,7 +3,7 @@ using Iris.EmulationCore.Common;
 
 namespace Iris.EmulationCore.NDS
 {
-    public sealed partial class Core : ICore
+    public sealed partial class Core : ISystemCore
     {
         private readonly CPU _cpu;
         private readonly PPU _ppu;
@@ -56,7 +56,7 @@ namespace Iris.EmulationCore.NDS
             _running = false;
         }
 
-        public void SetKeyStatus(ICore.Key key, ICore.KeyStatus status)
+        public void SetKeyStatus(ISystemCore.Key key, ISystemCore.KeyStatus status)
         {
             // TODO
         }
