@@ -237,35 +237,35 @@ namespace Iris.CPU
             }
         }
 
-        private readonly CPU _CPU;
+        private readonly CPU _cpu;
 
-        internal ARM_Interpreter(CPU CPU)
+        internal ARM_Interpreter(CPU cpu)
         {
-            _CPU = CPU;
+            _cpu = cpu;
             InitInstructionLUT();
         }
 
         internal void Step()
         {
-            UInt32 instruction = _CPU._callbackInterface.ReadMemory32(_CPU.NextInstructionAddress);
-            _CPU.NextInstructionAddress += 4;
+            UInt32 instruction = _cpu._callbackInterface.ReadMemory32(_cpu.NextInstructionAddress);
+            _cpu.NextInstructionAddress += 4;
 
             UInt32 cond = (instruction >> 28) & 0b1111;
 
-            if (_CPU.ConditionPassed(cond))
+            if (_cpu.ConditionPassed(cond))
             {
-                _CPU.Reg[CPU.PC] = _CPU.NextInstructionAddress + 4;
+                _cpu.Reg[CPU.PC] = _cpu.NextInstructionAddress + 4;
 
                 unsafe
                 {
-                    InstructionLUT[InstructionLUTHash(instruction)](_CPU, instruction);
+                    InstructionLUT[InstructionLUTHash(instruction)](_cpu, instruction);
                 }
             }
         }
 
         private void SetPC(UInt32 value)
         {
-            _CPU.NextInstructionAddress = value;
+            _cpu.NextInstructionAddress = value;
         }
 
         private void SetReg(UInt32 i, UInt32 value)
@@ -273,7 +273,7 @@ namespace Iris.CPU
             if (i == CPU.PC)
                 SetPC(value);
             else
-                _CPU.Reg[i] = value;
+                _cpu.Reg[i] = value;
         }
 
         // Addressing mode 1
@@ -290,7 +290,7 @@ namespace Iris.CPU
                 UInt32 imm = instruction & 0xff;
 
                 shifterOperand = BitOperations.RotateRight(imm, (int)(rotateImm * 2));
-                shifterCarryOut = (rotateImm == 0) ? _CPU.GetFlag(CPU.Flag.C) : (shifterOperand >> 31);
+                shifterCarryOut = (rotateImm == 0) ? _cpu.GetFlag(CPU.Flag.C) : (shifterOperand >> 31);
             }
             else
             {
@@ -302,7 +302,7 @@ namespace Iris.CPU
                 {
                     UInt32 shiftImm = (instruction >> 7) & 0b1_1111;
 
-                    UInt32 value = _CPU.Reg[rm];
+                    UInt32 value = _cpu.Reg[rm];
                     int shiftAmount = (int)shiftImm;
 
                     switch (shift)
@@ -311,7 +311,7 @@ namespace Iris.CPU
                             if (shiftAmount == 0)
                             {
                                 shifterOperand = value;
-                                shifterCarryOut = _CPU.GetFlag(CPU.Flag.C);
+                                shifterCarryOut = _cpu.GetFlag(CPU.Flag.C);
                             }
                             else
                             {
@@ -346,7 +346,7 @@ namespace Iris.CPU
                         case 0b11: // Rotate right
                             if (shiftAmount == 0)
                             {
-                                shifterOperand = (_CPU.GetFlag(CPU.Flag.C) << 31) | (value >> 1);
+                                shifterOperand = (_cpu.GetFlag(CPU.Flag.C) << 31) | (value >> 1);
                                 shifterCarryOut = value & 1;
                             }
                             else
@@ -361,8 +361,8 @@ namespace Iris.CPU
                 {
                     UInt32 rs = (instruction >> 8) & 0b1111;
 
-                    UInt32 value = (rm == CPU.PC) ? (_CPU.Reg[CPU.PC] + 4) : _CPU.Reg[rm];
-                    int shiftAmount = (int)(_CPU.Reg[rs] & 0xff);
+                    UInt32 value = (rm == CPU.PC) ? (_cpu.Reg[CPU.PC] + 4) : _cpu.Reg[rm];
+                    int shiftAmount = (int)(_cpu.Reg[rs] & 0xff);
 
                     switch (shift)
                     {
@@ -370,7 +370,7 @@ namespace Iris.CPU
                             if (shiftAmount == 0)
                             {
                                 shifterOperand = value;
-                                shifterCarryOut = _CPU.GetFlag(CPU.Flag.C);
+                                shifterCarryOut = _cpu.GetFlag(CPU.Flag.C);
                             }
                             else if (shiftAmount < 32)
                             {
@@ -392,7 +392,7 @@ namespace Iris.CPU
                             if (shiftAmount == 0)
                             {
                                 shifterOperand = value;
-                                shifterCarryOut = _CPU.GetFlag(CPU.Flag.C);
+                                shifterCarryOut = _cpu.GetFlag(CPU.Flag.C);
                             }
                             else if (shiftAmount < 32)
                             {
@@ -414,7 +414,7 @@ namespace Iris.CPU
                             if (shiftAmount == 0)
                             {
                                 shifterOperand = value;
-                                shifterCarryOut = _CPU.GetFlag(CPU.Flag.C);
+                                shifterCarryOut = _cpu.GetFlag(CPU.Flag.C);
                             }
                             else if (shiftAmount < 32)
                             {
@@ -431,7 +431,7 @@ namespace Iris.CPU
                             if (shiftAmount == 0)
                             {
                                 shifterOperand = value;
-                                shifterCarryOut = _CPU.GetFlag(CPU.Flag.C);
+                                shifterCarryOut = _cpu.GetFlag(CPU.Flag.C);
                             }
                             else if ((shiftAmount & 0b1_1111) == 0)
                             {
@@ -476,44 +476,44 @@ namespace Iris.CPU
 
                 if ((shiftImm == 0) && (shift == 0)) // Register
                 {
-                    index = _CPU.Reg[rm];
+                    index = _cpu.Reg[rm];
                 }
                 else // Scaled register
                 {
                     switch (shift)
                     {
                         case 0b00: // LSL
-                            index = _CPU.Reg[rm] << (int)shiftImm;
+                            index = _cpu.Reg[rm] << (int)shiftImm;
                             break;
                         case 0b01: // LSR
                             if (shiftImm == 0)
                                 index = 0;
                             else
-                                index = _CPU.Reg[rm] >> (int)shiftImm;
+                                index = _cpu.Reg[rm] >> (int)shiftImm;
                             break;
                         case 0b10: // ASR
                             if (shiftImm == 0)
-                                index = ((_CPU.Reg[rm] >> 31) == 1) ? 0xffff_ffff : 0;
+                                index = ((_cpu.Reg[rm] >> 31) == 1) ? 0xffff_ffff : 0;
                             else
-                                index = CPU.ArithmeticShiftRight(_CPU.Reg[rm], (int)shiftImm);
+                                index = CPU.ArithmeticShiftRight(_cpu.Reg[rm], (int)shiftImm);
                             break;
                         case 0b11:
                             if (shiftImm == 0) // RRX
-                                index = (_CPU.GetFlag(CPU.Flag.C) << 31) | (_CPU.Reg[rm] >> 1);
+                                index = (_cpu.GetFlag(CPU.Flag.C) << 31) | (_cpu.Reg[rm] >> 1);
                             else // ROR
-                                index = BitOperations.RotateRight(_CPU.Reg[rm], (int)shiftImm);
+                                index = BitOperations.RotateRight(_cpu.Reg[rm], (int)shiftImm);
                             break;
                     }
                 }
             }
 
-            UInt32 regRnIndexed = (u == 1) ? (_CPU.Reg[rn] + index) : (_CPU.Reg[rn] - index);
+            UInt32 regRnIndexed = (u == 1) ? (_cpu.Reg[rn] + index) : (_cpu.Reg[rn] - index);
 
             UInt32 address;
 
             if (p == 0) // Post-indexed
             {
-                address = _CPU.Reg[rn];
+                address = _cpu.Reg[rn];
                 SetReg(rn, regRnIndexed);
             }
             else if (w == 0) // Offset
@@ -552,16 +552,16 @@ namespace Iris.CPU
             {
                 UInt32 rm = instruction & 0b1111;
 
-                index = _CPU.Reg[rm];
+                index = _cpu.Reg[rm];
             }
 
-            UInt32 regRnIndexed = (u == 1) ? (_CPU.Reg[rn] + index) : (_CPU.Reg[rn] - index);
+            UInt32 regRnIndexed = (u == 1) ? (_cpu.Reg[rn] + index) : (_cpu.Reg[rn] - index);
 
             UInt32 address;
 
             if (p == 0) // Post-indexed
             {
-                address = _CPU.Reg[rn];
+                address = _cpu.Reg[rn];
                 SetReg(rn, regRnIndexed);
             }
             else if (w == 0) // Offset
@@ -593,32 +593,32 @@ namespace Iris.CPU
 
             if (u == 1) // increment
             {
-                value = _CPU.Reg[rn] + increment;
+                value = _cpu.Reg[rn] + increment;
 
                 if (p == 0) // after
                 {
-                    startAddress = _CPU.Reg[rn];
+                    startAddress = _cpu.Reg[rn];
                     endAddress = value - 4;
                 }
                 else // before
                 {
-                    startAddress = _CPU.Reg[rn] + 4;
+                    startAddress = _cpu.Reg[rn] + 4;
                     endAddress = value;
                 }
             }
             else // decrement
             {
-                value = _CPU.Reg[rn] - increment;
+                value = _cpu.Reg[rn] - increment;
 
                 if (p == 0) // after
                 {
                     startAddress = value + 4;
-                    endAddress = _CPU.Reg[rn];
+                    endAddress = _cpu.Reg[rn];
                 }
                 else // before
                 {
                     startAddress = value;
-                    endAddress = _CPU.Reg[rn] - 4;
+                    endAddress = _cpu.Reg[rn] - 4;
                 }
             }
 

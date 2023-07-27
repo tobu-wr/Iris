@@ -193,29 +193,29 @@ namespace Iris.CPU
             }
         }
 
-        private readonly CPU _CPU;
+        private readonly CPU _cpu;
 
-        internal THUMB_Interpreter(CPU CPU)
+        internal THUMB_Interpreter(CPU cpu)
         {
-            _CPU = CPU;
+            _cpu = cpu;
             InitInstructionLUT();
         }
 
         internal void Step()
         {
-            UInt16 instruction = _CPU._callbackInterface.ReadMemory16(_CPU.NextInstructionAddress);
-            _CPU.NextInstructionAddress += 2;
-            _CPU.Reg[CPU.PC] = _CPU.NextInstructionAddress + 2;
+            UInt16 instruction = _cpu._callbackInterface.ReadMemory16(_cpu.NextInstructionAddress);
+            _cpu.NextInstructionAddress += 2;
+            _cpu.Reg[CPU.PC] = _cpu.NextInstructionAddress + 2;
 
             unsafe
             {
-                InstructionLUT[InstructionLUTHash(instruction)](_CPU, instruction);
+                InstructionLUT[InstructionLUTHash(instruction)](_cpu, instruction);
             }
         }
 
         private void SetPC(UInt32 value)
         {
-            _CPU.NextInstructionAddress = value & 0xffff_fffe;
+            _cpu.NextInstructionAddress = value & 0xffff_fffe;
         }
 
         private void SetReg(UInt32 i, UInt32 value)
@@ -223,7 +223,7 @@ namespace Iris.CPU
             if (i == CPU.PC)
                 SetPC(value);
             else
-                _CPU.Reg[i] = value;
+                _cpu.Reg[i] = value;
         }
 
         private static void UNKNOWN(CPU cpu, UInt16 instruction)
