@@ -1,6 +1,6 @@
 ﻿namespace Iris.CPU
 {
-    public sealed partial class CPU
+    public sealed class CPU
     {
         public enum Architecture
         {
@@ -36,7 +36,7 @@
             High
         }
 
-        private enum Flag
+        internal enum Flag
         {
             V = 28,
             C = 29,
@@ -44,14 +44,14 @@
             N = 31
         }
 
-        private const UInt32 ModeMask = 0b1_1111;
-        private const UInt32 UserMode = 0b1_0000;
-        private const UInt32 SystemMode = 0b1_1111;
-        private const UInt32 SupervisorMode = 0b1_0011;
-        private const UInt32 AbortMode = 0b1_0111;
-        private const UInt32 UndefinedMode = 0b1_1011;
-        private const UInt32 InterruptMode = 0b1_0010;
-        private const UInt32 FastInterruptMode = 0b1_0001;
+        internal const UInt32 ModeMask = 0b1_1111;
+        internal const UInt32 UserMode = 0b1_0000;
+        internal const UInt32 SystemMode = 0b1_1111;
+        internal const UInt32 SupervisorMode = 0b1_0011;
+        internal const UInt32 AbortMode = 0b1_0111;
+        internal const UInt32 UndefinedMode = 0b1_1011;
+        internal const UInt32 InterruptMode = 0b1_0010;
+        internal const UInt32 FastInterruptMode = 0b1_0001;
 
         public const UInt32 SP = 13;
         public const UInt32 LR = 14;
@@ -69,8 +69,11 @@
         public UInt32 Reg8_fiq, Reg9_fiq, Reg10_fiq, Reg11_fiq, Reg12_fiq, Reg13_fiq, Reg14_fiq;
         public UInt32 SPSR_svc, SPSR_abt, SPSR_und, SPSR_irq, SPSR_fiq;
 
-        private readonly Architecture _architecture;
-        private readonly CallbackInterface _callbackInterface;
+        internal readonly Architecture _architecture;
+        internal readonly CallbackInterface _callbackInterface;
+
+        internal readonly ARM_Interpreter _ARM_Interpreter;
+        internal readonly THUMB_Interpreter _THUMB_Interpreter;
 
         public UInt32 NextInstructionAddress;
         public Signal NIRQ;
@@ -79,9 +82,8 @@
         {
             _architecture = architecture;
             _callbackInterface = callbackInterface;
-
-            ARM_InitInstructionLUT();
-            THUMB_InitInstructionLUT();
+            _ARM_Interpreter = new(this);
+            _THUMB_Interpreter = new(this);
         }
 
         public void Step()
@@ -94,9 +96,9 @@
             UInt32 t = (CPSR >> 5) & 1;
 
             if (t == 0)
-                ARM_Step();
+                _ARM_Interpreter.Step();
             else
-                THUMB_Step();
+                _THUMB_Interpreter.Step();
         }
 
         public void SetCPSR(UInt32 value)
@@ -240,17 +242,17 @@
             }
         }
 
-        private UInt32 GetFlag(Flag flag)
+        internal UInt32 GetFlag(Flag flag)
         {
             return (CPSR >> (int)flag) & 1;
         }
 
-        private void SetFlag(Flag flag, UInt32 value)
+        internal void SetFlag(Flag flag, UInt32 value)
         {
             CPSR = (CPSR & ~(1u << (int)flag)) | (value << (int)flag);
         }
 
-        private bool ConditionPassed(UInt32 cond)
+        internal bool ConditionPassed(UInt32 cond)
         {
             return cond switch
             {
@@ -291,39 +293,39 @@
             };
         }
 
-        private static UInt32 Not(UInt32 flag)
+        internal static UInt32 Not(UInt32 flag)
         {
             return ~flag & 1;
         }
 
-        private static UInt32 CarryFrom(UInt64 result)
+        internal static UInt32 CarryFrom(UInt64 result)
         {
             return (result > 0xffff_ffff) ? 1u : 0u;
         }
 
-        private static UInt32 BorrowFrom(UInt32 leftOperand, UInt64 rightOperand)
+        internal static UInt32 BorrowFrom(UInt32 leftOperand, UInt64 rightOperand)
         {
             return (leftOperand < rightOperand) ? 1u : 0u;
         }
 
-        private static UInt32 OverflowFrom_Addition(UInt32 leftOperand, UInt32 rightOperand, UInt32 result)
+        internal static UInt32 OverflowFrom_Addition(UInt32 leftOperand, UInt32 rightOperand, UInt32 result)
         {
             return (((leftOperand >> 31) == (rightOperand >> 31))
                  && ((leftOperand >> 31) != (result >> 31))) ? 1u : 0u;
         }
 
-        private static UInt32 OverflowFrom_Subtraction(UInt32 leftOperand, UInt32 rightOperand, UInt32 result)
+        internal static UInt32 OverflowFrom_Subtraction(UInt32 leftOperand, UInt32 rightOperand, UInt32 result)
         {
             return (((leftOperand >> 31) != (rightOperand >> 31))
                  && ((leftOperand >> 31) != (result >> 31))) ? 1u : 0u;
         }
 
-        private static UInt32 ArithmeticShiftRight(UInt32 value, int shiftAmount)
+        internal static UInt32 ArithmeticShiftRight(UInt32 value, int shiftAmount)
         {
             return (UInt32)((Int32)value >> shiftAmount);
         }
 
-        private static UInt32 SignExtend(UInt32 value, int size)
+        internal static UInt32 SignExtend(UInt32 value, int size)
         {
             return ((value >> (size - 1)) == 1) ? (value | (0xffff_ffff << size)) : value;
         }
