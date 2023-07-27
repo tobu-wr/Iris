@@ -4,7 +4,7 @@ Iris is a WIP GameBoy Advance emulator (and maybe DS in the future). I wanted to
 
 ## Features
 
-- Complete CPU emulation
+- Complete ARMv4T emulation
 - TBD
 
 ## Tested games
@@ -12,6 +12,7 @@ Iris is a WIP GameBoy Advance emulator (and maybe DS in the future). I wanted to
 TBD
 
 ## Screenshots
+
 <p align="center">
   <img src="Screenshots/Capture.PNG"/>
   <img src="Screenshots/Capture-2.PNG"/>
@@ -20,9 +21,9 @@ TBD
 ## Resources used
 
 - The Official Gameboy Advance Programming Manual
-- The ARM Architecture Reference Manual
+- ARM Architecture Reference Manual
 - [GBATEK](https://problemkaputt.de/gbatek.htm)
-- ARMWrestler test ROM
+- [ARMWrestler test ROM](https://github.com/destoer/armwrestler-gba-fixed)
 - [gba-tests test ROMs](https://github.com/jsmolka/gba-tests) (arm.gba and thumb.gba)
 - [FuzzARM test ROMs](https://github.com/DenSinH/FuzzARM)
-- [TONC demos](https://www.coranac.com/tonc/text/toc.htm)(key_demo.gba)
+- [TONC demos](https://www.coranac.com/tonc/text/toc.htm) (key_demo.gba)
