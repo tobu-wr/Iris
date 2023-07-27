@@ -2,7 +2,7 @@
 
 namespace Iris.CPU
 {
-    internal sealed class Interpreter
+    internal sealed class THUMB_Interpreter
     {
         private readonly struct InstructionListEntry
         {
@@ -195,7 +195,7 @@ namespace Iris.CPU
 
         private readonly CPU _CPU;
 
-        internal Interpreter(CPU CPU)
+        internal THUMB_Interpreter(CPU CPU)
         {
             _CPU = CPU;
             InitInstructionLUT();
@@ -228,7 +228,7 @@ namespace Iris.CPU
 
         private static void UNKNOWN(CPU cpu, UInt16 instruction)
         {
-            throw new Exception(string.Format("Iris.EmulationCore.Common.CPU.THUMB: Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, cpu.NextInstructionAddress - 2));
+            throw new Exception(string.Format("Iris.CPU.THUMB_Interpreter: Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, cpu.NextInstructionAddress - 2));
         }
 
         private static void ADC(CPU cpu, UInt16 instruction)
