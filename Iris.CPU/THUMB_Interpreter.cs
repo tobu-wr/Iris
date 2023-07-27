@@ -213,17 +213,17 @@ namespace Iris.CPU
             }
         }
 
-        private void SetPC(UInt32 value)
+        private static void SetPC(CPU cpu, UInt32 value)
         {
-            _cpu.NextInstructionAddress = value & 0xffff_fffe;
+            cpu.NextInstructionAddress = value & 0xffff_fffe;
         }
 
-        private void SetReg(UInt32 i, UInt32 value)
+        private static void SetReg(CPU cpu, UInt32 i, UInt32 value)
         {
             if (i == CPU.PC)
-                SetPC(value);
+                SetPC(cpu, value);
             else
-                _cpu.Reg[i] = value;
+                cpu.Reg[i] = value;
         }
 
         private static void UNKNOWN(CPU cpu, UInt16 instruction)
@@ -311,7 +311,7 @@ namespace Iris.CPU
             rd |= (UInt16)(h1 << 3);
             rm |= (UInt16)(h2 << 3);
 
-            cpu._thumbInterpreter.SetReg(rd, cpu.Reg[rd] + cpu.Reg[rm]);
+            SetReg(cpu, rd, cpu.Reg[rd] + cpu.Reg[rm]);
         }
 
         private static void ADD5(CPU cpu, UInt16 instruction)
@@ -403,14 +403,14 @@ namespace Iris.CPU
             UInt16 imm = (UInt16)(instruction & 0xff);
 
             if (cpu.ConditionPassed(cond))
-                cpu._thumbInterpreter.SetPC(cpu.Reg[CPU.PC] + (CPU.SignExtend(imm, 8) << 1));
+                SetPC(cpu, cpu.Reg[CPU.PC] + (CPU.SignExtend(imm, 8) << 1));
         }
 
         private static void B2(CPU cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)(instruction & 0x7ff);
 
-            cpu._thumbInterpreter.SetPC(cpu.Reg[CPU.PC] + (CPU.SignExtend(imm, 11) << 1));
+            SetPC(cpu, cpu.Reg[CPU.PC] + (CPU.SignExtend(imm, 11) << 1));
         }
 
         private static void BIC(CPU cpu, UInt16 instruction)
@@ -438,7 +438,7 @@ namespace Iris.CPU
                 // save NextInstructionAddress because it's invalidated by SetPC
                 UInt32 nextInstructionAddress = cpu.NextInstructionAddress;
 
-                cpu._thumbInterpreter.SetPC(cpu.Reg[CPU.LR] + (UInt32)(offset << 1));
+                SetPC(cpu, cpu.Reg[CPU.LR] + (UInt32)(offset << 1));
                 cpu.Reg[CPU.LR] = nextInstructionAddress | 1;
             }
         }
@@ -451,7 +451,7 @@ namespace Iris.CPU
             rm |= (UInt16)(h2 << 3);
 
             cpu.CPSR = (cpu.CPSR & ~(1u << 5)) | ((cpu.Reg[rm] & 1) << 5);
-            cpu._thumbInterpreter.SetPC(cpu.Reg[rm]);
+            SetPC(cpu, cpu.Reg[rm]);
         }
 
         private static void CMN(CPU cpu, UInt16 instruction)
@@ -545,7 +545,7 @@ namespace Iris.CPU
             if (registerList == 0)
             {
                 cpu.Reg[rn] += 0x40;
-                cpu._thumbInterpreter.SetPC(cpu._callbackInterface.ReadMemory32(address));
+                SetPC(cpu, cpu._callbackInterface.ReadMemory32(address));
             }
             else
             {
@@ -807,7 +807,7 @@ namespace Iris.CPU
             rd |= (UInt16)(h1 << 3);
             rm |= (UInt16)(h2 << 3);
 
-            cpu._thumbInterpreter.SetReg(rd, cpu.Reg[rm]);
+            SetReg(cpu, rd, cpu.Reg[rm]);
         }
 
         private static void MUL(CPU cpu, UInt16 instruction)
@@ -877,7 +877,7 @@ namespace Iris.CPU
             }
 
             if (r == 1)
-                cpu._thumbInterpreter.SetPC(cpu._callbackInterface.ReadMemory32(address));
+                SetPC(cpu, cpu._callbackInterface.ReadMemory32(address));
         }
 
         private static void PUSH(CPU cpu, UInt16 instruction)
