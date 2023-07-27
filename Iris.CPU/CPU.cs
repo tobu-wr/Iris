@@ -72,8 +72,8 @@
         internal readonly Architecture _architecture;
         internal readonly CallbackInterface _callbackInterface;
 
-        internal readonly ARM_Interpreter _ARM_Interpreter;
-        internal readonly THUMB_Interpreter _THUMB_Interpreter;
+        internal readonly ARM_Interpreter _armInterpreter;
+        internal readonly THUMB_Interpreter _thumbInterpreter;
 
         public UInt32 NextInstructionAddress;
         public Signal NIRQ;
@@ -82,8 +82,8 @@
         {
             _architecture = architecture;
             _callbackInterface = callbackInterface;
-            _ARM_Interpreter = new(this);
-            _THUMB_Interpreter = new(this);
+            _armInterpreter = new(this);
+            _thumbInterpreter = new(this);
         }
 
         public void Step()
@@ -96,9 +96,9 @@
             UInt32 t = (CPSR >> 5) & 1;
 
             if (t == 0)
-                _ARM_Interpreter.Step();
+                _armInterpreter.Step();
             else
-                _THUMB_Interpreter.Step();
+                _thumbInterpreter.Step();
         }
 
         public void SetCPSR(UInt32 value)
