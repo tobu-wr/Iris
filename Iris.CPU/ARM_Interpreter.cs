@@ -1,35 +1,12 @@
 ﻿using System.Numerics;
 using System.Runtime.CompilerServices;
+using static Iris.CPU.CPU;
 
 namespace Iris.CPU
 {
     internal sealed class ARM_Interpreter
     {
-        private readonly struct InstructionListEntry
-        {
-            internal readonly UInt32 Mask;
-            internal readonly UInt32 Expected;
-            internal unsafe readonly delegate*<CPU, UInt32, void> Handler;
-
-            internal unsafe InstructionListEntry(UInt32 mask, UInt32 expected, delegate*<CPU, UInt32, void> handler)
-            {
-                Mask = mask;
-                Expected = expected;
-                Handler = handler;
-            }
-        }
-
-        private readonly struct InstructionLUTEntry
-        {
-            internal unsafe readonly delegate*<CPU, UInt32, void> Handler;
-
-            internal unsafe InstructionLUTEntry(delegate*<CPU, UInt32, void> handler)
-            {
-                Handler = handler;
-            }
-        }
-
-        private unsafe readonly InstructionLUTEntry[] InstructionLUT = new InstructionLUTEntry[1 << 12];
+        private unsafe readonly InstructionLUTEntry<UInt32>[] InstructionLUT = new InstructionLUTEntry<UInt32>[1 << 12];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static UInt32 InstructionLUTHash(UInt32 value)
@@ -39,7 +16,7 @@ namespace Iris.CPU
 
         private unsafe void InitInstructionLUT()
         {
-            InstructionListEntry[] InstructionList = new InstructionListEntry[]
+            InstructionListEntry<UInt32>[] InstructionList = new InstructionListEntry<UInt32>[]
             {
                 // ADC
                 new(0x0fe0_0000, 0x02a0_0000, &ADC), // I bit is 1
@@ -234,7 +211,7 @@ namespace Iris.CPU
             {
                 bool unknownInstruction = true;
 
-                foreach (InstructionListEntry entry in InstructionList)
+                foreach (InstructionListEntry<UInt32> entry in InstructionList)
                 {
                     if ((instruction & InstructionLUTHash(entry.Mask)) == InstructionLUTHash(entry.Expected))
                     {

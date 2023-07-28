@@ -47,6 +47,30 @@ namespace Iris.CPU
             N = 31
         }
 
+        internal readonly struct InstructionListEntry<T>
+        {
+            internal readonly T Mask;
+            internal readonly T Expected;
+            internal unsafe readonly delegate*<CPU, T, void> Handler;
+
+            internal unsafe InstructionListEntry(T mask, T expected, delegate*<CPU, T, void> handler)
+            {
+                Mask = mask;
+                Expected = expected;
+                Handler = handler;
+            }
+        }
+
+        internal readonly struct InstructionLUTEntry<T>
+        {
+            internal unsafe readonly delegate*<CPU, T, void> Handler;
+
+            internal unsafe InstructionLUTEntry(delegate*<CPU, T, void> handler)
+            {
+                Handler = handler;
+            }
+        }
+
         internal const UInt32 ModeMask = 0b1_1111;
         internal const UInt32 UserMode = 0b1_0000;
         internal const UInt32 SystemMode = 0b1_1111;
