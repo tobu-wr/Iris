@@ -256,7 +256,7 @@ namespace Iris.CPU
 
             if (_cpu.ConditionPassed(cond))
             {
-                _cpu.Reg[CPU.PC] = _cpu.NextInstructionAddress + 4;
+                CPU.GetDataElementReference(_cpu.Reg, CPU.PC) = _cpu.NextInstructionAddress + 4;
 
                 unsafe
                 {

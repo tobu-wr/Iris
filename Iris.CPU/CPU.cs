@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Iris.CPU
 {
@@ -339,6 +340,12 @@ namespace Iris.CPU
         internal static UInt32 SignExtend(UInt32 value, int size)
         {
             return ((value >> (size - 1)) == 1) ? (value | (0xffff_ffff << size)) : value;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static ref T GetDataElementReference<T>(T[] array, nuint index)
+        {
+            return ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(array), index);
         }
     }
 }
