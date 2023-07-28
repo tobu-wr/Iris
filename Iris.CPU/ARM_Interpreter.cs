@@ -19,7 +19,17 @@ namespace Iris.CPU
             }
         }
 
-        private unsafe readonly delegate*<CPU, UInt32, void>[] InstructionLUT = new delegate*<CPU, UInt32, void>[1 << 12];
+        private readonly struct InstructionLUTEntry
+        {
+            internal unsafe readonly delegate*<CPU, UInt32, void> Handler;
+
+            internal unsafe InstructionLUTEntry(delegate*<CPU, UInt32, void> handler)
+            {
+                Handler = handler;
+            }
+        }
+
+        private unsafe readonly InstructionLUTEntry[] InstructionLUT = new InstructionLUTEntry[1 << 12];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static UInt32 InstructionLUTHash(UInt32 value)
@@ -228,14 +238,14 @@ namespace Iris.CPU
                 {
                     if ((instruction & InstructionLUTHash(entry.Mask)) == InstructionLUTHash(entry.Expected))
                     {
-                        InstructionLUT[instruction] = entry.Handler;
+                        InstructionLUT[instruction] = new(entry.Handler);
                         unknownInstruction = false;
                         break;
                     }
                 }
 
                 if (unknownInstruction)
-                    InstructionLUT[instruction] = &UNKNOWN;
+                    InstructionLUT[instruction] = new(&UNKNOWN);
             }
         }
 
@@ -260,7 +270,7 @@ namespace Iris.CPU
 
                 unsafe
                 {
-                    InstructionLUT[InstructionLUTHash(instruction)](_cpu, instruction);
+                    CPU.GetDataElementReference(InstructionLUT, InstructionLUTHash(instruction)).Handler(_cpu, instruction);
                 }
             }
         }
