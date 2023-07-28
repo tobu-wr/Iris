@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace Iris.CPU
 {
@@ -20,6 +21,7 @@ namespace Iris.CPU
 
         private unsafe readonly delegate*<CPU, UInt16, void>[] InstructionLUT = new delegate*<CPU, UInt16, void>[1 << 10];
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static UInt16 InstructionLUTHash(UInt16 value)
         {
             return (UInt16)(value >> 6);
@@ -213,11 +215,13 @@ namespace Iris.CPU
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void SetPC(CPU cpu, UInt32 value)
         {
             cpu.NextInstructionAddress = value & 0xffff_fffe;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void SetReg(CPU cpu, UInt32 i, UInt32 value)
         {
             if (i == CPU.PC)

@@ -1,4 +1,6 @@
-﻿namespace Iris.CPU
+﻿using System.Runtime.CompilerServices;
+
+namespace Iris.CPU
 {
     public sealed class CPU
     {
@@ -242,11 +244,13 @@
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal UInt32 GetFlag(Flag flag)
         {
             return (CPSR >> (int)flag) & 1;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void SetFlag(Flag flag, UInt32 value)
         {
             CPSR = (CPSR & ~(1u << (int)flag)) | (value << (int)flag);
@@ -293,38 +297,45 @@
             };
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static UInt32 Not(UInt32 flag)
         {
             return ~flag & 1;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static UInt32 CarryFrom(UInt64 result)
         {
             return (result > 0xffff_ffff) ? 1u : 0u;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static UInt32 BorrowFrom(UInt32 leftOperand, UInt64 rightOperand)
         {
             return (leftOperand < rightOperand) ? 1u : 0u;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static UInt32 OverflowFrom_Addition(UInt32 leftOperand, UInt32 rightOperand, UInt32 result)
         {
             return (((leftOperand >> 31) == (rightOperand >> 31))
                  && ((leftOperand >> 31) != (result >> 31))) ? 1u : 0u;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static UInt32 OverflowFrom_Subtraction(UInt32 leftOperand, UInt32 rightOperand, UInt32 result)
         {
             return (((leftOperand >> 31) != (rightOperand >> 31))
                  && ((leftOperand >> 31) != (result >> 31))) ? 1u : 0u;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static UInt32 ArithmeticShiftRight(UInt32 value, int shiftAmount)
         {
             return (UInt32)((Int32)value >> shiftAmount);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static UInt32 SignExtend(UInt32 value, int size)
         {
             return ((value >> (size - 1)) == 1) ? (value | (0xffff_ffff << size)) : value;
