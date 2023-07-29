@@ -325,7 +325,7 @@ namespace Iris.CPU
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static UInt32 Not(UInt32 flag)
         {
-            return ~flag & 1;
+            return flag ^ 1;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -363,7 +363,7 @@ namespace Iris.CPU
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static UInt32 SignExtend(UInt32 value, int size)
         {
-            return ((value >> (size - 1)) == 1) ? (value | (0xffff_ffff << size)) : value;
+            return value | ~((value & (1u << (size - 1))) - 1);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
