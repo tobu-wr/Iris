@@ -1,5 +1,6 @@
 using System.Drawing.Imaging;
 using Iris.Common;
+using Iris.GBA;
 
 namespace Iris.UserInterface
 {
@@ -29,7 +30,7 @@ namespace Iris.UserInterface
         {
             InitializeComponent();
 
-            _core = new GBA.Core(DrawFrame);
+            _core = new Core(DrawFrame);
             _performanceUpdateTimer.Elapsed += PerformanceUpdateTimer_Elapsed;
 
             if (args.Length > 0 && LoadROM(args[0]))
