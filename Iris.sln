@@ -17,7 +17,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Iris.UserInterface", "Iris.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Iris.Common", "Iris.Common\Iris.Common.csproj", "{01285C3A-5E79-46AA-8C43-A1B638ED9ACC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Iris.CPU", "Iris.CPU\Iris.CPU.csproj", "{59ADE4BA-036C-47C5-9DEE-C3AB846C2BB4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Iris.CPU", "Iris.CPU\Iris.CPU.csproj", "{59ADE4BA-036C-47C5-9DEE-C3AB846C2BB4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Iris.NDS", "Iris.NDS\Iris.NDS.csproj", "{61CC9F1A-CFA9-489E-865C-3FB36C045640}"
+	ProjectSection(ProjectDependencies) = postProject
+		{01285C3A-5E79-46AA-8C43-A1B638ED9ACC} = {01285C3A-5E79-46AA-8C43-A1B638ED9ACC}
+		{59ADE4BA-036C-47C5-9DEE-C3AB846C2BB4} = {59ADE4BA-036C-47C5-9DEE-C3AB846C2BB4}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +47,10 @@ Global
 		{59ADE4BA-036C-47C5-9DEE-C3AB846C2BB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{59ADE4BA-036C-47C5-9DEE-C3AB846C2BB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{59ADE4BA-036C-47C5-9DEE-C3AB846C2BB4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61CC9F1A-CFA9-489E-865C-3FB36C045640}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61CC9F1A-CFA9-489E-865C-3FB36C045640}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61CC9F1A-CFA9-489E-865C-3FB36C045640}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61CC9F1A-CFA9-489E-865C-3FB36C045640}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
