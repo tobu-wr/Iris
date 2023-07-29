@@ -11,7 +11,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Iris.Common\Iris.Common.csproj" />
-    <ProjectReference Include="..\Iris.EmulationCore\Iris.EmulationCore.csproj" />
+    <ProjectReference Include="..\Iris.GBA\Iris.GBA.csproj" />
+    <ProjectReference Include="..\Iris.NDS\Iris.NDS.csproj" />
   </ItemGroup>
 
   <ItemGroup>
