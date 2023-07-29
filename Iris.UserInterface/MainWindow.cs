@@ -1,26 +1,27 @@
 using System.Drawing.Imaging;
+using Iris.Common;
 
 namespace Iris.UserInterface
 {
     public partial class MainWindow : Form
     {
-        private static readonly Dictionary<Keys, Common.ISystemCore.Key> KeyMapping = new()
+        private static readonly Dictionary<Keys, ISystemCore.Key> KeyMapping = new()
         {
-            { Keys.A, Common.ISystemCore.Key.A },
-            { Keys.Z, Common.ISystemCore.Key.B },
-            { Keys.Space, Common.ISystemCore.Key.Select },
-            { Keys.Enter, Common.ISystemCore.Key.Start },
-            { Keys.Right, Common.ISystemCore.Key.Right },
-            { Keys.Left, Common.ISystemCore.Key.Left },
-            { Keys.Up, Common.ISystemCore.Key.Up },
-            { Keys.Down, Common.ISystemCore.Key.Down },
-            { Keys.S, Common.ISystemCore.Key.R },
-            { Keys.Q, Common.ISystemCore.Key.L },
-            { Keys.E, Common.ISystemCore.Key.X },
-            { Keys.R, Common.ISystemCore.Key.Y },
+            { Keys.A, ISystemCore.Key.A },
+            { Keys.Z, ISystemCore.Key.B },
+            { Keys.Space, ISystemCore.Key.Select },
+            { Keys.Enter, ISystemCore.Key.Start },
+            { Keys.Right, ISystemCore.Key.Right },
+            { Keys.Left, ISystemCore.Key.Left },
+            { Keys.Up, ISystemCore.Key.Up },
+            { Keys.Down, ISystemCore.Key.Down },
+            { Keys.S, ISystemCore.Key.R },
+            { Keys.Q, ISystemCore.Key.L },
+            { Keys.E, ISystemCore.Key.X },
+            { Keys.R, ISystemCore.Key.Y },
         };
 
-        private readonly Common.ISystemCore _core;
+        private readonly ISystemCore _core;
         private int _frameCount = 0;
         private readonly System.Timers.Timer _performanceUpdateTimer = new(1000);
 
@@ -225,14 +226,14 @@ namespace Iris.UserInterface
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
-            if (KeyMapping.TryGetValue(e.KeyCode, out Common.ISystemCore.Key value))
-                _core.SetKeyStatus(value, Common.ISystemCore.KeyStatus.Input);
+            if (KeyMapping.TryGetValue(e.KeyCode, out ISystemCore.Key value))
+                _core.SetKeyStatus(value, ISystemCore.KeyStatus.Input);
         }
 
         private void MainWindow_KeyUp(object sender, KeyEventArgs e)
         {
-            if (KeyMapping.TryGetValue(e.KeyCode, out Common.ISystemCore.Key value))
-                _core.SetKeyStatus(value, Common.ISystemCore.KeyStatus.NoInput);
+            if (KeyMapping.TryGetValue(e.KeyCode, out ISystemCore.Key value))
+                _core.SetKeyStatus(value, ISystemCore.KeyStatus.NoInput);
         }
     }
 }
