@@ -28,7 +28,7 @@ namespace Iris.UserInterface
         {
             InitializeComponent();
 
-            _core = new EmulationCore.GBA.Core(DrawFrame);
+            _core = new GBA.Core(DrawFrame);
             _performanceUpdateTimer.Elapsed += PerformanceUpdateTimer_Elapsed;
 
             if (args.Length > 0 && LoadROM(args[0]))

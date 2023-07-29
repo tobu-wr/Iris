@@ -1,4 +1,4 @@
-﻿namespace Iris.EmulationCore.GBA
+﻿namespace Iris.GBA
 {
     public sealed partial class Core
     {
@@ -94,7 +94,7 @@
                     ReturnFromIRQ();
                     break;
                 default:
-                    throw new Exception(string.Format("Iris.EmulationCore.GBA.Core.BIOS: Unknown BIOS function 0x{0:x2}", function));
+                    throw new Exception(string.Format("Iris.GBA.Core.BIOS: Unknown BIOS function 0x{0:x2}", function));
             }
         }
 

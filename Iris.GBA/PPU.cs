@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace Iris.EmulationCore.GBA
+namespace Iris.GBA
 {
     internal sealed class PPU
     {
@@ -157,7 +157,7 @@ namespace Iris.EmulationCore.GBA
                             break;
                         }
                     default:
-                        Console.WriteLine("Iris.EmulationCore.GBA.PPU: BG mode {0} unimplemented", bgMode);
+                        Console.WriteLine("Iris.GBA.PPU: BG mode {0} unimplemented", bgMode);
                         break;
                 }
 
