@@ -1,6 +1,6 @@
 ﻿using Iris.CPU;
 
-namespace Iris.EmulationCore.NDS
+namespace Iris.NDS
 {
     public sealed partial class Core
     {
@@ -16,12 +16,12 @@ namespace Iris.EmulationCore.NDS
 
         private void HandleSWI(UInt32 value)
         {
-            throw new NotImplementedException("Iris.EmulationCore.NDS.Core.BIOS: HandleSWI unimplemented");
+            throw new NotImplementedException("Iris.NDS.Core.BIOS: HandleSWI unimplemented");
         }
 
         private void HandleIRQ()
         {
-            throw new NotImplementedException("Iris.EmulationCore.NDS.Core.BIOS: HandleIRQ unimplemented");
+            throw new NotImplementedException("Iris.NDS.Core.BIOS: HandleIRQ unimplemented");
         }
     }
 }

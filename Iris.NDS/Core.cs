@@ -1,6 +1,6 @@
 ﻿using Iris.Common;
 
-namespace Iris.EmulationCore.NDS
+namespace Iris.NDS
 {
     public sealed partial class Core : ISystemCore
     {
