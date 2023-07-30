@@ -243,11 +243,11 @@ namespace Iris.CPU
 
             if (_cpu.ConditionPassed(cond))
             {
-                GetDataElementReference(_cpu.Reg, PC) = _cpu.NextInstructionAddress + 4;
+                GetArrayElementReference(_cpu.Reg, PC) = _cpu.NextInstructionAddress + 4;
 
                 unsafe
                 {
-                    GetDataElementReference(InstructionLUT, InstructionLUTHash(instruction)).Handler(_cpu, instruction);
+                    GetArrayElementReference(InstructionLUT, InstructionLUTHash(instruction)).Handler(_cpu, instruction);
                 }
             }
         }

@@ -367,7 +367,7 @@ namespace Iris.CPU
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static ref T GetDataElementReference<T>(T[] array, nuint index)
+        internal static ref T GetArrayElementReference<T>(T[] array, uint index)
         {
             return ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(array), index);
         }

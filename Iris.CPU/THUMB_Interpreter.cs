@@ -194,11 +194,11 @@ namespace Iris.CPU
         {
             UInt16 instruction = _cpu._callbackInterface.ReadMemory16(_cpu.NextInstructionAddress);
             _cpu.NextInstructionAddress += 2;
-            GetDataElementReference(_cpu.Reg, PC) = _cpu.NextInstructionAddress + 2;
+            GetArrayElementReference(_cpu.Reg, PC) = _cpu.NextInstructionAddress + 2;
 
             unsafe
             {
-                GetDataElementReference(InstructionLUT, InstructionLUTHash(instruction)).Handler(_cpu, instruction);
+                GetArrayElementReference(InstructionLUT, InstructionLUTHash(instruction)).Handler(_cpu, instruction);
             }
         }
 
