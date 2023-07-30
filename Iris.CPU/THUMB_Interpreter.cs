@@ -214,7 +214,7 @@ namespace Iris.CPU
             if (i == PC)
                 SetPC(cpu, value);
             else
-                cpu.Reg[i] = value;
+                GetArrayElementReference(cpu.Reg, i) = value;
         }
 
         private static void UNKNOWN(CPU cpu, UInt16 instruction)

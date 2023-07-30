@@ -264,7 +264,7 @@ namespace Iris.CPU
             if (i == PC)
                 SetPC(cpu, value);
             else
-                cpu.Reg[i] = value;
+                GetArrayElementReference(cpu.Reg, i) = value;
         }
 
         // Addressing mode 1
