@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using static Iris.CPU.CPU;
 
 namespace Iris.CPU
@@ -289,11 +290,14 @@ namespace Iris.CPU
                 UInt32 r = (instruction >> 4) & 1;
                 UInt32 rm = instruction & 0b1111;
 
+                ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+                ref UInt32 regRm = ref Unsafe.Add(ref regDataRef, rm);
+
                 if (r == 0) // Immediate shifts
                 {
                     UInt32 shiftImm = (instruction >> 7) & 0b1_1111;
 
-                    UInt32 value = cpu.Reg[rm];
+                    UInt32 value = regRm;
                     int shiftAmount = (int)shiftImm;
 
                     switch (shift)
@@ -352,8 +356,11 @@ namespace Iris.CPU
                 {
                     UInt32 rs = (instruction >> 8) & 0b1111;
 
-                    UInt32 value = (rm == PC) ? (cpu.Reg[PC] + 4) : cpu.Reg[rm];
-                    int shiftAmount = (int)(cpu.Reg[rs] & 0xff);
+                    ref UInt32 regRs = ref Unsafe.Add(ref regDataRef, rs);
+                    ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
+
+                    UInt32 value = (rm == PC) ? (regPC + 4) : regRm;
+                    int shiftAmount = (int)(regRs & 0xff);
 
                     switch (shift)
                     {
@@ -451,6 +458,9 @@ namespace Iris.CPU
             UInt32 w = (instruction >> 21) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
 
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRn = ref Unsafe.Add(ref regDataRef, rn);
+
             UInt32 index = 0;
 
             if (i == 0) // Immediate
@@ -465,46 +475,48 @@ namespace Iris.CPU
                 UInt32 shift = (instruction >> 5) & 0b11;
                 UInt32 rm = instruction & 0b1111;
 
+                ref UInt32 regRm = ref Unsafe.Add(ref regDataRef, rm);
+
                 if ((shiftImm == 0) && (shift == 0)) // Register
                 {
-                    index = cpu.Reg[rm];
+                    index = regRm;
                 }
                 else // Scaled register
                 {
                     switch (shift)
                     {
                         case 0b00: // LSL
-                            index = cpu.Reg[rm] << (int)shiftImm;
+                            index = regRm << (int)shiftImm;
                             break;
                         case 0b01: // LSR
                             if (shiftImm == 0)
                                 index = 0;
                             else
-                                index = cpu.Reg[rm] >> (int)shiftImm;
+                                index = regRm >> (int)shiftImm;
                             break;
                         case 0b10: // ASR
                             if (shiftImm == 0)
-                                index = ((cpu.Reg[rm] >> 31) == 1) ? 0xffff_ffff : 0;
+                                index = ((regRm >> 31) == 1) ? 0xffff_ffff : 0;
                             else
-                                index = ArithmeticShiftRight(cpu.Reg[rm], (int)shiftImm);
+                                index = ArithmeticShiftRight(regRm, (int)shiftImm);
                             break;
                         case 0b11:
                             if (shiftImm == 0) // RRX
-                                index = (cpu.GetFlag(Flag.C) << 31) | (cpu.Reg[rm] >> 1);
+                                index = (cpu.GetFlag(Flag.C) << 31) | (regRm >> 1);
                             else // ROR
-                                index = BitOperations.RotateRight(cpu.Reg[rm], (int)shiftImm);
+                                index = BitOperations.RotateRight(regRm, (int)shiftImm);
                             break;
                     }
                 }
             }
 
-            UInt32 regRnIndexed = (u == 1) ? (cpu.Reg[rn] + index) : (cpu.Reg[rn] - index);
+            UInt32 regRnIndexed = (u == 1) ? (regRn + index) : (regRn - index);
 
             UInt32 address;
 
             if (p == 0) // Post-indexed
             {
-                address = cpu.Reg[rn];
+                address = regRn;
                 SetReg(cpu, rn, regRnIndexed);
             }
             else if (w == 0) // Offset
@@ -529,6 +541,9 @@ namespace Iris.CPU
             UInt32 w = (instruction >> 21) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
 
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRn = ref Unsafe.Add(ref regDataRef, rn);
+
             UInt32 index;
 
             if (i == 1) // Immediate
@@ -543,16 +558,18 @@ namespace Iris.CPU
             {
                 UInt32 rm = instruction & 0b1111;
 
-                index = cpu.Reg[rm];
+                ref UInt32 regRm = ref Unsafe.Add(ref regDataRef, rm);
+
+                index = regRm;
             }
 
-            UInt32 regRnIndexed = (u == 1) ? (cpu.Reg[rn] + index) : (cpu.Reg[rn] - index);
+            UInt32 regRnIndexed = (u == 1) ? (regRn + index) : (regRn - index);
 
             UInt32 address;
 
             if (p == 0) // Post-indexed
             {
-                address = cpu.Reg[rn];
+                address = regRn;
                 SetReg(cpu, rn, regRnIndexed);
             }
             else if (w == 0) // Offset
@@ -577,6 +594,9 @@ namespace Iris.CPU
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 registerList = instruction & 0xffff;
 
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRn = ref Unsafe.Add(ref regDataRef, rn);
+
             UInt32 increment = (registerList == 0) ? 0x40 : ((UInt32)BitOperations.PopCount(registerList) * 4);
 
             UInt32 startAddress, endAddress;
@@ -584,32 +604,32 @@ namespace Iris.CPU
 
             if (u == 1) // increment
             {
-                value = cpu.Reg[rn] + increment;
+                value = regRn + increment;
 
                 if (p == 0) // after
                 {
-                    startAddress = cpu.Reg[rn];
+                    startAddress = regRn;
                     endAddress = value - 4;
                 }
                 else // before
                 {
-                    startAddress = cpu.Reg[rn] + 4;
+                    startAddress = regRn + 4;
                     endAddress = value;
                 }
             }
             else // decrement
             {
-                value = cpu.Reg[rn] - increment;
+                value = regRn - increment;
 
                 if (p == 0) // after
                 {
                     startAddress = value + 4;
-                    endAddress = cpu.Reg[rn];
+                    endAddress = regRn;
                 }
                 else // before
                 {
                     startAddress = value;
-                    endAddress = cpu.Reg[rn] - 4;
+                    endAddress = regRn - 4;
                 }
             }
 
@@ -632,9 +652,13 @@ namespace Iris.CPU
             UInt32 rd = (instruction >> 12) & 0b1111;
             UInt32 r = (instruction >> 4) & 1;
 
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRn = ref Unsafe.Add(ref regDataRef, rn);
+            ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
+
             (UInt32 shifterOperand, _) = GetShifterOperand(cpu, instruction);
 
-            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (cpu.Reg[PC] + 4) : cpu.Reg[rn];
+            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (regPC + 4) : regRn;
             UInt64 rightOperand = (UInt64)shifterOperand + (UInt64)cpu.GetFlag(Flag.C);
 
             UInt64 result = (UInt64)leftOperand + rightOperand;
@@ -648,10 +672,12 @@ namespace Iris.CPU
                 }
                 else
                 {
-                    cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
-                    cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+                    ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
+
+                    cpu.SetFlag(Flag.N, regRd >> 31);
+                    cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
                     cpu.SetFlag(Flag.C, CarryFrom(result));
-                    cpu.SetFlag(Flag.V, OverflowFrom_Addition(leftOperand, (UInt32)rightOperand, cpu.Reg[rd]));
+                    cpu.SetFlag(Flag.V, OverflowFrom_Addition(leftOperand, (UInt32)rightOperand, regRd));
                 }
             }
         }
@@ -664,9 +690,13 @@ namespace Iris.CPU
             UInt32 rd = (instruction >> 12) & 0b1111;
             UInt32 r = (instruction >> 4) & 1;
 
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRn = ref Unsafe.Add(ref regDataRef, rn);
+            ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
+
             (UInt32 shifterOperand, _) = GetShifterOperand(cpu, instruction);
 
-            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (cpu.Reg[PC] + 4) : cpu.Reg[rn];
+            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (regPC + 4) : regRn;
             UInt32 rightOperand = shifterOperand;
 
             UInt64 result = (UInt64)leftOperand + (UInt64)rightOperand;
@@ -680,10 +710,12 @@ namespace Iris.CPU
                 }
                 else
                 {
-                    cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
-                    cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+                    ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
+
+                    cpu.SetFlag(Flag.N, regRd >> 31);
+                    cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
                     cpu.SetFlag(Flag.C, CarryFrom(result));
-                    cpu.SetFlag(Flag.V, OverflowFrom_Addition(leftOperand, rightOperand, cpu.Reg[rd]));
+                    cpu.SetFlag(Flag.V, OverflowFrom_Addition(leftOperand, rightOperand, regRd));
                 }
             }
         }
@@ -696,9 +728,13 @@ namespace Iris.CPU
             UInt32 rd = (instruction >> 12) & 0b1111;
             UInt32 r = (instruction >> 4) & 1;
 
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRn = ref Unsafe.Add(ref regDataRef, rn);
+            ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
+
             (UInt32 shifterOperand, UInt32 shifterCarryOut) = GetShifterOperand(cpu, instruction);
 
-            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (cpu.Reg[PC] + 4) : cpu.Reg[rn];
+            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (regPC + 4) : regRn;
             UInt32 rightOperand = shifterOperand;
 
             SetReg(cpu, rd, leftOperand & rightOperand);
@@ -711,8 +747,10 @@ namespace Iris.CPU
                 }
                 else
                 {
-                    cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
-                    cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+                    ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
+
+                    cpu.SetFlag(Flag.N, regRd >> 31);
+                    cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
                     cpu.SetFlag(Flag.C, shifterCarryOut);
                 }
             }
@@ -722,15 +760,22 @@ namespace Iris.CPU
         {
             UInt32 imm = instruction & 0xff_ffff;
 
-            SetPC(cpu, cpu.Reg[PC] + (SignExtend(imm, 24) << 2));
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
+
+            SetPC(cpu, regPC + (SignExtend(imm, 24) << 2));
         }
 
         private static void BL(CPU cpu, UInt32 instruction)
         {
             UInt32 imm = instruction & 0xff_ffff;
 
-            cpu.Reg[LR] = cpu.NextInstructionAddress;
-            SetPC(cpu, cpu.Reg[PC] + (SignExtend(imm, 24) << 2));
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regLR = ref Unsafe.Add(ref regDataRef, LR);
+            ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
+
+            regLR = cpu.NextInstructionAddress;
+            SetPC(cpu, regPC + (SignExtend(imm, 24) << 2));
         }
 
         private static void BIC(CPU cpu, UInt32 instruction)
@@ -741,9 +786,13 @@ namespace Iris.CPU
             UInt32 rd = (instruction >> 12) & 0b1111;
             UInt32 r = (instruction >> 4) & 1;
 
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRn = ref Unsafe.Add(ref regDataRef, rn);
+            ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
+
             (UInt32 shifterOperand, UInt32 shifterCarryOut) = GetShifterOperand(cpu, instruction);
 
-            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (cpu.Reg[PC] + 4) : cpu.Reg[rn];
+            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (regPC + 4) : regRn;
             UInt32 rightOperand = shifterOperand;
 
             SetReg(cpu, rd, leftOperand & ~rightOperand);
@@ -756,8 +805,10 @@ namespace Iris.CPU
                 }
                 else
                 {
-                    cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
-                    cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+                    ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
+
+                    cpu.SetFlag(Flag.N, regRd >> 31);
+                    cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
                     cpu.SetFlag(Flag.C, shifterCarryOut);
                 }
             }
@@ -767,8 +818,11 @@ namespace Iris.CPU
         {
             UInt32 rm = instruction & 0b1111;
 
-            cpu.CPSR = (cpu.CPSR & ~(1u << 5)) | ((cpu.Reg[rm] & 1) << 5);
-            SetPC(cpu, cpu.Reg[rm] & 0xffff_fffe);
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRm = ref Unsafe.Add(ref regDataRef, rm);
+
+            cpu.CPSR = (cpu.CPSR & ~(1u << 5)) | ((regRm & 1) << 5);
+            SetPC(cpu, regRm & 0xffff_fffe);
         }
 
         private static void CMN(CPU cpu, UInt32 instruction)
@@ -778,9 +832,13 @@ namespace Iris.CPU
             UInt32 rd = (instruction >> 12) & 0b1111;
             UInt32 r = (instruction >> 4) & 1;
 
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRn = ref Unsafe.Add(ref regDataRef, rn);
+            ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
+
             (UInt32 shifterOperand, _) = GetShifterOperand(cpu, instruction);
 
-            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (cpu.Reg[PC] + 4) : cpu.Reg[rn];
+            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (regPC + 4) : regRn;
             UInt32 rightOperand = shifterOperand;
 
             UInt64 result = (UInt64)leftOperand + (UInt64)rightOperand;
@@ -809,9 +867,13 @@ namespace Iris.CPU
             UInt32 rd = (instruction >> 12) & 0b1111;
             UInt32 r = (instruction >> 4) & 1;
 
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRn = ref Unsafe.Add(ref regDataRef, rn);
+            ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
+
             (UInt32 shifterOperand, _) = GetShifterOperand(cpu, instruction);
 
-            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (cpu.Reg[PC] + 4) : cpu.Reg[rn];
+            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (regPC + 4) : regRn;
             UInt32 rightOperand = shifterOperand;
 
             UInt32 aluOut = leftOperand - rightOperand;
@@ -840,9 +902,13 @@ namespace Iris.CPU
             UInt32 rd = (instruction >> 12) & 0b1111;
             UInt32 r = (instruction >> 4) & 1;
 
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRn = ref Unsafe.Add(ref regDataRef, rn);
+            ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
+
             (UInt32 shifterOperand, UInt32 shifterCarryOut) = GetShifterOperand(cpu, instruction);
 
-            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (cpu.Reg[PC] + 4) : cpu.Reg[rn];
+            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (regPC + 4) : regRn;
             UInt32 rightOperand = shifterOperand;
 
             SetReg(cpu, rd, leftOperand ^ rightOperand);
@@ -855,8 +921,10 @@ namespace Iris.CPU
                 }
                 else
                 {
-                    cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
-                    cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+                    ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
+
+                    cpu.SetFlag(Flag.N, regRd >> 31);
+                    cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
                     cpu.SetFlag(Flag.C, shifterCarryOut);
                 }
             }
@@ -876,11 +944,15 @@ namespace Iris.CPU
             }
             else
             {
+                ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+
                 for (int i = 0; i <= 14; ++i)
                 {
                     if (((registerList >> i) & 1) == 1)
                     {
-                        cpu.Reg[i] = cpu._callbackInterface.ReadMemory32(address);
+                        ref UInt32 regRi = ref Unsafe.Add(ref regDataRef, i);
+
+                        regRi = cpu._callbackInterface.ReadMemory32(address);
                         address += 4;
                     }
                 }
@@ -904,6 +976,8 @@ namespace Iris.CPU
             }
             else
             {
+                ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+
                 for (int i = 0; i <= 14; ++i)
                 {
                     if (((registerList >> i) & 1) == 1)
@@ -934,8 +1008,12 @@ namespace Iris.CPU
                                 cpu.Reg14_usr = value;
                                 break;
                             default:
-                                cpu.Reg[i] = value;
-                                break;
+                                {
+                                    ref UInt32 regRi = ref Unsafe.Add(ref regDataRef, i);
+
+                                    regRi = value;
+                                    break;
+                                }
                         }
 
                         address += 4;
@@ -952,9 +1030,16 @@ namespace Iris.CPU
             UInt32 data = BitOperations.RotateRight(cpu._callbackInterface.ReadMemory32(address), (int)(8 * (address & 0b11)));
 
             if (rd == PC)
+            {
                 SetPC(cpu, data & 0xffff_fffc);
+            }
             else
-                cpu.Reg[rd] = data;
+            {
+                ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+                ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
+
+                regRd = data;
+            }
         }
 
         private static void LDRB(CPU cpu, UInt32 instruction)
@@ -1010,12 +1095,19 @@ namespace Iris.CPU
             UInt32 rs = (instruction >> 8) & 0b1111;
             UInt32 rm = instruction & 0b1111;
 
-            SetReg(cpu, rd, (cpu.Reg[rm] * cpu.Reg[rs]) + cpu.Reg[rn]);
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRn = ref Unsafe.Add(ref regDataRef, rn);
+            ref UInt32 regRs = ref Unsafe.Add(ref regDataRef, rs);
+            ref UInt32 regRm = ref Unsafe.Add(ref regDataRef, rm);
+
+            SetReg(cpu, rd, (regRm * regRs) + regRn);
 
             if (s == 1)
             {
-                cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
-                cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+                ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
+
+                cpu.SetFlag(Flag.N, regRd >> 31);
+                cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
             }
         }
 
@@ -1036,8 +1128,11 @@ namespace Iris.CPU
                 }
                 else
                 {
-                    cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
-                    cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+                    ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+                    ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
+
+                    cpu.SetFlag(Flag.N, regRd >> 31);
+                    cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
                     cpu.SetFlag(Flag.C, shifterCarryOut);
                 }
             }
@@ -1070,7 +1165,10 @@ namespace Iris.CPU
             {
                 UInt32 rm = instruction & 0b1111;
 
-                operand = cpu.Reg[rm];
+                ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+                ref UInt32 regRm = ref Unsafe.Add(ref regDataRef, rm);
+
+                operand = regRm;
             }
 
             UInt32 mask = (UInt32)((((fieldMask >> 0) & 1) == 1) ? 0x0000_00ff : 0)
@@ -1103,12 +1201,18 @@ namespace Iris.CPU
             UInt32 rs = (instruction >> 8) & 0b1111;
             UInt32 rm = instruction & 0b1111;
 
-            SetReg(cpu, rd, cpu.Reg[rm] * cpu.Reg[rs]);
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRs = ref Unsafe.Add(ref regDataRef, rs);
+            ref UInt32 regRm = ref Unsafe.Add(ref regDataRef, rm);
+
+            SetReg(cpu, rd, regRm * regRs);
 
             if (s == 1)
             {
-                cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
-                cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+                ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
+
+                cpu.SetFlag(Flag.N, regRd >> 31);
+                cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
             }
         }
 
@@ -1129,8 +1233,11 @@ namespace Iris.CPU
                 }
                 else
                 {
-                    cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
-                    cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+                    ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+                    ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
+
+                    cpu.SetFlag(Flag.N, regRd >> 31);
+                    cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
                     cpu.SetFlag(Flag.C, shifterCarryOut);
                 }
             }
@@ -1144,9 +1251,13 @@ namespace Iris.CPU
             UInt32 rd = (instruction >> 12) & 0b1111;
             UInt32 r = (instruction >> 4) & 1;
 
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRn = ref Unsafe.Add(ref regDataRef, rn);
+            ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
+
             (UInt32 shifterOperand, UInt32 shifterCarryOut) = GetShifterOperand(cpu, instruction);
 
-            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (cpu.Reg[PC] + 4) : cpu.Reg[rn];
+            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (regPC + 4) : regRn;
             UInt32 rightOperand = shifterOperand;
 
             SetReg(cpu, rd, leftOperand | rightOperand);
@@ -1159,8 +1270,10 @@ namespace Iris.CPU
                 }
                 else
                 {
-                    cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
-                    cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+                    ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
+
+                    cpu.SetFlag(Flag.N, regRd >> 31);
+                    cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
                     cpu.SetFlag(Flag.C, shifterCarryOut);
                 }
             }
@@ -1174,10 +1287,14 @@ namespace Iris.CPU
             UInt32 rd = (instruction >> 12) & 0b1111;
             UInt32 r = (instruction >> 4) & 1;
 
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRn = ref Unsafe.Add(ref regDataRef, rn);
+            ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
+
             (UInt32 shifterOperand, _) = GetShifterOperand(cpu, instruction);
 
             UInt32 leftOperand = shifterOperand;
-            UInt32 rightOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (cpu.Reg[PC] + 4) : cpu.Reg[rn];
+            UInt32 rightOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (regPC + 4) : regRn;
 
             SetReg(cpu, rd, leftOperand - rightOperand);
 
@@ -1189,10 +1306,12 @@ namespace Iris.CPU
                 }
                 else
                 {
-                    cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
-                    cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+                    ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
+
+                    cpu.SetFlag(Flag.N, regRd >> 31);
+                    cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
                     cpu.SetFlag(Flag.C, Not(BorrowFrom(leftOperand, rightOperand)));
-                    cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, rightOperand, cpu.Reg[rd]));
+                    cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, rightOperand, regRd));
                 }
             }
         }
@@ -1205,10 +1324,14 @@ namespace Iris.CPU
             UInt32 rd = (instruction >> 12) & 0b1111;
             UInt32 r = (instruction >> 4) & 1;
 
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRn = ref Unsafe.Add(ref regDataRef, rn);
+            ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
+
             (UInt32 shifterOperand, _) = GetShifterOperand(cpu, instruction);
 
             UInt32 leftOperand = shifterOperand;
-            UInt64 rightOperand = (UInt64)(((rn == PC) && (i == 0) && (r == 1)) ? (cpu.Reg[PC] + 4) : cpu.Reg[rn])
+            UInt64 rightOperand = (UInt64)(((rn == PC) && (i == 0) && (r == 1)) ? (regPC + 4) : regRn)
                                 + (UInt64)Not(cpu.GetFlag(Flag.C));
 
             SetReg(cpu, rd, leftOperand - (UInt32)rightOperand);
@@ -1221,10 +1344,12 @@ namespace Iris.CPU
                 }
                 else
                 {
-                    cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
-                    cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+                    ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
+
+                    cpu.SetFlag(Flag.N, regRd >> 31);
+                    cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
                     cpu.SetFlag(Flag.C, Not(BorrowFrom(leftOperand, rightOperand)));
-                    cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, (UInt32)rightOperand, cpu.Reg[rd]));
+                    cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, (UInt32)rightOperand, regRd));
                 }
             }
         }
@@ -1237,9 +1362,13 @@ namespace Iris.CPU
             UInt32 rd = (instruction >> 12) & 0b1111;
             UInt32 r = (instruction >> 4) & 1;
 
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRn = ref Unsafe.Add(ref regDataRef, rn);
+            ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
+
             (UInt32 shifterOperand, _) = GetShifterOperand(cpu, instruction);
 
-            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (cpu.Reg[PC] + 4) : cpu.Reg[rn];
+            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (regPC + 4) : regRn;
             UInt64 rightOperand = (UInt64)shifterOperand + (UInt64)Not(cpu.GetFlag(Flag.C));
 
             SetReg(cpu, rd, leftOperand - (UInt32)rightOperand);
@@ -1252,10 +1381,12 @@ namespace Iris.CPU
                 }
                 else
                 {
-                    cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
-                    cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+                    ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
+
+                    cpu.SetFlag(Flag.N, regRd >> 31);
+                    cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
                     cpu.SetFlag(Flag.C, Not(BorrowFrom(leftOperand, rightOperand)));
-                    cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, (UInt32)rightOperand, cpu.Reg[rd]));
+                    cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, (UInt32)rightOperand, regRd));
                 }
             }
         }
@@ -1268,16 +1399,22 @@ namespace Iris.CPU
             UInt32 rs = (instruction >> 8) & 0b1111;
             UInt32 rm = instruction & 0b1111;
 
-            Int64 result = (Int64)(Int32)cpu.Reg[rm] * (Int64)(Int32)cpu.Reg[rs];
-            UInt64 resultLo = (UInt64)(UInt32)result + (UInt64)cpu.Reg[rdLo];
-            UInt32 resultHi = (UInt32)(result >> 32) + cpu.Reg[rdHi] + CarryFrom(resultLo);
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRdHi = ref Unsafe.Add(ref regDataRef, rdHi);
+            ref UInt32 regRdLo = ref Unsafe.Add(ref regDataRef, rdLo);
+            ref UInt32 regRs = ref Unsafe.Add(ref regDataRef, rs);
+            ref UInt32 regRm = ref Unsafe.Add(ref regDataRef, rm);
+
+            Int64 result = (Int64)(Int32)regRm * (Int64)(Int32)regRs;
+            UInt64 resultLo = (UInt64)(UInt32)result + (UInt64)regRdLo;
+            UInt32 resultHi = (UInt32)(result >> 32) + regRdHi + CarryFrom(resultLo);
             SetReg(cpu, rdLo, (UInt32)resultLo);
             SetReg(cpu, rdHi, resultHi);
 
             if (s == 1)
             {
-                cpu.SetFlag(Flag.N, cpu.Reg[rdHi] >> 31);
-                cpu.SetFlag(Flag.Z, ((cpu.Reg[rdHi] == 0) && (cpu.Reg[rdLo] == 0)) ? 1u : 0u);
+                cpu.SetFlag(Flag.N, regRdHi >> 31);
+                cpu.SetFlag(Flag.Z, ((regRdHi == 0) && (regRdLo == 0)) ? 1u : 0u);
             }
         }
 
@@ -1289,14 +1426,21 @@ namespace Iris.CPU
             UInt32 rs = (instruction >> 8) & 0b1111;
             UInt32 rm = instruction & 0b1111;
 
-            Int64 result = (Int64)(Int32)cpu.Reg[rm] * (Int64)(Int32)cpu.Reg[rs];
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRs = ref Unsafe.Add(ref regDataRef, rs);
+            ref UInt32 regRm = ref Unsafe.Add(ref regDataRef, rm);
+
+            Int64 result = (Int64)(Int32)regRm * (Int64)(Int32)regRs;
             SetReg(cpu, rdLo, (UInt32)result);
             SetReg(cpu, rdHi, (UInt32)(result >> 32));
 
             if (s == 1)
             {
-                cpu.SetFlag(Flag.N, cpu.Reg[rdHi] >> 31);
-                cpu.SetFlag(Flag.Z, ((cpu.Reg[rdHi] == 0) && (cpu.Reg[rdLo] == 0)) ? 1u : 0u);
+                ref UInt32 regRdHi = ref Unsafe.Add(ref regDataRef, rdHi);
+                ref UInt32 regRdLo = ref Unsafe.Add(ref regDataRef, rdLo);
+
+                cpu.SetFlag(Flag.N, regRdHi >> 31);
+                cpu.SetFlag(Flag.Z, ((regRdHi == 0) && (regRdLo == 0)) ? 1u : 0u);
             }
         }
 
@@ -1305,7 +1449,10 @@ namespace Iris.CPU
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 registerList = instruction & 0xffff;
 
-            UInt32 oldRegRn = cpu.Reg[rn];
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRn = ref Unsafe.Add(ref regDataRef, rn);
+
+            UInt32 oldRegRn = regRn;
 
             (UInt32 startAddress, _) = GetAddress_Multiple(cpu, instruction);
 
@@ -1313,7 +1460,9 @@ namespace Iris.CPU
 
             if (registerList == 0)
             {
-                cpu._callbackInterface.WriteMemory32(address, cpu.Reg[PC] + 4);
+                ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
+
+                cpu._callbackInterface.WriteMemory32(address, regPC + 4);
             }
             else
             {
@@ -1322,16 +1471,26 @@ namespace Iris.CPU
                     if (((registerList >> i) & 1) == 1)
                     {
                         if ((i == rn) && ((registerList & ~(0xffff << i)) == 0))
+                        {
                             cpu._callbackInterface.WriteMemory32(address, oldRegRn);
+                        }
                         else
-                            cpu._callbackInterface.WriteMemory32(address, cpu.Reg[i]);
+                        {
+                            ref UInt32 regRi = ref Unsafe.Add(ref regDataRef, i);
+
+                            cpu._callbackInterface.WriteMemory32(address, regRi);
+                        }
 
                         address += 4;
                     }
                 }
 
                 if (((registerList >> 15) & 1) == 1)
-                    cpu._callbackInterface.WriteMemory32(address, cpu.Reg[PC] + 4);
+                {
+                    ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
+
+                    cpu._callbackInterface.WriteMemory32(address, regPC + 4);
+                }
             }
         }
 
@@ -1339,6 +1498,8 @@ namespace Iris.CPU
         {
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 registerList = instruction & 0xffff;
+
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
 
             UInt32 oldRegRn = rn switch
             {
@@ -1349,7 +1510,7 @@ namespace Iris.CPU
                 12 => cpu.Reg12_usr,
                 13 => cpu.Reg13_usr,
                 14 => cpu.Reg14_usr,
-                _ => cpu.Reg[rn],
+                _ => Unsafe.Add(ref regDataRef, rn),
             };
 
             (UInt32 startAddress, _) = GetAddress_Multiple(cpu, instruction);
@@ -1358,7 +1519,9 @@ namespace Iris.CPU
 
             if (registerList == 0)
             {
-                cpu._callbackInterface.WriteMemory32(address, cpu.Reg[PC] + 4);
+                ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
+
+                cpu._callbackInterface.WriteMemory32(address, regPC + 4);
             }
             else
             {
@@ -1381,7 +1544,7 @@ namespace Iris.CPU
                                 12 => cpu.Reg12_usr,
                                 13 => cpu.Reg13_usr,
                                 14 => cpu.Reg14_usr,
-                                _ => cpu.Reg[i],
+                                _ => Unsafe.Add(ref regDataRef, i),
                             };
 
                             cpu._callbackInterface.WriteMemory32(address, value);
@@ -1392,7 +1555,11 @@ namespace Iris.CPU
                 }
 
                 if (((registerList >> 15) & 1) == 1)
-                    cpu._callbackInterface.WriteMemory32(address, cpu.Reg[PC] + 4);
+                {
+                    ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
+
+                    cpu._callbackInterface.WriteMemory32(address, regPC + 4);
+                }
             }
         }
 
@@ -1400,7 +1567,11 @@ namespace Iris.CPU
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
-            UInt32 data = (rd == PC) ? (cpu.Reg[PC] + 4) : cpu.Reg[rd];
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
+            ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
+
+            UInt32 data = (rd == PC) ? (regPC + 4) : regRd;
             UInt32 address = GetAddress(cpu, instruction);
             cpu._callbackInterface.WriteMemory32(address, data);
         }
@@ -1409,7 +1580,11 @@ namespace Iris.CPU
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
-            UInt32 data = (rd == PC) ? (cpu.Reg[PC] + 4) : cpu.Reg[rd];
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
+            ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
+
+            UInt32 data = (rd == PC) ? (regPC + 4) : regRd;
             UInt32 address = GetAddress(cpu, instruction);
             cpu._callbackInterface.WriteMemory8(address, (Byte)data);
         }
@@ -1418,7 +1593,11 @@ namespace Iris.CPU
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
-            UInt32 data = (rd == PC) ? (cpu.Reg[PC] + 4) : cpu.Reg[rd];
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
+            ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
+
+            UInt32 data = (rd == PC) ? (regPC + 4) : regRd;
             UInt32 address = GetAddress_Misc(cpu, instruction);
             cpu._callbackInterface.WriteMemory16(address, (UInt16)data);
         }
@@ -1431,9 +1610,13 @@ namespace Iris.CPU
             UInt32 rd = (instruction >> 12) & 0b1111;
             UInt32 r = (instruction >> 4) & 1;
 
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRn = ref Unsafe.Add(ref regDataRef, rn);
+            ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
+
             (UInt32 shifterOperand, _) = GetShifterOperand(cpu, instruction);
 
-            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (cpu.Reg[PC] + 4) : cpu.Reg[rn];
+            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (regPC + 4) : regRn;
             UInt32 rightOperand = shifterOperand;
 
             SetReg(cpu, rd, leftOperand - rightOperand);
@@ -1446,10 +1629,12 @@ namespace Iris.CPU
                 }
                 else
                 {
-                    cpu.SetFlag(Flag.N, cpu.Reg[rd] >> 31);
-                    cpu.SetFlag(Flag.Z, (cpu.Reg[rd] == 0) ? 1u : 0u);
+                    ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
+
+                    cpu.SetFlag(Flag.N, regRd >> 31);
+                    cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
                     cpu.SetFlag(Flag.C, Not(BorrowFrom(leftOperand, rightOperand)));
-                    cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, rightOperand, cpu.Reg[rd]));
+                    cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, rightOperand, regRd));
                 }
             }
         }
@@ -1467,8 +1652,12 @@ namespace Iris.CPU
             UInt32 rd = (instruction >> 12) & 0b1111;
             UInt32 rm = instruction & 0b1111;
 
-            UInt32 temp = BitOperations.RotateRight(cpu._callbackInterface.ReadMemory32(cpu.Reg[rn]), (int)(8 * (cpu.Reg[rn] & 0b11)));
-            cpu._callbackInterface.WriteMemory32(cpu.Reg[rn], cpu.Reg[rm]);
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRn = ref Unsafe.Add(ref regDataRef, rn);
+            ref UInt32 regRm = ref Unsafe.Add(ref regDataRef, rm);
+
+            UInt32 temp = BitOperations.RotateRight(cpu._callbackInterface.ReadMemory32(regRn), (int)(8 * (regRn & 0b11)));
+            cpu._callbackInterface.WriteMemory32(regRn, regRm);
             SetReg(cpu, rd, temp);
         }
 
@@ -1478,8 +1667,12 @@ namespace Iris.CPU
             UInt32 rd = (instruction >> 12) & 0b1111;
             UInt32 rm = instruction & 0b1111;
 
-            Byte temp = cpu._callbackInterface.ReadMemory8(cpu.Reg[rn]);
-            cpu._callbackInterface.WriteMemory8(cpu.Reg[rn], (Byte)cpu.Reg[rm]);
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRn = ref Unsafe.Add(ref regDataRef, rn);
+            ref UInt32 regRm = ref Unsafe.Add(ref regDataRef, rm);
+
+            Byte temp = cpu._callbackInterface.ReadMemory8(regRn);
+            cpu._callbackInterface.WriteMemory8(regRn, (Byte)regRm);
             SetReg(cpu, rd, temp);
         }
 
@@ -1490,9 +1683,13 @@ namespace Iris.CPU
             UInt32 rd = (instruction >> 12) & 0b1111;
             UInt32 r = (instruction >> 4) & 1;
 
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRn = ref Unsafe.Add(ref regDataRef, rn);
+            ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
+
             (UInt32 shifterOperand, UInt32 shifterCarryOut) = GetShifterOperand(cpu, instruction);
 
-            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (cpu.Reg[PC] + 4) : cpu.Reg[rn];
+            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (regPC + 4) : regRn;
             UInt32 rightOperand = shifterOperand;
 
             UInt32 aluOut = leftOperand ^ rightOperand;
@@ -1519,9 +1716,13 @@ namespace Iris.CPU
             UInt32 rd = (instruction >> 12) & 0b1111;
             UInt32 r = (instruction >> 4) & 1;
 
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRn = ref Unsafe.Add(ref regDataRef, rn);
+            ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
+
             (UInt32 shifterOperand, UInt32 shifterCarryOut) = GetShifterOperand(cpu, instruction);
 
-            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (cpu.Reg[PC] + 4) : cpu.Reg[rn];
+            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (regPC + 4) : regRn;
             UInt32 rightOperand = shifterOperand;
 
             UInt32 aluOut = leftOperand & rightOperand;
@@ -1549,16 +1750,22 @@ namespace Iris.CPU
             UInt32 rs = (instruction >> 8) & 0b1111;
             UInt32 rm = instruction & 0b1111;
 
-            UInt64 result = (UInt64)cpu.Reg[rm] * (UInt64)cpu.Reg[rs];
-            UInt64 resultLo = (UInt64)(UInt32)result + (UInt64)cpu.Reg[rdLo];
-            UInt32 resultHi = (UInt32)(result >> 32) + cpu.Reg[rdHi] + CarryFrom(resultLo);
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRdHi = ref Unsafe.Add(ref regDataRef, rdHi);
+            ref UInt32 regRdLo = ref Unsafe.Add(ref regDataRef, rdLo);
+            ref UInt32 regRs = ref Unsafe.Add(ref regDataRef, rs);
+            ref UInt32 regRm = ref Unsafe.Add(ref regDataRef, rm);
+
+            UInt64 result = (UInt64)regRm * (UInt64)regRs;
+            UInt64 resultLo = (UInt64)(UInt32)result + (UInt64)regRdLo;
+            UInt32 resultHi = (UInt32)(result >> 32) + regRdHi + CarryFrom(resultLo);
             SetReg(cpu, rdLo, (UInt32)resultLo);
             SetReg(cpu, rdHi, resultHi);
 
             if (s == 1)
             {
-                cpu.SetFlag(Flag.N, cpu.Reg[rdHi] >> 31);
-                cpu.SetFlag(Flag.Z, ((cpu.Reg[rdHi] == 0) && (cpu.Reg[rdLo] == 0)) ? 1u : 0u);
+                cpu.SetFlag(Flag.N, regRdHi >> 31);
+                cpu.SetFlag(Flag.Z, ((regRdHi == 0) && (regRdLo == 0)) ? 1u : 0u);
             }
         }
 
@@ -1570,14 +1777,21 @@ namespace Iris.CPU
             UInt32 rs = (instruction >> 8) & 0b1111;
             UInt32 rm = instruction & 0b1111;
 
-            UInt64 result = (UInt64)cpu.Reg[rm] * (UInt64)cpu.Reg[rs];
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+            ref UInt32 regRs = ref Unsafe.Add(ref regDataRef, rs);
+            ref UInt32 regRm = ref Unsafe.Add(ref regDataRef, rm);
+
+            UInt64 result = (UInt64)regRm * (UInt64)regRs;
             SetReg(cpu, rdLo, (UInt32)result);
             SetReg(cpu, rdHi, (UInt32)(result >> 32));
 
             if (s == 1)
             {
-                cpu.SetFlag(Flag.N, cpu.Reg[rdHi] >> 31);
-                cpu.SetFlag(Flag.Z, ((cpu.Reg[rdHi] == 0) && (cpu.Reg[rdLo] == 0)) ? 1u : 0u);
+                ref UInt32 regRdHi = ref Unsafe.Add(ref regDataRef, rdHi);
+                ref UInt32 regRdLo = ref Unsafe.Add(ref regDataRef, rdLo);
+
+                cpu.SetFlag(Flag.N, regRdHi >> 31);
+                cpu.SetFlag(Flag.Z, ((regRdHi == 0) && (regRdLo == 0)) ? 1u : 0u);
             }
         }
     }
