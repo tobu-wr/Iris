@@ -7,7 +7,7 @@ namespace Iris.CPU
 {
     internal sealed class THUMB_Interpreter
     {
-        private unsafe readonly InstructionLUTEntry<UInt16>[] InstructionLUT = new InstructionLUTEntry<UInt16>[1 << 10];
+        private unsafe readonly InstructionLUTEntry<UInt16>[] _instructionLUT = new InstructionLUTEntry<UInt16>[1 << 10];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static UInt16 InstructionLUTHash(UInt16 value)
@@ -164,7 +164,7 @@ namespace Iris.CPU
                 new(0xffc0, 0x4200, &TST),
             };
 
-            for (UInt32 instruction = 0; instruction < InstructionLUT.Length; ++instruction)
+            for (UInt32 instruction = 0; instruction < _instructionLUT.Length; ++instruction)
             {
                 bool unknownInstruction = true;
 
@@ -172,14 +172,14 @@ namespace Iris.CPU
                 {
                     if ((instruction & InstructionLUTHash(entry.Mask)) == InstructionLUTHash(entry.Expected))
                     {
-                        InstructionLUT[instruction] = new(entry.Handler);
+                        _instructionLUT[instruction] = new(entry.Handler);
                         unknownInstruction = false;
                         break;
                     }
                 }
 
                 if (unknownInstruction)
-                    InstructionLUT[instruction] = new(&UNKNOWN);
+                    _instructionLUT[instruction] = new(&UNKNOWN);
             }
         }
 
@@ -201,7 +201,7 @@ namespace Iris.CPU
 
             regPC = _cpu.NextInstructionAddress + 2;
 
-            ref InstructionLUTEntry<UInt16> instructionLUTDataRef = ref MemoryMarshal.GetArrayDataReference(InstructionLUT);
+            ref InstructionLUTEntry<UInt16> instructionLUTDataRef = ref MemoryMarshal.GetArrayDataReference(_instructionLUT);
             ref InstructionLUTEntry<UInt16> instructionLUTEntry = ref Unsafe.Add(ref instructionLUTDataRef, InstructionLUTHash(instruction));
 
             unsafe

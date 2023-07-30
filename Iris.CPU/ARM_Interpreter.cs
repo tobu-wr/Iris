@@ -7,7 +7,7 @@ namespace Iris.CPU
 {
     internal sealed class ARM_Interpreter
     {
-        private unsafe readonly InstructionLUTEntry<UInt32>[] InstructionLUT = new InstructionLUTEntry<UInt32>[1 << 12];
+        private unsafe readonly InstructionLUTEntry<UInt32>[] _instructionLUT = new InstructionLUTEntry<UInt32>[1 << 12];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static UInt32 InstructionLUTHash(UInt32 value)
@@ -208,7 +208,7 @@ namespace Iris.CPU
                 new(0x0fe0_00f0, 0x0080_0090, &UMULL),
             };
 
-            for (UInt64 instruction = 0; instruction < (UInt64)InstructionLUT.LongLength; ++instruction)
+            for (UInt64 instruction = 0; instruction < (UInt64)_instructionLUT.LongLength; ++instruction)
             {
                 bool unknownInstruction = true;
 
@@ -216,14 +216,14 @@ namespace Iris.CPU
                 {
                     if ((instruction & InstructionLUTHash(entry.Mask)) == InstructionLUTHash(entry.Expected))
                     {
-                        InstructionLUT[instruction] = new(entry.Handler);
+                        _instructionLUT[instruction] = new(entry.Handler);
                         unknownInstruction = false;
                         break;
                     }
                 }
 
                 if (unknownInstruction)
-                    InstructionLUT[instruction] = new(&UNKNOWN);
+                    _instructionLUT[instruction] = new(&UNKNOWN);
             }
         }
 
@@ -249,7 +249,7 @@ namespace Iris.CPU
 
                 regPC = _cpu.NextInstructionAddress + 4;
 
-                ref InstructionLUTEntry<UInt32> instructionLUTDataRef = ref MemoryMarshal.GetArrayDataReference(InstructionLUT);
+                ref InstructionLUTEntry<UInt32> instructionLUTDataRef = ref MemoryMarshal.GetArrayDataReference(_instructionLUT);
                 ref InstructionLUTEntry<UInt32> instructionLUTEntry = ref Unsafe.Add(ref instructionLUTDataRef, InstructionLUTHash(instruction));
 
                 unsafe
