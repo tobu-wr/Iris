@@ -137,67 +137,76 @@ namespace Iris.CPU
 
             if (previousMode != newMode)
             {
+                ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(Reg);
+                ref UInt32 reg8 = ref Unsafe.Add(ref regDataRef, 8);
+                ref UInt32 reg9 = ref Unsafe.Add(ref regDataRef, 9);
+                ref UInt32 reg10 = ref Unsafe.Add(ref regDataRef, 10);
+                ref UInt32 reg11 = ref Unsafe.Add(ref regDataRef, 11);
+                ref UInt32 reg12 = ref Unsafe.Add(ref regDataRef, 12);
+                ref UInt32 reg13 = ref Unsafe.Add(ref regDataRef, 13);
+                ref UInt32 reg14 = ref Unsafe.Add(ref regDataRef, 14);
+
                 // save previous mode registers
                 switch (previousMode)
                 {
                     case UserMode:
                     case SystemMode:
-                        Reg8_usr = Reg[8];
-                        Reg9_usr = Reg[9];
-                        Reg10_usr = Reg[10];
-                        Reg11_usr = Reg[11];
-                        Reg12_usr = Reg[12];
-                        Reg13_usr = Reg[13];
-                        Reg14_usr = Reg[14];
+                        Reg8_usr = reg8;
+                        Reg9_usr = reg9;
+                        Reg10_usr = reg10;
+                        Reg11_usr = reg11;
+                        Reg12_usr = reg12;
+                        Reg13_usr = reg13;
+                        Reg14_usr = reg14;
                         break;
                     case SupervisorMode:
-                        Reg8_usr = Reg[8];
-                        Reg9_usr = Reg[9];
-                        Reg10_usr = Reg[10];
-                        Reg11_usr = Reg[11];
-                        Reg12_usr = Reg[12];
-                        Reg13_svc = Reg[13];
-                        Reg14_svc = Reg[14];
+                        Reg8_usr = reg8;
+                        Reg9_usr = reg9;
+                        Reg10_usr = reg10;
+                        Reg11_usr = reg11;
+                        Reg12_usr = reg12;
+                        Reg13_svc = reg13;
+                        Reg14_svc = reg14;
                         SPSR_svc = SPSR;
                         break;
                     case AbortMode:
-                        Reg8_usr = Reg[8];
-                        Reg9_usr = Reg[9];
-                        Reg10_usr = Reg[10];
-                        Reg11_usr = Reg[11];
-                        Reg12_usr = Reg[12];
-                        Reg13_abt = Reg[13];
-                        Reg14_abt = Reg[14];
+                        Reg8_usr = reg8;
+                        Reg9_usr = reg9;
+                        Reg10_usr = reg10;
+                        Reg11_usr = reg11;
+                        Reg12_usr = reg12;
+                        Reg13_abt = reg13;
+                        Reg14_abt = reg14;
                         SPSR_abt = SPSR;
                         break;
                     case UndefinedMode:
-                        Reg8_usr = Reg[8];
-                        Reg9_usr = Reg[9];
-                        Reg10_usr = Reg[10];
-                        Reg11_usr = Reg[11];
-                        Reg12_usr = Reg[12];
-                        Reg13_und = Reg[13];
-                        Reg14_und = Reg[14];
+                        Reg8_usr = reg8;
+                        Reg9_usr = reg9;
+                        Reg10_usr = reg10;
+                        Reg11_usr = reg11;
+                        Reg12_usr = reg12;
+                        Reg13_und = reg13;
+                        Reg14_und = reg14;
                         SPSR_und = SPSR;
                         break;
                     case InterruptMode:
-                        Reg8_usr = Reg[8];
-                        Reg9_usr = Reg[9];
-                        Reg10_usr = Reg[10];
-                        Reg11_usr = Reg[11];
-                        Reg12_usr = Reg[12];
-                        Reg13_irq = Reg[13];
-                        Reg14_irq = Reg[14];
+                        Reg8_usr = reg8;
+                        Reg9_usr = reg9;
+                        Reg10_usr = reg10;
+                        Reg11_usr = reg11;
+                        Reg12_usr = reg12;
+                        Reg13_irq = reg13;
+                        Reg14_irq = reg14;
                         SPSR_irq = SPSR;
                         break;
                     case FastInterruptMode:
-                        Reg8_fiq = Reg[8];
-                        Reg9_fiq = Reg[9];
-                        Reg10_fiq = Reg[10];
-                        Reg11_fiq = Reg[11];
-                        Reg12_fiq = Reg[12];
-                        Reg13_fiq = Reg[13];
-                        Reg14_fiq = Reg[14];
+                        Reg8_fiq = reg8;
+                        Reg9_fiq = reg9;
+                        Reg10_fiq = reg10;
+                        Reg11_fiq = reg11;
+                        Reg12_fiq = reg12;
+                        Reg13_fiq = reg13;
+                        Reg14_fiq = reg14;
                         SPSR_fiq = SPSR;
                         break;
                 }
@@ -207,62 +216,62 @@ namespace Iris.CPU
                 {
                     case UserMode:
                     case SystemMode:
-                        Reg[8] = Reg8_usr;
-                        Reg[9] = Reg9_usr;
-                        Reg[10] = Reg10_usr;
-                        Reg[11] = Reg11_usr;
-                        Reg[12] = Reg12_usr;
-                        Reg[13] = Reg13_usr;
-                        Reg[14] = Reg14_usr;
+                        reg8 = Reg8_usr;
+                        reg9 = Reg9_usr;
+                        reg10 = Reg10_usr;
+                        reg11 = Reg11_usr;
+                        reg12 = Reg12_usr;
+                        reg13 = Reg13_usr;
+                        reg14 = Reg14_usr;
                         break;
                     case SupervisorMode:
-                        Reg[8] = Reg8_usr;
-                        Reg[9] = Reg9_usr;
-                        Reg[10] = Reg10_usr;
-                        Reg[11] = Reg11_usr;
-                        Reg[12] = Reg12_usr;
-                        Reg[13] = Reg13_svc;
-                        Reg[14] = Reg14_svc;
+                        reg8 = Reg8_usr;
+                        reg9 = Reg9_usr;
+                        reg10 = Reg10_usr;
+                        reg11 = Reg11_usr;
+                        reg12 = Reg12_usr;
+                        reg13 = Reg13_svc;
+                        reg14 = Reg14_svc;
                         SPSR = SPSR_svc;
                         break;
                     case AbortMode:
-                        Reg[8] = Reg8_usr;
-                        Reg[9] = Reg9_usr;
-                        Reg[10] = Reg10_usr;
-                        Reg[11] = Reg11_usr;
-                        Reg[12] = Reg12_usr;
-                        Reg[13] = Reg13_abt;
-                        Reg[14] = Reg14_abt;
+                        reg8 = Reg8_usr;
+                        reg9 = Reg9_usr;
+                        reg10 = Reg10_usr;
+                        reg11 = Reg11_usr;
+                        reg12 = Reg12_usr;
+                        reg13 = Reg13_abt;
+                        reg14 = Reg14_abt;
                         SPSR = SPSR_abt;
                         break;
                     case UndefinedMode:
-                        Reg[8] = Reg8_usr;
-                        Reg[9] = Reg9_usr;
-                        Reg[10] = Reg10_usr;
-                        Reg[11] = Reg11_usr;
-                        Reg[12] = Reg12_usr;
-                        Reg[13] = Reg13_und;
-                        Reg[14] = Reg14_und;
+                        reg8 = Reg8_usr;
+                        reg9 = Reg9_usr;
+                        reg10 = Reg10_usr;
+                        reg11 = Reg11_usr;
+                        reg12 = Reg12_usr;
+                        reg13 = Reg13_und;
+                        reg14 = Reg14_und;
                         SPSR = SPSR_und;
                         break;
                     case InterruptMode:
-                        Reg[8] = Reg8_usr;
-                        Reg[9] = Reg9_usr;
-                        Reg[10] = Reg10_usr;
-                        Reg[11] = Reg11_usr;
-                        Reg[12] = Reg12_usr;
-                        Reg[13] = Reg13_irq;
-                        Reg[14] = Reg14_irq;
+                        reg8 = Reg8_usr;
+                        reg9 = Reg9_usr;
+                        reg10 = Reg10_usr;
+                        reg11 = Reg11_usr;
+                        reg12 = Reg12_usr;
+                        reg13 = Reg13_irq;
+                        reg14 = Reg14_irq;
                         SPSR = SPSR_irq;
                         break;
                     case FastInterruptMode:
-                        Reg[8] = Reg8_fiq;
-                        Reg[9] = Reg9_fiq;
-                        Reg[10] = Reg10_fiq;
-                        Reg[11] = Reg11_fiq;
-                        Reg[12] = Reg12_fiq;
-                        Reg[13] = Reg13_fiq;
-                        Reg[14] = Reg14_fiq;
+                        reg8 = Reg8_fiq;
+                        reg9 = Reg9_fiq;
+                        reg10 = Reg10_fiq;
+                        reg11 = Reg11_fiq;
+                        reg12 = Reg12_fiq;
+                        reg13 = Reg13_fiq;
+                        reg14 = Reg14_fiq;
                         SPSR = SPSR_fiq;
                         break;
                 }
