@@ -374,11 +374,5 @@ namespace Iris.CPU
         {
             return value | ~((value & (1u << (size - 1))) - 1);
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static ref T GetArrayElementReference<T>(T[] array, uint index)
-        {
-            return ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(array), index);
-        }
     }
 }

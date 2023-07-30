@@ -195,11 +195,18 @@ namespace Iris.CPU
         {
             UInt16 instruction = _cpu._callbackInterface.ReadMemory16(_cpu.NextInstructionAddress);
             _cpu.NextInstructionAddress += 2;
-            GetArrayElementReference(_cpu.Reg, PC) = _cpu.NextInstructionAddress + 2;
+
+            ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(_cpu.Reg);
+            ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
+
+            regPC = _cpu.NextInstructionAddress + 2;
+
+            ref InstructionLUTEntry<UInt16> instructionLUTDataRef = ref MemoryMarshal.GetArrayDataReference(InstructionLUT);
+            ref InstructionLUTEntry<UInt16> instructionLUTEntry = ref Unsafe.Add(ref instructionLUTDataRef, InstructionLUTHash(instruction));
 
             unsafe
             {
-                GetArrayElementReference(InstructionLUT, InstructionLUTHash(instruction)).Handler(_cpu, instruction);
+                instructionLUTEntry.Handler(_cpu, instruction);
             }
         }
 
@@ -213,9 +220,16 @@ namespace Iris.CPU
         private static void SetReg(CPU cpu, UInt32 i, UInt32 value)
         {
             if (i == PC)
+            {
                 SetPC(cpu, value);
+            }
             else
-                GetArrayElementReference(cpu.Reg, i) = value;
+            {
+                ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(cpu.Reg);
+                ref UInt32 regRi = ref Unsafe.Add(ref regDataRef, i);
+
+                regRi = value;
+            }
         }
 
         private static void UNKNOWN(CPU cpu, UInt16 instruction)
