@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace Iris.CPU
 {
@@ -373,6 +374,26 @@ namespace Iris.CPU
         internal static UInt32 SignExtend(UInt32 value, int size)
         {
             return value | ~((value & (1u << (size - 1))) - 1);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static UInt32 ComputeM(UInt32 multiplier)
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            static bool CheckMultiplier(UInt32 multiplier, UInt32 mask)
+            {
+                UInt32 masked = multiplier & mask;
+                return (masked == 0) || (masked == mask);
+            }
+
+            if (CheckMultiplier(multiplier, 0xffff_ff00))
+                return 1;
+            else if (CheckMultiplier(multiplier, 0xffff_0000))
+                return 2;
+            else if (CheckMultiplier(multiplier, 0xff00_0000))
+                return 3;
+            else
+                return 4;
         }
     }
 }

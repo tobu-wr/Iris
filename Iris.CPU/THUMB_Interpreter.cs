@@ -1062,24 +1062,7 @@ namespace Iris.CPU
             ref UInt32 regRm = ref Unsafe.Add(ref regDataRef, rm);
             ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
 
-            UInt32 m;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            static bool CheckMultiplier(UInt32 multiplier, UInt32 mask)
-            {
-                UInt32 masked = multiplier & mask;
-                return (masked == 0) || (masked == mask);
-            }
-
-            if (CheckMultiplier(regRm, 0xffff_ff00))
-                m = 1;
-            else if (CheckMultiplier(regRm, 0xffff_0000))
-                m = 2;
-            else if (CheckMultiplier(regRm, 0xff00_0000))
-                m = 3;
-            else
-                m = 4;
-
+            UInt32 m = Math.Max(ComputeM(regRd), ComputeM(regRm));
             regRd *= regRm;
 
             cpu.SetFlag(Flag.N, regRd >> 31);
