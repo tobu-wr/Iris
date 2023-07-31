@@ -254,11 +254,13 @@ namespace Iris.CPU
 
                 unsafe
                 {
-                    instructionLUTEntry.Handler(_cpu, instruction);
+                    return instructionLUTEntry.Handler(_cpu, instruction);
                 }
             }
-
-            return 1;
+            else
+            {
+                return 1;
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -654,12 +656,12 @@ namespace Iris.CPU
             return (startAddress, endAddress);
         }
 
-        private static void UNKNOWN(CPU cpu, UInt32 instruction)
+        private static Byte UNKNOWN(CPU cpu, UInt32 instruction)
         {
             throw new Exception(string.Format("Iris.CPU.ARM_Interpreter: Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, cpu.NextInstructionAddress - 4));
         }
 
-        private static void ADC(CPU cpu, UInt32 instruction)
+        private static Byte ADC(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -695,9 +697,12 @@ namespace Iris.CPU
                     cpu.SetFlag(Flag.V, OverflowFrom_Addition(leftOperand, (UInt32)rightOperand, regRd));
                 }
             }
+
+            // TODO: check
+            return 1;
         }
 
-        private static void ADD(CPU cpu, UInt32 instruction)
+        private static Byte ADD(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -733,9 +738,12 @@ namespace Iris.CPU
                     cpu.SetFlag(Flag.V, OverflowFrom_Addition(leftOperand, rightOperand, regRd));
                 }
             }
+
+            // TODO: check
+            return 1;
         }
 
-        private static void AND(CPU cpu, UInt32 instruction)
+        private static Byte AND(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -769,9 +777,12 @@ namespace Iris.CPU
                     cpu.SetFlag(Flag.C, shifterCarryOut);
                 }
             }
+
+            // TODO: check
+            return 1;
         }
 
-        private static void B(CPU cpu, UInt32 instruction)
+        private static Byte B(CPU cpu, UInt32 instruction)
         {
             UInt32 imm = instruction & 0xff_ffff;
 
@@ -779,9 +790,12 @@ namespace Iris.CPU
             ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
 
             SetPC(cpu, regPC + (SignExtend(imm, 24) << 2));
+
+            // TODO: check
+            return 1;
         }
 
-        private static void BL(CPU cpu, UInt32 instruction)
+        private static Byte BL(CPU cpu, UInt32 instruction)
         {
             UInt32 imm = instruction & 0xff_ffff;
 
@@ -791,9 +805,12 @@ namespace Iris.CPU
 
             regLR = cpu.NextInstructionAddress;
             SetPC(cpu, regPC + (SignExtend(imm, 24) << 2));
+
+            // TODO: check
+            return 1;
         }
 
-        private static void BIC(CPU cpu, UInt32 instruction)
+        private static Byte BIC(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -827,9 +844,12 @@ namespace Iris.CPU
                     cpu.SetFlag(Flag.C, shifterCarryOut);
                 }
             }
+
+            // TODO: check
+            return 1;
         }
 
-        private static void BX(CPU cpu, UInt32 instruction)
+        private static Byte BX(CPU cpu, UInt32 instruction)
         {
             UInt32 rm = instruction & 0b1111;
 
@@ -838,9 +858,12 @@ namespace Iris.CPU
 
             cpu.CPSR = (cpu.CPSR & ~(1u << 5)) | ((regRm & 1) << 5);
             SetPC(cpu, regRm & 0xffff_fffe);
+
+            // TODO: check
+            return 1;
         }
 
-        private static void CMN(CPU cpu, UInt32 instruction)
+        private static Byte CMN(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
@@ -873,9 +896,12 @@ namespace Iris.CPU
                 cpu.SetFlag(Flag.C, CarryFrom(result));
                 cpu.SetFlag(Flag.V, OverflowFrom_Addition(leftOperand, rightOperand, aluOut));
             }
+
+            // TODO: check
+            return 1;
         }
 
-        private static void CMP(CPU cpu, UInt32 instruction)
+        private static Byte CMP(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
@@ -907,9 +933,12 @@ namespace Iris.CPU
                 cpu.SetFlag(Flag.C, Not(BorrowFrom(leftOperand, rightOperand)));
                 cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, rightOperand, aluOut));
             }
+
+            // TODO: check
+            return 1;
         }
 
-        private static void EOR(CPU cpu, UInt32 instruction)
+        private static Byte EOR(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -943,9 +972,12 @@ namespace Iris.CPU
                     cpu.SetFlag(Flag.C, shifterCarryOut);
                 }
             }
+
+            // TODO: check
+            return 1;
         }
 
-        private static void LDM1(CPU cpu, UInt32 instruction)
+        private static Byte LDM1(CPU cpu, UInt32 instruction)
         {
             UInt32 registerList = instruction & 0xffff;
 
@@ -975,9 +1007,12 @@ namespace Iris.CPU
                 if (((registerList >> 15) & 1) == 1)
                     SetPC(cpu, cpu._callbackInterface.ReadMemory32(address) & 0xffff_fffc);
             }
+
+            // TODO: check
+            return 1;
         }
 
-        private static void LDM2(CPU cpu, UInt32 instruction)
+        private static Byte LDM2(CPU cpu, UInt32 instruction)
         {
             UInt32 registerList = instruction & 0x7fff;
 
@@ -1035,9 +1070,12 @@ namespace Iris.CPU
                     }
                 }
             }
+
+            // TODO: check
+            return 1;
         }
 
-        private static void LDR(CPU cpu, UInt32 instruction)
+        private static Byte LDR(CPU cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
@@ -1055,36 +1093,48 @@ namespace Iris.CPU
 
                 regRd = data;
             }
+
+            // TODO: check
+            return 1;
         }
 
-        private static void LDRB(CPU cpu, UInt32 instruction)
+        private static Byte LDRB(CPU cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
             UInt32 address = GetAddress(cpu, instruction);
             Byte data = cpu._callbackInterface.ReadMemory8(address);
             SetReg(cpu, rd, data);
+
+            // TODO: check
+            return 1;
         }
 
-        private static void LDRH(CPU cpu, UInt32 instruction)
+        private static Byte LDRH(CPU cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
             UInt32 address = GetAddress_Misc(cpu, instruction);
             UInt32 data = BitOperations.RotateRight(cpu._callbackInterface.ReadMemory16(address), (int)(8 * (address & 1)));
             SetReg(cpu, rd, data);
+
+            // TODO: check
+            return 1;
         }
 
-        private static void LDRSB(CPU cpu, UInt32 instruction)
+        private static Byte LDRSB(CPU cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
             UInt32 address = GetAddress_Misc(cpu, instruction);
             Byte data = cpu._callbackInterface.ReadMemory8(address);
             SetReg(cpu, rd, SignExtend(data, 8));
+
+            // TODO: check
+            return 1;
         }
 
-        private static void LDRSH(CPU cpu, UInt32 instruction)
+        private static Byte LDRSH(CPU cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
@@ -1100,9 +1150,12 @@ namespace Iris.CPU
                 UInt16 data = cpu._callbackInterface.ReadMemory16(address);
                 SetReg(cpu, rd, SignExtend(data, 16));
             }
+
+            // TODO: check
+            return 1;
         }
 
-        private static void MLA(CPU cpu, UInt32 instruction)
+        private static Byte MLA(CPU cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rd = (instruction >> 16) & 0b1111;
@@ -1124,9 +1177,12 @@ namespace Iris.CPU
                 cpu.SetFlag(Flag.N, regRd >> 31);
                 cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
             }
+
+            // TODO: check
+            return 1;
         }
 
-        private static void MOV(CPU cpu, UInt32 instruction)
+        private static Byte MOV(CPU cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rd = (instruction >> 12) & 0b1111;
@@ -1151,17 +1207,23 @@ namespace Iris.CPU
                     cpu.SetFlag(Flag.C, shifterCarryOut);
                 }
             }
+
+            // TODO: check
+            return 1;
         }
 
-        private static void MRS(CPU cpu, UInt32 instruction)
+        private static Byte MRS(CPU cpu, UInt32 instruction)
         {
             UInt32 r = (instruction >> 22) & 1;
             UInt32 rd = (instruction >> 12) & 0b1111;
 
             SetReg(cpu, rd, (r == 1) ? cpu.SPSR : cpu.CPSR);
+
+            // TODO: check
+            return 1;
         }
 
-        private static void MSR(CPU cpu, UInt32 instruction)
+        private static Byte MSR(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 r = (instruction >> 22) & 1;
@@ -1207,9 +1269,12 @@ namespace Iris.CPU
             {
                 cpu.SPSR = (cpu.SPSR & ~mask) | (operand & mask);
             }
+
+            // TODO: check
+            return 1;
         }
 
-        private static void MUL(CPU cpu, UInt32 instruction)
+        private static Byte MUL(CPU cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rd = (instruction >> 16) & 0b1111;
@@ -1229,9 +1294,12 @@ namespace Iris.CPU
                 cpu.SetFlag(Flag.N, regRd >> 31);
                 cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
             }
+
+            // TODO: check
+            return 1;
         }
 
-        private static void MVN(CPU cpu, UInt32 instruction)
+        private static Byte MVN(CPU cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rd = (instruction >> 12) & 0b1111;
@@ -1256,9 +1324,12 @@ namespace Iris.CPU
                     cpu.SetFlag(Flag.C, shifterCarryOut);
                 }
             }
+
+            // TODO: check
+            return 1;
         }
 
-        private static void ORR(CPU cpu, UInt32 instruction)
+        private static Byte ORR(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -1292,9 +1363,12 @@ namespace Iris.CPU
                     cpu.SetFlag(Flag.C, shifterCarryOut);
                 }
             }
+
+            // TODO: check
+            return 1;
         }
 
-        private static void RSB(CPU cpu, UInt32 instruction)
+        private static Byte RSB(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -1329,9 +1403,12 @@ namespace Iris.CPU
                     cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, rightOperand, regRd));
                 }
             }
+
+            // TODO: check
+            return 1;
         }
 
-        private static void RSC(CPU cpu, UInt32 instruction)
+        private static Byte RSC(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -1367,9 +1444,12 @@ namespace Iris.CPU
                     cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, (UInt32)rightOperand, regRd));
                 }
             }
+
+            // TODO: check
+            return 1;
         }
 
-        private static void SBC(CPU cpu, UInt32 instruction)
+        private static Byte SBC(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -1404,9 +1484,12 @@ namespace Iris.CPU
                     cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, (UInt32)rightOperand, regRd));
                 }
             }
+
+            // TODO: check
+            return 1;
         }
 
-        private static void SMLAL(CPU cpu, UInt32 instruction)
+        private static Byte SMLAL(CPU cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rdHi = (instruction >> 16) & 0b1111;
@@ -1431,9 +1514,12 @@ namespace Iris.CPU
                 cpu.SetFlag(Flag.N, regRdHi >> 31);
                 cpu.SetFlag(Flag.Z, ((regRdHi == 0) && (regRdLo == 0)) ? 1u : 0u);
             }
+
+            // TODO: check
+            return 1;
         }
 
-        private static void SMULL(CPU cpu, UInt32 instruction)
+        private static Byte SMULL(CPU cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rdHi = (instruction >> 16) & 0b1111;
@@ -1457,9 +1543,12 @@ namespace Iris.CPU
                 cpu.SetFlag(Flag.N, regRdHi >> 31);
                 cpu.SetFlag(Flag.Z, ((regRdHi == 0) && (regRdLo == 0)) ? 1u : 0u);
             }
+
+            // TODO: check
+            return 1;
         }
 
-        private static void STM1(CPU cpu, UInt32 instruction)
+        private static Byte STM1(CPU cpu, UInt32 instruction)
         {
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 registerList = instruction & 0xffff;
@@ -1507,9 +1596,12 @@ namespace Iris.CPU
                     cpu._callbackInterface.WriteMemory32(address, regPC + 4);
                 }
             }
+
+            // TODO: check
+            return 1;
         }
 
-        private static void STM2(CPU cpu, UInt32 instruction)
+        private static Byte STM2(CPU cpu, UInt32 instruction)
         {
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 registerList = instruction & 0xffff;
@@ -1576,9 +1668,12 @@ namespace Iris.CPU
                     cpu._callbackInterface.WriteMemory32(address, regPC + 4);
                 }
             }
+
+            // TODO: check
+            return 1;
         }
 
-        private static void STR(CPU cpu, UInt32 instruction)
+        private static Byte STR(CPU cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
@@ -1589,9 +1684,12 @@ namespace Iris.CPU
             UInt32 data = (rd == PC) ? (regPC + 4) : regRd;
             UInt32 address = GetAddress(cpu, instruction);
             cpu._callbackInterface.WriteMemory32(address, data);
+
+            // TODO: check
+            return 1;
         }
 
-        private static void STRB(CPU cpu, UInt32 instruction)
+        private static Byte STRB(CPU cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
@@ -1602,9 +1700,12 @@ namespace Iris.CPU
             UInt32 data = (rd == PC) ? (regPC + 4) : regRd;
             UInt32 address = GetAddress(cpu, instruction);
             cpu._callbackInterface.WriteMemory8(address, (Byte)data);
+
+            // TODO: check
+            return 1;
         }
 
-        private static void STRH(CPU cpu, UInt32 instruction)
+        private static Byte STRH(CPU cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
@@ -1615,9 +1716,12 @@ namespace Iris.CPU
             UInt32 data = (rd == PC) ? (regPC + 4) : regRd;
             UInt32 address = GetAddress_Misc(cpu, instruction);
             cpu._callbackInterface.WriteMemory16(address, (UInt16)data);
+
+            // TODO: check
+            return 1;
         }
 
-        private static void SUB(CPU cpu, UInt32 instruction)
+        private static Byte SUB(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -1652,16 +1756,22 @@ namespace Iris.CPU
                     cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, rightOperand, regRd));
                 }
             }
+
+            // TODO: check
+            return 1;
         }
 
-        private static void SWI(CPU cpu, UInt32 instruction)
+        private static Byte SWI(CPU cpu, UInt32 instruction)
         {
             UInt32 imm = instruction & 0xff_ffff;
 
             cpu._callbackInterface.HandleSWI(imm);
+
+            // TODO: check
+            return 1;
         }
 
-        private static void SWP(CPU cpu, UInt32 instruction)
+        private static Byte SWP(CPU cpu, UInt32 instruction)
         {
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
@@ -1674,9 +1784,12 @@ namespace Iris.CPU
             UInt32 temp = BitOperations.RotateRight(cpu._callbackInterface.ReadMemory32(regRn), (int)(8 * (regRn & 0b11)));
             cpu._callbackInterface.WriteMemory32(regRn, regRm);
             SetReg(cpu, rd, temp);
+
+            // TODO: check
+            return 1;
         }
 
-        private static void SWPB(CPU cpu, UInt32 instruction)
+        private static Byte SWPB(CPU cpu, UInt32 instruction)
         {
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
@@ -1689,9 +1802,12 @@ namespace Iris.CPU
             Byte temp = cpu._callbackInterface.ReadMemory8(regRn);
             cpu._callbackInterface.WriteMemory8(regRn, (Byte)regRm);
             SetReg(cpu, rd, temp);
+
+            // TODO: check
+            return 1;
         }
 
-        private static void TEQ(CPU cpu, UInt32 instruction)
+        private static Byte TEQ(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
@@ -1722,9 +1838,12 @@ namespace Iris.CPU
                 cpu.SetFlag(Flag.Z, (aluOut == 0) ? 1u : 0u);
                 cpu.SetFlag(Flag.C, shifterCarryOut);
             }
+
+            // TODO: check
+            return 1;
         }
 
-        private static void TST(CPU cpu, UInt32 instruction)
+        private static Byte TST(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
@@ -1755,9 +1874,12 @@ namespace Iris.CPU
                 cpu.SetFlag(Flag.Z, (aluOut == 0) ? 1u : 0u);
                 cpu.SetFlag(Flag.C, shifterCarryOut);
             }
+
+            // TODO: check
+            return 1;
         }
 
-        private static void UMLAL(CPU cpu, UInt32 instruction)
+        private static Byte UMLAL(CPU cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rdHi = (instruction >> 16) & 0b1111;
@@ -1782,9 +1904,12 @@ namespace Iris.CPU
                 cpu.SetFlag(Flag.N, regRdHi >> 31);
                 cpu.SetFlag(Flag.Z, ((regRdHi == 0) && (regRdLo == 0)) ? 1u : 0u);
             }
+
+            // TODO: check
+            return 1;
         }
 
-        private static void UMULL(CPU cpu, UInt32 instruction)
+        private static Byte UMULL(CPU cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rdHi = (instruction >> 16) & 0b1111;
@@ -1808,6 +1933,9 @@ namespace Iris.CPU
                 cpu.SetFlag(Flag.N, regRdHi >> 31);
                 cpu.SetFlag(Flag.Z, ((regRdHi == 0) && (regRdLo == 0)) ? 1u : 0u);
             }
+
+            // TODO: check
+            return 1;
         }
     }
 }
