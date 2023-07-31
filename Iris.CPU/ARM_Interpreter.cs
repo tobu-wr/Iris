@@ -791,8 +791,7 @@ namespace Iris.CPU
 
             SetPC(cpu, regPC + (SignExtend(imm, 24) << 2));
 
-            // TODO: check
-            return 1;
+            return 3;
         }
 
         private static UInt32 BL(CPU cpu, UInt32 instruction)
@@ -806,8 +805,7 @@ namespace Iris.CPU
             regLR = cpu.NextInstructionAddress;
             SetPC(cpu, regPC + (SignExtend(imm, 24) << 2));
 
-            // TODO: check
-            return 1;
+            return 3;
         }
 
         private static UInt32 BIC(CPU cpu, UInt32 instruction)
@@ -859,8 +857,7 @@ namespace Iris.CPU
             cpu.CPSR = (cpu.CPSR & ~(1u << 5)) | ((regRm & 1) << 5);
             SetPC(cpu, regRm & 0xffff_fffe);
 
-            // TODO: check
-            return 1;
+            return 3;
         }
 
         private static UInt32 CMN(CPU cpu, UInt32 instruction)
@@ -1085,6 +1082,8 @@ namespace Iris.CPU
             if (rd == PC)
             {
                 SetPC(cpu, data & 0xffff_fffc);
+
+                return 5;
             }
             else
             {
@@ -1092,10 +1091,9 @@ namespace Iris.CPU
                 ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
 
                 regRd = data;
-            }
 
-            // TODO: check
-            return 1;
+                return 3;
+            }
         }
 
         private static UInt32 LDRB(CPU cpu, UInt32 instruction)
@@ -1106,8 +1104,7 @@ namespace Iris.CPU
             Byte data = cpu._callbackInterface.ReadMemory8(address);
             SetReg(cpu, rd, data);
 
-            // TODO: check
-            return 1;
+            return (rd == PC) ? 5u : 3u;
         }
 
         private static UInt32 LDRH(CPU cpu, UInt32 instruction)
@@ -1118,8 +1115,7 @@ namespace Iris.CPU
             UInt32 data = BitOperations.RotateRight(cpu._callbackInterface.ReadMemory16(address), (int)(8 * (address & 1)));
             SetReg(cpu, rd, data);
 
-            // TODO: check
-            return 1;
+            return (rd == PC) ? 5u : 3u;
         }
 
         private static UInt32 LDRSB(CPU cpu, UInt32 instruction)
@@ -1130,8 +1126,7 @@ namespace Iris.CPU
             Byte data = cpu._callbackInterface.ReadMemory8(address);
             SetReg(cpu, rd, SignExtend(data, 8));
 
-            // TODO: check
-            return 1;
+            return (rd == PC) ? 5u : 3u;
         }
 
         private static UInt32 LDRSH(CPU cpu, UInt32 instruction)
@@ -1151,8 +1146,7 @@ namespace Iris.CPU
                 SetReg(cpu, rd, SignExtend(data, 16));
             }
 
-            // TODO: check
-            return 1;
+            return (rd == PC) ? 5u : 3u;
         }
 
         private static UInt32 MLA(CPU cpu, UInt32 instruction)
@@ -1219,7 +1213,6 @@ namespace Iris.CPU
 
             SetReg(cpu, rd, (r == 1) ? cpu.SPSR : cpu.CPSR);
 
-            // TODO: check
             return 1;
         }
 
@@ -1270,7 +1263,6 @@ namespace Iris.CPU
                 cpu.SPSR = (cpu.SPSR & ~mask) | (operand & mask);
             }
 
-            // TODO: check
             return 1;
         }
 
@@ -1685,8 +1677,7 @@ namespace Iris.CPU
             UInt32 address = GetAddress(cpu, instruction);
             cpu._callbackInterface.WriteMemory32(address, data);
 
-            // TODO: check
-            return 1;
+            return 2;
         }
 
         private static UInt32 STRB(CPU cpu, UInt32 instruction)
@@ -1701,8 +1692,7 @@ namespace Iris.CPU
             UInt32 address = GetAddress(cpu, instruction);
             cpu._callbackInterface.WriteMemory8(address, (Byte)data);
 
-            // TODO: check
-            return 1;
+            return 2;
         }
 
         private static UInt32 STRH(CPU cpu, UInt32 instruction)
@@ -1717,8 +1707,7 @@ namespace Iris.CPU
             UInt32 address = GetAddress_Misc(cpu, instruction);
             cpu._callbackInterface.WriteMemory16(address, (UInt16)data);
 
-            // TODO: check
-            return 1;
+            return 2;
         }
 
         private static UInt32 SUB(CPU cpu, UInt32 instruction)
@@ -1767,8 +1756,7 @@ namespace Iris.CPU
 
             cpu._callbackInterface.HandleSWI(imm);
 
-            // TODO: check
-            return 1;
+            return 3;
         }
 
         private static UInt32 SWP(CPU cpu, UInt32 instruction)
@@ -1785,8 +1773,7 @@ namespace Iris.CPU
             cpu._callbackInterface.WriteMemory32(regRn, regRm);
             SetReg(cpu, rd, temp);
 
-            // TODO: check
-            return 1;
+            return 4;
         }
 
         private static UInt32 SWPB(CPU cpu, UInt32 instruction)
@@ -1803,8 +1790,7 @@ namespace Iris.CPU
             cpu._callbackInterface.WriteMemory8(regRn, (Byte)regRm);
             SetReg(cpu, rd, temp);
 
-            // TODO: check
-            return 1;
+            return 4;
         }
 
         private static UInt32 TEQ(CPU cpu, UInt32 instruction)
