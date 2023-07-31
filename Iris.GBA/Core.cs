@@ -82,8 +82,10 @@ namespace Iris.GBA
 
             while (_running)
             {
-                _CPU.Step();
-                _PPU.Step();
+                Byte cycles = _CPU.Step();
+
+                for (Byte i = 0; i < cycles; ++i)
+                    _PPU.Step();
             }
         }
 

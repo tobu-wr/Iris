@@ -113,7 +113,7 @@ namespace Iris.CPU
             _thumbInterpreter = new(this);
         }
 
-        public void Step()
+        public Byte Step()
         {
             UInt32 i = (CPSR >> 7) & 1;
 
@@ -123,9 +123,9 @@ namespace Iris.CPU
             UInt32 t = (CPSR >> 5) & 1;
 
             if (t == 0)
-                _armInterpreter.Step();
+                return _armInterpreter.Step();
             else
-                _thumbInterpreter.Step();
+                return _thumbInterpreter.Step();
         }
 
         public void SetCPSR(UInt32 value)

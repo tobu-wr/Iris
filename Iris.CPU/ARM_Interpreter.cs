@@ -235,7 +235,7 @@ namespace Iris.CPU
             InitInstructionLUT();
         }
 
-        internal void Step()
+        internal Byte Step()
         {
             UInt32 instruction = _cpu._callbackInterface.ReadMemory32(_cpu.NextInstructionAddress);
             _cpu.NextInstructionAddress += 4;
@@ -257,6 +257,8 @@ namespace Iris.CPU
                     instructionLUTEntry.Handler(_cpu, instruction);
                 }
             }
+
+            return 1;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

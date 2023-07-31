@@ -45,8 +45,10 @@ namespace Iris.NDS
 
             while (_running)
             {
-                _cpu.Step();
-                _ppu.Step();
+                Byte cycles = _CPU.Step();
+
+                for (Byte i = 0; i < cycles; ++i)
+                    _PPU.Step();
             }
         }
 
