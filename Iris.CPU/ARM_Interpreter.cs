@@ -235,7 +235,7 @@ namespace Iris.CPU
             InitInstructionLUT();
         }
 
-        internal Byte Step()
+        internal UInt32 Step()
         {
             UInt32 instruction = _cpu._callbackInterface.ReadMemory32(_cpu.NextInstructionAddress);
             _cpu.NextInstructionAddress += 4;
@@ -656,12 +656,12 @@ namespace Iris.CPU
             return (startAddress, endAddress);
         }
 
-        private static Byte UNKNOWN(CPU cpu, UInt32 instruction)
+        private static UInt32 UNKNOWN(CPU cpu, UInt32 instruction)
         {
             throw new Exception(string.Format("Iris.CPU.ARM_Interpreter: Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, cpu.NextInstructionAddress - 4));
         }
 
-        private static Byte ADC(CPU cpu, UInt32 instruction)
+        private static UInt32 ADC(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -702,7 +702,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte ADD(CPU cpu, UInt32 instruction)
+        private static UInt32 ADD(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -743,7 +743,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte AND(CPU cpu, UInt32 instruction)
+        private static UInt32 AND(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -782,7 +782,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte B(CPU cpu, UInt32 instruction)
+        private static UInt32 B(CPU cpu, UInt32 instruction)
         {
             UInt32 imm = instruction & 0xff_ffff;
 
@@ -795,7 +795,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte BL(CPU cpu, UInt32 instruction)
+        private static UInt32 BL(CPU cpu, UInt32 instruction)
         {
             UInt32 imm = instruction & 0xff_ffff;
 
@@ -810,7 +810,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte BIC(CPU cpu, UInt32 instruction)
+        private static UInt32 BIC(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -849,7 +849,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte BX(CPU cpu, UInt32 instruction)
+        private static UInt32 BX(CPU cpu, UInt32 instruction)
         {
             UInt32 rm = instruction & 0b1111;
 
@@ -863,7 +863,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte CMN(CPU cpu, UInt32 instruction)
+        private static UInt32 CMN(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
@@ -901,7 +901,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte CMP(CPU cpu, UInt32 instruction)
+        private static UInt32 CMP(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
@@ -938,7 +938,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte EOR(CPU cpu, UInt32 instruction)
+        private static UInt32 EOR(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -977,7 +977,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte LDM1(CPU cpu, UInt32 instruction)
+        private static UInt32 LDM1(CPU cpu, UInt32 instruction)
         {
             UInt32 registerList = instruction & 0xffff;
 
@@ -1012,7 +1012,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte LDM2(CPU cpu, UInt32 instruction)
+        private static UInt32 LDM2(CPU cpu, UInt32 instruction)
         {
             UInt32 registerList = instruction & 0x7fff;
 
@@ -1075,7 +1075,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte LDR(CPU cpu, UInt32 instruction)
+        private static UInt32 LDR(CPU cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
@@ -1098,7 +1098,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte LDRB(CPU cpu, UInt32 instruction)
+        private static UInt32 LDRB(CPU cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
@@ -1110,7 +1110,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte LDRH(CPU cpu, UInt32 instruction)
+        private static UInt32 LDRH(CPU cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
@@ -1122,7 +1122,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte LDRSB(CPU cpu, UInt32 instruction)
+        private static UInt32 LDRSB(CPU cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
@@ -1134,7 +1134,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte LDRSH(CPU cpu, UInt32 instruction)
+        private static UInt32 LDRSH(CPU cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
@@ -1155,7 +1155,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte MLA(CPU cpu, UInt32 instruction)
+        private static UInt32 MLA(CPU cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rd = (instruction >> 16) & 0b1111;
@@ -1182,7 +1182,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte MOV(CPU cpu, UInt32 instruction)
+        private static UInt32 MOV(CPU cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rd = (instruction >> 12) & 0b1111;
@@ -1212,7 +1212,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte MRS(CPU cpu, UInt32 instruction)
+        private static UInt32 MRS(CPU cpu, UInt32 instruction)
         {
             UInt32 r = (instruction >> 22) & 1;
             UInt32 rd = (instruction >> 12) & 0b1111;
@@ -1223,7 +1223,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte MSR(CPU cpu, UInt32 instruction)
+        private static UInt32 MSR(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 r = (instruction >> 22) & 1;
@@ -1274,7 +1274,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte MUL(CPU cpu, UInt32 instruction)
+        private static UInt32 MUL(CPU cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rd = (instruction >> 16) & 0b1111;
@@ -1299,7 +1299,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte MVN(CPU cpu, UInt32 instruction)
+        private static UInt32 MVN(CPU cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rd = (instruction >> 12) & 0b1111;
@@ -1329,7 +1329,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte ORR(CPU cpu, UInt32 instruction)
+        private static UInt32 ORR(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -1368,7 +1368,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte RSB(CPU cpu, UInt32 instruction)
+        private static UInt32 RSB(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -1408,7 +1408,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte RSC(CPU cpu, UInt32 instruction)
+        private static UInt32 RSC(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -1449,7 +1449,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte SBC(CPU cpu, UInt32 instruction)
+        private static UInt32 SBC(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -1489,7 +1489,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte SMLAL(CPU cpu, UInt32 instruction)
+        private static UInt32 SMLAL(CPU cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rdHi = (instruction >> 16) & 0b1111;
@@ -1519,7 +1519,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte SMULL(CPU cpu, UInt32 instruction)
+        private static UInt32 SMULL(CPU cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rdHi = (instruction >> 16) & 0b1111;
@@ -1548,7 +1548,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte STM1(CPU cpu, UInt32 instruction)
+        private static UInt32 STM1(CPU cpu, UInt32 instruction)
         {
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 registerList = instruction & 0xffff;
@@ -1601,7 +1601,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte STM2(CPU cpu, UInt32 instruction)
+        private static UInt32 STM2(CPU cpu, UInt32 instruction)
         {
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 registerList = instruction & 0xffff;
@@ -1673,7 +1673,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte STR(CPU cpu, UInt32 instruction)
+        private static UInt32 STR(CPU cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
@@ -1689,7 +1689,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte STRB(CPU cpu, UInt32 instruction)
+        private static UInt32 STRB(CPU cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
@@ -1705,7 +1705,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte STRH(CPU cpu, UInt32 instruction)
+        private static UInt32 STRH(CPU cpu, UInt32 instruction)
         {
             UInt32 rd = (instruction >> 12) & 0b1111;
 
@@ -1721,7 +1721,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte SUB(CPU cpu, UInt32 instruction)
+        private static UInt32 SUB(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
@@ -1761,7 +1761,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte SWI(CPU cpu, UInt32 instruction)
+        private static UInt32 SWI(CPU cpu, UInt32 instruction)
         {
             UInt32 imm = instruction & 0xff_ffff;
 
@@ -1771,7 +1771,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte SWP(CPU cpu, UInt32 instruction)
+        private static UInt32 SWP(CPU cpu, UInt32 instruction)
         {
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
@@ -1789,7 +1789,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte SWPB(CPU cpu, UInt32 instruction)
+        private static UInt32 SWPB(CPU cpu, UInt32 instruction)
         {
             UInt32 rn = (instruction >> 16) & 0b1111;
             UInt32 rd = (instruction >> 12) & 0b1111;
@@ -1807,7 +1807,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte TEQ(CPU cpu, UInt32 instruction)
+        private static UInt32 TEQ(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
@@ -1843,7 +1843,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte TST(CPU cpu, UInt32 instruction)
+        private static UInt32 TST(CPU cpu, UInt32 instruction)
         {
             UInt32 i = (instruction >> 25) & 1;
             UInt32 rn = (instruction >> 16) & 0b1111;
@@ -1879,7 +1879,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte UMLAL(CPU cpu, UInt32 instruction)
+        private static UInt32 UMLAL(CPU cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rdHi = (instruction >> 16) & 0b1111;
@@ -1909,7 +1909,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static Byte UMULL(CPU cpu, UInt32 instruction)
+        private static UInt32 UMULL(CPU cpu, UInt32 instruction)
         {
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rdHi = (instruction >> 16) & 0b1111;

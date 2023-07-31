@@ -82,9 +82,9 @@ namespace Iris.GBA
 
             while (_running)
             {
-                Byte cycles = _cpu.Step();
+                UInt32 cycles = _cpu.Step();
 
-                for (Byte i = 0; i < cycles; ++i)
+                for (UInt32 i = 0; i < cycles; ++i)
                     _ppu.Step();
             }
         }

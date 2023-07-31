@@ -51,9 +51,9 @@ namespace Iris.CPU
         {
             internal readonly T Mask;
             internal readonly T Expected;
-            internal unsafe readonly delegate*<CPU, T, Byte> Handler;
+            internal unsafe readonly delegate*<CPU, T, UInt32> Handler;
 
-            internal unsafe InstructionListEntry(T mask, T expected, delegate*<CPU, T, Byte> handler)
+            internal unsafe InstructionListEntry(T mask, T expected, delegate*<CPU, T, UInt32> handler)
             {
                 Mask = mask;
                 Expected = expected;
@@ -63,9 +63,9 @@ namespace Iris.CPU
 
         internal readonly struct InstructionLUTEntry<T>
         {
-            internal unsafe readonly delegate*<CPU, T, Byte> Handler;
+            internal unsafe readonly delegate*<CPU, T, UInt32> Handler;
 
-            internal unsafe InstructionLUTEntry(delegate*<CPU, T, Byte> handler)
+            internal unsafe InstructionLUTEntry(delegate*<CPU, T, UInt32> handler)
             {
                 Handler = handler;
             }
@@ -113,7 +113,7 @@ namespace Iris.CPU
             _thumbInterpreter = new(this);
         }
 
-        public Byte Step()
+        public UInt32 Step()
         {
             UInt32 i = (CPSR >> 7) & 1;
 
