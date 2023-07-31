@@ -1065,13 +1065,17 @@ namespace Iris.CPU
             UInt32 m;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            static bool CheckMultiplierAgainstMask(UInt32 multiplier, UInt32 mask) => ((multiplier & mask) == 0) || ((multiplier & mask) == mask);
+            static bool CheckMultiplier(UInt32 multiplier, UInt32 mask)
+            {
+                UInt32 masked = multiplier & mask;
+                return (masked == 0) || (masked == mask);
+            }
 
-            if (CheckMultiplierAgainstMask(regRm, 0xffff_ff00))
+            if (CheckMultiplier(regRm, 0xffff_ff00))
                 m = 1;
-            else if (CheckMultiplierAgainstMask(regRm, 0xffff_0000))
+            else if (CheckMultiplier(regRm, 0xffff_0000))
                 m = 2;
-            else if (CheckMultiplierAgainstMask(regRm, 0xff00_0000))
+            else if (CheckMultiplier(regRm, 0xff00_0000))
                 m = 3;
             else
                 m = 4;
