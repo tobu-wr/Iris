@@ -675,7 +675,9 @@ namespace Iris.CPU
 
             (UInt32 shifterOperand, _) = GetShifterOperand(cpu, instruction);
 
-            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (regPC + 4) : regRn;
+            bool shiftRs = (i == 0) && (r == 1);
+
+            UInt32 leftOperand = ((rn == PC) && shiftRs) ? (regPC + 4) : regRn;
             UInt64 rightOperand = (UInt64)shifterOperand + (UInt64)cpu.GetFlag(Flag.C);
 
             UInt64 result = (UInt64)leftOperand + rightOperand;
@@ -686,6 +688,8 @@ namespace Iris.CPU
                 if (rd == PC)
                 {
                     cpu.SetCPSR(cpu.SPSR);
+
+                    return shiftRs ? 4u : 3u;
                 }
                 else
                 {
@@ -695,11 +699,14 @@ namespace Iris.CPU
                     cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
                     cpu.SetFlag(Flag.C, CarryFrom(result));
                     cpu.SetFlag(Flag.V, OverflowFrom_Addition(leftOperand, (UInt32)rightOperand, regRd));
+
+                    return shiftRs ? 2u : 1u;
                 }
             }
-
-            // TODO: check
-            return 1;
+            else
+            {
+                return (shiftRs ? 2u : 1u) + ((rd == PC) ? 2u : 0u);
+            }
         }
 
         private static UInt32 ADD(CPU cpu, UInt32 instruction)
@@ -716,7 +723,9 @@ namespace Iris.CPU
 
             (UInt32 shifterOperand, _) = GetShifterOperand(cpu, instruction);
 
-            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (regPC + 4) : regRn;
+            bool shiftRs = (i == 0) && (r == 1);
+
+            UInt32 leftOperand = ((rn == PC) && shiftRs) ? (regPC + 4) : regRn;
             UInt32 rightOperand = shifterOperand;
 
             UInt64 result = (UInt64)leftOperand + (UInt64)rightOperand;
@@ -727,6 +736,8 @@ namespace Iris.CPU
                 if (rd == PC)
                 {
                     cpu.SetCPSR(cpu.SPSR);
+
+                    return shiftRs ? 4u : 3u;
                 }
                 else
                 {
@@ -736,11 +747,14 @@ namespace Iris.CPU
                     cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
                     cpu.SetFlag(Flag.C, CarryFrom(result));
                     cpu.SetFlag(Flag.V, OverflowFrom_Addition(leftOperand, rightOperand, regRd));
+
+                    return shiftRs ? 2u : 1u;
                 }
             }
-
-            // TODO: check
-            return 1;
+            else
+            {
+                return (shiftRs ? 2u : 1u) + ((rd == PC) ? 2u : 0u);
+            }
         }
 
         private static UInt32 AND(CPU cpu, UInt32 instruction)
@@ -757,7 +771,9 @@ namespace Iris.CPU
 
             (UInt32 shifterOperand, UInt32 shifterCarryOut) = GetShifterOperand(cpu, instruction);
 
-            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (regPC + 4) : regRn;
+            bool shiftRs = (i == 0) && (r == 1);
+
+            UInt32 leftOperand = ((rn == PC) && shiftRs) ? (regPC + 4) : regRn;
             UInt32 rightOperand = shifterOperand;
 
             SetReg(cpu, rd, leftOperand & rightOperand);
@@ -767,6 +783,8 @@ namespace Iris.CPU
                 if (rd == PC)
                 {
                     cpu.SetCPSR(cpu.SPSR);
+
+                    return shiftRs ? 4u : 3u;
                 }
                 else
                 {
@@ -775,11 +793,14 @@ namespace Iris.CPU
                     cpu.SetFlag(Flag.N, regRd >> 31);
                     cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
                     cpu.SetFlag(Flag.C, shifterCarryOut);
+
+                    return shiftRs ? 2u : 1u;
                 }
             }
-
-            // TODO: check
-            return 1;
+            else
+            {
+                return (shiftRs ? 2u : 1u) + ((rd == PC) ? 2u : 0u);
+            }
         }
 
         private static UInt32 B(CPU cpu, UInt32 instruction)
@@ -822,7 +843,9 @@ namespace Iris.CPU
 
             (UInt32 shifterOperand, UInt32 shifterCarryOut) = GetShifterOperand(cpu, instruction);
 
-            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (regPC + 4) : regRn;
+            bool shiftRs = (i == 0) && (r == 1);
+
+            UInt32 leftOperand = ((rn == PC) && shiftRs) ? (regPC + 4) : regRn;
             UInt32 rightOperand = shifterOperand;
 
             SetReg(cpu, rd, leftOperand & ~rightOperand);
@@ -832,6 +855,8 @@ namespace Iris.CPU
                 if (rd == PC)
                 {
                     cpu.SetCPSR(cpu.SPSR);
+
+                    return shiftRs ? 4u : 3u;
                 }
                 else
                 {
@@ -840,11 +865,14 @@ namespace Iris.CPU
                     cpu.SetFlag(Flag.N, regRd >> 31);
                     cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
                     cpu.SetFlag(Flag.C, shifterCarryOut);
+
+                    return shiftRs ? 2u : 1u;
                 }
             }
-
-            // TODO: check
-            return 1;
+            else
+            {
+                return (shiftRs ? 2u : 1u) + ((rd == PC) ? 2u : 0u);
+            }
         }
 
         private static UInt32 BX(CPU cpu, UInt32 instruction)
@@ -873,7 +901,9 @@ namespace Iris.CPU
 
             (UInt32 shifterOperand, _) = GetShifterOperand(cpu, instruction);
 
-            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (regPC + 4) : regRn;
+            bool shiftRs = (i == 0) && (r == 1);
+
+            UInt32 leftOperand = ((rn == PC) && shiftRs) ? (regPC + 4) : regRn;
             UInt32 rightOperand = shifterOperand;
 
             UInt64 result = (UInt64)leftOperand + (UInt64)rightOperand;
@@ -885,6 +915,8 @@ namespace Iris.CPU
                     cpu.CPSR = (cpu.CPSR & ~0xf000_0000) | (aluOut & 0xf000_0000);
                 else
                     cpu.SetCPSR((cpu.CPSR & ~0xf000_00c3) | (aluOut & 0xf000_0003) | (((aluOut >> 26) & 0b11) << 6));
+
+                return shiftRs ? 4u : 3u;
             }
             else
             {
@@ -892,10 +924,9 @@ namespace Iris.CPU
                 cpu.SetFlag(Flag.Z, (aluOut == 0) ? 1u : 0u);
                 cpu.SetFlag(Flag.C, CarryFrom(result));
                 cpu.SetFlag(Flag.V, OverflowFrom_Addition(leftOperand, rightOperand, aluOut));
-            }
 
-            // TODO: check
-            return 1;
+                return shiftRs ? 2u : 1u;
+            }
         }
 
         private static UInt32 CMP(CPU cpu, UInt32 instruction)
@@ -911,7 +942,9 @@ namespace Iris.CPU
 
             (UInt32 shifterOperand, _) = GetShifterOperand(cpu, instruction);
 
-            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (regPC + 4) : regRn;
+            bool shiftRs = (i == 0) && (r == 1);
+
+            UInt32 leftOperand = ((rn == PC) && shiftRs) ? (regPC + 4) : regRn;
             UInt32 rightOperand = shifterOperand;
 
             UInt32 aluOut = leftOperand - rightOperand;
@@ -922,6 +955,8 @@ namespace Iris.CPU
                     cpu.CPSR = (cpu.CPSR & ~0xf000_0000) | (aluOut & 0xf000_0000);
                 else
                     cpu.SetCPSR((cpu.CPSR & ~0xf000_00c3) | (aluOut & 0xf000_0003) | (((aluOut >> 26) & 0b11) << 6));
+
+                return shiftRs ? 4u : 3u;
             }
             else
             {
@@ -929,10 +964,9 @@ namespace Iris.CPU
                 cpu.SetFlag(Flag.Z, (aluOut == 0) ? 1u : 0u);
                 cpu.SetFlag(Flag.C, Not(BorrowFrom(leftOperand, rightOperand)));
                 cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, rightOperand, aluOut));
-            }
 
-            // TODO: check
-            return 1;
+                return shiftRs ? 2u : 1u;
+            }
         }
 
         private static UInt32 EOR(CPU cpu, UInt32 instruction)
@@ -949,7 +983,9 @@ namespace Iris.CPU
 
             (UInt32 shifterOperand, UInt32 shifterCarryOut) = GetShifterOperand(cpu, instruction);
 
-            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (regPC + 4) : regRn;
+            bool shiftRs = (i == 0) && (r == 1);
+
+            UInt32 leftOperand = ((rn == PC) && shiftRs) ? (regPC + 4) : regRn;
             UInt32 rightOperand = shifterOperand;
 
             SetReg(cpu, rd, leftOperand ^ rightOperand);
@@ -959,6 +995,8 @@ namespace Iris.CPU
                 if (rd == PC)
                 {
                     cpu.SetCPSR(cpu.SPSR);
+
+                    return shiftRs ? 4u : 3u;
                 }
                 else
                 {
@@ -967,11 +1005,14 @@ namespace Iris.CPU
                     cpu.SetFlag(Flag.N, regRd >> 31);
                     cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
                     cpu.SetFlag(Flag.C, shifterCarryOut);
+
+                    return shiftRs ? 2u : 1u;
                 }
             }
-
-            // TODO: check
-            return 1;
+            else
+            {
+                return (shiftRs ? 2u : 1u) + ((rd == PC) ? 2u : 0u);
+            }
         }
 
         private static UInt32 LDM1(CPU cpu, UInt32 instruction)
@@ -1178,10 +1219,14 @@ namespace Iris.CPU
 
         private static UInt32 MOV(CPU cpu, UInt32 instruction)
         {
+            UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rd = (instruction >> 12) & 0b1111;
+            UInt32 r = (instruction >> 4) & 1;
 
             (UInt32 shifterOperand, UInt32 shifterCarryOut) = GetShifterOperand(cpu, instruction);
+
+            bool shiftRs = (i == 0) && (r == 1);
 
             SetReg(cpu, rd, shifterOperand);
 
@@ -1190,6 +1235,8 @@ namespace Iris.CPU
                 if (rd == PC)
                 {
                     cpu.SetCPSR(cpu.SPSR);
+
+                    return shiftRs ? 4u : 3u;
                 }
                 else
                 {
@@ -1199,11 +1246,14 @@ namespace Iris.CPU
                     cpu.SetFlag(Flag.N, regRd >> 31);
                     cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
                     cpu.SetFlag(Flag.C, shifterCarryOut);
+
+                    return shiftRs ? 2u : 1u;
                 }
             }
-
-            // TODO: check
-            return 1;
+            else
+            {
+                return (shiftRs ? 2u : 1u) + ((rd == PC) ? 2u : 0u);
+            }
         }
 
         private static UInt32 MRS(CPU cpu, UInt32 instruction)
@@ -1293,10 +1343,14 @@ namespace Iris.CPU
 
         private static UInt32 MVN(CPU cpu, UInt32 instruction)
         {
+            UInt32 i = (instruction >> 25) & 1;
             UInt32 s = (instruction >> 20) & 1;
             UInt32 rd = (instruction >> 12) & 0b1111;
+            UInt32 r = (instruction >> 4) & 1;
 
             (UInt32 shifterOperand, UInt32 shifterCarryOut) = GetShifterOperand(cpu, instruction);
+
+            bool shiftRs = (i == 0) && (r == 1);
 
             SetReg(cpu, rd, ~shifterOperand);
 
@@ -1305,6 +1359,8 @@ namespace Iris.CPU
                 if (rd == PC)
                 {
                     cpu.SetCPSR(cpu.SPSR);
+
+                    return shiftRs ? 4u : 3u;
                 }
                 else
                 {
@@ -1314,11 +1370,14 @@ namespace Iris.CPU
                     cpu.SetFlag(Flag.N, regRd >> 31);
                     cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
                     cpu.SetFlag(Flag.C, shifterCarryOut);
+
+                    return shiftRs ? 2u : 1u;
                 }
             }
-
-            // TODO: check
-            return 1;
+            else
+            {
+                return (shiftRs ? 2u : 1u) + ((rd == PC) ? 2u : 0u);
+            }
         }
 
         private static UInt32 ORR(CPU cpu, UInt32 instruction)
@@ -1335,7 +1394,9 @@ namespace Iris.CPU
 
             (UInt32 shifterOperand, UInt32 shifterCarryOut) = GetShifterOperand(cpu, instruction);
 
-            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (regPC + 4) : regRn;
+            bool shiftRs = (i == 0) && (r == 1);
+
+            UInt32 leftOperand = ((rn == PC) && shiftRs) ? (regPC + 4) : regRn;
             UInt32 rightOperand = shifterOperand;
 
             SetReg(cpu, rd, leftOperand | rightOperand);
@@ -1345,6 +1406,8 @@ namespace Iris.CPU
                 if (rd == PC)
                 {
                     cpu.SetCPSR(cpu.SPSR);
+
+                    return shiftRs ? 4u : 3u;
                 }
                 else
                 {
@@ -1353,11 +1416,14 @@ namespace Iris.CPU
                     cpu.SetFlag(Flag.N, regRd >> 31);
                     cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
                     cpu.SetFlag(Flag.C, shifterCarryOut);
+
+                    return shiftRs ? 2u : 1u;
                 }
             }
-
-            // TODO: check
-            return 1;
+            else
+            {
+                return (shiftRs ? 2u : 1u) + ((rd == PC) ? 2u : 0u);
+            }
         }
 
         private static UInt32 RSB(CPU cpu, UInt32 instruction)
@@ -1374,8 +1440,10 @@ namespace Iris.CPU
 
             (UInt32 shifterOperand, _) = GetShifterOperand(cpu, instruction);
 
+            bool shiftRs = (i == 0) && (r == 1);
+
             UInt32 leftOperand = shifterOperand;
-            UInt32 rightOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (regPC + 4) : regRn;
+            UInt32 rightOperand = ((rn == PC) && shiftRs) ? (regPC + 4) : regRn;
 
             SetReg(cpu, rd, leftOperand - rightOperand);
 
@@ -1384,6 +1452,8 @@ namespace Iris.CPU
                 if (rd == PC)
                 {
                     cpu.SetCPSR(cpu.SPSR);
+
+                    return shiftRs ? 4u : 3u;
                 }
                 else
                 {
@@ -1393,11 +1463,14 @@ namespace Iris.CPU
                     cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
                     cpu.SetFlag(Flag.C, Not(BorrowFrom(leftOperand, rightOperand)));
                     cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, rightOperand, regRd));
+
+                    return shiftRs ? 2u : 1u;
                 }
             }
-
-            // TODO: check
-            return 1;
+            else
+            {
+                return (shiftRs ? 2u : 1u) + ((rd == PC) ? 2u : 0u);
+            }
         }
 
         private static UInt32 RSC(CPU cpu, UInt32 instruction)
@@ -1414,8 +1487,10 @@ namespace Iris.CPU
 
             (UInt32 shifterOperand, _) = GetShifterOperand(cpu, instruction);
 
+            bool shiftRs = (i == 0) && (r == 1);
+
             UInt32 leftOperand = shifterOperand;
-            UInt64 rightOperand = (UInt64)(((rn == PC) && (i == 0) && (r == 1)) ? (regPC + 4) : regRn)
+            UInt64 rightOperand = (UInt64)(((rn == PC) && shiftRs) ? (regPC + 4) : regRn)
                                 + (UInt64)Not(cpu.GetFlag(Flag.C));
 
             SetReg(cpu, rd, leftOperand - (UInt32)rightOperand);
@@ -1425,6 +1500,8 @@ namespace Iris.CPU
                 if (rd == PC)
                 {
                     cpu.SetCPSR(cpu.SPSR);
+
+                    return shiftRs ? 4u : 3u;
                 }
                 else
                 {
@@ -1434,11 +1511,14 @@ namespace Iris.CPU
                     cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
                     cpu.SetFlag(Flag.C, Not(BorrowFrom(leftOperand, rightOperand)));
                     cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, (UInt32)rightOperand, regRd));
+
+                    return shiftRs ? 2u : 1u;
                 }
             }
-
-            // TODO: check
-            return 1;
+            else
+            {
+                return (shiftRs ? 2u : 1u) + ((rd == PC) ? 2u : 0u);
+            }
         }
 
         private static UInt32 SBC(CPU cpu, UInt32 instruction)
@@ -1455,7 +1535,9 @@ namespace Iris.CPU
 
             (UInt32 shifterOperand, _) = GetShifterOperand(cpu, instruction);
 
-            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (regPC + 4) : regRn;
+            bool shiftRs = (i == 0) && (r == 1);
+
+            UInt32 leftOperand = ((rn == PC) && shiftRs) ? (regPC + 4) : regRn;
             UInt64 rightOperand = (UInt64)shifterOperand + (UInt64)Not(cpu.GetFlag(Flag.C));
 
             SetReg(cpu, rd, leftOperand - (UInt32)rightOperand);
@@ -1465,6 +1547,8 @@ namespace Iris.CPU
                 if (rd == PC)
                 {
                     cpu.SetCPSR(cpu.SPSR);
+
+                    return shiftRs ? 4u : 3u;
                 }
                 else
                 {
@@ -1474,11 +1558,14 @@ namespace Iris.CPU
                     cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
                     cpu.SetFlag(Flag.C, Not(BorrowFrom(leftOperand, rightOperand)));
                     cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, (UInt32)rightOperand, regRd));
+
+                    return shiftRs ? 2u : 1u;
                 }
             }
-
-            // TODO: check
-            return 1;
+            else
+            {
+                return (shiftRs ? 2u : 1u) + ((rd == PC) ? 2u : 0u);
+            }
         }
 
         private static UInt32 SMLAL(CPU cpu, UInt32 instruction)
@@ -1724,7 +1811,9 @@ namespace Iris.CPU
 
             (UInt32 shifterOperand, _) = GetShifterOperand(cpu, instruction);
 
-            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (regPC + 4) : regRn;
+            bool shiftRs = (i == 0) && (r == 1);
+
+            UInt32 leftOperand = ((rn == PC) && shiftRs) ? (regPC + 4) : regRn;
             UInt32 rightOperand = shifterOperand;
 
             SetReg(cpu, rd, leftOperand - rightOperand);
@@ -1734,6 +1823,8 @@ namespace Iris.CPU
                 if (rd == PC)
                 {
                     cpu.SetCPSR(cpu.SPSR);
+
+                    return shiftRs ? 4u : 3u;
                 }
                 else
                 {
@@ -1743,11 +1834,14 @@ namespace Iris.CPU
                     cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
                     cpu.SetFlag(Flag.C, Not(BorrowFrom(leftOperand, rightOperand)));
                     cpu.SetFlag(Flag.V, OverflowFrom_Subtraction(leftOperand, rightOperand, regRd));
+
+                    return shiftRs ? 2u : 1u;
                 }
             }
-
-            // TODO: check
-            return 1;
+            else
+            {
+                return (shiftRs ? 2u : 1u) + ((rd == PC) ? 2u : 0u);
+            }
         }
 
         private static UInt32 SWI(CPU cpu, UInt32 instruction)
@@ -1806,7 +1900,9 @@ namespace Iris.CPU
 
             (UInt32 shifterOperand, UInt32 shifterCarryOut) = GetShifterOperand(cpu, instruction);
 
-            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (regPC + 4) : regRn;
+            bool shiftRs = (i == 0) && (r == 1);
+
+            UInt32 leftOperand = ((rn == PC) && shiftRs) ? (regPC + 4) : regRn;
             UInt32 rightOperand = shifterOperand;
 
             UInt32 aluOut = leftOperand ^ rightOperand;
@@ -1817,16 +1913,17 @@ namespace Iris.CPU
                     cpu.CPSR = (cpu.CPSR & ~0xf000_0000) | (aluOut & 0xf000_0000);
                 else
                     cpu.SetCPSR((cpu.CPSR & ~0xf000_00c3) | (aluOut & 0xf000_0003) | (((aluOut >> 26) & 0b11) << 6));
+
+                return shiftRs ? 4u : 3u;
             }
             else
             {
                 cpu.SetFlag(Flag.N, aluOut >> 31);
                 cpu.SetFlag(Flag.Z, (aluOut == 0) ? 1u : 0u);
                 cpu.SetFlag(Flag.C, shifterCarryOut);
-            }
 
-            // TODO: check
-            return 1;
+                return shiftRs ? 2u : 1u;
+            }
         }
 
         private static UInt32 TST(CPU cpu, UInt32 instruction)
@@ -1842,7 +1939,9 @@ namespace Iris.CPU
 
             (UInt32 shifterOperand, UInt32 shifterCarryOut) = GetShifterOperand(cpu, instruction);
 
-            UInt32 leftOperand = ((rn == PC) && (i == 0) && (r == 1)) ? (regPC + 4) : regRn;
+            bool shiftRs = (i == 0) && (r == 1);
+
+            UInt32 leftOperand = ((rn == PC) && shiftRs) ? (regPC + 4) : regRn;
             UInt32 rightOperand = shifterOperand;
 
             UInt32 aluOut = leftOperand & rightOperand;
@@ -1853,16 +1952,17 @@ namespace Iris.CPU
                     cpu.CPSR = (cpu.CPSR & ~0xf000_0000) | (aluOut & 0xf000_0000);
                 else
                     cpu.SetCPSR((cpu.CPSR & ~0xf000_00c3) | (aluOut & 0xf000_0003) | (((aluOut >> 26) & 0b11) << 6));
+
+                return shiftRs ? 4u : 3u;
             }
             else
             {
                 cpu.SetFlag(Flag.N, aluOut >> 31);
                 cpu.SetFlag(Flag.Z, (aluOut == 0) ? 1u : 0u);
                 cpu.SetFlag(Flag.C, shifterCarryOut);
-            }
 
-            // TODO: check
-            return 1;
+                return shiftRs ? 2u : 1u;
+            }
         }
 
         private static UInt32 UMLAL(CPU cpu, UInt32 instruction)
