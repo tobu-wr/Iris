@@ -1,6 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
 
 namespace Iris.CPU
 {
@@ -376,24 +375,28 @@ namespace Iris.CPU
             return value | ~((value & (1u << (size - 1))) - 1);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static UInt32 ComputeM(UInt32 multiplier)
+        internal static UInt32 ComputeMultiplicationCycleCount(UInt32 leftMultiplier, UInt32 rightMultiplier)
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            static bool CheckMultiplier(UInt32 multiplier, UInt32 mask)
+            static UInt32 ComputeMultiplierCycleCount(UInt32 multiplier)
             {
-                UInt32 masked = multiplier & mask;
-                return (masked == 0) || (masked == mask);
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                static bool CheckMultiplierAgainstMask(UInt32 multiplier, UInt32 mask)
+                {
+                    UInt32 masked = multiplier & mask;
+                    return (masked == 0) || (masked == mask);
+                }
+
+                if (CheckMultiplierAgainstMask(multiplier, 0xffff_ff00))
+                    return 1;
+                else if (CheckMultiplierAgainstMask(multiplier, 0xffff_0000))
+                    return 2;
+                else if (CheckMultiplierAgainstMask(multiplier, 0xff00_0000))
+                    return 3;
+                else
+                    return 4;
             }
 
-            if (CheckMultiplier(multiplier, 0xffff_ff00))
-                return 1;
-            else if (CheckMultiplier(multiplier, 0xffff_0000))
-                return 2;
-            else if (CheckMultiplier(multiplier, 0xff00_0000))
-                return 3;
-            else
-                return 4;
+            return Math.Max(ComputeMultiplierCycleCount(leftMultiplier), ComputeMultiplierCycleCount(rightMultiplier));
         }
     }
 }

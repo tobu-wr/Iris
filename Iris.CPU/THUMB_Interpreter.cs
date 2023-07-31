@@ -216,7 +216,6 @@ namespace Iris.CPU
             cpu.NextInstructionAddress = value & 0xffff_fffe;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void SetReg(CPU cpu, UInt32 i, UInt32 value)
         {
             if (i == PC)
@@ -1062,7 +1061,7 @@ namespace Iris.CPU
             ref UInt32 regRm = ref Unsafe.Add(ref regDataRef, rm);
             ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
 
-            UInt32 m = Math.Max(ComputeM(regRd), ComputeM(regRm));
+            UInt32 m = ComputeMultiplicationCycleCount(regRd, regRm);
             regRd *= regRm;
 
             cpu.SetFlag(Flag.N, regRd >> 31);
