@@ -34,7 +34,7 @@ namespace Iris.GBA
 
         private void UpdateInterrupts()
         {
-            _CPU.NIRQ = ((_IME == 0) || (_IE & _IF) == 0) ? CPU.CPU.Signal.High : CPU.CPU.Signal.Low;
+            _cpu.NIRQ = ((_IME == 0) || (_IE & _IF) == 0) ? CPU.CPU.Signal.High : CPU.CPU.Signal.Low;
         }
     }
 }

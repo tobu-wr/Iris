@@ -5,8 +5,8 @@ namespace Iris.GBA
 {
     public sealed partial class Core : ISystemCore
     {
-        private readonly CPU.CPU _CPU;
-        private readonly PPU _PPU;
+        private readonly CPU.CPU _cpu;
+        private readonly PPU _ppu;
 
         private UInt16 _WAITCNT;
 
@@ -32,8 +32,8 @@ namespace Iris.GBA
                 RequestVBlankInterrupt = () => RequestInterrupt(Interrupt.VBlank)
             };
 
-            _CPU = new(CPU.CPU.Architecture.ARMv4T, cpuCallbackInterface);
-            _PPU = new(ppuCallbackInterface);
+            _cpu = new(CPU.CPU.Architecture.ARMv4T, cpuCallbackInterface);
+            _ppu = new(ppuCallbackInterface);
 
             InitPageTables();
         }
@@ -68,7 +68,7 @@ namespace Iris.GBA
             _WAITCNT = 0;
             _IME = 0;
 
-            _CPU.NIRQ = CPU.CPU.Signal.High;
+            _cpu.NIRQ = CPU.CPU.Signal.High;
         }
 
         public bool IsRunning()
@@ -82,10 +82,10 @@ namespace Iris.GBA
 
             while (_running)
             {
-                Byte cycles = _CPU.Step();
+                Byte cycles = _cpu.Step();
 
                 for (Byte i = 0; i < cycles; ++i)
-                    _PPU.Step();
+                    _ppu.Step();
             }
         }
 

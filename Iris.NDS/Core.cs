@@ -1,4 +1,5 @@
 ﻿using Iris.Common;
+using Iris.CPU;
 
 namespace Iris.NDS
 {
@@ -45,10 +46,10 @@ namespace Iris.NDS
 
             while (_running)
             {
-                Byte cycles = _CPU.Step();
+                Byte cycles = _cpu.Step();
 
                 for (Byte i = 0; i < cycles; ++i)
-                    _PPU.Step();
+                    _ppu.Step();
             }
         }
 
