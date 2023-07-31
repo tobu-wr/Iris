@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using static Iris.CPU.CPU;
 
 namespace Iris.CPU
@@ -269,7 +270,6 @@ namespace Iris.CPU
             cpu.NextInstructionAddress = value;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void SetReg(CPU cpu, UInt32 i, UInt32 value)
         {
             if (i == PC)
@@ -1026,6 +1026,8 @@ namespace Iris.CPU
             if (registerList == 0)
             {
                 SetPC(cpu, cpu._callbackInterface.ReadMemory32(address));
+
+                return 5;
             }
             else
             {
@@ -1042,12 +1044,19 @@ namespace Iris.CPU
                     }
                 }
 
-                if (((registerList >> 15) & 1) == 1)
-                    SetPC(cpu, cpu._callbackInterface.ReadMemory32(address) & 0xffff_fffc);
-            }
+                UInt32 n = (UInt32)BitOperations.PopCount(registerList);
 
-            // TODO: check
-            return 1;
+                if (((registerList >> 15) & 1) == 1)
+                {
+                    SetPC(cpu, cpu._callbackInterface.ReadMemory32(address) & 0xffff_fffc);
+
+                    return n + 4;
+                }
+                else
+                {
+                    return n + 2;
+                }
+            }
         }
 
         private static UInt32 LDM2(CPU cpu, UInt32 instruction)
@@ -1061,6 +1070,8 @@ namespace Iris.CPU
             if (registerList == 0)
             {
                 SetPC(cpu, cpu._callbackInterface.ReadMemory32(address));
+
+                return 5;
             }
             else
             {
@@ -1107,10 +1118,10 @@ namespace Iris.CPU
                         address += 4;
                     }
                 }
-            }
 
-            // TODO: check
-            return 1;
+                UInt32 n = (UInt32)BitOperations.PopCount(registerList);
+                return n + 2;
+            }
         }
 
         private static UInt32 LDR(CPU cpu, UInt32 instruction)
@@ -1203,6 +1214,7 @@ namespace Iris.CPU
             ref UInt32 regRs = ref Unsafe.Add(ref regDataRef, rs);
             ref UInt32 regRm = ref Unsafe.Add(ref regDataRef, rm);
 
+            UInt32 m = ComputeMultiplicationCycleCount(regRm, regRs);
             SetReg(cpu, rd, (regRm * regRs) + regRn);
 
             if (s == 1)
@@ -1213,8 +1225,7 @@ namespace Iris.CPU
                 cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
             }
 
-            // TODO: check
-            return 1;
+            return m + 2;
         }
 
         private static UInt32 MOV(CPU cpu, UInt32 instruction)
@@ -1327,6 +1338,7 @@ namespace Iris.CPU
             ref UInt32 regRs = ref Unsafe.Add(ref regDataRef, rs);
             ref UInt32 regRm = ref Unsafe.Add(ref regDataRef, rm);
 
+            UInt32 m = ComputeMultiplicationCycleCount(regRm, regRs);
             SetReg(cpu, rd, regRm * regRs);
 
             if (s == 1)
@@ -1337,8 +1349,7 @@ namespace Iris.CPU
                 cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
             }
 
-            // TODO: check
-            return 1;
+            return m + 1;
         }
 
         private static UInt32 MVN(CPU cpu, UInt32 instruction)
@@ -1582,6 +1593,7 @@ namespace Iris.CPU
             ref UInt32 regRs = ref Unsafe.Add(ref regDataRef, rs);
             ref UInt32 regRm = ref Unsafe.Add(ref regDataRef, rm);
 
+            UInt32 m = ComputeMultiplicationCycleCount(regRm, regRs);
             Int64 result = (Int64)(Int32)regRm * (Int64)(Int32)regRs;
             UInt64 resultLo = (UInt64)(UInt32)result + (UInt64)regRdLo;
             UInt32 resultHi = (UInt32)(result >> 32) + regRdHi + CarryFrom(resultLo);
@@ -1594,8 +1606,7 @@ namespace Iris.CPU
                 cpu.SetFlag(Flag.Z, ((regRdHi == 0) && (regRdLo == 0)) ? 1u : 0u);
             }
 
-            // TODO: check
-            return 1;
+            return m + 3;
         }
 
         private static UInt32 SMULL(CPU cpu, UInt32 instruction)
@@ -1610,6 +1621,7 @@ namespace Iris.CPU
             ref UInt32 regRs = ref Unsafe.Add(ref regDataRef, rs);
             ref UInt32 regRm = ref Unsafe.Add(ref regDataRef, rm);
 
+            UInt32 m = ComputeMultiplicationCycleCount(regRm, regRs);
             Int64 result = (Int64)(Int32)regRm * (Int64)(Int32)regRs;
             SetReg(cpu, rdLo, (UInt32)result);
             SetReg(cpu, rdHi, (UInt32)(result >> 32));
@@ -1623,8 +1635,7 @@ namespace Iris.CPU
                 cpu.SetFlag(Flag.Z, ((regRdHi == 0) && (regRdLo == 0)) ? 1u : 0u);
             }
 
-            // TODO: check
-            return 1;
+            return m + 2;
         }
 
         private static UInt32 STM1(CPU cpu, UInt32 instruction)
@@ -1646,6 +1657,8 @@ namespace Iris.CPU
                 ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
 
                 cpu._callbackInterface.WriteMemory32(address, regPC + 4);
+
+                return 2;
             }
             else
             {
@@ -1674,10 +1687,10 @@ namespace Iris.CPU
 
                     cpu._callbackInterface.WriteMemory32(address, regPC + 4);
                 }
-            }
 
-            // TODO: check
-            return 1;
+                UInt32 n = (UInt32)BitOperations.PopCount(registerList);
+                return n + 1;
+            }
         }
 
         private static UInt32 STM2(CPU cpu, UInt32 instruction)
@@ -1708,6 +1721,8 @@ namespace Iris.CPU
                 ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
 
                 cpu._callbackInterface.WriteMemory32(address, regPC + 4);
+
+                return 2;
             }
             else
             {
@@ -1746,10 +1761,10 @@ namespace Iris.CPU
 
                     cpu._callbackInterface.WriteMemory32(address, regPC + 4);
                 }
-            }
 
-            // TODO: check
-            return 1;
+                UInt32 n = (UInt32)BitOperations.PopCount(registerList);
+                return n + 1;
+            }
         }
 
         private static UInt32 STR(CPU cpu, UInt32 instruction)
@@ -1979,6 +1994,7 @@ namespace Iris.CPU
             ref UInt32 regRs = ref Unsafe.Add(ref regDataRef, rs);
             ref UInt32 regRm = ref Unsafe.Add(ref regDataRef, rm);
 
+            UInt32 m = ComputeMultiplicationCycleCount(regRm, regRs);
             UInt64 result = (UInt64)regRm * (UInt64)regRs;
             UInt64 resultLo = (UInt64)(UInt32)result + (UInt64)regRdLo;
             UInt32 resultHi = (UInt32)(result >> 32) + regRdHi + CarryFrom(resultLo);
@@ -1991,8 +2007,7 @@ namespace Iris.CPU
                 cpu.SetFlag(Flag.Z, ((regRdHi == 0) && (regRdLo == 0)) ? 1u : 0u);
             }
 
-            // TODO: check
-            return 1;
+            return m + 3;
         }
 
         private static UInt32 UMULL(CPU cpu, UInt32 instruction)
@@ -2007,6 +2022,7 @@ namespace Iris.CPU
             ref UInt32 regRs = ref Unsafe.Add(ref regDataRef, rs);
             ref UInt32 regRm = ref Unsafe.Add(ref regDataRef, rm);
 
+            UInt32 m = ComputeMultiplicationCycleCount(regRm, regRs);
             UInt64 result = (UInt64)regRm * (UInt64)regRs;
             SetReg(cpu, rdLo, (UInt32)result);
             SetReg(cpu, rdHi, (UInt32)(result >> 32));
@@ -2020,8 +2036,7 @@ namespace Iris.CPU
                 cpu.SetFlag(Flag.Z, ((regRdHi == 0) && (regRdLo == 0)) ? 1u : 0u);
             }
 
-            // TODO: check
-            return 1;
+            return m + 2;
         }
     }
 }
