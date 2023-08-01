@@ -49,25 +49,25 @@ namespace Iris.CPU
 
         internal readonly struct InstructionListEntry<T>
         {
-            internal readonly T Mask;
-            internal readonly T Expected;
-            internal unsafe readonly delegate*<CPU, T, UInt32> Handler;
+            internal readonly T _mask;
+            internal readonly T _expected;
+            internal unsafe readonly delegate*<CPU, T, UInt32> _handler;
 
             internal unsafe InstructionListEntry(T mask, T expected, delegate*<CPU, T, UInt32> handler)
             {
-                Mask = mask;
-                Expected = expected;
-                Handler = handler;
+                _mask = mask;
+                _expected = expected;
+                _handler = handler;
             }
         }
 
         internal readonly struct InstructionLUTEntry<T>
         {
-            internal unsafe readonly delegate*<CPU, T, UInt32> Handler;
+            internal unsafe readonly delegate*<CPU, T, UInt32> _handler;
 
             internal unsafe InstructionLUTEntry(delegate*<CPU, T, UInt32> handler)
             {
-                Handler = handler;
+                _handler = handler;
             }
         }
 

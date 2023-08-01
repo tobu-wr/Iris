@@ -170,9 +170,9 @@ namespace Iris.CPU
 
                 foreach (InstructionListEntry<UInt16> entry in InstructionList)
                 {
-                    if ((instruction & InstructionLUTHash(entry.Mask)) == InstructionLUTHash(entry.Expected))
+                    if ((instruction & InstructionLUTHash(entry._mask)) == InstructionLUTHash(entry._expected))
                     {
-                        _instructionLUT[instruction] = new(entry.Handler);
+                        _instructionLUT[instruction] = new(entry._handler);
                         unknownInstruction = false;
                         break;
                     }
@@ -206,7 +206,7 @@ namespace Iris.CPU
 
             unsafe
             {
-                return instructionLUTEntry.Handler(_cpu, instruction);
+                return instructionLUTEntry._handler(_cpu, instruction);
             }
         }
 
