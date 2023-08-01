@@ -5,10 +5,10 @@ namespace Iris.CPU
 {
     public sealed class CPU_Core
     {
-        public enum Architecture
+        public enum Model
         {
-            ARMv4T,
-            ARMv5TE
+            ARM7TDMI,
+            ARM946ES
         }
 
         // could have used function pointers (delegate*) for performance instead of delegates but it's less flexible (cannot use non-static function for instance)
@@ -96,7 +96,7 @@ namespace Iris.CPU
         public UInt32 Reg8_fiq, Reg9_fiq, Reg10_fiq, Reg11_fiq, Reg12_fiq, Reg13_fiq, Reg14_fiq;
         public UInt32 SPSR_svc, SPSR_abt, SPSR_und, SPSR_irq, SPSR_fiq;
 
-        internal readonly Architecture _architecture;
+        internal readonly Model _model;
         internal readonly CallbackInterface _callbackInterface;
 
         private readonly ARM_Interpreter _armInterpreter;
@@ -105,9 +105,9 @@ namespace Iris.CPU
         public UInt32 NextInstructionAddress;
         public Signal NIRQ;
 
-        public CPU_Core(Architecture architecture, CallbackInterface callbackInterface)
+        public CPU_Core(Model model, CallbackInterface callbackInterface)
         {
-            _architecture = architecture;
+            _model = model;
             _callbackInterface = callbackInterface;
             _armInterpreter = new(this);
             _thumbInterpreter = new(this);

@@ -32,7 +32,7 @@ namespace Iris.GBA
                 RequestVBlankInterrupt = () => RequestInterrupt(Interrupt.VBlank)
             };
 
-            _cpu = new(CPU_Core.Architecture.ARMv4T, cpuCallbackInterface);
+            _cpu = new(CPU_Core.Model.ARM7TDMI, cpuCallbackInterface);
             _ppu = new(ppuCallbackInterface);
 
             InitPageTables();

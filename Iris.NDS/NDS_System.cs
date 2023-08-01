@@ -24,7 +24,7 @@ namespace Iris.NDS
                 HandleIRQ = HandleIRQ
             };
 
-            _cpu = new(CPU_Core.Architecture.ARMv5TE, cpuCallbackInterface);
+            _cpu = new(CPU_Core.Model.ARM946ES, cpuCallbackInterface);
             _ppu = new(drawFrameCallback);
         }
 
