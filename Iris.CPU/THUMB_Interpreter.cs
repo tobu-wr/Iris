@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using static Iris.CPU.CPU;
+using static Iris.CPU.CPU_Core;
 
 namespace Iris.CPU
 {
@@ -183,9 +183,9 @@ namespace Iris.CPU
             }
         }
 
-        private readonly CPU _cpu;
+        private readonly CPU_Core _cpu;
 
-        internal THUMB_Interpreter(CPU cpu)
+        internal THUMB_Interpreter(CPU_Core cpu)
         {
             _cpu = cpu;
             InitInstructionLUT();
@@ -211,12 +211,12 @@ namespace Iris.CPU
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void SetPC(CPU cpu, UInt32 value)
+        private static void SetPC(CPU_Core cpu, UInt32 value)
         {
             cpu.NextInstructionAddress = value & 0xffff_fffe;
         }
 
-        private static void SetReg(CPU cpu, UInt32 i, UInt32 value)
+        private static void SetReg(CPU_Core cpu, UInt32 i, UInt32 value)
         {
             if (i == PC)
             {
@@ -231,12 +231,12 @@ namespace Iris.CPU
             }
         }
 
-        private static UInt32 UNKNOWN(CPU cpu, UInt16 instruction)
+        private static UInt32 UNKNOWN(CPU_Core cpu, UInt16 instruction)
         {
             throw new Exception(string.Format("Iris.CPU.THUMB_Interpreter: Unknown THUMB instruction 0x{0:x4} at address 0x{1:x8}", instruction, cpu.NextInstructionAddress - 2));
         }
 
-        private static UInt32 ADC(CPU cpu, UInt16 instruction)
+        private static UInt32 ADC(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -259,7 +259,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static UInt32 ADD1(CPU cpu, UInt16 instruction)
+        private static UInt32 ADD1(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -283,7 +283,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static UInt32 ADD2(CPU cpu, UInt16 instruction)
+        private static UInt32 ADD2(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -305,7 +305,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static UInt32 ADD3(CPU cpu, UInt16 instruction)
+        private static UInt32 ADD3(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -330,7 +330,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static UInt32 ADD4(CPU cpu, UInt16 instruction)
+        private static UInt32 ADD4(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 h1 = (UInt16)((instruction >> 7) & 1);
             UInt16 h2 = (UInt16)((instruction >> 6) & 1);
@@ -349,7 +349,7 @@ namespace Iris.CPU
             return (rd == PC) ? 3u : 1u;
         }
 
-        private static UInt32 ADD5(CPU cpu, UInt16 instruction)
+        private static UInt32 ADD5(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -363,7 +363,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static UInt32 ADD6(CPU cpu, UInt16 instruction)
+        private static UInt32 ADD6(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -377,7 +377,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static UInt32 ADD7(CPU cpu, UInt16 instruction)
+        private static UInt32 ADD7(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)(instruction & 0x7f);
 
@@ -389,7 +389,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static UInt32 AND(CPU cpu, UInt16 instruction)
+        private static UInt32 AND(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -406,7 +406,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static UInt32 ASR1(CPU cpu, UInt16 instruction)
+        private static UInt32 ASR1(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
@@ -435,7 +435,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static UInt32 ASR2(CPU cpu, UInt16 instruction)
+        private static UInt32 ASR2(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rs = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -467,7 +467,7 @@ namespace Iris.CPU
             return 2;
         }
 
-        private static UInt32 B1(CPU cpu, UInt16 instruction)
+        private static UInt32 B1(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 cond = (UInt16)((instruction >> 8) & 0b1111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -487,7 +487,7 @@ namespace Iris.CPU
             }
         }
 
-        private static UInt32 B2(CPU cpu, UInt16 instruction)
+        private static UInt32 B2(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)(instruction & 0x7ff);
 
@@ -499,7 +499,7 @@ namespace Iris.CPU
             return 3;
         }
 
-        private static UInt32 BIC(CPU cpu, UInt16 instruction)
+        private static UInt32 BIC(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -516,7 +516,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static UInt32 BL(CPU cpu, UInt16 instruction)
+        private static UInt32 BL(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 h = (UInt16)((instruction >> 11) & 0b11);
             UInt16 offset = (UInt16)(instruction & 0x7ff);
@@ -542,7 +542,7 @@ namespace Iris.CPU
             return 4;
         }
 
-        private static UInt32 BX(CPU cpu, UInt16 instruction)
+        private static UInt32 BX(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 h2 = (UInt16)((instruction >> 6) & 1);
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
@@ -558,7 +558,7 @@ namespace Iris.CPU
             return 3;
         }
 
-        private static UInt32 CMN(CPU cpu, UInt16 instruction)
+        private static UInt32 CMN(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rn = (UInt16)(instruction & 0b111);
@@ -581,7 +581,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static UInt32 CMP1(CPU cpu, UInt16 instruction)
+        private static UInt32 CMP1(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rn = (UInt16)((instruction >> 8) & 0b111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -602,7 +602,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static UInt32 CMP2(CPU cpu, UInt16 instruction)
+        private static UInt32 CMP2(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rn = (UInt16)(instruction & 0b111);
@@ -624,7 +624,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static UInt32 CMP3(CPU cpu, UInt16 instruction)
+        private static UInt32 CMP3(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 h1 = (UInt16)((instruction >> 7) & 1);
             UInt16 h2 = (UInt16)((instruction >> 6) & 1);
@@ -651,7 +651,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static UInt32 EOR(CPU cpu, UInt16 instruction)
+        private static UInt32 EOR(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -668,7 +668,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static UInt32 LDMIA(CPU cpu, UInt16 instruction)
+        private static UInt32 LDMIA(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rn = (UInt16)((instruction >> 8) & 0b111);
             UInt16 registerList = (UInt16)(instruction & 0xff);
@@ -705,7 +705,7 @@ namespace Iris.CPU
             }
         }
 
-        private static UInt32 LDR1(CPU cpu, UInt16 instruction)
+        private static UInt32 LDR1(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -722,7 +722,7 @@ namespace Iris.CPU
             return 3;
         }
 
-        private static UInt32 LDR2(CPU cpu, UInt16 instruction)
+        private static UInt32 LDR2(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -740,7 +740,7 @@ namespace Iris.CPU
             return 3;
         }
 
-        private static UInt32 LDR3(CPU cpu, UInt16 instruction)
+        private static UInt32 LDR3(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -756,7 +756,7 @@ namespace Iris.CPU
             return 3;
         }
 
-        private static UInt32 LDR4(CPU cpu, UInt16 instruction)
+        private static UInt32 LDR4(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -772,7 +772,7 @@ namespace Iris.CPU
             return 3;
         }
 
-        private static UInt32 LDRB1(CPU cpu, UInt16 instruction)
+        private static UInt32 LDRB1(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -789,7 +789,7 @@ namespace Iris.CPU
             return 3;
         }
 
-        private static UInt32 LDRB2(CPU cpu, UInt16 instruction)
+        private static UInt32 LDRB2(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -807,7 +807,7 @@ namespace Iris.CPU
             return 3;
         }
 
-        private static UInt32 LDRH1(CPU cpu, UInt16 instruction)
+        private static UInt32 LDRH1(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -824,7 +824,7 @@ namespace Iris.CPU
             return 3;
         }
 
-        private static UInt32 LDRH2(CPU cpu, UInt16 instruction)
+        private static UInt32 LDRH2(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -842,7 +842,7 @@ namespace Iris.CPU
             return 3;
         }
 
-        private static UInt32 LDRSB(CPU cpu, UInt16 instruction)
+        private static UInt32 LDRSB(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -860,7 +860,7 @@ namespace Iris.CPU
             return 3;
         }
 
-        private static UInt32 LDRSH(CPU cpu, UInt16 instruction)
+        private static UInt32 LDRSH(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -887,7 +887,7 @@ namespace Iris.CPU
             return 3;
         }
 
-        private static UInt32 LSL1(CPU cpu, UInt16 instruction)
+        private static UInt32 LSL1(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
@@ -915,7 +915,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static UInt32 LSL2(CPU cpu, UInt16 instruction)
+        private static UInt32 LSL2(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rs = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -952,7 +952,7 @@ namespace Iris.CPU
             return 2;
         }
 
-        private static UInt32 LSR1(CPU cpu, UInt16 instruction)
+        private static UInt32 LSR1(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
@@ -981,7 +981,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static UInt32 LSR2(CPU cpu, UInt16 instruction)
+        private static UInt32 LSR2(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rs = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -1018,7 +1018,7 @@ namespace Iris.CPU
             return 2;
         }
 
-        private static UInt32 MOV1(CPU cpu, UInt16 instruction)
+        private static UInt32 MOV1(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -1034,7 +1034,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static UInt32 MOV3(CPU cpu, UInt16 instruction)
+        private static UInt32 MOV3(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 h1 = (UInt16)((instruction >> 7) & 1);
             UInt16 h2 = (UInt16)((instruction >> 6) & 1);
@@ -1052,7 +1052,7 @@ namespace Iris.CPU
             return (rd == PC) ? 3u : 1u;
         }
 
-        private static UInt32 MUL(CPU cpu, UInt16 instruction)
+        private static UInt32 MUL(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -1070,7 +1070,7 @@ namespace Iris.CPU
             return m + 1;
         }
 
-        private static UInt32 MVN(CPU cpu, UInt16 instruction)
+        private static UInt32 MVN(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -1087,7 +1087,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static UInt32 NEG(CPU cpu, UInt16 instruction)
+        private static UInt32 NEG(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -1109,7 +1109,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static UInt32 ORR(CPU cpu, UInt16 instruction)
+        private static UInt32 ORR(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -1126,7 +1126,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static UInt32 POP(CPU cpu, UInt16 instruction)
+        private static UInt32 POP(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 r = (UInt16)((instruction >> 8) & 1);
             UInt16 registerList = (UInt16)(instruction & 0xff);
@@ -1161,7 +1161,7 @@ namespace Iris.CPU
             }
         }
 
-        private static UInt32 PUSH(CPU cpu, UInt16 instruction)
+        private static UInt32 PUSH(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 r = (UInt16)((instruction >> 8) & 1);
             UInt16 registerList = (UInt16)(instruction & 0xff);
@@ -1198,7 +1198,7 @@ namespace Iris.CPU
             }
         }
 
-        private static UInt32 ROR(CPU cpu, UInt16 instruction)
+        private static UInt32 ROR(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rs = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -1227,7 +1227,7 @@ namespace Iris.CPU
             return 2;
         }
 
-        private static UInt32 SBC(CPU cpu, UInt16 instruction)
+        private static UInt32 SBC(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rd = (UInt16)(instruction & 0b111);
@@ -1249,7 +1249,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static UInt32 STMIA(CPU cpu, UInt16 instruction)
+        private static UInt32 STMIA(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rn = (UInt16)((instruction >> 8) & 0b111);
             UInt16 registerList = (UInt16)(instruction & 0xff);
@@ -1297,7 +1297,7 @@ namespace Iris.CPU
             }
         }
 
-        private static UInt32 STR1(CPU cpu, UInt16 instruction)
+        private static UInt32 STR1(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -1313,7 +1313,7 @@ namespace Iris.CPU
             return 2;
         }
 
-        private static UInt32 STR2(CPU cpu, UInt16 instruction)
+        private static UInt32 STR2(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -1330,7 +1330,7 @@ namespace Iris.CPU
             return 2;
         }
 
-        private static UInt32 STR3(CPU cpu, UInt16 instruction)
+        private static UInt32 STR3(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -1345,7 +1345,7 @@ namespace Iris.CPU
             return 2;
         }
 
-        private static UInt32 STRB1(CPU cpu, UInt16 instruction)
+        private static UInt32 STRB1(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -1361,7 +1361,7 @@ namespace Iris.CPU
             return 2;
         }
 
-        private static UInt32 STRB2(CPU cpu, UInt16 instruction)
+        private static UInt32 STRB2(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -1378,7 +1378,7 @@ namespace Iris.CPU
             return 2;
         }
 
-        private static UInt32 STRH1(CPU cpu, UInt16 instruction)
+        private static UInt32 STRH1(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b1_1111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -1394,7 +1394,7 @@ namespace Iris.CPU
             return 2;
         }
 
-        private static UInt32 STRH2(CPU cpu, UInt16 instruction)
+        private static UInt32 STRH2(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -1411,7 +1411,7 @@ namespace Iris.CPU
             return 2;
         }
 
-        private static UInt32 SUB1(CPU cpu, UInt16 instruction)
+        private static UInt32 SUB1(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -1434,7 +1434,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static UInt32 SUB2(CPU cpu, UInt16 instruction)
+        private static UInt32 SUB2(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rd = (UInt16)((instruction >> 8) & 0b111);
             UInt16 imm = (UInt16)(instruction & 0xff);
@@ -1455,7 +1455,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static UInt32 SUB3(CPU cpu, UInt16 instruction)
+        private static UInt32 SUB3(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 6) & 0b111);
             UInt16 rn = (UInt16)((instruction >> 3) & 0b111);
@@ -1479,7 +1479,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static UInt32 SUB4(CPU cpu, UInt16 instruction)
+        private static UInt32 SUB4(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)(instruction & 0x7f);
 
@@ -1491,7 +1491,7 @@ namespace Iris.CPU
             return 1;
         }
 
-        private static UInt32 SWI(CPU cpu, UInt16 instruction)
+        private static UInt32 SWI(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 imm = (UInt16)(instruction & 0xff);
 
@@ -1500,7 +1500,7 @@ namespace Iris.CPU
             return 3;
         }
 
-        private static UInt32 TST(CPU cpu, UInt16 instruction)
+        private static UInt32 TST(CPU_Core cpu, UInt16 instruction)
         {
             UInt16 rm = (UInt16)((instruction >> 3) & 0b111);
             UInt16 rn = (UInt16)(instruction & 0b111);

@@ -5,7 +5,7 @@ namespace Iris.GBA
 {
     public sealed partial class GBA_System : ISystem
     {
-        private readonly CPU.CPU _cpu;
+        private readonly CPU_Core _cpu;
         private readonly PPU _ppu;
 
         private UInt16 _WAITCNT;
@@ -14,7 +14,7 @@ namespace Iris.GBA
 
         public GBA_System(DrawFrame_Delegate drawFrame)
         {
-            CPU.CPU.CallbackInterface cpuCallbackInterface = new()
+            CPU_Core.CallbackInterface cpuCallbackInterface = new()
             {
                 ReadMemory8 = ReadMemory8,
                 ReadMemory16 = ReadMemory16,
@@ -32,7 +32,7 @@ namespace Iris.GBA
                 RequestVBlankInterrupt = () => RequestInterrupt(Interrupt.VBlank)
             };
 
-            _cpu = new(CPU.CPU.Architecture.ARMv4T, cpuCallbackInterface);
+            _cpu = new(CPU_Core.Architecture.ARMv4T, cpuCallbackInterface);
             _ppu = new(ppuCallbackInterface);
 
             InitPageTables();
@@ -68,7 +68,7 @@ namespace Iris.GBA
             _WAITCNT = 0;
             _IME = 0;
 
-            _cpu.NIRQ = CPU.CPU.Signal.High;
+            _cpu.NIRQ = CPU_Core.Signal.High;
         }
 
         public bool IsRunning()

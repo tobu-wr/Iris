@@ -5,14 +5,14 @@ namespace Iris.NDS
 {
     public sealed partial class NDS_System : ISystem
     {
-        private readonly CPU.CPU _cpu;
+        private readonly CPU_Core _cpu;
         private readonly PPU _ppu;
 
         private bool _running = false;
 
         public NDS_System(DrawFrame_Delegate drawFrameCallback)
         {
-            CPU.CPU.CallbackInterface cpuCallbackInterface = new()
+            CPU_Core.CallbackInterface cpuCallbackInterface = new()
             {
                 ReadMemory8 = ReadMemory8,
                 ReadMemory16 = ReadMemory16,
@@ -24,7 +24,7 @@ namespace Iris.NDS
                 HandleIRQ = HandleIRQ
             };
 
-            _cpu = new(CPU.CPU.Architecture.ARMv5TE, cpuCallbackInterface);
+            _cpu = new(CPU_Core.Architecture.ARMv5TE, cpuCallbackInterface);
             _ppu = new(drawFrameCallback);
         }
 
@@ -32,7 +32,7 @@ namespace Iris.NDS
         {
             BIOS_Reset();
 
-            _cpu.NIRQ = CPU.CPU.Signal.High;
+            _cpu.NIRQ = CPU_Core.Signal.High;
         }
 
         public bool IsRunning()

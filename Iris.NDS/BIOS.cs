@@ -10,7 +10,7 @@ namespace Iris.NDS
 
             // TODO
 
-            _cpu.Reg[CPU.CPU.PC] = ROMAddress;
+            _cpu.Reg[CPU_Core.PC] = ROMAddress;
             _cpu.NextInstructionAddress = ROMAddress;
         }
 

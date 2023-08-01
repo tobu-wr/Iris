@@ -1,4 +1,6 @@
-﻿namespace Iris.GBA
+﻿using Iris.CPU;
+
+namespace Iris.GBA
 {
     public sealed partial class GBA_System
     {
@@ -9,8 +11,8 @@
             for (int i = 0; i <= 12; ++i)
                 _cpu.Reg[i] = 0;
 
-            _cpu.Reg[CPU.CPU.SP] = 0x300_7f00;
-            _cpu.Reg[CPU.CPU.LR] = ROMAddress;
+            _cpu.Reg[CPU_Core.SP] = 0x300_7f00;
+            _cpu.Reg[CPU_Core.LR] = ROMAddress;
 
             _cpu.Reg13_svc = 0x300_7fe0;
             _cpu.Reg14_svc = 0;
@@ -107,11 +109,11 @@
 
             void PushToStack(UInt32 value)
             {
-                _cpu.Reg[CPU.CPU.SP] -= 4;
-                WriteMemory32(_cpu.Reg[CPU.CPU.SP], value);
+                _cpu.Reg[CPU_Core.SP] -= 4;
+                WriteMemory32(_cpu.Reg[CPU_Core.SP], value);
             }
 
-            PushToStack(_cpu.Reg[CPU.CPU.LR]);
+            PushToStack(_cpu.Reg[CPU_Core.LR]);
             PushToStack(_cpu.Reg[12]);
             PushToStack(_cpu.Reg[3]);
             PushToStack(_cpu.Reg[2]);
@@ -119,7 +121,7 @@
             PushToStack(_cpu.Reg[0]);
 
             _cpu.Reg[0] = 0x400_0000;
-            _cpu.Reg[CPU.CPU.LR] = 0x138;
+            _cpu.Reg[CPU_Core.LR] = 0x138;
             _cpu.NextInstructionAddress = ReadMemory32(0x300_7ffc);
         }
 
@@ -308,8 +310,8 @@
         {
             UInt32 PopFromStack()
             {
-                UInt32 value = ReadMemory32(_cpu.Reg[CPU.CPU.SP]);
-                _cpu.Reg[CPU.CPU.SP] += 4;
+                UInt32 value = ReadMemory32(_cpu.Reg[CPU_Core.SP]);
+                _cpu.Reg[CPU_Core.SP] += 4;
                 return value;
             }
 
@@ -318,9 +320,9 @@
             _cpu.Reg[2] = PopFromStack();
             _cpu.Reg[3] = PopFromStack();
             _cpu.Reg[12] = PopFromStack();
-            _cpu.Reg[CPU.CPU.LR] = PopFromStack();
+            _cpu.Reg[CPU_Core.LR] = PopFromStack();
 
-            _cpu.NextInstructionAddress = _cpu.Reg[CPU.CPU.LR] - 4;
+            _cpu.NextInstructionAddress = _cpu.Reg[CPU_Core.LR] - 4;
             _cpu.SetCPSR(_cpu.SPSR);
         }
     }

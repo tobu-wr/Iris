@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Iris.CPU
 {
-    public sealed class CPU
+    public sealed class CPU_Core
     {
         public enum Architecture
         {
@@ -51,9 +51,9 @@ namespace Iris.CPU
         {
             internal readonly T _mask;
             internal readonly T _expected;
-            internal unsafe readonly delegate*<CPU, T, UInt32> _handler;
+            internal unsafe readonly delegate*<CPU_Core, T, UInt32> _handler;
 
-            internal unsafe InstructionListEntry(T mask, T expected, delegate*<CPU, T, UInt32> handler)
+            internal unsafe InstructionListEntry(T mask, T expected, delegate*<CPU_Core, T, UInt32> handler)
             {
                 _mask = mask;
                 _expected = expected;
@@ -63,9 +63,9 @@ namespace Iris.CPU
 
         internal readonly struct InstructionLUTEntry<T>
         {
-            internal unsafe readonly delegate*<CPU, T, UInt32> _handler;
+            internal unsafe readonly delegate*<CPU_Core, T, UInt32> _handler;
 
-            internal unsafe InstructionLUTEntry(delegate*<CPU, T, UInt32> handler)
+            internal unsafe InstructionLUTEntry(delegate*<CPU_Core, T, UInt32> handler)
             {
                 _handler = handler;
             }
@@ -105,7 +105,7 @@ namespace Iris.CPU
         public UInt32 NextInstructionAddress;
         public Signal NIRQ;
 
-        public CPU(Architecture architecture, CallbackInterface callbackInterface)
+        public CPU_Core(Architecture architecture, CallbackInterface callbackInterface)
         {
             _architecture = architecture;
             _callbackInterface = callbackInterface;
