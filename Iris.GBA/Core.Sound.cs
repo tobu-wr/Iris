@@ -1,6 +1,6 @@
 ﻿namespace Iris.GBA
 {
-    public sealed partial class Core
+    public sealed partial class GBA_System
     {
         private UInt16 _SOUND1CNT_L;
         private UInt16 _SOUND1CNT_H;

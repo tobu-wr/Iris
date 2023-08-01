@@ -1,6 +1,6 @@
 ﻿namespace Iris.GBA
 {
-    public sealed partial class Core
+    public sealed partial class GBA_System
     {
         private UInt16 _DMA0SAD_L;
         private UInt16 _DMA0SAD_H;

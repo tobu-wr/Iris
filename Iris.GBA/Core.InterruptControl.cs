@@ -2,7 +2,7 @@
 
 namespace Iris.GBA
 {
-    public sealed partial class Core
+    public sealed partial class GBA_System
     {
         private enum Interrupt
         {

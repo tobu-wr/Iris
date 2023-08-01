@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Iris.GBA
 {
-    public sealed partial class Core
+    public sealed partial class GBA_System
     {
         [Flags]
         private enum MemoryFlag

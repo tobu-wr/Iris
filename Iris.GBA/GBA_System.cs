@@ -3,7 +3,7 @@ using Iris.CPU;
 
 namespace Iris.GBA
 {
-    public sealed partial class Core : ISystem
+    public sealed partial class GBA_System : ISystem
     {
         private readonly CPU.CPU _cpu;
         private readonly PPU _ppu;
@@ -12,7 +12,7 @@ namespace Iris.GBA
 
         private bool _running;
 
-        public Core(DrawFrame_Delegate drawFrame)
+        public GBA_System(DrawFrame_Delegate drawFrame)
         {
             CPU.CPU.CallbackInterface cpuCallbackInterface = new()
             {
