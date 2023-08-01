@@ -46,30 +46,32 @@ namespace Iris.UserInterface
 
         private void DrawFrame(UInt16[] frameBuffer)
         {
+#if !RELEASE_NODISPLAY
             const int ScreenWidth = 240;
             const int ScreenHeight = 160;
             const int PixelCount = ScreenWidth * ScreenHeight;
             const PixelFormat PixelFormat = PixelFormat.Format16bppRgb555;
 
-            //Bitmap bitmap = new(ScreenWidth, ScreenHeight, PixelFormat);
-            //BitmapData data = bitmap.LockBits(new Rectangle(0, 0, ScreenWidth, ScreenHeight), ImageLockMode.WriteOnly, PixelFormat);
+            Bitmap bitmap = new(ScreenWidth, ScreenHeight, PixelFormat);
+            BitmapData data = bitmap.LockBits(new Rectangle(0, 0, ScreenWidth, ScreenHeight), ImageLockMode.WriteOnly, PixelFormat);
 
-            //Int16[] buffer = new Int16[PixelCount];
+            Int16[] buffer = new Int16[PixelCount];
 
-            //for (int i = 0; i < PixelCount; ++i)
-            //{
-            //    UInt16 gbaColor = frameBuffer[i]; // BGR format
-            //    Byte red = (Byte)((gbaColor >> 0) & 0x1f);
-            //    Byte green = (Byte)((gbaColor >> 5) & 0x1f);
-            //    Byte blue = (Byte)((gbaColor >> 10) & 0x1f);
-            //    buffer[i] = (Int16)((red << 10) | (green << 5) | blue);
-            //}
+            for (int i = 0; i < PixelCount; ++i)
+            {
+                UInt16 gbaColor = frameBuffer[i]; // BGR format
+                Byte red = (Byte)((gbaColor >> 0) & 0x1f);
+                Byte green = (Byte)((gbaColor >> 5) & 0x1f);
+                Byte blue = (Byte)((gbaColor >> 10) & 0x1f);
+                buffer[i] = (Int16)((red << 10) | (green << 5) | blue);
+            }
 
-            //System.Runtime.InteropServices.Marshal.Copy(buffer, 0, data.Scan0, PixelCount);
-            //bitmap.UnlockBits(data);
+            System.Runtime.InteropServices.Marshal.Copy(buffer, 0, data.Scan0, PixelCount);
+            bitmap.UnlockBits(data);
 
-            //screenBox.Invoke(() => screenBox.Image = bitmap);
-            //screenBox.Invalidate();
+            screenBox.Invoke(() => screenBox.Image = bitmap);
+            screenBox.Invalidate();
+#endif
 
             ++_frameCount;
         }
