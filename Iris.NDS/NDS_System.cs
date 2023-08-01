@@ -3,14 +3,14 @@ using Iris.CPU;
 
 namespace Iris.NDS
 {
-    public sealed partial class Core : ISystem
+    public sealed partial class NDS_System : ISystem
     {
         private readonly CPU.CPU _cpu;
         private readonly PPU _ppu;
 
         private bool _running = false;
 
-        public Core(DrawFrame_Delegate drawFrameCallback)
+        public NDS_System(DrawFrame_Delegate drawFrameCallback)
         {
             CPU.CPU.CallbackInterface cpuCallbackInterface = new()
             {

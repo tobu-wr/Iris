@@ -2,7 +2,7 @@
 
 namespace Iris.NDS
 {
-    public sealed partial class Core
+    public sealed partial class NDS_System
     {
         private void BIOS_Reset()
         {
