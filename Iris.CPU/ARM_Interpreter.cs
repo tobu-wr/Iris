@@ -20,192 +20,192 @@ namespace Iris.CPU
             InstructionListEntry<UInt32>[] InstructionList = new InstructionListEntry<UInt32>[]
             {
                 // ADC
-                new(0x0fe0_0000, 0x02a0_0000, &ADC, Model.ARM7TDMI), // I bit is 1
-                new(0x0fe0_0090, 0x00a0_0000, &ADC, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0fe0_0090, 0x00a0_0080, &ADC, Model.ARM7TDMI), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0fe0_0090, 0x00a0_0010, &ADC, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0fe0_0000, 0x02a0_0000, &ADC, new List<Model>{ Model.ARM7TDMI }), // I bit is 1
+                new(0x0fe0_0090, 0x00a0_0000, &ADC, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x00a0_0080, &ADC, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x00a0_0010, &ADC, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // ADD
-                new(0x0fe0_0000, 0x0280_0000, &ADD, Model.ARM7TDMI), // I bit is 1
-                new(0x0fe0_0090, 0x0080_0000, &ADD, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0fe0_0090, 0x0080_0080, &ADD, Model.ARM7TDMI), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0fe0_0090, 0x0080_0010, &ADD, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0fe0_0000, 0x0280_0000, &ADD, new List<Model>{ Model.ARM7TDMI }), // I bit is 1
+                new(0x0fe0_0090, 0x0080_0000, &ADD, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x0080_0080, &ADD, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x0080_0010, &ADD, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // AND
-                new(0x0fe0_0000, 0x0200_0000, &AND, Model.ARM7TDMI), // I bit is 1
-                new(0x0fe0_0090, 0x0000_0000, &AND, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0fe0_0090, 0x0000_0080, &AND, Model.ARM7TDMI), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0fe0_0090, 0x0000_0010, &AND, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0fe0_0000, 0x0200_0000, &AND, new List<Model>{ Model.ARM7TDMI }), // I bit is 1
+                new(0x0fe0_0090, 0x0000_0000, &AND, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x0000_0080, &AND, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x0000_0010, &AND, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // B
-                new(0x0f00_0000, 0x0a00_0000, &B, Model.ARM7TDMI),
+                new(0x0f00_0000, 0x0a00_0000, &B, new List<Model>{ Model.ARM7TDMI }),
 
                 // BL
-                new(0x0f00_0000, 0x0b00_0000, &BL, Model.ARM7TDMI),
+                new(0x0f00_0000, 0x0b00_0000, &BL, new List<Model>{ Model.ARM7TDMI }),
 
                 // BIC
-                new(0x0fe0_0000, 0x03c0_0000, &BIC, Model.ARM7TDMI), // I bit is 1
-                new(0x0fe0_0090, 0x01c0_0000, &BIC, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0fe0_0090, 0x01c0_0080, &BIC, Model.ARM7TDMI), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0fe0_0090, 0x01c0_0010, &BIC, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0fe0_0000, 0x03c0_0000, &BIC, new List<Model>{ Model.ARM7TDMI }), // I bit is 1
+                new(0x0fe0_0090, 0x01c0_0000, &BIC, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x01c0_0080, &BIC, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x01c0_0010, &BIC, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // BX
-                new(0x0fff_fff0, 0x012f_ff10, &BX, Model.ARM7TDMI),
+                new(0x0fff_fff0, 0x012f_ff10, &BX, new List<Model>{ Model.ARM7TDMI }),
 
                 // CMN
-                new(0x0ff0_f000, 0x0370_0000, &CMN, Model.ARM7TDMI), // I bit is 1
-                new(0x0ff0_f090, 0x0170_0000, &CMN, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0ff0_f090, 0x0170_0080, &CMN, Model.ARM7TDMI), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0ff0_f090, 0x0170_0010, &CMN, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 1
-                new(0x0ff0_f000, 0x0370_f000, &CMN, Model.ARM7TDMI), // I bit is 1
-                new(0x0ff0_f090, 0x0170_f000, &CMN, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0ff0_f090, 0x0170_f080, &CMN, Model.ARM7TDMI), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0ff0_f090, 0x0170_f010, &CMN, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0ff0_f000, 0x0370_0000, &CMN, new List<Model>{ Model.ARM7TDMI }), // I bit is 1
+                new(0x0ff0_f090, 0x0170_0000, &CMN, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0ff0_f090, 0x0170_0080, &CMN, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0ff0_f090, 0x0170_0010, &CMN, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0ff0_f000, 0x0370_f000, &CMN, new List<Model>{ Model.ARM7TDMI }), // I bit is 1
+                new(0x0ff0_f090, 0x0170_f000, &CMN, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0ff0_f090, 0x0170_f080, &CMN, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0ff0_f090, 0x0170_f010, &CMN, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // CMP
-                new(0x0ff0_f000, 0x0350_0000, &CMP, Model.ARM7TDMI), // I bit is 1
-                new(0x0ff0_f090, 0x0150_0000, &CMP, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0ff0_f090, 0x0150_0080, &CMP, Model.ARM7TDMI), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0ff0_f090, 0x0150_0010, &CMP, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 1
-                new(0x0ff0_f000, 0x0350_f000, &CMP, Model.ARM7TDMI), // I bit is 1
-                new(0x0ff0_f090, 0x0150_f000, &CMP, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0ff0_f090, 0x0150_f080, &CMP, Model.ARM7TDMI), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0ff0_f090, 0x0150_f010, &CMP, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0ff0_f000, 0x0350_0000, &CMP, new List<Model>{ Model.ARM7TDMI }), // I bit is 1
+                new(0x0ff0_f090, 0x0150_0000, &CMP, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0ff0_f090, 0x0150_0080, &CMP, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0ff0_f090, 0x0150_0010, &CMP, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0ff0_f000, 0x0350_f000, &CMP, new List<Model>{ Model.ARM7TDMI }), // I bit is 1
+                new(0x0ff0_f090, 0x0150_f000, &CMP, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0ff0_f090, 0x0150_f080, &CMP, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0ff0_f090, 0x0150_f010, &CMP, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // EOR
-                new(0x0fe0_0000, 0x0220_0000, &EOR, Model.ARM7TDMI), // I bit is 1
-                new(0x0fe0_0090, 0x0020_0000, &EOR, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0fe0_0090, 0x0020_0080, &EOR, Model.ARM7TDMI), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0fe0_0090, 0x0020_0010, &EOR, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0fe0_0000, 0x0220_0000, &EOR, new List<Model>{ Model.ARM7TDMI }), // I bit is 1
+                new(0x0fe0_0090, 0x0020_0000, &EOR, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x0020_0080, &EOR, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x0020_0010, &EOR, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // LDM
-                new(0x0e50_0000, 0x0810_0000, &LDM1, Model.ARM7TDMI),
-                new(0x0e50_8000, 0x0850_0000, &LDM2, Model.ARM7TDMI),
-                //new(0x0e50_8000, 0x0850_8000, &LDM3, Model.ARM7TDMI),
+                new(0x0e50_0000, 0x0810_0000, &LDM1, new List<Model>{ Model.ARM7TDMI }),
+                new(0x0e50_8000, 0x0850_0000, &LDM2, new List<Model>{ Model.ARM7TDMI }),
+                //new(0x0e50_8000, 0x0850_8000, &LDM3, new List<Model>{ Model.ARM7TDMI }),
 
                 // LDR
-                new(0x0c50_0000, 0x0410_0000, &LDR, Model.ARM7TDMI),
+                new(0x0c50_0000, 0x0410_0000, &LDR, new List<Model>{ Model.ARM7TDMI }),
 
                 // LDRB
-                new(0x0c50_0000, 0x0450_0000, &LDRB, Model.ARM7TDMI),
+                new(0x0c50_0000, 0x0450_0000, &LDRB, new List<Model>{ Model.ARM7TDMI }),
 
                 // LDRH
-                new(0x0e10_00f0, 0x0010_00b0, &LDRH, Model.ARM7TDMI),
+                new(0x0e10_00f0, 0x0010_00b0, &LDRH, new List<Model>{ Model.ARM7TDMI }),
 
                 // LDRSB
-                new(0x0e10_00f0, 0x0010_00d0, &LDRSB, Model.ARM7TDMI),
+                new(0x0e10_00f0, 0x0010_00d0, &LDRSB, new List<Model>{ Model.ARM7TDMI }),
 
                 // LDRSH
-                new(0x0e10_00f0, 0x0010_00f0, &LDRSH, Model.ARM7TDMI),
+                new(0x0e10_00f0, 0x0010_00f0, &LDRSH, new List<Model>{ Model.ARM7TDMI }),
 
                 // MLA
-                new(0x0fe0_00f0, 0x0020_0090, &MLA, Model.ARM7TDMI),
+                new(0x0fe0_00f0, 0x0020_0090, &MLA, new List<Model>{ Model.ARM7TDMI }),
 
                 // MOV
-                new(0x0fef_0000, 0x03a0_0000, &MOV, Model.ARM7TDMI), // I bit is 1
-                new(0x0fef_0090, 0x01a0_0000, &MOV, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0fef_0090, 0x01a0_0080, &MOV, Model.ARM7TDMI), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0fef_0090, 0x01a0_0010, &MOV, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0fef_0000, 0x03a0_0000, &MOV, new List<Model>{ Model.ARM7TDMI }), // I bit is 1
+                new(0x0fef_0090, 0x01a0_0000, &MOV, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fef_0090, 0x01a0_0080, &MOV, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fef_0090, 0x01a0_0010, &MOV, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // MRS
-                new(0x0fbf_0fff, 0x010f_0000, &MRS, Model.ARM7TDMI),
+                new(0x0fbf_0fff, 0x010f_0000, &MRS, new List<Model>{ Model.ARM7TDMI }),
 
                 // MSR
-                new(0x0fb0_f000, 0x0320_f000, &MSR, Model.ARM7TDMI), // Immediate operand
-                new(0x0fb0_fff0, 0x0120_f000, &MSR, Model.ARM7TDMI), // Register operand
+                new(0x0fb0_f000, 0x0320_f000, &MSR, new List<Model>{ Model.ARM7TDMI }), // Immediate operand
+                new(0x0fb0_fff0, 0x0120_f000, &MSR, new List<Model>{ Model.ARM7TDMI }), // Register operand
 
                 // MUL
-                new(0x0fe0_f0f0, 0x0000_0090, &MUL, Model.ARM7TDMI),
+                new(0x0fe0_f0f0, 0x0000_0090, &MUL, new List<Model>{ Model.ARM7TDMI }),
 
                 // MVN
-                new(0x0fef_0000, 0x03e0_0000, &MVN, Model.ARM7TDMI), // I bit is 1
-                new(0x0fef_0090, 0x01e0_0000, &MVN, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0fef_0090, 0x01e0_0080, &MVN, Model.ARM7TDMI), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0fef_0090, 0x01e0_0010, &MVN, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0fef_0000, 0x03e0_0000, &MVN, new List<Model>{ Model.ARM7TDMI }), // I bit is 1
+                new(0x0fef_0090, 0x01e0_0000, &MVN, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fef_0090, 0x01e0_0080, &MVN, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fef_0090, 0x01e0_0010, &MVN, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // ORR
-                new(0x0fe0_0000, 0x0380_0000, &ORR, Model.ARM7TDMI), // I bit is 1
-                new(0x0fe0_0090, 0x0180_0000, &ORR, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0fe0_0090, 0x0180_0080, &ORR, Model.ARM7TDMI), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0fe0_0090, 0x0180_0010, &ORR, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0fe0_0000, 0x0380_0000, &ORR, new List<Model>{ Model.ARM7TDMI }), // I bit is 1
+                new(0x0fe0_0090, 0x0180_0000, &ORR, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x0180_0080, &ORR, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x0180_0010, &ORR, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // RSB
-                new(0x0fe0_0000, 0x0260_0000, &RSB, Model.ARM7TDMI), // I bit is 1
-                new(0x0fe0_0090, 0x0060_0000, &RSB, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0fe0_0090, 0x0060_0080, &RSB, Model.ARM7TDMI), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0fe0_0090, 0x0060_0010, &RSB, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0fe0_0000, 0x0260_0000, &RSB, new List<Model>{ Model.ARM7TDMI }), // I bit is 1
+                new(0x0fe0_0090, 0x0060_0000, &RSB, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x0060_0080, &RSB, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x0060_0010, &RSB, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // RSC
-                new(0x0fe0_0000, 0x02e0_0000, &RSC, Model.ARM7TDMI), // I bit is 1
-                new(0x0fe0_0090, 0x00e0_0000, &RSC, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0fe0_0090, 0x00e0_0080, &RSC, Model.ARM7TDMI), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0fe0_0090, 0x00e0_0010, &RSC, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0fe0_0000, 0x02e0_0000, &RSC, new List<Model>{ Model.ARM7TDMI }), // I bit is 1
+                new(0x0fe0_0090, 0x00e0_0000, &RSC, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x00e0_0080, &RSC, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x00e0_0010, &RSC, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // SBC
-                new(0x0fe0_0000, 0x02c0_0000, &SBC, Model.ARM7TDMI), // I bit is 1
-                new(0x0fe0_0090, 0x00c0_0000, &SBC, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0fe0_0090, 0x00c0_0080, &SBC, Model.ARM7TDMI), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0fe0_0090, 0x00c0_0010, &SBC, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0fe0_0000, 0x02c0_0000, &SBC, new List<Model>{ Model.ARM7TDMI }), // I bit is 1
+                new(0x0fe0_0090, 0x00c0_0000, &SBC, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x00c0_0080, &SBC, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x00c0_0010, &SBC, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // SMLAL
-                new(0x0fe0_00f0, 0x00e0_0090, &SMLAL, Model.ARM7TDMI),
+                new(0x0fe0_00f0, 0x00e0_0090, &SMLAL, new List<Model>{ Model.ARM7TDMI }),
 
                 // SMULL
-                new(0x0fe0_00f0, 0x00c0_0090, &SMULL, Model.ARM7TDMI),
+                new(0x0fe0_00f0, 0x00c0_0090, &SMULL, new List<Model>{ Model.ARM7TDMI }),
 
                 // STM
-                new(0x0e50_0000, 0x0800_0000, &STM1, Model.ARM7TDMI),
-                new(0x0e70_0000, 0x0840_0000, &STM2, Model.ARM7TDMI),
+                new(0x0e50_0000, 0x0800_0000, &STM1, new List<Model>{ Model.ARM7TDMI }),
+                new(0x0e70_0000, 0x0840_0000, &STM2, new List<Model>{ Model.ARM7TDMI }),
 
                 // STR
-                new(0x0c50_0000, 0x0400_0000, &STR, Model.ARM7TDMI),
+                new(0x0c50_0000, 0x0400_0000, &STR, new List<Model>{ Model.ARM7TDMI }),
 
                 // STRB
-                new(0x0c50_0000, 0x0440_0000, &STRB, Model.ARM7TDMI),
+                new(0x0c50_0000, 0x0440_0000, &STRB, new List<Model>{ Model.ARM7TDMI }),
 
                 // STRH
-                new(0x0e10_00f0, 0x0000_00b0, &STRH, Model.ARM7TDMI),
+                new(0x0e10_00f0, 0x0000_00b0, &STRH, new List<Model>{ Model.ARM7TDMI }),
 
                 // SUB
-                new(0x0fe0_0000, 0x0240_0000, &SUB, Model.ARM7TDMI), // I bit is 1
-                new(0x0fe0_0090, 0x0040_0000, &SUB, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0fe0_0090, 0x0040_0080, &SUB, Model.ARM7TDMI), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0fe0_0090, 0x0040_0010, &SUB, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0fe0_0000, 0x0240_0000, &SUB, new List<Model>{ Model.ARM7TDMI }), // I bit is 1
+                new(0x0fe0_0090, 0x0040_0000, &SUB, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0fe0_0090, 0x0040_0080, &SUB, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0fe0_0090, 0x0040_0010, &SUB, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // SWI
-                new(0x0f00_0000, 0x0f00_0000, &SWI, Model.ARM7TDMI),
+                new(0x0f00_0000, 0x0f00_0000, &SWI, new List<Model>{ Model.ARM7TDMI }),
 
                 // SWP
-                new(0x0ff0_0ff0, 0x0100_0090, &SWP, Model.ARM7TDMI),
+                new(0x0ff0_0ff0, 0x0100_0090, &SWP, new List<Model>{ Model.ARM7TDMI }),
 
                 // SWPB
-                new(0x0ff0_0ff0, 0x0140_0090, &SWPB, Model.ARM7TDMI),
+                new(0x0ff0_0ff0, 0x0140_0090, &SWPB, new List<Model>{ Model.ARM7TDMI }),
 
                 // TEQ
-                new(0x0ff0_f000, 0x0330_0000, &TEQ, Model.ARM7TDMI), // I bit is 1
-                new(0x0ff0_f090, 0x0130_0000, &TEQ, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0ff0_f090, 0x0130_0080, &TEQ, Model.ARM7TDMI), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0ff0_f090, 0x0130_0010, &TEQ, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 1
-                new(0x0ff0_f000, 0x0330_f000, &TEQ, Model.ARM7TDMI), // I bit is 1
-                new(0x0ff0_f090, 0x0130_f000, &TEQ, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0ff0_f090, 0x0130_f080, &TEQ, Model.ARM7TDMI), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0ff0_f090, 0x0130_f010, &TEQ, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0ff0_f000, 0x0330_0000, &TEQ, new List<Model>{ Model.ARM7TDMI }), // I bit is 1
+                new(0x0ff0_f090, 0x0130_0000, &TEQ, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0ff0_f090, 0x0130_0080, &TEQ, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0ff0_f090, 0x0130_0010, &TEQ, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0ff0_f000, 0x0330_f000, &TEQ, new List<Model>{ Model.ARM7TDMI }), // I bit is 1
+                new(0x0ff0_f090, 0x0130_f000, &TEQ, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0ff0_f090, 0x0130_f080, &TEQ, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0ff0_f090, 0x0130_f010, &TEQ, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // TST
-                new(0x0ff0_f000, 0x0310_0000, &TST, Model.ARM7TDMI), // I bit is 1
-                new(0x0ff0_f090, 0x0110_0000, &TST, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0ff0_f090, 0x0110_0080, &TST, Model.ARM7TDMI), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0ff0_f090, 0x0110_0010, &TST, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 1
-                new(0x0ff0_f000, 0x0310_f000, &TST, Model.ARM7TDMI), // I bit is 1
-                new(0x0ff0_f090, 0x0110_f000, &TST, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 0
-                new(0x0ff0_f090, 0x0110_f080, &TST, Model.ARM7TDMI), // I bit is 0, bit[7] is 1 and bit[4] is 0
-                new(0x0ff0_f090, 0x0110_f010, &TST, Model.ARM7TDMI), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0ff0_f000, 0x0310_0000, &TST, new List<Model>{ Model.ARM7TDMI }), // I bit is 1
+                new(0x0ff0_f090, 0x0110_0000, &TST, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0ff0_f090, 0x0110_0080, &TST, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0ff0_f090, 0x0110_0010, &TST, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 1
+                new(0x0ff0_f000, 0x0310_f000, &TST, new List<Model>{ Model.ARM7TDMI }), // I bit is 1
+                new(0x0ff0_f090, 0x0110_f000, &TST, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 0
+                new(0x0ff0_f090, 0x0110_f080, &TST, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 1 and bit[4] is 0
+                new(0x0ff0_f090, 0x0110_f010, &TST, new List<Model>{ Model.ARM7TDMI }), // I bit is 0, bit[7] is 0 and bit[4] is 1
 
                 // UMLAL
-                new(0x0fe0_00f0, 0x00a0_0090, &UMLAL, Model.ARM7TDMI),
+                new(0x0fe0_00f0, 0x00a0_0090, &UMLAL, new List<Model>{ Model.ARM7TDMI }),
 
                 // UMULL
-                new(0x0fe0_00f0, 0x0080_0090, &UMULL, Model.ARM7TDMI),
+                new(0x0fe0_00f0, 0x0080_0090, &UMULL, new List<Model>{ Model.ARM7TDMI }),
             };
 
             for (UInt64 instruction = 0; instruction < (UInt64)_instructionLUT.LongLength; ++instruction)
@@ -216,7 +216,7 @@ namespace Iris.CPU
                 {
                     if ((instruction & InstructionLUTHash(entry._mask)) == InstructionLUTHash(entry._expected))
                     {
-                        if (entry._models.HasFlag(_cpu._model))
+                        if (entry._models.Contains(_cpu._model))
                         {
                             _instructionLUT[instruction] = new(entry._handler);
                             unknownInstruction = false;
