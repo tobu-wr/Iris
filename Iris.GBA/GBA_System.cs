@@ -12,7 +12,7 @@ namespace Iris.GBA
 
         private bool _running;
 
-        public GBA_System(DrawFrame_Delegate drawFrame)
+        public GBA_System(ISystem.DrawFrame_Delegate drawFrame)
         {
             CPU_Core.CallbackInterface cpuCallbackInterface = new()
             {

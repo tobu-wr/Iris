@@ -1,9 +1,9 @@
 ﻿namespace Iris.Common
 {
-    public delegate void DrawFrame_Delegate(UInt16[] frameBuffer);
-
     public interface ISystem
     {
+        public delegate void DrawFrame_Delegate(UInt16[] frameBuffer);
+
         public enum Key
         {
             A,

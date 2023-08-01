@@ -62,7 +62,7 @@ namespace Iris.GBA
         {
             internal delegate void RequestInterrupt_Delegate();
 
-            internal DrawFrame_Delegate DrawFrame;
+            internal ISystem.DrawFrame_Delegate DrawFrame;
             internal RequestInterrupt_Delegate RequestVBlankInterrupt;
         }
 

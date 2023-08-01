@@ -6,9 +6,9 @@ namespace Iris.NDS
     {
         private const int KB = 1024;
 
-        private readonly DrawFrame_Delegate _drawFrameCallback;
+        private readonly ISystem.DrawFrame_Delegate _drawFrameCallback;
 
-        internal PPU(DrawFrame_Delegate drawFrameCallback)
+        internal PPU(ISystem.DrawFrame_Delegate drawFrameCallback)
         {
             _drawFrameCallback = drawFrameCallback;
         }

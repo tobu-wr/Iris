@@ -10,7 +10,7 @@ namespace Iris.NDS
 
         private bool _running = false;
 
-        public NDS_System(DrawFrame_Delegate drawFrameCallback)
+        public NDS_System(ISystem.DrawFrame_Delegate drawFrameCallback)
         {
             CPU_Core.CallbackInterface cpuCallbackInterface = new()
             {
