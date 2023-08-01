@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <TieredPGO>true</TieredPGO>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <Configurations>Debug;Release;Release_NoPPU</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

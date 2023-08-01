@@ -10,8 +10,6 @@
     <Configurations>Debug;Release;Release_NoDisplay</Configurations>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_NoDisplay|AnyCPU'" />
-
   <ItemGroup>
     <ProjectReference Include="..\Iris.Common\Iris.Common.csproj" />
     <ProjectReference Include="..\Iris.GBA\Iris.GBA.csproj" />
