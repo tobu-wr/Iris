@@ -6,23 +6,23 @@ namespace Iris.UserInterface
 {
     public partial class MainWindow : Form
     {
-        private static readonly Dictionary<Keys, ISystemCore.Key> KeyMapping = new()
+        private static readonly Dictionary<Keys, ISystem.Key> KeyMapping = new()
         {
-            { Keys.A, ISystemCore.Key.A },
-            { Keys.Z, ISystemCore.Key.B },
-            { Keys.Space, ISystemCore.Key.Select },
-            { Keys.Enter, ISystemCore.Key.Start },
-            { Keys.Right, ISystemCore.Key.Right },
-            { Keys.Left, ISystemCore.Key.Left },
-            { Keys.Up, ISystemCore.Key.Up },
-            { Keys.Down, ISystemCore.Key.Down },
-            { Keys.S, ISystemCore.Key.R },
-            { Keys.Q, ISystemCore.Key.L },
-            { Keys.E, ISystemCore.Key.X },
-            { Keys.R, ISystemCore.Key.Y },
+            { Keys.A, ISystem.Key.A },
+            { Keys.Z, ISystem.Key.B },
+            { Keys.Space, ISystem.Key.Select },
+            { Keys.Enter, ISystem.Key.Start },
+            { Keys.Right, ISystem.Key.Right },
+            { Keys.Left, ISystem.Key.Left },
+            { Keys.Up, ISystem.Key.Up },
+            { Keys.Down, ISystem.Key.Down },
+            { Keys.S, ISystem.Key.R },
+            { Keys.Q, ISystem.Key.L },
+            { Keys.E, ISystem.Key.X },
+            { Keys.R, ISystem.Key.Y },
         };
 
-        private readonly ISystemCore _core;
+        private readonly ISystem _system;
         private int _frameCount = 0;
         private readonly System.Timers.Timer _performanceUpdateTimer = new(1000);
 
@@ -30,7 +30,7 @@ namespace Iris.UserInterface
         {
             InitializeComponent();
 
-            _core = new Core(DrawFrame);
+            _system = new Core(DrawFrame);
             _performanceUpdateTimer.Elapsed += PerformanceUpdateTimer_Elapsed;
 
             if (args.Length > 0 && LoadROM(args[0]))
@@ -80,8 +80,8 @@ namespace Iris.UserInterface
         {
             try
             {
-                _core.LoadROM(fileName);
-                _core.Reset();
+                _system.LoadROM(fileName);
+                _system.Reset();
                 return true;
             }
             catch
@@ -101,12 +101,12 @@ namespace Iris.UserInterface
             {
                 try
                 {
-                    _core.Run();
+                    _system.Run();
                 }
                 catch (Exception ex)
                 {
                     Pause();
-                    _core.Reset();
+                    _system.Reset();
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             });
@@ -119,7 +119,7 @@ namespace Iris.UserInterface
             runToolStripMenuItem.Enabled = true;
             pauseToolStripMenuItem.Enabled = false;
             statusToolStripStatusLabel.Text = "Paused";
-            _core.Pause();
+            _system.Pause();
 
             _performanceUpdateTimer.Stop();
             fpsToolStripStatusLabel.Text = "FPS: 0";
@@ -128,7 +128,7 @@ namespace Iris.UserInterface
 
         private void LoadROMToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            bool running = _core.IsRunning();
+            bool running = _system.IsRunning();
 
             if (running)
                 Pause();
@@ -157,7 +157,7 @@ namespace Iris.UserInterface
 
         private void LoadStateToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            bool running = _core.IsRunning();
+            bool running = _system.IsRunning();
 
             if (running)
                 Pause();
@@ -175,7 +175,7 @@ namespace Iris.UserInterface
 
         private void SaveStateToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            bool running = _core.IsRunning();
+            bool running = _system.IsRunning();
 
             if (running)
                 Pause();
@@ -208,12 +208,12 @@ namespace Iris.UserInterface
 
         private void RestartToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            bool running = _core.IsRunning();
+            bool running = _system.IsRunning();
 
             if (running)
                 Pause();
 
-            _core.Reset();
+            _system.Reset();
 
             if (running)
                 Run();
@@ -229,14 +229,14 @@ namespace Iris.UserInterface
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
-            if (KeyMapping.TryGetValue(e.KeyCode, out ISystemCore.Key value))
-                _core.SetKeyStatus(value, ISystemCore.KeyStatus.Input);
+            if (KeyMapping.TryGetValue(e.KeyCode, out ISystem.Key value))
+                _system.SetKeyStatus(value, ISystem.KeyStatus.Input);
         }
 
         private void MainWindow_KeyUp(object sender, KeyEventArgs e)
         {
-            if (KeyMapping.TryGetValue(e.KeyCode, out ISystemCore.Key value))
-                _core.SetKeyStatus(value, ISystemCore.KeyStatus.NoInput);
+            if (KeyMapping.TryGetValue(e.KeyCode, out ISystem.Key value))
+                _system.SetKeyStatus(value, ISystem.KeyStatus.NoInput);
         }
     }
 }

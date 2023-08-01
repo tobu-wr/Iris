@@ -3,7 +3,7 @@ using Iris.CPU;
 
 namespace Iris.NDS
 {
-    public sealed partial class Core : ISystemCore
+    public sealed partial class Core : ISystem
     {
         private readonly CPU.CPU _cpu;
         private readonly PPU _ppu;
@@ -58,7 +58,7 @@ namespace Iris.NDS
             _running = false;
         }
 
-        public void SetKeyStatus(ISystemCore.Key key, ISystemCore.KeyStatus status)
+        public void SetKeyStatus(ISystem.Key key, ISystem.KeyStatus status)
         {
             // TODO
         }

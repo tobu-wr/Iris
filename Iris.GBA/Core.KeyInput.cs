@@ -7,40 +7,40 @@ namespace Iris.GBA
         private UInt16 _KEYINPUT;
         private UInt16 _KEYCNT;
 
-        public void SetKeyStatus(ISystemCore.Key key, ISystemCore.KeyStatus status)
+        public void SetKeyStatus(ISystem.Key key, ISystem.KeyStatus status)
         {
             int pos;
 
             switch (key)
             {
-                case ISystemCore.Key.A:
+                case ISystem.Key.A:
                     pos = 0;
                     break;
-                case ISystemCore.Key.B:
+                case ISystem.Key.B:
                     pos = 1;
                     break;
-                case ISystemCore.Key.Select:
+                case ISystem.Key.Select:
                     pos = 2;
                     break;
-                case ISystemCore.Key.Start:
+                case ISystem.Key.Start:
                     pos = 3;
                     break;
-                case ISystemCore.Key.Right:
+                case ISystem.Key.Right:
                     pos = 4;
                     break;
-                case ISystemCore.Key.Left:
+                case ISystem.Key.Left:
                     pos = 5;
                     break;
-                case ISystemCore.Key.Up:
+                case ISystem.Key.Up:
                     pos = 6;
                     break;
-                case ISystemCore.Key.Down:
+                case ISystem.Key.Down:
                     pos = 7;
                     break;
-                case ISystemCore.Key.R:
+                case ISystem.Key.R:
                     pos = 8;
                     break;
-                case ISystemCore.Key.L:
+                case ISystem.Key.L:
                     pos = 9;
                     break;
                 default:

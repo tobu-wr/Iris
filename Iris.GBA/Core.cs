@@ -3,7 +3,7 @@ using Iris.CPU;
 
 namespace Iris.GBA
 {
-    public sealed partial class Core : ISystemCore
+    public sealed partial class Core : ISystem
     {
         private readonly CPU.CPU _cpu;
         private readonly PPU _ppu;
