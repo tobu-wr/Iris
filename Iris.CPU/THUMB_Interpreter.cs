@@ -20,148 +20,148 @@ namespace Iris.CPU
             InstructionListEntry<UInt16>[] InstructionList = new InstructionListEntry<UInt16>[]
             {
                 // ADC
-                new(0xffc0, 0x4140, &ADC),
+                new(0xffc0, 0x4140, &ADC, Model.ARM7TDMI),
 
                 // ADD
-                new(0xfe00, 0x1c00, &ADD1),
-                new(0xf800, 0x3000, &ADD2),
-                new(0xfe00, 0x1800, &ADD3),
-                new(0xff00, 0x4400, &ADD4),
-                new(0xf800, 0xa000, &ADD5),
-                new(0xf800, 0xa800, &ADD6),
-                new(0xff80, 0xb000, &ADD7),
+                new(0xfe00, 0x1c00, &ADD1, Model.ARM7TDMI),
+                new(0xf800, 0x3000, &ADD2, Model.ARM7TDMI),
+                new(0xfe00, 0x1800, &ADD3, Model.ARM7TDMI),
+                new(0xff00, 0x4400, &ADD4, Model.ARM7TDMI),
+                new(0xf800, 0xa000, &ADD5, Model.ARM7TDMI),
+                new(0xf800, 0xa800, &ADD6, Model.ARM7TDMI),
+                new(0xff80, 0xb000, &ADD7, Model.ARM7TDMI),
 
                 // AND
-                new(0xffc0, 0x4000, &AND),
+                new(0xffc0, 0x4000, &AND, Model.ARM7TDMI),
 
                 // ASR
-                new(0xf800, 0x1000, &ASR1),
-                new(0xffc0, 0x4100, &ASR2),
+                new(0xf800, 0x1000, &ASR1, Model.ARM7TDMI),
+                new(0xffc0, 0x4100, &ASR2, Model.ARM7TDMI),
 
                 // B
-                new(0xff00, 0xd000, &B1), // condition field 0b0000
-                new(0xff00, 0xd100, &B1), // condition field 0b0001
-                new(0xff00, 0xd200, &B1), // condition field 0b0010
-                new(0xff00, 0xd300, &B1), // condition field 0b0011
-                new(0xff00, 0xd400, &B1), // condition field 0b0100
-                new(0xff00, 0xd500, &B1), // condition field 0b0101
-                new(0xff00, 0xd600, &B1), // condition field 0b0110
-                new(0xff00, 0xd700, &B1), // condition field 0b0111
-                new(0xff00, 0xd800, &B1), // condition field 0b1000
-                new(0xff00, 0xd900, &B1), // condition field 0b1001
-                new(0xff00, 0xda00, &B1), // condition field 0b1010
-                new(0xff00, 0xdb00, &B1), // condition field 0b1011
-                new(0xff00, 0xdc00, &B1), // condition field 0b1100
-                new(0xff00, 0xdd00, &B1), // condition field 0b1101
-                new(0xf800, 0xe000, &B2),
+                new(0xff00, 0xd000, &B1, Model.ARM7TDMI), // condition field 0b0000
+                new(0xff00, 0xd100, &B1, Model.ARM7TDMI), // condition field 0b0001
+                new(0xff00, 0xd200, &B1, Model.ARM7TDMI), // condition field 0b0010
+                new(0xff00, 0xd300, &B1, Model.ARM7TDMI), // condition field 0b0011
+                new(0xff00, 0xd400, &B1, Model.ARM7TDMI), // condition field 0b0100
+                new(0xff00, 0xd500, &B1, Model.ARM7TDMI), // condition field 0b0101
+                new(0xff00, 0xd600, &B1, Model.ARM7TDMI), // condition field 0b0110
+                new(0xff00, 0xd700, &B1, Model.ARM7TDMI), // condition field 0b0111
+                new(0xff00, 0xd800, &B1, Model.ARM7TDMI), // condition field 0b1000
+                new(0xff00, 0xd900, &B1, Model.ARM7TDMI), // condition field 0b1001
+                new(0xff00, 0xda00, &B1, Model.ARM7TDMI), // condition field 0b1010
+                new(0xff00, 0xdb00, &B1, Model.ARM7TDMI), // condition field 0b1011
+                new(0xff00, 0xdc00, &B1, Model.ARM7TDMI), // condition field 0b1100
+                new(0xff00, 0xdd00, &B1, Model.ARM7TDMI), // condition field 0b1101
+                new(0xf800, 0xe000, &B2, Model.ARM7TDMI),
 
                 // BIC
-                new(0xffc0, 0x4380, &BIC),
+                new(0xffc0, 0x4380, &BIC, Model.ARM7TDMI),
 
                 // BL
-                new(0xf000, 0xf000, &BL),
+                new(0xf000, 0xf000, &BL, Model.ARM7TDMI),
 
                 // BX
-                new(0xff80, 0x4700, &BX),
+                new(0xff80, 0x4700, &BX, Model.ARM7TDMI),
 
                 // CMN
-                new(0xffc0, 0x42c0, &CMN),
+                new(0xffc0, 0x42c0, &CMN, Model.ARM7TDMI),
 
                 // CMP
-                new(0xf800, 0x2800, &CMP1),
-                new(0xffc0, 0x4280, &CMP2),
-                new(0xff00, 0x4500, &CMP3),
+                new(0xf800, 0x2800, &CMP1, Model.ARM7TDMI),
+                new(0xffc0, 0x4280, &CMP2, Model.ARM7TDMI),
+                new(0xff00, 0x4500, &CMP3, Model.ARM7TDMI),
 
                 // EOR
-                new(0xffc0, 0x4040, &EOR),
+                new(0xffc0, 0x4040, &EOR, Model.ARM7TDMI),
 
                 // LDMIA
-                new(0xf800, 0xc800, &LDMIA),
+                new(0xf800, 0xc800, &LDMIA, Model.ARM7TDMI),
 
                 // LDR
-                new(0xf800, 0x6800, &LDR1),
-                new(0xfe00, 0x5800, &LDR2),
-                new(0xf800, 0x4800, &LDR3),
-                new(0xf800, 0x9800, &LDR4),
+                new(0xf800, 0x6800, &LDR1, Model.ARM7TDMI),
+                new(0xfe00, 0x5800, &LDR2, Model.ARM7TDMI),
+                new(0xf800, 0x4800, &LDR3, Model.ARM7TDMI),
+                new(0xf800, 0x9800, &LDR4, Model.ARM7TDMI),
 
                 // LDRB
-                new(0xf800, 0x7800, &LDRB1),
-                new(0xfe00, 0x5c00, &LDRB2),
+                new(0xf800, 0x7800, &LDRB1, Model.ARM7TDMI),
+                new(0xfe00, 0x5c00, &LDRB2, Model.ARM7TDMI),
 
                 // LDRH
-                new(0xf800, 0x8800, &LDRH1),
-                new(0xfe00, 0x5a00, &LDRH2),
+                new(0xf800, 0x8800, &LDRH1, Model.ARM7TDMI),
+                new(0xfe00, 0x5a00, &LDRH2, Model.ARM7TDMI),
 
                 // LDRSB
-                new(0xfe00, 0x5600, &LDRSB),
+                new(0xfe00, 0x5600, &LDRSB, Model.ARM7TDMI),
 
                 // LDRSH
-                new(0xfe00, 0x5e00, &LDRSH),
+                new(0xfe00, 0x5e00, &LDRSH, Model.ARM7TDMI),
 
                 // LSL
-                new(0xf800, 0x0000, &LSL1),
-                new(0xffc0, 0x4080, &LSL2),
+                new(0xf800, 0x0000, &LSL1, Model.ARM7TDMI),
+                new(0xffc0, 0x4080, &LSL2, Model.ARM7TDMI),
 
                 // LSR
-                new(0xf800, 0x0800, &LSR1),
-                new(0xffc0, 0x40c0, &LSR2),
+                new(0xf800, 0x0800, &LSR1, Model.ARM7TDMI),
+                new(0xffc0, 0x40c0, &LSR2, Model.ARM7TDMI),
 
                 // MOV
-                new(0xf800, 0x2000, &MOV1),
-                //new(0xffc0, 0x1c00, &MOV2),
-                new(0xff00, 0x4600, &MOV3),
+                new(0xf800, 0x2000, &MOV1, Model.ARM7TDMI),
+                //new(0xffc0, 0x1c00, &MOV2, Model.ARM7TDMI),
+                new(0xff00, 0x4600, &MOV3, Model.ARM7TDMI),
 
                 // MUL
-                new(0xffc0, 0x4340, &MUL),
+                new(0xffc0, 0x4340, &MUL, Model.ARM7TDMI),
 
                 // MVN
-                new(0xffc0, 0x43c0, &MVN),
+                new(0xffc0, 0x43c0, &MVN, Model.ARM7TDMI),
 
                 // NEG
-                new(0xffc0, 0x4240, &NEG),
+                new(0xffc0, 0x4240, &NEG, Model.ARM7TDMI),
 
                 // ORR
-                new(0xffc0, 0x4300, &ORR),
+                new(0xffc0, 0x4300, &ORR, Model.ARM7TDMI),
 
                 // POP
-                new(0xfe00, 0xbc00, &POP),
+                new(0xfe00, 0xbc00, &POP, Model.ARM7TDMI),
 
                 // PUSH
-                new(0xfe00, 0xb400, &PUSH),
+                new(0xfe00, 0xb400, &PUSH, Model.ARM7TDMI),
 
                 // ROR
-                new(0xffc0, 0x41c0, &ROR),
+                new(0xffc0, 0x41c0, &ROR, Model.ARM7TDMI),
 
                 // SBC
-                new(0xffc0, 0x4180, &SBC),
+                new(0xffc0, 0x4180, &SBC, Model.ARM7TDMI),
 
                 // STMIA
-                new(0xf800, 0xc000, &STMIA),
+                new(0xf800, 0xc000, &STMIA, Model.ARM7TDMI),
 
                 // STR
-                new(0xf800, 0x6000, &STR1),
-                new(0xfe00, 0x5000, &STR2),
-                new(0xf800, 0x9000, &STR3),
+                new(0xf800, 0x6000, &STR1, Model.ARM7TDMI),
+                new(0xfe00, 0x5000, &STR2, Model.ARM7TDMI),
+                new(0xf800, 0x9000, &STR3, Model.ARM7TDMI),
 
                 // STRB
-                new(0xf800, 0x7000, &STRB1),
-                new(0xfe00, 0x5400, &STRB2),
+                new(0xf800, 0x7000, &STRB1, Model.ARM7TDMI),
+                new(0xfe00, 0x5400, &STRB2, Model.ARM7TDMI),
 
                 // STRH
-                new(0xf800, 0x8000, &STRH1),
-                new(0xfe00, 0x5200, &STRH2),
+                new(0xf800, 0x8000, &STRH1, Model.ARM7TDMI),
+                new(0xfe00, 0x5200, &STRH2, Model.ARM7TDMI),
 
                 // SUB
-                new(0xfe00, 0x1e00, &SUB1),
-                new(0xf800, 0x3800, &SUB2),
-                new(0xfe00, 0x1a00, &SUB3),
-                new(0xff80, 0xb080, &SUB4),
+                new(0xfe00, 0x1e00, &SUB1, Model.ARM7TDMI),
+                new(0xf800, 0x3800, &SUB2, Model.ARM7TDMI),
+                new(0xfe00, 0x1a00, &SUB3, Model.ARM7TDMI),
+                new(0xff80, 0xb080, &SUB4, Model.ARM7TDMI),
 
                 // SWI
-                new(0xff00, 0xdf00, &SWI),
+                new(0xff00, 0xdf00, &SWI, Model.ARM7TDMI),
 
                 // TST
-                new(0xffc0, 0x4200, &TST),
+                new(0xffc0, 0x4200, &TST, Model.ARM7TDMI),
             };
 
             for (UInt32 instruction = 0; instruction < _instructionLUT.Length; ++instruction)

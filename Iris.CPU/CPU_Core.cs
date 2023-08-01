@@ -5,6 +5,7 @@ namespace Iris.CPU
 {
     public sealed class CPU_Core
     {
+        [Flags]
         public enum Model
         {
             ARM7TDMI,
@@ -52,12 +53,14 @@ namespace Iris.CPU
             internal readonly T _mask;
             internal readonly T _expected;
             internal unsafe readonly delegate*<CPU_Core, T, UInt32> _handler;
+            internal readonly Model _models;
 
-            internal unsafe InstructionListEntry(T mask, T expected, delegate*<CPU_Core, T, UInt32> handler)
+            internal unsafe InstructionListEntry(T mask, T expected, delegate*<CPU_Core, T, UInt32> handler, Model models)
             {
                 _mask = mask;
                 _expected = expected;
                 _handler = handler;
+                _models = models;
             }
         }
 
