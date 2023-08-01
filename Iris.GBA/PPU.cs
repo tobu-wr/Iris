@@ -136,7 +136,6 @@ namespace Iris.GBA
                         }
                     case 0b100:
                         {
-
                             UInt16 bg2 = (UInt16)((DISPCNT >> 10) & 1);
 
                             if (bg2 == 1)
@@ -160,7 +159,6 @@ namespace Iris.GBA
 
                                 _callbackInterface.DrawFrame(screenFrameBuffer);
                             }
-
                             break;
                         }
                     default:
