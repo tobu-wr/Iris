@@ -329,7 +329,7 @@ namespace Iris.CPU
                 // NV
                 0b1111 => false,
                 // should never happen
-                _ => throw new Exception(string.Format("Iris.CPU.CPU: Wrong condition code {0}", cond)),
+                _ => throw new Exception(string.Format("Iris.CPU.CPU_Core: Wrong condition code {0}", cond)),
             };
         }
 
