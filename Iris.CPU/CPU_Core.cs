@@ -52,14 +52,14 @@ namespace Iris.CPU
             internal readonly T _mask;
             internal readonly T _expected;
             internal unsafe readonly delegate*<CPU_Core, T, UInt32> _handler;
-            internal readonly List<Model> _models;
+            internal readonly List<Model> _modelList;
 
-            internal unsafe InstructionListEntry(T mask, T expected, delegate*<CPU_Core, T, UInt32> handler, List<Model> models)
+            internal unsafe InstructionListEntry(T mask, T expected, delegate*<CPU_Core, T, UInt32> handler, List<Model> modelList)
             {
                 _mask = mask;
                 _expected = expected;
                 _handler = handler;
-                _models = models;
+                _modelList = modelList;
             }
         }
 

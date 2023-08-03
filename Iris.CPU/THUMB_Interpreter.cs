@@ -172,7 +172,7 @@ namespace Iris.CPU
                 {
                     if ((instruction & InstructionLUTHash(entry._mask)) == InstructionLUTHash(entry._expected))
                     {
-                        if (entry._models.Contains(_cpu._model))
+                        if (entry._modelList.Contains(_cpu._model))
                         {
                             _instructionLUT[instruction] = new(entry._handler);
                             unknownInstruction = false;
