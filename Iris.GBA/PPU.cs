@@ -99,9 +99,9 @@ namespace Iris.GBA
 
         internal void Step()
         {
-            VCOUNT = (UInt16)(_cycleCounter / HorizontalLineWidth);
+            VCOUNT = (UInt16)(_cycleCounter / (4 * HorizontalLineWidth));
 
-            if (_cycleCounter == (HorizontalLineWidth * PhysicalScreenHeight))
+            if (_cycleCounter == (HorizontalLineWidth * PhysicalScreenHeight * 4))
             {
                 // start of vertical blank
                 UInt16 bgMode = (UInt16)(DISPCNT & 0b111);
@@ -172,7 +172,7 @@ namespace Iris.GBA
                 DISPSTAT |= 1;
                 ++_cycleCounter;
             }
-            else if (_cycleCounter == (HorizontalLineWidth * HorizontalLineCount))
+            else if (_cycleCounter == (HorizontalLineWidth * HorizontalLineCount * 4))
             {
                 // end of vertical blank
                 DISPSTAT &= ~1 & 0xffff;
