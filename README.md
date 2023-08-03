@@ -16,9 +16,9 @@ Iris is a WIP GameBoy Advance emulator (and maybe DS in the future). I wanted to
 - Pass ARMWrestler test ROM
 - ARM946E-S instruction timings
 
-## Tested games
+## Compatible games
 
-TBD
+TODO
 
 ## Screenshots
 
@@ -27,7 +27,7 @@ TBD
   <img src="Screenshots/Capture-2.PNG"/>
 </p>
 
-## Resources used
+## Resources
 
 - The Official Gameboy Advance Programming Manual
 - ARM Architecture Reference Manual
