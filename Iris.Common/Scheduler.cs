@@ -19,12 +19,14 @@
         {
             cycleCount += _cycleCounter;
 
-            int i = 0;
+            int index = _taskList.Count - 1;
 
-            while ((i < _taskList.Count) && (_taskList[i].CycleCount < cycleCount))
-                ++i;
+            while ((index >= 0) && (_taskList[index].CycleCount > cycleCount))
+                --index;
 
-            _taskList.Insert(i, new(cycleCount, task));
+            ++index;
+
+            _taskList.Insert(index, new(cycleCount, task));
         }
 
         public bool HasTaskReady()
