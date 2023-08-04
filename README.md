@@ -6,15 +6,22 @@ Iris is a WIP GameBoy Advance emulator (and maybe DS in the future). I wanted to
 
 ### GBA
 
+- Reorganize architecture
 - Waitstates
 - BIOS function timings
 - Sprites
+- Add Settings dialog
+- Allow to specify and load a BIOS (settings)
+- Pokemon Mystery Dungeon in playable state
+- Load/save states
 
 ### NDS
 
 - Missing ARMv5TE instructions
 - Pass ARMWrestler test ROM
 - ARM946E-S instruction timings
+- Pokemon Mystery Dungeon in playable state
+- Rudimentary audio
 
 ## Compatible games
 
