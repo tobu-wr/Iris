@@ -14,6 +14,7 @@ Iris is a WIP GameBoy Advance emulator (and maybe DS in the future). I wanted to
 - Allow to specify and load a BIOS (settings)
 - Pokemon Mystery Dungeon in playable state
 - Load/save states
+- Use OpenGL/Vulkan to make rendering faster
 
 ### NDS
 
@@ -25,7 +26,13 @@ Iris is a WIP GameBoy Advance emulator (and maybe DS in the future). I wanted to
 
 ## Compatible games
 
-TODO
+### GBA
+
+None atm
+
+### NDS
+
+None atm
 
 ## Screenshots
 
