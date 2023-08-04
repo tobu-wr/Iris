@@ -29,7 +29,7 @@
 
         public bool HasTaskReady()
         {
-            return (_taskList.Count > 0) && (_taskList.First().CycleCount <= _cycleCounter);
+            return (_taskList.Count > 0) && (_taskList[0].CycleCount <= _cycleCounter);
         }
 
         public void AdvanceCycleCounter(UInt32 cycleCount)
@@ -41,7 +41,7 @@
         {
             while (HasTaskReady())
             {
-                _taskList.First().Task();
+                _taskList[0].Task();
                 _taskList.RemoveAt(0);
             }
 
