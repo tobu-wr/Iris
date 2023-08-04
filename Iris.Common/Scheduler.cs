@@ -24,9 +24,7 @@
             while ((index >= 0) && (_taskList[index].CycleCount > cycleCount))
                 --index;
 
-            ++index;
-
-            _taskList.Insert(index, new(cycleCount, task));
+            _taskList.Insert(index + 1, new(cycleCount, task));
         }
 
         public bool HasTaskReady()
