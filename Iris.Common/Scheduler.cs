@@ -6,12 +6,12 @@
 
         private record struct TaskListEntry(UInt32 CycleCount, Task_Delegate Task);
 
-        private UInt32 _cycleCount;
+        private UInt32 _cycleCounter;
         private readonly List<TaskListEntry> _taskList = new();
 
         public void Reset()
         {
-            _cycleCount = 0;
+            _cycleCounter = 0;
             _taskList.Clear();
         }
 
@@ -27,12 +27,12 @@
 
         public bool HasTaskReady()
         {
-            return (_taskList.Count > 0) && (_taskList.First().CycleCount <= _cycleCount);
+            return (_taskList.Count > 0) && (_taskList.First().CycleCount <= _cycleCounter);
         }
 
-        public void IncrementCycleCount(UInt32 cycleCount)
+        public void AdvanceCycleCounter(UInt32 cycleCount)
         {
-            _cycleCount += cycleCount;
+            _cycleCounter += cycleCount;
         }
 
         public void ProcessTasks()
@@ -44,9 +44,9 @@
             }
 
             for (int i = 0; i < _taskList.Count; ++i)
-                _taskList[i] = new(_taskList[i].CycleCount - _cycleCount, _taskList[i].Task);
+                _taskList[i] = new(_taskList[i].CycleCount - _cycleCounter, _taskList[i].Task);
 
-            _cycleCount = 0;
+            _cycleCounter = 0;
         }
     }
 }
