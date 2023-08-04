@@ -17,6 +17,8 @@
 
         public void AddTask(UInt32 cycleCount, Task_Delegate task)
         {
+            cycleCount += _cycleCounter;
+
             int i = 0;
 
             while ((i < _taskList.Count) && (_taskList[i].CycleCount < cycleCount))
