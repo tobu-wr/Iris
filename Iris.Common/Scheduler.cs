@@ -10,9 +10,9 @@
         private readonly TaskListEntry[] _taskList;
         private int _taskCount;
 
-        public Scheduler(int taskCount)
+        public Scheduler(int taskListSize)
         {
-            _taskList = new TaskListEntry[taskCount];
+            _taskList = new TaskListEntry[taskListSize];
         }
 
         public void Reset()
