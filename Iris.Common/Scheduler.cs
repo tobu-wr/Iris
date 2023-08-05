@@ -51,12 +51,14 @@
         {
             while (HasTaskReady())
             {
-                _taskList[0].Task();
+                Task_Delegate task = _taskList[0].Task;
 
                 --_taskCount;
 
                 if (_taskCount > 0)
                     Array.Copy(_taskList, 1, _taskList, 0, _taskCount);
+
+                task();
             }
 
             for (int i = 0; i < _taskCount; ++i)
