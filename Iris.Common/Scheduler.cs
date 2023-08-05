@@ -1,4 +1,7 @@
-﻿namespace Iris.Common
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+namespace Iris.Common
 {
     public sealed class Scheduler
     {
@@ -27,13 +30,18 @@
 
             int i = _taskCount - 1;
 
-            while ((i >= 0) && (_taskList[i].CycleCount > cycleCount))
+            while ((i >= 0) && (Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_taskList), i).CycleCount > cycleCount))
                 --i;
 
-            if ((i + 1) < _taskCount)
-                Array.Copy(_taskList, i + 1, _taskList, i + 2, _taskCount - i - 1);
+            ++i;
 
-            _taskList[i + 1] = new(cycleCount, task);
+            if (i < _taskCount)
+                Array.Copy(_taskList, i, _taskList, i + 1, _taskCount - i);
+
+            ref TaskListEntry entry = ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_taskList), i);
+            entry.CycleCount = cycleCount;
+            entry.Task = task;
+
             ++_taskCount;
         }
 
@@ -51,14 +59,15 @@
         {
             while (HasTaskReady())
             {
-                Task_Delegate task = _taskList[0].Task;
+                _taskList[0].Task();
+               // Task_Delegate task = _taskList[0].Task;
 
                 --_taskCount;
 
                 if (_taskCount > 0)
                     Array.Copy(_taskList, 1, _taskList, 0, _taskCount);
 
-                task();
+              //  task();
             }
 
             for (int i = 0; i < _taskCount; ++i)
