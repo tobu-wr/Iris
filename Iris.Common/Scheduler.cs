@@ -7,29 +7,39 @@
         private record struct TaskListEntry(UInt32 CycleCount, Task_Delegate Task);
 
         private UInt32 _cycleCounter;
-        private readonly List<TaskListEntry> _taskList = new();
+        private readonly TaskListEntry[] _taskList;
+        private int _taskCount;
+
+        public Scheduler(int taskCount)
+        {
+            _taskList = new TaskListEntry[taskCount];
+        }
 
         public void Reset()
         {
             _cycleCounter = 0;
-            _taskList.Clear();
+            _taskCount = 0;
         }
 
         public void AddTask(UInt32 cycleCount, Task_Delegate task)
         {
             cycleCount += _cycleCounter;
 
-            int index = _taskList.Count - 1;
+            int i = _taskCount - 1;
 
-            while ((index >= 0) && (_taskList[index].CycleCount > cycleCount))
-                --index;
+            while ((i >= 0) && (_taskList[i].CycleCount > cycleCount))
+                --i;
 
-            _taskList.Insert(index + 1, new(cycleCount, task));
+            if ((i + 1) < _taskCount)
+                Array.Copy(_taskList, i + 1, _taskList, i + 2, _taskCount - i - 1);
+
+            _taskList[i + 1] = new(cycleCount, task);
+            ++_taskCount;
         }
 
         public bool HasTaskReady()
         {
-            return (_taskList.Count > 0) && (_taskList[0].CycleCount <= _cycleCounter);
+            return (_taskCount > 0) && (_taskList[0].CycleCount <= _cycleCounter);
         }
 
         public void AdvanceCycleCounter(UInt32 cycleCount)
@@ -42,11 +52,15 @@
             while (HasTaskReady())
             {
                 _taskList[0].Task();
-                _taskList.RemoveAt(0);
+
+                --_taskCount;
+
+                if (_taskCount > 0)
+                    Array.Copy(_taskList, 1, _taskList, 0, _taskCount);
             }
 
-            for (int i = 0; i < _taskList.Count; ++i)
-                _taskList[i] = new(_taskList[i].CycleCount - _cycleCounter, _taskList[i].Task);
+            for (int i = 0; i < _taskCount; ++i)
+                _taskList[i].CycleCount -= _cycleCounter;
 
             _cycleCounter = 0;
         }

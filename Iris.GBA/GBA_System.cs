@@ -5,7 +5,7 @@ namespace Iris.GBA
 {
     public sealed partial class GBA_System : ISystem
     {
-        private readonly Scheduler _scheduler = new();
+        private readonly Scheduler _scheduler = new(2);
 
         private readonly CPU_Core _cpu;
         private readonly PPU _ppu;
