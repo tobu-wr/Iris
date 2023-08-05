@@ -5,6 +5,8 @@ namespace Iris.GBA
 {
     public sealed partial class GBA_System : ISystem
     {
+        private readonly Scheduler _scheduler = new();
+
         private readonly CPU_Core _cpu;
         private readonly PPU _ppu;
 
@@ -33,13 +35,16 @@ namespace Iris.GBA
             };
 
             _cpu = new(CPU_Core.Model.ARM7TDMI, cpuCallbackInterface);
-            _ppu = new(ppuCallbackInterface);
+            _ppu = new(_scheduler, ppuCallbackInterface);
 
             InitPageTables();
         }
 
         public void Reset()
         {
+            _scheduler.Reset();
+
+            _ppu.Reset();
             BIOS_Reset();
 
             _SOUNDCNT_H = 0;
@@ -80,12 +85,23 @@ namespace Iris.GBA
         {
             _running = true;
 
+            //_scheduler.AddTask(90, () => { });
+            //_scheduler.AddTask(30, () => { });
+            //_scheduler.AddTask(10, () => { });
+            //_scheduler.AddTask(30, () => { });
+            //_scheduler.AddTask(20, () => { });
+            //_scheduler.AddTask(50, () => { });
+            //_scheduler.AddTask(40, () => { });
+
             while (_running)
             {
-                UInt32 cycles = _cpu.Step();
+                while (!_scheduler.HasTaskReady())
+                {
+                    UInt32 cycleCount = _cpu.Step();
+                    _scheduler.AdvanceCycleCounter(cycleCount);
+                }
 
-                for (UInt32 i = 0; i < cycles; ++i)
-                    _ppu.Step();
+                _scheduler.ProcessTasks();
             }
         }
 

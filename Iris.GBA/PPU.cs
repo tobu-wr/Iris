@@ -66,14 +66,21 @@ namespace Iris.GBA
             internal RequestInterrupt_Delegate RequestVBlankInterrupt;
         }
 
+        private readonly Scheduler _scheduler;
         private readonly CallbackInterface _callbackInterface;
-        private UInt32 _cycleCounter;
 
         //private bool _disposed;
 
-        internal PPU(CallbackInterface callbackInterface)
+        internal PPU(Scheduler scheduler, CallbackInterface callbackInterface)
         {
+            _scheduler = scheduler;
             _callbackInterface = callbackInterface;
+        }
+
+        internal void Reset()
+        {
+            VCOUNT = 0;
+            _scheduler.AddTask(HorizontalLineWidth * 4, StartHorizontalLine);
         }
 
         //~PPU()
@@ -97,91 +104,98 @@ namespace Iris.GBA
         //    _disposed = true;
         //}
 
-        internal void Step()
+        internal void StartHorizontalLine()
         {
-            VCOUNT = (UInt16)(_cycleCounter / (4 * HorizontalLineWidth));
+            ++VCOUNT;
 
-            if (_cycleCounter == (HorizontalLineWidth * PhysicalScreenHeight * 4))
+            switch (VCOUNT)
             {
-                // start of vertical blank
-                UInt16 bgMode = (UInt16)(DISPCNT & 0b111);
+                case (UInt16)PhysicalScreenHeight:
+                    StartVBlank();
+                    break;
 
-                switch (bgMode)
-                {
-                    case 0b000:
+                case (UInt16)HorizontalLineCount:
+                    EndVBlank();
+                    break;
+            }
+
+            _scheduler.AddTask(4 * HorizontalLineWidth, StartHorizontalLine);
+        }
+
+        internal void StartVBlank()
+        {
+            UInt16 bgMode = (UInt16)(DISPCNT & 0b111);
+
+            switch (bgMode)
+            {
+                case 0b000:
+                    {
+                        UInt16[] screenFrameBuffer = new UInt16[PhysicalScreenSize];
+
+#if !RELEASE_NOPPU
+                        UInt16 bg0 = (UInt16)((DISPCNT >> 8) & 1);
+                        UInt16 bg1 = (UInt16)((DISPCNT >> 9) & 1);
+                        UInt16 bg2 = (UInt16)((DISPCNT >> 10) & 1);
+                        UInt16 bg3 = (UInt16)((DISPCNT >> 11) & 1);
+
+                        if (bg3 == 1)
+                            RenderBackground(3, screenFrameBuffer);
+
+                        if (bg2 == 1)
+                            RenderBackground(2, screenFrameBuffer);
+
+                        if (bg1 == 1)
+                            RenderBackground(1, screenFrameBuffer);
+
+                        if (bg0 == 1)
+                            RenderBackground(0, screenFrameBuffer);
+#endif
+
+                        _callbackInterface.DrawFrame(screenFrameBuffer);
+                        break;
+                    }
+                case 0b100:
+                    {
+                        UInt16 bg2 = (UInt16)((DISPCNT >> 10) & 1);
+
+                        if (bg2 == 1)
                         {
                             UInt16[] screenFrameBuffer = new UInt16[PhysicalScreenSize];
 
 #if !RELEASE_NOPPU
-                            UInt16 bg0 = (UInt16)((DISPCNT >> 8) & 1);
-                            UInt16 bg1 = (UInt16)((DISPCNT >> 9) & 1);
-                            UInt16 bg2 = (UInt16)((DISPCNT >> 10) & 1);
-                            UInt16 bg3 = (UInt16)((DISPCNT >> 11) & 1);
+                            UInt16 frameBuffer = (UInt16)((DISPCNT >> 4) & 1);
+                            UInt32 frameBufferAddress = (frameBuffer == 0) ? 0x0_0000u : 0x0_a000u;
 
-                            if (bg3 == 1)
-                                RenderBackground(3, screenFrameBuffer);
-
-                            if (bg2 == 1)
-                                RenderBackground(2, screenFrameBuffer);
-
-                            if (bg1 == 1)
-                                RenderBackground(1, screenFrameBuffer);
-
-                            if (bg0 == 1)
-                                RenderBackground(0, screenFrameBuffer);
+                            for (UInt32 i = 0; i < PhysicalScreenSize; ++i)
+                            {
+                                unsafe
+                                {
+                                    Byte colorNo = Unsafe.Read<Byte>((Byte*)VRAM + (frameBufferAddress + i));
+                                    UInt16 color = Unsafe.Read<UInt16>((Byte*)PaletteRAM + (colorNo * 2));
+                                    screenFrameBuffer[i] = color;
+                                }
+                            }
 #endif
 
                             _callbackInterface.DrawFrame(screenFrameBuffer);
-                            break;
                         }
-                    case 0b100:
-                        {
-                            UInt16 bg2 = (UInt16)((DISPCNT >> 10) & 1);
-
-                            if (bg2 == 1)
-                            {
-                                UInt16[] screenFrameBuffer = new UInt16[PhysicalScreenSize];
-
-#if !RELEASE_NOPPU
-                                UInt16 frameBuffer = (UInt16)((DISPCNT >> 4) & 1);
-                                UInt32 frameBufferAddress = (frameBuffer == 0) ? 0x0_0000u : 0x0_a000u;
-
-                                for (UInt32 i = 0; i < PhysicalScreenSize; ++i)
-                                {
-                                    unsafe
-                                    {
-                                        Byte colorNo = Unsafe.Read<Byte>((Byte*)VRAM + (frameBufferAddress + i));
-                                        UInt16 color = Unsafe.Read<UInt16>((Byte*)PaletteRAM + (colorNo * 2));
-                                        screenFrameBuffer[i] = color;
-                                    }
-                                }
-#endif
-
-                                _callbackInterface.DrawFrame(screenFrameBuffer);
-                            }
-                            break;
-                        }
-                    default:
-                        Console.WriteLine("Iris.GBA.PPU: BG mode {0} unimplemented", bgMode);
                         break;
-                }
+                    }
+                default:
+                    Console.WriteLine("Iris.GBA.PPU: BG mode {0} unimplemented", bgMode);
+                    break;
+            }
 
-                if ((DISPSTAT & 0x0008) != 0)
-                    _callbackInterface.RequestVBlankInterrupt();
+            if ((DISPSTAT & 0x0008) != 0)
+                _callbackInterface.RequestVBlankInterrupt();
 
-                DISPSTAT |= 1;
-                ++_cycleCounter;
-            }
-            else if (_cycleCounter == (HorizontalLineWidth * HorizontalLineCount * 4))
-            {
-                // end of vertical blank
-                DISPSTAT &= ~1 & 0xffff;
-                _cycleCounter = 0;
-            }
-            else
-            {
-                ++_cycleCounter;
-            }
+            DISPSTAT |= 1;
+        }
+
+        internal void EndVBlank()
+        {
+            DISPSTAT &= ~1 & 0xffff;
+            VCOUNT = 0;
         }
 
         private void RenderBackground(int bg, UInt16[] screenFrameBuffer)
