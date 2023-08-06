@@ -1,6 +1,7 @@
 ﻿using Iris.Common;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using static Iris.Common.ISystem;
 
 namespace Iris.GBA
 {
@@ -62,7 +63,7 @@ namespace Iris.GBA
         {
             internal delegate void RequestInterrupt_Delegate();
 
-            internal ISystem.DrawFrame_Delegate DrawFrame;
+            internal DrawFrame_Delegate DrawFrame;
             internal RequestInterrupt_Delegate RequestVBlankInterrupt;
         }
 
