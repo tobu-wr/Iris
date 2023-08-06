@@ -28,14 +28,14 @@ namespace Iris.GBA
         {
             CPU_Core.CallbackInterface cpuCallbackInterface = new()
             {
-                ReadMemory8 = (UInt32 address) => _memory!.ReadMemory8(address),
-                ReadMemory16 = (UInt32 address) => _memory!.ReadMemory16(address),
-                ReadMemory32 = (UInt32 address) => _memory!.ReadMemory32(address),
-                WriteMemory8 = (UInt32 address, Byte value) => _memory!.WriteMemory8(address, value),
-                WriteMemory16 = (UInt32 address, UInt16 value) => _memory!.WriteMemory16(address, value),
-                WriteMemory32 = (UInt32 address, UInt32 value) => _memory!.WriteMemory32(address, value),
-                HandleSWI = (UInt32 value) => _bios!.HandleSWI(value),
-                HandleIRQ = () => _bios!.HandleIRQ()
+                ReadMemory8 = _memory.ReadMemory8,
+                ReadMemory16 = _memory.ReadMemory16,
+                ReadMemory32 = _memory.ReadMemory32,
+                WriteMemory8 = _memory.WriteMemory8,
+                WriteMemory16 = _memory.WriteMemory16,
+                WriteMemory32 = _memory.WriteMemory32,
+                HandleSWI = _bios.HandleSWI,
+                HandleIRQ = _bios.HandleIRQ
             };
 
             _cpu = new(CPU_Core.Model.ARM7TDMI, cpuCallbackInterface);
@@ -43,7 +43,7 @@ namespace Iris.GBA
             PPU.CallbackInterface ppuCallbackInterface = new()
             {
                 DrawFrame = drawFrame,
-                RequestVBlankInterrupt = () => _interruptControl!.RequestInterrupt(Interrupt.VBlank)
+                RequestVBlankInterrupt = () => _interruptControl.RequestInterrupt(Interrupt.VBlank)
             };
 
             _ppu = new(_scheduler, ppuCallbackInterface);
