@@ -300,23 +300,23 @@ namespace Iris.GBA
                             0x10e => GetLowByte(_TM3CNT_H),
                             0x10f => GetHighByte(_TM3CNT_H),
 
-                            0x120 => GetLowByte(_SIODATA0),
-                            0x121 => GetHighByte(_SIODATA0),
+                            0x120 => GetLowByte(_communication._SIODATA0),
+                            0x121 => GetHighByte(_communication._SIODATA0),
 
-                            0x122 => GetLowByte(_SIODATA1),
-                            0x123 => GetHighByte(_SIODATA1),
+                            0x122 => GetLowByte(_communication._SIODATA1),
+                            0x123 => GetHighByte(_communication._SIODATA1),
 
-                            0x124 => GetLowByte(_SIODATA2),
-                            0x125 => GetHighByte(_SIODATA2),
+                            0x124 => GetLowByte(_communication._SIODATA2),
+                            0x125 => GetHighByte(_communication._SIODATA2),
 
-                            0x126 => GetLowByte(_SIODATA3),
-                            0x127 => GetHighByte(_SIODATA3),
+                            0x126 => GetLowByte(_communication._SIODATA3),
+                            0x127 => GetHighByte(_communication._SIODATA3),
 
-                            0x128 => GetLowByte(_SIOCNT),
-                            0x129 => GetHighByte(_SIOCNT),
+                            0x128 => GetLowByte(_communication._SIOCNT),
+                            0x129 => GetHighByte(_communication._SIOCNT),
 
-                            0x12a => GetLowByte(_SIODATA_SEND),
-                            0x12b => GetHighByte(_SIODATA_SEND),
+                            0x12a => GetLowByte(_communication._SIODATA_SEND),
+                            0x12b => GetHighByte(_communication._SIODATA_SEND),
 
                             0x130 => GetLowByte(_KEYINPUT),
                             0x131 => GetHighByte(_KEYINPUT),
@@ -324,8 +324,8 @@ namespace Iris.GBA
                             0x132 => GetLowByte(_KEYCNT),
                             0x133 => GetHighByte(_KEYCNT),
 
-                            0x134 => GetLowByte(_RCNT),
-                            0x135 => GetHighByte(_RCNT),
+                            0x134 => GetLowByte(_communication._RCNT),
+                            0x135 => GetHighByte(_communication._RCNT),
 
                             0x200 => GetLowByte(_IE),
                             0x201 => GetHighByte(_IE),
@@ -473,15 +473,15 @@ namespace Iris.GBA
                             0x10a => _TM2CNT_H,
                             0x10c => _TM3CNT_L,
                             0x10e => _TM3CNT_H,
-                            0x120 => _SIODATA0,
-                            0x122 => _SIODATA1,
-                            0x124 => _SIODATA2,
-                            0x126 => _SIODATA3,
-                            0x128 => _SIOCNT,
-                            0x12a => _SIODATA_SEND,
+                            0x120 => _communication._SIODATA0,
+                            0x122 => _communication._SIODATA1,
+                            0x124 => _communication._SIODATA2,
+                            0x126 => _communication._SIODATA3,
+                            0x128 => _communication._SIOCNT,
+                            0x12a => _communication._SIODATA_SEND,
                             0x130 => _KEYINPUT,
                             0x132 => _KEYCNT,
-                            0x134 => _RCNT,
+                            0x134 => _communication._RCNT,
                             0x200 => _IE,
                             0x202 => _IF,
                             0x204 => _WAITCNT,
@@ -1228,45 +1228,45 @@ namespace Iris.GBA
                                 break;
 
                             case 0x120:
-                                SetLowByte(ref _SIODATA0, value);
+                                SetLowByte(ref _communication._SIODATA0, value);
                                 break;
                             case 0x121:
-                                SetHighByte(ref _SIODATA0, value);
+                                SetHighByte(ref _communication._SIODATA0, value);
                                 break;
 
                             case 0x122:
-                                SetLowByte(ref _SIODATA1, value);
+                                SetLowByte(ref _communication._SIODATA1, value);
                                 break;
                             case 0x123:
-                                SetHighByte(ref _SIODATA1, value);
+                                SetHighByte(ref _communication._SIODATA1, value);
                                 break;
 
                             case 0x124:
-                                SetLowByte(ref _SIODATA2, value);
+                                SetLowByte(ref _communication._SIODATA2, value);
                                 break;
                             case 0x125:
-                                SetHighByte(ref _SIODATA2, value);
+                                SetHighByte(ref _communication._SIODATA2, value);
                                 break;
 
                             case 0x126:
-                                SetLowByte(ref _SIODATA3, value);
+                                SetLowByte(ref _communication._SIODATA3, value);
                                 break;
                             case 0x127:
-                                SetHighByte(ref _SIODATA3, value);
+                                SetHighByte(ref _communication._SIODATA3, value);
                                 break;
 
                             case 0x128:
-                                SetLowByte(ref _SIOCNT, value);
+                                SetLowByte(ref _communication._SIOCNT, value);
                                 break;
                             case 0x129:
-                                SetHighByte(ref _SIOCNT, value);
+                                SetHighByte(ref _communication._SIOCNT, value);
                                 break;
 
                             case 0x12a:
-                                SetLowByte(ref _SIODATA_SEND, value);
+                                SetLowByte(ref _communication._SIODATA_SEND, value);
                                 break;
                             case 0x12b:
-                                SetHighByte(ref _SIODATA_SEND, value);
+                                SetHighByte(ref _communication._SIODATA_SEND, value);
                                 break;
 
                             case 0x130:
@@ -1284,10 +1284,10 @@ namespace Iris.GBA
                                 break;
 
                             case 0x134:
-                                SetLowByte(ref _RCNT, value);
+                                SetLowByte(ref _communication._RCNT, value);
                                 break;
                             case 0x135:
-                                SetHighByte(ref _RCNT, value);
+                                SetHighByte(ref _communication._RCNT, value);
                                 break;
 
                             case 0x200:
@@ -1611,22 +1611,22 @@ namespace Iris.GBA
                                 _TM3CNT_H = value;
                                 break;
                             case 0x120:
-                                _SIODATA0 = value;
+                                _communication._SIODATA0 = value;
                                 break;
                             case 0x122:
-                                _SIODATA1 = value;
+                                _communication._SIODATA1 = value;
                                 break;
                             case 0x124:
-                                _SIODATA2 = value;
+                                _communication._SIODATA2 = value;
                                 break;
                             case 0x126:
-                                _SIODATA3 = value;
+                                _communication._SIODATA3 = value;
                                 break;
                             case 0x128:
-                                _SIOCNT = value;
+                                _communication._SIOCNT = value;
                                 break;
                             case 0x12a:
-                                _SIODATA_SEND = value;
+                                _communication._SIODATA_SEND = value;
                                 break;
                             case 0x130:
                                 _KEYINPUT = value;
@@ -1635,7 +1635,7 @@ namespace Iris.GBA
                                 _KEYCNT = value;
                                 break;
                             case 0x134:
-                                _RCNT = value;
+                                _communication._RCNT = value;
                                 break;
                             case 0x200:
                                 _IE = value;
@@ -1787,8 +1787,8 @@ namespace Iris.GBA
                                 _TM3CNT_H = GetHighHalfword(value);
                                 break;
                             case 0x128:
-                                _SIOCNT = GetLowHalfword(value);
-                                _SIODATA_SEND = GetHighHalfword(value);
+                                _communication._SIOCNT = GetLowHalfword(value);
+                                _communication._SIODATA_SEND = GetHighHalfword(value);
                                 break;
                             case 0x204:
                                 _WAITCNT = GetLowHalfword(value);

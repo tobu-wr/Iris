@@ -8,6 +8,7 @@ namespace Iris.GBA
         private readonly Scheduler _scheduler = new(1);
 
         private readonly CPU_Core _cpu;
+        private readonly Communication _communication = new();
         private readonly PPU _ppu;
 
         private UInt16 _WAITCNT;
@@ -44,6 +45,7 @@ namespace Iris.GBA
         {
             _scheduler.Reset();
 
+            _communication.Reset();
             _ppu.Reset();
             BIOS_Reset();
 
@@ -65,7 +67,6 @@ namespace Iris.GBA
             _TM1CNT_H = 0;
             _TM2CNT_H = 0;
             _TM3CNT_H = 0;
-            _SIOCNT = 0;
             _KEYINPUT = 0x03ff;
             _KEYCNT = 0;
             _IE = 0;
@@ -84,14 +85,6 @@ namespace Iris.GBA
         public void Run()
         {
             _running = true;
-
-            //_scheduler.AddTask(90, () => { });
-            //_scheduler.AddTask(30, () => { });
-            //_scheduler.AddTask(10, () => { });
-            //_scheduler.AddTask(30, () => { });
-            //_scheduler.AddTask(20, () => { });
-            //_scheduler.AddTask(50, () => { });
-            //_scheduler.AddTask(40, () => { });
 
             while (_running)
             {
