@@ -1,5 +1,6 @@
 ﻿using Iris.Common;
 using Iris.CPU;
+using static Iris.Common.ISystem;
 
 namespace Iris.GBA
 {
@@ -12,6 +13,7 @@ namespace Iris.GBA
         private readonly Timer _timer = new();
         private readonly Sound _sound = new();
         private readonly DMA _dma = new();
+        private readonly KeyInput _keyInput = new();
         private readonly PPU _ppu;
 
         private UInt16 _WAITCNT;
@@ -52,11 +54,10 @@ namespace Iris.GBA
             _timer.Reset();
             _sound.Reset();
             _dma.Reset();
+            _keyInput.Reset();
             _ppu.Reset();
             BIOS_Reset();
 
-            _KEYINPUT = 0x03ff;
-            _KEYCNT = 0;
             _IE = 0;
             _IF = 0;
             _WAITCNT = 0;
@@ -89,6 +90,11 @@ namespace Iris.GBA
         public void Pause()
         {
             _running = false;
+        }
+
+        public void SetKeyStatus(Key key, KeyStatus status)
+        {
+            _keyInput.SetKeyStatus(key, status);
         }
     }
 }

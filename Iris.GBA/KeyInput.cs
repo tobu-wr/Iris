@@ -1,46 +1,52 @@
-﻿using Iris.Common;
+﻿using static Iris.Common.ISystem;
 
 namespace Iris.GBA
 {
-    public sealed partial class GBA_System
+    internal sealed class KeyInput
     {
-        private UInt16 _KEYINPUT;
-        private UInt16 _KEYCNT;
+        internal UInt16 _KEYINPUT;
+        internal UInt16 _KEYCNT;
 
-        public void SetKeyStatus(ISystem.Key key, ISystem.KeyStatus status)
+        internal void Reset()
+        {
+            _KEYINPUT = 0x03ff;
+            _KEYCNT = 0;
+        }
+
+        internal void SetKeyStatus(Key key, KeyStatus status)
         {
             int pos;
 
             switch (key)
             {
-                case ISystem.Key.A:
+                case Key.A:
                     pos = 0;
                     break;
-                case ISystem.Key.B:
+                case Key.B:
                     pos = 1;
                     break;
-                case ISystem.Key.Select:
+                case Key.Select:
                     pos = 2;
                     break;
-                case ISystem.Key.Start:
+                case Key.Start:
                     pos = 3;
                     break;
-                case ISystem.Key.Right:
+                case Key.Right:
                     pos = 4;
                     break;
-                case ISystem.Key.Left:
+                case Key.Left:
                     pos = 5;
                     break;
-                case ISystem.Key.Up:
+                case Key.Up:
                     pos = 6;
                     break;
-                case ISystem.Key.Down:
+                case Key.Down:
                     pos = 7;
                     break;
-                case ISystem.Key.R:
+                case Key.R:
                     pos = 8;
                     break;
-                case ISystem.Key.L:
+                case Key.L:
                     pos = 9;
                     break;
                 default:
