@@ -33,6 +33,16 @@
             _SIODATA_SEND = 0;
 
             _RCNT = 0;
+
+            //_JOYCNT = 0;
+
+            //_JOY_RECV_L = 0;
+            //_JOY_RECV_H = 0;
+
+            //_JOY_TRANS_L = 0;
+            //_JOY_TRANS_H = 0;
+
+            //_JOYSTAT = 0;
         }
     }
 }
