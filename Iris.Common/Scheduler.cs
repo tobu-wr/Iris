@@ -26,13 +26,13 @@ namespace Iris.Common
 
         public void AddTask(UInt32 cycleCount, Task_Delegate task)
         {
-            cycleCount += _cycleCounter;
+            ref TaskListEntry firstEntryRef = ref MemoryMarshal.GetArrayDataReference(_taskList);
 
-            ref TaskListEntry taskListDataRef = ref MemoryMarshal.GetArrayDataReference(_taskList);
+            cycleCount += _cycleCounter;
 
             int i = _taskCount - 1;
 
-            while ((i >= 0) && (Unsafe.Add(ref taskListDataRef, i).CycleCount > cycleCount))
+            while ((i >= 0) && (Unsafe.Add(ref firstEntryRef, i).CycleCount > cycleCount))
                 --i;
 
             ++i;
@@ -40,7 +40,7 @@ namespace Iris.Common
             if (i < _taskCount)
                 Array.Copy(_taskList, i, _taskList, i + 1, _taskCount - i);
 
-            ref TaskListEntry entry = ref Unsafe.Add(ref taskListDataRef, i);
+            ref TaskListEntry entry = ref Unsafe.Add(ref firstEntryRef, i);
             entry.CycleCount = cycleCount;
             entry.Task = task;
 
@@ -59,9 +59,11 @@ namespace Iris.Common
 
         public void ProcessTasks()
         {
-            while (HasTaskReady())
+            ref TaskListEntry firstEntryRef = ref MemoryMarshal.GetArrayDataReference(_taskList);
+
+            while ((_taskCount > 0) && (firstEntryRef.CycleCount <= _cycleCounter))
             {
-                Task_Delegate task = MemoryMarshal.GetArrayDataReference(_taskList).Task;
+                Task_Delegate task = firstEntryRef.Task;
 
                 --_taskCount;
 
@@ -71,10 +73,8 @@ namespace Iris.Common
                 task();
             }
 
-            ref TaskListEntry taskListDataRef = ref MemoryMarshal.GetArrayDataReference(_taskList);
-
             for (int i = 0; i < _taskCount; ++i)
-                Unsafe.Add(ref taskListDataRef, i).CycleCount -= _cycleCounter;
+                Unsafe.Add(ref firstEntryRef, i).CycleCount -= _cycleCounter;
 
             _cycleCounter = 0;
         }
