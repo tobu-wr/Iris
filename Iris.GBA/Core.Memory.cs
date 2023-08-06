@@ -276,29 +276,29 @@ namespace Iris.GBA
                             0x0de => GetLowByte(_DMA3CNT_H),
                             0x0df => GetHighByte(_DMA3CNT_H),
 
-                            0x100 => GetLowByte(_TM0CNT_L),
-                            0x101 => GetHighByte(_TM0CNT_L),
+                            0x100 => GetLowByte(_timer._TM0CNT_L),
+                            0x101 => GetHighByte(_timer._TM0CNT_L),
 
-                            0x102 => GetLowByte(_TM0CNT_H),
-                            0x103 => GetHighByte(_TM0CNT_H),
+                            0x102 => GetLowByte(_timer._TM0CNT_H),
+                            0x103 => GetHighByte(_timer._TM0CNT_H),
 
-                            0x104 => GetLowByte(_TM1CNT_L),
-                            0x105 => GetHighByte(_TM1CNT_L),
+                            0x104 => GetLowByte(_timer._TM1CNT_L),
+                            0x105 => GetHighByte(_timer._TM1CNT_L),
 
-                            0x106 => GetLowByte(_TM1CNT_H),
-                            0x107 => GetHighByte(_TM1CNT_H),
+                            0x106 => GetLowByte(_timer._TM1CNT_H),
+                            0x107 => GetHighByte(_timer._TM1CNT_H),
 
-                            0x108 => GetLowByte(_TM2CNT_L),
-                            0x109 => GetHighByte(_TM2CNT_L),
+                            0x108 => GetLowByte(_timer._TM2CNT_L),
+                            0x109 => GetHighByte(_timer._TM2CNT_L),
 
-                            0x10a => GetLowByte(_TM2CNT_H),
-                            0x10b => GetHighByte(_TM2CNT_H),
+                            0x10a => GetLowByte(_timer._TM2CNT_H),
+                            0x10b => GetHighByte(_timer._TM2CNT_H),
 
-                            0x10c => GetLowByte(_TM3CNT_L),
-                            0x10d => GetHighByte(_TM3CNT_L),
+                            0x10c => GetLowByte(_timer._TM3CNT_L),
+                            0x10d => GetHighByte(_timer._TM3CNT_L),
 
-                            0x10e => GetLowByte(_TM3CNT_H),
-                            0x10f => GetHighByte(_TM3CNT_H),
+                            0x10e => GetLowByte(_timer._TM3CNT_H),
+                            0x10f => GetHighByte(_timer._TM3CNT_H),
 
                             0x120 => GetLowByte(_communication._SIODATA0),
                             0x121 => GetHighByte(_communication._SIODATA0),
@@ -465,14 +465,14 @@ namespace Iris.GBA
                             0x0c6 => _DMA1CNT_H,
                             0x0d2 => _DMA2CNT_H,
                             0x0de => _DMA3CNT_H,
-                            0x100 => _TM0CNT_L,
-                            0x102 => _TM0CNT_H,
-                            0x104 => _TM1CNT_L,
-                            0x106 => _TM1CNT_H,
-                            0x108 => _TM2CNT_L,
-                            0x10a => _TM2CNT_H,
-                            0x10c => _TM3CNT_L,
-                            0x10e => _TM3CNT_H,
+                            0x100 => _timer._TM0CNT_L,
+                            0x102 => _timer._TM0CNT_H,
+                            0x104 => _timer._TM1CNT_L,
+                            0x106 => _timer._TM1CNT_H,
+                            0x108 => _timer._TM2CNT_L,
+                            0x10a => _timer._TM2CNT_H,
+                            0x10c => _timer._TM3CNT_L,
+                            0x10e => _timer._TM3CNT_H,
                             0x120 => _communication._SIODATA0,
                             0x122 => _communication._SIODATA1,
                             0x124 => _communication._SIODATA2,
@@ -1172,59 +1172,59 @@ namespace Iris.GBA
                                 break;
 
                             case 0x100:
-                                SetLowByte(ref _TM0CNT_L, value);
+                                SetLowByte(ref _timer._TM0CNT_L, value);
                                 break;
                             case 0x101:
-                                SetHighByte(ref _TM0CNT_L, value);
+                                SetHighByte(ref _timer._TM0CNT_L, value);
                                 break;
 
                             case 0x102:
-                                SetLowByte(ref _TM0CNT_H, value);
+                                SetLowByte(ref _timer._TM0CNT_H, value);
                                 break;
                             case 0x103:
-                                SetHighByte(ref _TM0CNT_H, value);
+                                SetHighByte(ref _timer._TM0CNT_H, value);
                                 break;
 
                             case 0x104:
-                                SetLowByte(ref _TM1CNT_L, value);
+                                SetLowByte(ref _timer._TM1CNT_L, value);
                                 break;
                             case 0x105:
-                                SetHighByte(ref _TM1CNT_L, value);
+                                SetHighByte(ref _timer._TM1CNT_L, value);
                                 break;
 
                             case 0x106:
-                                SetLowByte(ref _TM1CNT_H, value);
+                                SetLowByte(ref _timer._TM1CNT_H, value);
                                 break;
                             case 0x107:
-                                SetHighByte(ref _TM1CNT_H, value);
+                                SetHighByte(ref _timer._TM1CNT_H, value);
                                 break;
 
                             case 0x108:
-                                SetLowByte(ref _TM2CNT_L, value);
+                                SetLowByte(ref _timer._TM2CNT_L, value);
                                 break;
                             case 0x109:
-                                SetHighByte(ref _TM2CNT_L, value);
+                                SetHighByte(ref _timer._TM2CNT_L, value);
                                 break;
 
                             case 0x10a:
-                                SetLowByte(ref _TM2CNT_H, value);
+                                SetLowByte(ref _timer._TM2CNT_H, value);
                                 break;
                             case 0x10b:
-                                SetHighByte(ref _TM2CNT_H, value);
+                                SetHighByte(ref _timer._TM2CNT_H, value);
                                 break;
 
                             case 0x10c:
-                                SetLowByte(ref _TM3CNT_L, value);
+                                SetLowByte(ref _timer._TM3CNT_L, value);
                                 break;
                             case 0x10d:
-                                SetHighByte(ref _TM3CNT_L, value);
+                                SetHighByte(ref _timer._TM3CNT_L, value);
                                 break;
 
                             case 0x10e:
-                                SetLowByte(ref _TM3CNT_H, value);
+                                SetLowByte(ref _timer._TM3CNT_H, value);
                                 break;
                             case 0x10f:
-                                SetHighByte(ref _TM3CNT_H, value);
+                                SetHighByte(ref _timer._TM3CNT_H, value);
                                 break;
 
                             case 0x120:
@@ -1587,28 +1587,28 @@ namespace Iris.GBA
                                 _DMA3CNT_H = value;
                                 break;
                             case 0x100:
-                                _TM0CNT_L = value;
+                                _timer._TM0CNT_L = value;
                                 break;
                             case 0x102:
-                                _TM0CNT_H = value;
+                                _timer._TM0CNT_H = value;
                                 break;
                             case 0x104:
-                                _TM1CNT_L = value;
+                                _timer._TM1CNT_L = value;
                                 break;
                             case 0x106:
-                                _TM1CNT_H = value;
+                                _timer._TM1CNT_H = value;
                                 break;
                             case 0x108:
-                                _TM2CNT_L = value;
+                                _timer._TM2CNT_L = value;
                                 break;
                             case 0x10a:
-                                _TM2CNT_H = value;
+                                _timer._TM2CNT_H = value;
                                 break;
                             case 0x10c:
-                                _TM3CNT_L = value;
+                                _timer._TM3CNT_L = value;
                                 break;
                             case 0x10e:
-                                _TM3CNT_H = value;
+                                _timer._TM3CNT_H = value;
                                 break;
                             case 0x120:
                                 _communication._SIODATA0 = value;
@@ -1783,8 +1783,8 @@ namespace Iris.GBA
                                 _DMA3CNT_H = GetHighHalfword(value);
                                 break;
                             case 0x10c:
-                                _TM3CNT_L = GetLowHalfword(value);
-                                _TM3CNT_H = GetHighHalfword(value);
+                                _timer._TM3CNT_L = GetLowHalfword(value);
+                                _timer._TM3CNT_H = GetHighHalfword(value);
                                 break;
                             case 0x128:
                                 _communication._SIOCNT = GetLowHalfword(value);

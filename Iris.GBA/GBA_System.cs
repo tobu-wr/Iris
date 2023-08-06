@@ -9,6 +9,7 @@ namespace Iris.GBA
 
         private readonly CPU_Core _cpu;
         private readonly Communication _communication = new();
+        private readonly Timer _timer = new();
         private readonly PPU _ppu;
 
         private UInt16 _WAITCNT;
@@ -46,6 +47,7 @@ namespace Iris.GBA
             _scheduler.Reset();
 
             _communication.Reset();
+            _timer.Reset();
             _ppu.Reset();
             BIOS_Reset();
 
@@ -63,10 +65,6 @@ namespace Iris.GBA
             _DMA2CNT_L = 0;
             _DMA2CNT_H = 0;
             _DMA3CNT_H = 0;
-            _TM0CNT_H = 0;
-            _TM1CNT_H = 0;
-            _TM2CNT_H = 0;
-            _TM3CNT_H = 0;
             _KEYINPUT = 0x03ff;
             _KEYCNT = 0;
             _IE = 0;
