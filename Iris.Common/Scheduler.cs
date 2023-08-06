@@ -28,9 +28,11 @@ namespace Iris.Common
         {
             cycleCount += _cycleCounter;
 
+            ref TaskListEntry taskListDataRef = ref MemoryMarshal.GetArrayDataReference(_taskList);
+
             int i = _taskCount - 1;
 
-            while ((i >= 0) && (Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_taskList), i).CycleCount > cycleCount))
+            while ((i >= 0) && (Unsafe.Add(ref taskListDataRef, i).CycleCount > cycleCount))
                 --i;
 
             ++i;
@@ -38,7 +40,7 @@ namespace Iris.Common
             if (i < _taskCount)
                 Array.Copy(_taskList, i, _taskList, i + 1, _taskCount - i);
 
-            ref TaskListEntry entry = ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_taskList), i);
+            ref TaskListEntry entry = ref Unsafe.Add(ref taskListDataRef, i);
             entry.CycleCount = cycleCount;
             entry.Task = task;
 
@@ -69,8 +71,10 @@ namespace Iris.Common
                 task();
             }
 
+            ref TaskListEntry taskListDataRef = ref MemoryMarshal.GetArrayDataReference(_taskList);
+
             for (int i = 0; i < _taskCount; ++i)
-                Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_taskList), i).CycleCount -= _cycleCounter;
+                Unsafe.Add(ref taskListDataRef, i).CycleCount -= _cycleCounter;
 
             _cycleCounter = 0;
         }
