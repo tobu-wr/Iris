@@ -4,10 +4,10 @@ namespace Iris.GBA
 {
     internal sealed class BIOS
     {
-        private readonly CPU_Core _cpu;
-        private readonly Memory _memory;
+        private CPU_Core? _cpu;
+        private Memory? _memory;
 
-        internal BIOS(CPU_Core cpu, Memory memory)
+        internal void Init(CPU_Core cpu, Memory memory)
         {
             _cpu = cpu;
             _memory = memory;
@@ -18,9 +18,9 @@ namespace Iris.GBA
             const UInt32 ROMAddress = 0x800_0000;
 
             for (int i = 0; i <= 12; ++i)
-                _cpu.Reg[i] = 0;
+                _cpu!.Reg[i] = 0;
 
-            _cpu.Reg[CPU_Core.SP] = 0x300_7f00;
+            _cpu!.Reg[CPU_Core.SP] = 0x300_7f00;
             _cpu.Reg[CPU_Core.LR] = ROMAddress;
 
             _cpu.Reg13_svc = 0x300_7fe0;
@@ -36,7 +36,7 @@ namespace Iris.GBA
             _cpu.NextInstructionAddress = ROMAddress;
 
             for (UInt32 address = 0x300_7e00; address < 0x300_8000; address += 4)
-                _memory.WriteMemory32(address, 0);
+                _memory!.WriteMemory32(address, 0);
         }
 
         internal Byte Read8(UInt32 address)
@@ -112,14 +112,14 @@ namespace Iris.GBA
         // IRQ handler start
         internal void HandleIRQ()
         {
-            _cpu.Reg14_irq = _cpu.NextInstructionAddress + 4;
+            _cpu!.Reg14_irq = _cpu.NextInstructionAddress + 4;
             _cpu.SPSR_irq = _cpu.CPSR;
             _cpu.SetCPSR((_cpu.CPSR & ~0xbfu) | 0x92u);
 
             void PushToStack(UInt32 value)
             {
                 _cpu.Reg[CPU_Core.SP] -= 4;
-                _memory.WriteMemory32(_cpu.Reg[CPU_Core.SP], value);
+                _memory!.WriteMemory32(_cpu.Reg[CPU_Core.SP], value);
             }
 
             PushToStack(_cpu.Reg[CPU_Core.LR]);
@@ -131,7 +131,7 @@ namespace Iris.GBA
 
             _cpu.Reg[0] = 0x400_0000;
             _cpu.Reg[CPU_Core.LR] = 0x138;
-            _cpu.NextInstructionAddress = _memory.ReadMemory32(0x300_7ffc);
+            _cpu.NextInstructionAddress = _memory!.ReadMemory32(0x300_7ffc);
         }
 
         private void RegisterRamReset()
@@ -151,7 +151,7 @@ namespace Iris.GBA
 
         private void Div()
         {
-            Int32 number = (Int32)_cpu.Reg[0];
+            Int32 number = (Int32)_cpu!.Reg[0];
             Int32 divisor = (Int32)_cpu.Reg[1];
             _cpu.Reg[0] = (UInt32)(number / divisor);
             _cpu.Reg[1] = (UInt32)(number % divisor);
@@ -160,7 +160,7 @@ namespace Iris.GBA
 
         private void CpuSet()
         {
-            UInt32 source = _cpu.Reg[0];
+            UInt32 source = _cpu!.Reg[0];
             UInt32 destination = _cpu.Reg[1];
             UInt32 length = _cpu.Reg[2] & 0xf_ffff;
             UInt32 fixedSource = (_cpu.Reg[2] >> 24) & 1;
@@ -176,7 +176,7 @@ namespace Iris.GBA
                 {
                     while (destination < lastDestination)
                     {
-                        _memory.WriteMemory16(destination, _memory.ReadMemory16(source));
+                        _memory!.WriteMemory16(destination, _memory.ReadMemory16(source));
                         destination += 2;
                         source += 2;
                     }
@@ -185,7 +185,7 @@ namespace Iris.GBA
                 // fill
                 else
                 {
-                    UInt16 value = _memory.ReadMemory16(source);
+                    UInt16 value = _memory!.ReadMemory16(source);
 
                     while (destination < lastDestination)
                     {
@@ -205,7 +205,7 @@ namespace Iris.GBA
                 {
                     while (destination < lastDestination)
                     {
-                        _memory.WriteMemory32(destination, _memory.ReadMemory32(source));
+                        _memory!.WriteMemory32(destination, _memory.ReadMemory32(source));
                         destination += 4;
                         source += 4;
                     }
@@ -214,7 +214,7 @@ namespace Iris.GBA
                 // fill
                 else
                 {
-                    UInt32 value = _memory.ReadMemory32(source);
+                    UInt32 value = _memory!.ReadMemory32(source);
 
                     while (destination < lastDestination)
                     {
@@ -227,7 +227,7 @@ namespace Iris.GBA
 
         private void CpuFastSet()
         {
-            UInt32 source = _cpu.Reg[0];
+            UInt32 source = _cpu!.Reg[0];
             UInt32 destination = _cpu.Reg[1];
             UInt32 length = _cpu.Reg[2] & 0xf_ffff;
             UInt32 fixedSource = (_cpu.Reg[2] >> 24) & 1;
@@ -243,7 +243,7 @@ namespace Iris.GBA
             {
                 while (destination < lastDestination)
                 {
-                    _memory.WriteMemory32(destination, _memory.ReadMemory32(source));
+                    _memory!.WriteMemory32(destination, _memory.ReadMemory32(source));
                     destination += 4;
                     source += 4;
                 }
@@ -252,7 +252,7 @@ namespace Iris.GBA
             // fill
             else
             {
-                UInt32 value = _memory.ReadMemory32(source);
+                UInt32 value = _memory!.ReadMemory32(source);
 
                 while (destination < lastDestination)
                 {
@@ -264,10 +264,10 @@ namespace Iris.GBA
 
         private void LZ77UnCompReadNormalWrite16bit()
         {
-            UInt32 source = _cpu.Reg[0];
+            UInt32 source = _cpu!.Reg[0];
             UInt32 destination = _cpu.Reg[1];
 
-            UInt32 dataHeader = _memory.ReadMemory32(source);
+            UInt32 dataHeader = _memory!.ReadMemory32(source);
             source += 4;
 
             UInt32 dataSize = dataHeader >> 8;
@@ -319,12 +319,12 @@ namespace Iris.GBA
         {
             UInt32 PopFromStack()
             {
-                UInt32 value = _memory.ReadMemory32(_cpu.Reg[CPU_Core.SP]);
+                UInt32 value = _memory!.ReadMemory32(_cpu.Reg[CPU_Core.SP]);
                 _cpu.Reg[CPU_Core.SP] += 4;
                 return value;
             }
 
-            _cpu.Reg[0] = PopFromStack();
+            _cpu!.Reg[0] = PopFromStack();
             _cpu.Reg[1] = PopFromStack();
             _cpu.Reg[2] = PopFromStack();
             _cpu.Reg[3] = PopFromStack();

@@ -16,7 +16,7 @@ namespace Iris.GBA
         private readonly DMA _dma = new();
         private readonly KeyInput _keyInput = new();
         private readonly InterruptControl _interruptControl = new();
-        private readonly BIOS _bios;
+        private readonly BIOS _bios = new();
         private readonly Memory _memory = new();
         private readonly PPU _ppu;
 
@@ -38,17 +38,18 @@ namespace Iris.GBA
                 HandleIRQ = () => _bios!.HandleIRQ()
             };
 
+            _cpu = new(CPU_Core.Model.ARM7TDMI, cpuCallbackInterface);
+
             PPU.CallbackInterface ppuCallbackInterface = new()
             {
                 DrawFrame = drawFrame,
                 RequestVBlankInterrupt = () => _interruptControl!.RequestInterrupt(Interrupt.VBlank)
             };
 
-            _cpu = new(CPU_Core.Model.ARM7TDMI, cpuCallbackInterface);
             _ppu = new(_scheduler, ppuCallbackInterface);
-            _bios = new(_cpu, _memory);
 
             _interruptControl.Init(_cpu);
+            _bios.Init(_cpu, _memory);
             _memory.Init(_communication, _timer, _sound, _dma, _keyInput, _interruptControl, _bios, _ppu, this);
         }
 
