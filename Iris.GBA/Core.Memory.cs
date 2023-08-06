@@ -129,7 +129,7 @@ namespace Iris.GBA
             MapMemory(_ROM, pageCount, 0x0c00_0000, 0x0e00_0000, MemoryFlag.AllRead);
         }
 
-        private Byte ReadMemory8(UInt32 address)
+        internal Byte ReadMemory8(UInt32 address)
         {
             address &= 0x0fff_ffff;
 
@@ -150,7 +150,7 @@ namespace Iris.GBA
                 // BIOS
                 case 0x0:
                 case 0x1:
-                    return BIOS_Read8(address);
+                    return _bios.Read8(address);
 
                 // IO and registers
                 case 0x4:
@@ -398,7 +398,7 @@ namespace Iris.GBA
             throw new Exception(string.Format("Iris.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address));
         }
 
-        private UInt16 ReadMemory16(UInt32 address)
+        internal UInt16 ReadMemory16(UInt32 address)
         {
             address &= 0x0fff_fffe;
 
@@ -419,7 +419,7 @@ namespace Iris.GBA
                 // BIOS
                 case 0x0:
                 case 0x1:
-                    return BIOS_Read16(address);
+                    return _bios.Read16(address);
 
                 // IO and registers
                 case 0x4:
@@ -545,7 +545,7 @@ namespace Iris.GBA
             throw new Exception(string.Format("Iris.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address));
         }
 
-        private UInt32 ReadMemory32(UInt32 address)
+        internal UInt32 ReadMemory32(UInt32 address)
         {
             address &= 0x0fff_fffc;
 
@@ -566,7 +566,7 @@ namespace Iris.GBA
                 // BIOS
                 case 0x0:
                 case 0x1:
-                    return BIOS_Read32(address);
+                    return _bios.Read32(address);
 
                 // IO and registers
                 case 0x4:
@@ -1344,7 +1344,7 @@ namespace Iris.GBA
             }
         }
 
-        private void WriteMemory16(UInt32 address, UInt16 value)
+        internal void WriteMemory16(UInt32 address, UInt16 value)
         {
             address &= 0x0fff_fffe;
 
@@ -1672,7 +1672,7 @@ namespace Iris.GBA
             }
         }
 
-        private void WriteMemory32(UInt32 address, UInt32 value)
+        internal void WriteMemory32(UInt32 address, UInt32 value)
         {
             address &= 0x0fff_fffc;
 
