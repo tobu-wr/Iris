@@ -327,17 +327,17 @@ namespace Iris.GBA
                             0x134 => GetLowByte(_communication._RCNT),
                             0x135 => GetHighByte(_communication._RCNT),
 
-                            0x200 => GetLowByte(_IE),
-                            0x201 => GetHighByte(_IE),
+                            0x200 => GetLowByte(_interruptControl._IE),
+                            0x201 => GetHighByte(_interruptControl._IE),
 
-                            0x202 => GetLowByte(_IF),
-                            0x203 => GetHighByte(_IF),
+                            0x202 => GetLowByte(_interruptControl._IF),
+                            0x203 => GetHighByte(_interruptControl._IF),
 
                             0x204 => GetLowByte(_WAITCNT),
                             0x205 => GetHighByte(_WAITCNT),
 
-                            0x208 => GetLowByte(_IME),
-                            0x209 => GetHighByte(_IME),
+                            0x208 => GetLowByte(_interruptControl._IME),
+                            0x209 => GetHighByte(_interruptControl._IME),
 
                             _ => throw new Exception(string.Format("Iris.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address)),
                         };
@@ -482,10 +482,10 @@ namespace Iris.GBA
                             0x130 => _keyInput._KEYINPUT,
                             0x132 => _keyInput._KEYCNT,
                             0x134 => _communication._RCNT,
-                            0x200 => _IE,
-                            0x202 => _IF,
+                            0x200 => _interruptControl._IE,
+                            0x202 => _interruptControl._IF,
                             0x204 => _WAITCNT,
-                            0x208 => _IME,
+                            0x208 => _interruptControl._IME,
                             _ => throw new Exception(string.Format("Iris.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address)),
                         };
                     }
@@ -583,7 +583,7 @@ namespace Iris.GBA
                             0x0c4 => (UInt32)(_dma._DMA1CNT_H << 16),
                             0x0d0 => (UInt32)(_dma._DMA2CNT_H << 16),
                             0x0dc => (UInt32)(_dma._DMA3CNT_H << 16),
-                            0x200 => (UInt32)((_IF << 16) | _IE),
+                            0x200 => (UInt32)((_interruptControl._IF << 16) | _interruptControl._IE),
                             _ => throw new Exception(string.Format("Iris.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address)),
                         };
                     }
@@ -1291,21 +1291,21 @@ namespace Iris.GBA
                                 break;
 
                             case 0x200:
-                                SetLowByte(ref _IE, value);
-                                UpdateInterrupts();
+                                SetLowByte(ref _interruptControl._IE, value);
+                                _interruptControl.UpdateInterrupts();
                                 break;
                             case 0x201:
-                                SetHighByte(ref _IE, value);
-                                UpdateInterrupts();
+                                SetHighByte(ref _interruptControl._IE, value);
+                                _interruptControl.UpdateInterrupts();
                                 break;
 
                             case 0x202:
-                                _IF &= (UInt16)~value;
-                                UpdateInterrupts();
+                                _interruptControl._IF &= (UInt16)~value;
+                                _interruptControl.UpdateInterrupts();
                                 break;
                             case 0x203:
-                                _IF &= (UInt16)~(value << 8);
-                                UpdateInterrupts();
+                                _interruptControl._IF &= (UInt16)~(value << 8);
+                                _interruptControl.UpdateInterrupts();
                                 break;
 
                             case 0x204:
@@ -1316,12 +1316,12 @@ namespace Iris.GBA
                                 break;
 
                             case 0x208:
-                                SetLowByte(ref _IME, value);
-                                UpdateInterrupts();
+                                SetLowByte(ref _interruptControl._IME, value);
+                                _interruptControl.UpdateInterrupts();
                                 break;
                             case 0x209:
-                                SetHighByte(ref _IME, value);
-                                UpdateInterrupts();
+                                SetHighByte(ref _interruptControl._IME, value);
+                                _interruptControl.UpdateInterrupts();
                                 break;
 
                             default:
@@ -1638,19 +1638,19 @@ namespace Iris.GBA
                                 _communication._RCNT = value;
                                 break;
                             case 0x200:
-                                _IE = value;
-                                UpdateInterrupts();
+                                _interruptControl._IE = value;
+                                _interruptControl.UpdateInterrupts();
                                 break;
                             case 0x202:
-                                _IF &= (UInt16)~value;
-                                UpdateInterrupts();
+                                _interruptControl._IF &= (UInt16)~value;
+                                _interruptControl.UpdateInterrupts();
                                 break;
                             case 0x204:
                                 _WAITCNT = value;
                                 break;
                             case 0x208:
-                                _IME = value;
-                                UpdateInterrupts();
+                                _interruptControl._IME = value;
+                                _interruptControl.UpdateInterrupts();
                                 break;
                             default:
                                 throw new Exception(string.Format("Iris.GBA.Core.Memory: Unhandled write to address 0x{0:x8}", address));
@@ -1795,7 +1795,8 @@ namespace Iris.GBA
                                 // 16 upper bits are unused
                                 break;
                             case 0x208:
-                                _IME = GetLowHalfword(value);
+                                _interruptControl._IME = GetLowHalfword(value);
+                                _interruptControl.UpdateInterrupts();
                                 // 16 upper bits are unused
                                 break;
                             default:

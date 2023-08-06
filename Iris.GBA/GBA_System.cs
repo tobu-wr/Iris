@@ -1,6 +1,7 @@
 ﻿using Iris.Common;
 using Iris.CPU;
 using static Iris.Common.ISystem;
+using static Iris.GBA.InterruptControl;
 
 namespace Iris.GBA
 {
@@ -14,6 +15,7 @@ namespace Iris.GBA
         private readonly Sound _sound = new();
         private readonly DMA _dma = new();
         private readonly KeyInput _keyInput = new();
+        private readonly InterruptControl _interruptControl;
         private readonly PPU _ppu;
 
         private UInt16 _WAITCNT;
@@ -37,10 +39,11 @@ namespace Iris.GBA
             PPU.CallbackInterface ppuCallbackInterface = new()
             {
                 DrawFrame = drawFrame,
-                RequestVBlankInterrupt = () => RequestInterrupt(Interrupt.VBlank)
+                RequestVBlankInterrupt = () => _interruptControl!.RequestInterrupt(Interrupt.VBlank)
             };
 
             _cpu = new(CPU_Core.Model.ARM7TDMI, cpuCallbackInterface);
+            _interruptControl = new(_cpu);
             _ppu = new(_scheduler, ppuCallbackInterface);
 
             InitPageTables();
@@ -55,15 +58,12 @@ namespace Iris.GBA
             _sound.Reset();
             _dma.Reset();
             _keyInput.Reset();
+            _interruptControl.Reset();
             _ppu.Reset();
+
             BIOS_Reset();
 
-            _IE = 0;
-            _IF = 0;
             _WAITCNT = 0;
-            _IME = 0;
-
-            _cpu.NIRQ = CPU_Core.Signal.High;
         }
 
         public bool IsRunning()
