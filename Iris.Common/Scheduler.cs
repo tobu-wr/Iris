@@ -47,7 +47,7 @@ namespace Iris.Common
 
         public bool HasTaskReady()
         {
-            return (_taskCount > 0) && (_taskList[0].CycleCount <= _cycleCounter);
+            return (_taskCount > 0) && (MemoryMarshal.GetArrayDataReference(_taskList).CycleCount <= _cycleCounter);
         }
 
         public void AdvanceCycleCounter(UInt32 cycleCount)
@@ -59,7 +59,7 @@ namespace Iris.Common
         {
             while (HasTaskReady())
             {
-                Task_Delegate task = _taskList[0].Task;
+                Task_Delegate task = MemoryMarshal.GetArrayDataReference(_taskList).Task;
 
                 --_taskCount;
 
@@ -70,7 +70,7 @@ namespace Iris.Common
             }
 
             for (int i = 0; i < _taskCount; ++i)
-                _taskList[i].CycleCount -= _cycleCounter;
+                Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_taskList), i).CycleCount -= _cycleCounter;
 
             _cycleCounter = 0;
         }
