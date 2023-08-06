@@ -24,7 +24,15 @@
 
         internal void Reset()
         {
+            _SIODATA0 = 0;
+            _SIODATA1 = 0;
+            _SIODATA2 = 0;
+            _SIODATA3 = 0;
+
             _SIOCNT = 0;
+            _SIODATA_SEND = 0;
+
+            _RCNT = 0;
         }
     }
 }
