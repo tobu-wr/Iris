@@ -5,12 +5,12 @@ namespace Iris.GBA
     internal sealed class BIOS
     {
         private readonly CPU_Core _cpu;
-        private readonly GBA_System _system;
+        private readonly Memory _memory;
 
-        internal BIOS(CPU_Core cpu, GBA_System system)
+        internal BIOS(CPU_Core cpu, Memory memory)
         {
             _cpu = cpu;
-            _system = system;
+            _memory = memory;
         }
 
         internal void Reset()
@@ -36,7 +36,7 @@ namespace Iris.GBA
             _cpu.NextInstructionAddress = ROMAddress;
 
             for (UInt32 address = 0x300_7e00; address < 0x300_8000; address += 4)
-                _system.WriteMemory32(address, 0);
+                _memory.WriteMemory32(address, 0);
         }
 
         internal Byte Read8(UInt32 address)
@@ -119,7 +119,7 @@ namespace Iris.GBA
             void PushToStack(UInt32 value)
             {
                 _cpu.Reg[CPU_Core.SP] -= 4;
-                _system.WriteMemory32(_cpu.Reg[CPU_Core.SP], value);
+                _memory.WriteMemory32(_cpu.Reg[CPU_Core.SP], value);
             }
 
             PushToStack(_cpu.Reg[CPU_Core.LR]);
@@ -131,7 +131,7 @@ namespace Iris.GBA
 
             _cpu.Reg[0] = 0x400_0000;
             _cpu.Reg[CPU_Core.LR] = 0x138;
-            _cpu.NextInstructionAddress = _system.ReadMemory32(0x300_7ffc);
+            _cpu.NextInstructionAddress = _memory.ReadMemory32(0x300_7ffc);
         }
 
         private void RegisterRamReset()
@@ -176,7 +176,7 @@ namespace Iris.GBA
                 {
                     while (destination < lastDestination)
                     {
-                        _system.WriteMemory16(destination, _system.ReadMemory16(source));
+                        _memory.WriteMemory16(destination, _memory.ReadMemory16(source));
                         destination += 2;
                         source += 2;
                     }
@@ -185,11 +185,11 @@ namespace Iris.GBA
                 // fill
                 else
                 {
-                    UInt16 value = _system.ReadMemory16(source);
+                    UInt16 value = _memory.ReadMemory16(source);
 
                     while (destination < lastDestination)
                     {
-                        _system.WriteMemory16(destination, value);
+                        _memory.WriteMemory16(destination, value);
                         destination += 2;
                     }
                 }
@@ -205,7 +205,7 @@ namespace Iris.GBA
                 {
                     while (destination < lastDestination)
                     {
-                        _system.WriteMemory32(destination, _system.ReadMemory32(source));
+                        _memory.WriteMemory32(destination, _memory.ReadMemory32(source));
                         destination += 4;
                         source += 4;
                     }
@@ -214,11 +214,11 @@ namespace Iris.GBA
                 // fill
                 else
                 {
-                    UInt32 value = _system.ReadMemory32(source);
+                    UInt32 value = _memory.ReadMemory32(source);
 
                     while (destination < lastDestination)
                     {
-                        _system.WriteMemory32(destination, value);
+                        _memory.WriteMemory32(destination, value);
                         destination += 4;
                     }
                 }
@@ -243,7 +243,7 @@ namespace Iris.GBA
             {
                 while (destination < lastDestination)
                 {
-                    _system.WriteMemory32(destination, _system.ReadMemory32(source));
+                    _memory.WriteMemory32(destination, _memory.ReadMemory32(source));
                     destination += 4;
                     source += 4;
                 }
@@ -252,11 +252,11 @@ namespace Iris.GBA
             // fill
             else
             {
-                UInt32 value = _system.ReadMemory32(source);
+                UInt32 value = _memory.ReadMemory32(source);
 
                 while (destination < lastDestination)
                 {
-                    _system.WriteMemory32(destination, value);
+                    _memory.WriteMemory32(destination, value);
                     destination += 4;
                 }
             }
@@ -267,7 +267,7 @@ namespace Iris.GBA
             UInt32 source = _cpu.Reg[0];
             UInt32 destination = _cpu.Reg[1];
 
-            UInt32 dataHeader = _system.ReadMemory32(source);
+            UInt32 dataHeader = _memory.ReadMemory32(source);
             source += 4;
 
             UInt32 dataSize = dataHeader >> 8;
@@ -275,7 +275,7 @@ namespace Iris.GBA
 
             while (destination < lastDestination)
             {
-                Byte flags = _system.ReadMemory8(source);
+                Byte flags = _memory.ReadMemory8(source);
                 ++source;
 
                 for (int i = 7; i >= 0; --i)
@@ -285,7 +285,7 @@ namespace Iris.GBA
                     // uncompressed
                     if (blockType == 0)
                     {
-                        _system.WriteMemory16(destination, _system.ReadMemory16(source));
+                        _memory.WriteMemory16(destination, _memory.ReadMemory16(source));
                         destination += 2;
                         source += 2;
                     }
@@ -293,7 +293,7 @@ namespace Iris.GBA
                     // compressed
                     else
                     {
-                        UInt16 blockHeader = _system.ReadMemory16(source);
+                        UInt16 blockHeader = _memory.ReadMemory16(source);
                         source += 2;
 
                         UInt16 offset = (UInt16)((((blockHeader & 0xf) << 8) | (blockHeader >> 8)) + 1);
@@ -301,7 +301,7 @@ namespace Iris.GBA
 
                         for (int j = 0; j < blockSize; j += 2)
                         {
-                            _system.WriteMemory16(destination, _system.ReadMemory16(destination - offset));
+                            _memory.WriteMemory16(destination, _memory.ReadMemory16(destination - offset));
                             destination += 2;
                         }
                     }
@@ -319,7 +319,7 @@ namespace Iris.GBA
         {
             UInt32 PopFromStack()
             {
-                UInt32 value = _system.ReadMemory32(_cpu.Reg[CPU_Core.SP]);
+                UInt32 value = _memory.ReadMemory32(_cpu.Reg[CPU_Core.SP]);
                 _cpu.Reg[CPU_Core.SP] += 4;
                 return value;
             }

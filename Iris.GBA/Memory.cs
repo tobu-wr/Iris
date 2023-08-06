@@ -3,8 +3,18 @@ using System.Runtime.InteropServices;
 
 namespace Iris.GBA
 {
-    public sealed partial class GBA_System
+    internal sealed class Memory
     {
+        private Communication? _communication;
+        private Timer? _timer;
+        private Sound? _sound;
+        private DMA? _dma;
+        private KeyInput? _keyInput;
+        private InterruptControl? _interruptControl;
+        private BIOS? _bios;
+        private PPU? _ppu;
+        private GBA_System? _system;
+
         [Flags]
         private enum MemoryFlag
         {
@@ -43,6 +53,21 @@ namespace Iris.GBA
         private readonly IntPtr[] _write8PageTable = new IntPtr[PageTableSize];
         private readonly IntPtr[] _write16PageTable = new IntPtr[PageTableSize];
         private readonly IntPtr[] _write32PageTable = new IntPtr[PageTableSize];
+
+        internal void Init(Communication communication, Timer timer, Sound sound, DMA dma, KeyInput keyInput, InterruptControl interruptControl, BIOS bios, PPU ppu, GBA_System system)
+        {
+            _communication = communication;
+            _timer = timer;
+            _sound = sound;
+            _dma = dma;
+            _keyInput = keyInput;
+            _interruptControl = interruptControl;
+            _bios = bios;
+            _ppu = ppu;
+            _system = system;
+
+            InitPageTables();
+        }
 
         private void MapMemory(IntPtr data, int pageCount, UInt32 startAddress, UInt32 endAddress, MemoryFlag flags)
         {
@@ -101,7 +126,7 @@ namespace Iris.GBA
             }
         }
 
-        private void InitPageTables()
+        internal void InitPageTables()
         {
             MapMemory(_eWRAM, EWRAMSize / PageSize, 0x0200_0000, 0x0300_0000, MemoryFlag.All);
             MapMemory(_iWRAM, IWRAMSize / PageSize, 0x0300_0000, 0x0400_0000, MemoryFlag.All);
@@ -111,7 +136,7 @@ namespace Iris.GBA
             MapMemory(_SRAM, SRAMSize / PageSize, 0x0e00_0000, 0x1000_0000, MemoryFlag.Read8 | MemoryFlag.Write8 | MemoryFlag.Mirrored);
         }
 
-        public void LoadROM(string filename)
+        internal void LoadROM(string filename)
         {
             Byte[] data = File.ReadAllBytes(filename);
 
@@ -333,13 +358,13 @@ namespace Iris.GBA
                             0x202 => GetLowByte(_interruptControl._IF),
                             0x203 => GetHighByte(_interruptControl._IF),
 
-                            0x204 => GetLowByte(_WAITCNT),
-                            0x205 => GetHighByte(_WAITCNT),
+                            0x204 => GetLowByte(_system._WAITCNT),
+                            0x205 => GetHighByte(_system._WAITCNT),
 
                             0x208 => GetLowByte(_interruptControl._IME),
                             0x209 => GetHighByte(_interruptControl._IME),
 
-                            _ => throw new Exception(string.Format("Iris.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address)),
+                            _ => throw new Exception(string.Format("Iris.GBA.Memory: Unhandled read from address 0x{0:x8}", address)),
                         };
                     }
 
@@ -395,7 +420,7 @@ namespace Iris.GBA
                     break;
             }
 
-            throw new Exception(string.Format("Iris.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address));
+            throw new Exception(string.Format("Iris.GBA.Memory: Unhandled read from address 0x{0:x8}", address));
         }
 
         internal UInt16 ReadMemory16(UInt32 address)
@@ -484,9 +509,9 @@ namespace Iris.GBA
                             0x134 => _communication._RCNT,
                             0x200 => _interruptControl._IE,
                             0x202 => _interruptControl._IF,
-                            0x204 => _WAITCNT,
+                            0x204 => _system._WAITCNT,
                             0x208 => _interruptControl._IME,
-                            _ => throw new Exception(string.Format("Iris.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address)),
+                            _ => throw new Exception(string.Format("Iris.GBA.Memory: Unhandled read from address 0x{0:x8}", address)),
                         };
                     }
 
@@ -542,7 +567,7 @@ namespace Iris.GBA
                     break;
             }
 
-            throw new Exception(string.Format("Iris.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address));
+            throw new Exception(string.Format("Iris.GBA.Memory: Unhandled read from address 0x{0:x8}", address));
         }
 
         internal UInt32 ReadMemory32(UInt32 address)
@@ -584,7 +609,7 @@ namespace Iris.GBA
                             0x0d0 => (UInt32)(_dma._DMA2CNT_H << 16),
                             0x0dc => (UInt32)(_dma._DMA3CNT_H << 16),
                             0x200 => (UInt32)((_interruptControl._IF << 16) | _interruptControl._IE),
-                            _ => throw new Exception(string.Format("Iris.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address)),
+                            _ => throw new Exception(string.Format("Iris.GBA.Memory: Unhandled read from address 0x{0:x8}", address)),
                         };
                     }
 
@@ -640,10 +665,10 @@ namespace Iris.GBA
                     break;
             }
 
-            throw new Exception(string.Format("Iris.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address));
+            throw new Exception(string.Format("Iris.GBA.Memory: Unhandled read from address 0x{0:x8}", address));
         }
 
-        private void WriteMemory8(UInt32 address, Byte value)
+        internal void WriteMemory8(UInt32 address, Byte value)
         {
             address &= 0x0fff_ffff;
 
@@ -1309,10 +1334,10 @@ namespace Iris.GBA
                                 break;
 
                             case 0x204:
-                                SetLowByte(ref _WAITCNT, value);
+                                SetLowByte(ref _system._WAITCNT, value);
                                 break;
                             case 0x205:
-                                SetHighByte(ref _WAITCNT, value);
+                                SetHighByte(ref _system._WAITCNT, value);
                                 break;
 
                             case 0x208:
@@ -1325,7 +1350,7 @@ namespace Iris.GBA
                                 break;
 
                             default:
-                                throw new Exception(string.Format("Iris.GBA.Core.Memory: Unhandled write to address 0x{0:x8}", address));
+                                throw new Exception(string.Format("Iris.GBA.Memory: Unhandled write to address 0x{0:x8}", address));
                         }
                     }
                     break;
@@ -1340,7 +1365,7 @@ namespace Iris.GBA
                     break;
 
                 default:
-                    throw new Exception(string.Format("Iris.GBA.Core.Memory: Unhandled write to address 0x{0:x8}", address));
+                    throw new Exception(string.Format("Iris.GBA.Memory: Unhandled write to address 0x{0:x8}", address));
             }
         }
 
@@ -1646,14 +1671,14 @@ namespace Iris.GBA
                                 _interruptControl.UpdateInterrupts();
                                 break;
                             case 0x204:
-                                _WAITCNT = value;
+                                _system._WAITCNT = value;
                                 break;
                             case 0x208:
                                 _interruptControl._IME = value;
                                 _interruptControl.UpdateInterrupts();
                                 break;
                             default:
-                                throw new Exception(string.Format("Iris.GBA.Core.Memory: Unhandled write to address 0x{0:x8}", address));
+                                throw new Exception(string.Format("Iris.GBA.Memory: Unhandled write to address 0x{0:x8}", address));
                         }
                     }
                     break;
@@ -1668,7 +1693,7 @@ namespace Iris.GBA
                     break;
 
                 default:
-                    throw new Exception(string.Format("Iris.GBA.Core.Memory: Unhandled write to address 0x{0:x8}", address));
+                    throw new Exception(string.Format("Iris.GBA.Memory: Unhandled write to address 0x{0:x8}", address));
             }
         }
 
@@ -1791,7 +1816,7 @@ namespace Iris.GBA
                                 _communication._SIODATA_SEND = GetHighHalfword(value);
                                 break;
                             case 0x204:
-                                _WAITCNT = GetLowHalfword(value);
+                                _system._WAITCNT = GetLowHalfword(value);
                                 // 16 upper bits are unused
                                 break;
                             case 0x208:
@@ -1800,7 +1825,7 @@ namespace Iris.GBA
                                 // 16 upper bits are unused
                                 break;
                             default:
-                                throw new Exception(string.Format("Iris.GBA.Core.Memory: Unhandled write to address 0x{0:x8}", address));
+                                throw new Exception(string.Format("Iris.GBA.Memory: Unhandled write to address 0x{0:x8}", address));
                         }
                     }
                     break;
@@ -1815,7 +1840,7 @@ namespace Iris.GBA
                     break;
 
                 default:
-                    throw new Exception(string.Format("Iris.GBA.Core.Memory: Unhandled write to address 0x{0:x8}", address));
+                    throw new Exception(string.Format("Iris.GBA.Memory: Unhandled write to address 0x{0:x8}", address));
             }
         }
     }

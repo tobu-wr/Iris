@@ -5,7 +5,7 @@ using static Iris.GBA.InterruptControl;
 
 namespace Iris.GBA
 {
-    public sealed partial class GBA_System : ISystem
+    public sealed class GBA_System : ISystem
     {
         private readonly Scheduler _scheduler = new(1);
 
@@ -17,9 +17,10 @@ namespace Iris.GBA
         private readonly KeyInput _keyInput = new();
         private readonly InterruptControl _interruptControl;
         private readonly BIOS _bios;
+        private readonly Memory _memory = new();
         private readonly PPU _ppu;
 
-        private UInt16 _WAITCNT;
+        internal UInt16 _WAITCNT;
 
         private bool _running;
 
@@ -27,12 +28,12 @@ namespace Iris.GBA
         {
             CPU_Core.CallbackInterface cpuCallbackInterface = new()
             {
-                ReadMemory8 = ReadMemory8,
-                ReadMemory16 = ReadMemory16,
-                ReadMemory32 = ReadMemory32,
-                WriteMemory8 = WriteMemory8,
-                WriteMemory16 = WriteMemory16,
-                WriteMemory32 = WriteMemory32,
+                ReadMemory8 = (UInt32 address) => _memory!.ReadMemory8(address),
+                ReadMemory16 = (UInt32 address) => _memory!.ReadMemory16(address),
+                ReadMemory32 = (UInt32 address) => _memory!.ReadMemory32(address),
+                WriteMemory8 = (UInt32 address, Byte value) => _memory!.WriteMemory8(address, value),
+                WriteMemory16 = (UInt32 address, UInt16 value) => _memory!.WriteMemory16(address, value),
+                WriteMemory32 = (UInt32 address, UInt32 value) => _memory!.WriteMemory32(address, value),
                 HandleSWI = (UInt32 value) => _bios!.HandleSWI(value),
                 HandleIRQ = () => _bios!.HandleIRQ()
             };
@@ -45,10 +46,10 @@ namespace Iris.GBA
 
             _cpu = new(CPU_Core.Model.ARM7TDMI, cpuCallbackInterface);
             _interruptControl = new(_cpu);
-            _bios = new(_cpu, this);
             _ppu = new(_scheduler, ppuCallbackInterface);
+            _bios = new(_cpu, _memory);
 
-            InitPageTables();
+            _memory.Init(_communication, _timer, _sound, _dma, _keyInput, _interruptControl, _bios, _ppu, this);
         }
 
         public void Reset()
@@ -65,6 +66,11 @@ namespace Iris.GBA
             _ppu.Reset();
 
             _WAITCNT = 0;
+        }
+
+        public void LoadROM(string filename)
+        {
+            _memory.LoadROM(filename);
         }
 
         public bool IsRunning()
