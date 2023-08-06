@@ -264,17 +264,17 @@ namespace Iris.GBA
                             0x09e => GetLowByte(_sound._WAVE_RAM3_H),
                             0x09f => GetHighByte(_sound._WAVE_RAM3_H),
 
-                            0x0ba => GetLowByte(_DMA0CNT_H),
-                            0x0bb => GetHighByte(_DMA0CNT_H),
+                            0x0ba => GetLowByte(_dma._DMA0CNT_H),
+                            0x0bb => GetHighByte(_dma._DMA0CNT_H),
 
-                            0x0c6 => GetLowByte(_DMA1CNT_H),
-                            0x0c7 => GetHighByte(_DMA1CNT_H),
+                            0x0c6 => GetLowByte(_dma._DMA1CNT_H),
+                            0x0c7 => GetHighByte(_dma._DMA1CNT_H),
 
-                            0x0d2 => GetLowByte(_DMA2CNT_H),
-                            0x0d3 => GetHighByte(_DMA2CNT_H),
+                            0x0d2 => GetLowByte(_dma._DMA2CNT_H),
+                            0x0d3 => GetHighByte(_dma._DMA2CNT_H),
 
-                            0x0de => GetLowByte(_DMA3CNT_H),
-                            0x0df => GetHighByte(_DMA3CNT_H),
+                            0x0de => GetLowByte(_dma._DMA3CNT_H),
+                            0x0df => GetHighByte(_dma._DMA3CNT_H),
 
                             0x100 => GetLowByte(_timer._TM0CNT_L),
                             0x101 => GetHighByte(_timer._TM0CNT_L),
@@ -461,10 +461,10 @@ namespace Iris.GBA
                             0x09a => _sound._WAVE_RAM2_H,
                             0x09c => _sound._WAVE_RAM3_L,
                             0x09e => _sound._WAVE_RAM3_H,
-                            0x0ba => _DMA0CNT_H,
-                            0x0c6 => _DMA1CNT_H,
-                            0x0d2 => _DMA2CNT_H,
-                            0x0de => _DMA3CNT_H,
+                            0x0ba => _dma._DMA0CNT_H,
+                            0x0c6 => _dma._DMA1CNT_H,
+                            0x0d2 => _dma._DMA2CNT_H,
+                            0x0de => _dma._DMA3CNT_H,
                             0x100 => _timer._TM0CNT_L,
                             0x102 => _timer._TM0CNT_H,
                             0x104 => _timer._TM1CNT_L,
@@ -579,10 +579,10 @@ namespace Iris.GBA
                             0x004 => (UInt32)((_ppu.VCOUNT << 16) | _ppu.DISPSTAT),
                             0x008 => (UInt32)((_ppu.BG1CNT << 16) | _ppu.BG0CNT),
                             0x00c => (UInt32)((_ppu.BG3CNT << 16) | _ppu.BG2CNT),
-                            0x0b8 => (UInt32)(_DMA0CNT_H << 16),
-                            0x0c4 => (UInt32)(_DMA1CNT_H << 16),
-                            0x0d0 => (UInt32)(_DMA2CNT_H << 16),
-                            0x0dc => (UInt32)(_DMA3CNT_H << 16),
+                            0x0b8 => (UInt32)(_dma._DMA0CNT_H << 16),
+                            0x0c4 => (UInt32)(_dma._DMA1CNT_H << 16),
+                            0x0d0 => (UInt32)(_dma._DMA2CNT_H << 16),
+                            0x0dc => (UInt32)(_dma._DMA3CNT_H << 16),
                             0x200 => (UInt32)((_IF << 16) | _IE),
                             _ => throw new Exception(string.Format("Iris.GBA.Core.Memory: Unhandled read from address 0x{0:x8}", address)),
                         };
@@ -1004,171 +1004,171 @@ namespace Iris.GBA
                                 break;
 
                             case 0x0b0:
-                                SetLowByte(ref _DMA0SAD_L, value);
+                                SetLowByte(ref _dma._DMA0SAD_L, value);
                                 break;
                             case 0x0b1:
-                                SetHighByte(ref _DMA0SAD_L, value);
+                                SetHighByte(ref _dma._DMA0SAD_L, value);
                                 break;
 
                             case 0x0b2:
-                                SetLowByte(ref _DMA0SAD_H, value);
+                                SetLowByte(ref _dma._DMA0SAD_H, value);
                                 break;
                             case 0x0b3:
-                                SetHighByte(ref _DMA0SAD_H, value);
+                                SetHighByte(ref _dma._DMA0SAD_H, value);
                                 break;
 
                             case 0x0b4:
-                                SetLowByte(ref _DMA0DAD_L, value);
+                                SetLowByte(ref _dma._DMA0DAD_L, value);
                                 break;
                             case 0x0b5:
-                                SetHighByte(ref _DMA0DAD_L, value);
+                                SetHighByte(ref _dma._DMA0DAD_L, value);
                                 break;
 
                             case 0x0b6:
-                                SetLowByte(ref _DMA0DAD_H, value);
+                                SetLowByte(ref _dma._DMA0DAD_H, value);
                                 break;
                             case 0x0b7:
-                                SetHighByte(ref _DMA0DAD_H, value);
+                                SetHighByte(ref _dma._DMA0DAD_H, value);
                                 break;
 
                             case 0x0b8:
-                                SetLowByte(ref _DMA0CNT_L, value);
+                                SetLowByte(ref _dma._DMA0CNT_L, value);
                                 break;
                             case 0x0b9:
-                                SetHighByte(ref _DMA0CNT_L, value);
+                                SetHighByte(ref _dma._DMA0CNT_L, value);
                                 break;
 
                             case 0x0ba:
-                                SetLowByte(ref _DMA0CNT_H, value);
+                                SetLowByte(ref _dma._DMA0CNT_H, value);
                                 break;
                             case 0x0bb:
-                                SetHighByte(ref _DMA0CNT_H, value);
+                                SetHighByte(ref _dma._DMA0CNT_H, value);
                                 break;
 
                             case 0x0bc:
-                                SetLowByte(ref _DMA1SAD_L, value);
+                                SetLowByte(ref _dma._DMA1SAD_L, value);
                                 break;
                             case 0x0bd:
-                                SetHighByte(ref _DMA1SAD_L, value);
+                                SetHighByte(ref _dma._DMA1SAD_L, value);
                                 break;
 
                             case 0x0be:
-                                SetLowByte(ref _DMA1SAD_H, value);
+                                SetLowByte(ref _dma._DMA1SAD_H, value);
                                 break;
                             case 0x0bf:
-                                SetHighByte(ref _DMA1SAD_H, value);
+                                SetHighByte(ref _dma._DMA1SAD_H, value);
                                 break;
 
                             case 0x0c0:
-                                SetLowByte(ref _DMA1DAD_L, value);
+                                SetLowByte(ref _dma._DMA1DAD_L, value);
                                 break;
                             case 0x0c1:
-                                SetHighByte(ref _DMA1DAD_L, value);
+                                SetHighByte(ref _dma._DMA1DAD_L, value);
                                 break;
 
                             case 0x0c2:
-                                SetLowByte(ref _DMA1DAD_H, value);
+                                SetLowByte(ref _dma._DMA1DAD_H, value);
                                 break;
                             case 0x0c3:
-                                SetHighByte(ref _DMA1DAD_H, value);
+                                SetHighByte(ref _dma._DMA1DAD_H, value);
                                 break;
 
                             case 0x0c4:
-                                SetLowByte(ref _DMA1CNT_L, value);
+                                SetLowByte(ref _dma._DMA1CNT_L, value);
                                 break;
                             case 0x0c5:
-                                SetHighByte(ref _DMA1CNT_L, value);
+                                SetHighByte(ref _dma._DMA1CNT_L, value);
                                 break;
 
                             case 0x0c6:
-                                SetLowByte(ref _DMA1CNT_H, value);
+                                SetLowByte(ref _dma._DMA1CNT_H, value);
                                 break;
                             case 0x0c7:
-                                SetHighByte(ref _DMA1CNT_H, value);
+                                SetHighByte(ref _dma._DMA1CNT_H, value);
                                 break;
 
                             case 0x0c8:
-                                SetLowByte(ref _DMA2SAD_L, value);
+                                SetLowByte(ref _dma._DMA2SAD_L, value);
                                 break;
                             case 0x0c9:
-                                SetHighByte(ref _DMA2SAD_L, value);
+                                SetHighByte(ref _dma._DMA2SAD_L, value);
                                 break;
 
                             case 0x0ca:
-                                SetLowByte(ref _DMA2SAD_H, value);
+                                SetLowByte(ref _dma._DMA2SAD_H, value);
                                 break;
                             case 0x0cb:
-                                SetHighByte(ref _DMA2SAD_H, value);
+                                SetHighByte(ref _dma._DMA2SAD_H, value);
                                 break;
 
                             case 0x0cc:
-                                SetLowByte(ref _DMA2DAD_L, value);
+                                SetLowByte(ref _dma._DMA2DAD_L, value);
                                 break;
                             case 0x0cd:
-                                SetHighByte(ref _DMA2DAD_L, value);
+                                SetHighByte(ref _dma._DMA2DAD_L, value);
                                 break;
 
                             case 0x0ce:
-                                SetLowByte(ref _DMA2DAD_H, value);
+                                SetLowByte(ref _dma._DMA2DAD_H, value);
                                 break;
                             case 0x0cf:
-                                SetHighByte(ref _DMA2DAD_H, value);
+                                SetHighByte(ref _dma._DMA2DAD_H, value);
                                 break;
 
                             case 0x0d0:
-                                SetLowByte(ref _DMA2CNT_L, value);
+                                SetLowByte(ref _dma._DMA2CNT_L, value);
                                 break;
                             case 0x0d1:
-                                SetHighByte(ref _DMA2CNT_L, value);
+                                SetHighByte(ref _dma._DMA2CNT_L, value);
                                 break;
 
                             case 0x0d2:
-                                SetLowByte(ref _DMA2CNT_H, value);
+                                SetLowByte(ref _dma._DMA2CNT_H, value);
                                 break;
                             case 0x0d3:
-                                SetHighByte(ref _DMA2CNT_H, value);
+                                SetHighByte(ref _dma._DMA2CNT_H, value);
                                 break;
 
                             case 0x0d4:
-                                SetLowByte(ref _DMA3SAD_L, value);
+                                SetLowByte(ref _dma._DMA3SAD_L, value);
                                 break;
                             case 0x0d5:
-                                SetHighByte(ref _DMA3SAD_L, value);
+                                SetHighByte(ref _dma._DMA3SAD_L, value);
                                 break;
 
                             case 0x0d6:
-                                SetLowByte(ref _DMA3SAD_H, value);
+                                SetLowByte(ref _dma._DMA3SAD_H, value);
                                 break;
                             case 0x0d7:
-                                SetHighByte(ref _DMA3SAD_H, value);
+                                SetHighByte(ref _dma._DMA3SAD_H, value);
                                 break;
 
                             case 0x0d8:
-                                SetLowByte(ref _DMA3DAD_L, value);
+                                SetLowByte(ref _dma._DMA3DAD_L, value);
                                 break;
                             case 0x0d9:
-                                SetHighByte(ref _DMA3DAD_L, value);
+                                SetHighByte(ref _dma._DMA3DAD_L, value);
                                 break;
 
                             case 0x0da:
-                                SetLowByte(ref _DMA3DAD_H, value);
+                                SetLowByte(ref _dma._DMA3DAD_H, value);
                                 break;
                             case 0x0db:
-                                SetHighByte(ref _DMA3DAD_H, value);
+                                SetHighByte(ref _dma._DMA3DAD_H, value);
                                 break;
 
                             case 0x0dc:
-                                SetLowByte(ref _DMA3CNT_L, value);
+                                SetLowByte(ref _dma._DMA3CNT_L, value);
                                 break;
                             case 0x0dd:
-                                SetHighByte(ref _DMA3CNT_L, value);
+                                SetHighByte(ref _dma._DMA3CNT_L, value);
                                 break;
 
                             case 0x0de:
-                                SetLowByte(ref _DMA3CNT_H, value);
+                                SetLowByte(ref _dma._DMA3CNT_H, value);
                                 break;
                             case 0x0df:
-                                SetHighByte(ref _DMA3CNT_H, value);
+                                SetHighByte(ref _dma._DMA3CNT_H, value);
                                 break;
 
                             case 0x100:
@@ -1515,76 +1515,76 @@ namespace Iris.GBA
                                 _sound._WAVE_RAM3_H = value;
                                 break;
                             case 0x0b0:
-                                _DMA0SAD_L = value;
+                                _dma._DMA0SAD_L = value;
                                 break;
                             case 0x0b2:
-                                _DMA0SAD_H = value;
+                                _dma._DMA0SAD_H = value;
                                 break;
                             case 0x0b4:
-                                _DMA0DAD_L = value;
+                                _dma._DMA0DAD_L = value;
                                 break;
                             case 0x0b6:
-                                _DMA0DAD_H = value;
+                                _dma._DMA0DAD_H = value;
                                 break;
                             case 0x0b8:
-                                _DMA0CNT_L = value;
+                                _dma._DMA0CNT_L = value;
                                 break;
                             case 0x0ba:
-                                _DMA0CNT_H = value;
+                                _dma._DMA0CNT_H = value;
                                 break;
                             case 0x0bc:
-                                _DMA1SAD_L = value;
+                                _dma._DMA1SAD_L = value;
                                 break;
                             case 0x0be:
-                                _DMA1SAD_H = value;
+                                _dma._DMA1SAD_H = value;
                                 break;
                             case 0x0c0:
-                                _DMA1DAD_L = value;
+                                _dma._DMA1DAD_L = value;
                                 break;
                             case 0x0c2:
-                                _DMA1DAD_H = value;
+                                _dma._DMA1DAD_H = value;
                                 break;
                             case 0x0c4:
-                                _DMA1CNT_L = value;
+                                _dma._DMA1CNT_L = value;
                                 break;
                             case 0x0c6:
-                                _DMA1CNT_H = value;
+                                _dma._DMA1CNT_H = value;
                                 break;
                             case 0x0c8:
-                                _DMA2SAD_L = value;
+                                _dma._DMA2SAD_L = value;
                                 break;
                             case 0x0ca:
-                                _DMA2SAD_H = value;
+                                _dma._DMA2SAD_H = value;
                                 break;
                             case 0x0cc:
-                                _DMA2DAD_L = value;
+                                _dma._DMA2DAD_L = value;
                                 break;
                             case 0x0ce:
-                                _DMA2DAD_H = value;
+                                _dma._DMA2DAD_H = value;
                                 break;
                             case 0x0d0:
-                                _DMA2CNT_L = value;
+                                _dma._DMA2CNT_L = value;
                                 break;
                             case 0x0d2:
-                                _DMA2CNT_H = value;
+                                _dma._DMA2CNT_H = value;
                                 break;
                             case 0x0d4:
-                                _DMA3SAD_L = value;
+                                _dma._DMA3SAD_L = value;
                                 break;
                             case 0x0d6:
-                                _DMA3SAD_H = value;
+                                _dma._DMA3SAD_H = value;
                                 break;
                             case 0x0d8:
-                                _DMA3DAD_L = value;
+                                _dma._DMA3DAD_L = value;
                                 break;
                             case 0x0da:
-                                _DMA3DAD_H = value;
+                                _dma._DMA3DAD_H = value;
                                 break;
                             case 0x0dc:
-                                _DMA3CNT_L = value;
+                                _dma._DMA3CNT_L = value;
                                 break;
                             case 0x0de:
-                                _DMA3CNT_H = value;
+                                _dma._DMA3CNT_H = value;
                                 break;
                             case 0x100:
                                 _timer._TM0CNT_L = value;
@@ -1735,52 +1735,52 @@ namespace Iris.GBA
                                 _sound._WAVE_RAM3_H = GetHighHalfword(value);
                                 break;
                             case 0x0b0:
-                                _DMA0SAD_L = GetLowHalfword(value);
-                                _DMA0SAD_H = GetHighHalfword(value);
+                                _dma._DMA0SAD_L = GetLowHalfword(value);
+                                _dma._DMA0SAD_H = GetHighHalfword(value);
                                 break;
                             case 0x0b4:
-                                _DMA0DAD_L = GetLowHalfword(value);
-                                _DMA0DAD_H = GetHighHalfword(value);
+                                _dma._DMA0DAD_L = GetLowHalfword(value);
+                                _dma._DMA0DAD_H = GetHighHalfword(value);
                                 break;
                             case 0x0b8:
-                                _DMA0CNT_L = GetLowHalfword(value);
-                                _DMA0CNT_H = GetHighHalfword(value);
+                                _dma._DMA0CNT_L = GetLowHalfword(value);
+                                _dma._DMA0CNT_H = GetHighHalfword(value);
                                 break;
                             case 0x0bc:
-                                _DMA1SAD_L = GetLowHalfword(value);
-                                _DMA1SAD_H = GetHighHalfword(value);
+                                _dma._DMA1SAD_L = GetLowHalfword(value);
+                                _dma._DMA1SAD_H = GetHighHalfword(value);
                                 break;
                             case 0x0c0:
-                                _DMA1DAD_L = GetLowHalfword(value);
-                                _DMA1DAD_H = GetHighHalfword(value);
+                                _dma._DMA1DAD_L = GetLowHalfword(value);
+                                _dma._DMA1DAD_H = GetHighHalfword(value);
                                 break;
                             case 0x0c4:
-                                _DMA1CNT_L = GetLowHalfword(value);
-                                _DMA1CNT_H = GetHighHalfword(value);
+                                _dma._DMA1CNT_L = GetLowHalfword(value);
+                                _dma._DMA1CNT_H = GetHighHalfword(value);
                                 break;
                             case 0x0c8:
-                                _DMA2SAD_L = GetLowHalfword(value);
-                                _DMA2SAD_H = GetHighHalfword(value);
+                                _dma._DMA2SAD_L = GetLowHalfword(value);
+                                _dma._DMA2SAD_H = GetHighHalfword(value);
                                 break;
                             case 0x0cc:
-                                _DMA2DAD_L = GetLowHalfword(value);
-                                _DMA2DAD_H = GetHighHalfword(value);
+                                _dma._DMA2DAD_L = GetLowHalfword(value);
+                                _dma._DMA2DAD_H = GetHighHalfword(value);
                                 break;
                             case 0x0d0:
-                                _DMA2CNT_L = GetLowHalfword(value);
-                                _DMA2CNT_H = GetHighHalfword(value);
+                                _dma._DMA2CNT_L = GetLowHalfword(value);
+                                _dma._DMA2CNT_H = GetHighHalfword(value);
                                 break;
                             case 0x0d4:
-                                _DMA3SAD_L = GetLowHalfword(value);
-                                _DMA3SAD_H = GetHighHalfword(value);
+                                _dma._DMA3SAD_L = GetLowHalfword(value);
+                                _dma._DMA3SAD_H = GetHighHalfword(value);
                                 break;
                             case 0x0d8:
-                                _DMA3DAD_L = GetLowHalfword(value);
-                                _DMA3DAD_H = GetHighHalfword(value);
+                                _dma._DMA3DAD_L = GetLowHalfword(value);
+                                _dma._DMA3DAD_H = GetHighHalfword(value);
                                 break;
                             case 0x0dc:
-                                _DMA3CNT_L = GetLowHalfword(value);
-                                _DMA3CNT_H = GetHighHalfword(value);
+                                _dma._DMA3CNT_L = GetLowHalfword(value);
+                                _dma._DMA3CNT_H = GetHighHalfword(value);
                                 break;
                             case 0x10c:
                                 _timer._TM3CNT_L = GetLowHalfword(value);
