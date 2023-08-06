@@ -10,6 +10,7 @@ namespace Iris.GBA
         private readonly CPU_Core _cpu;
         private readonly Communication _communication = new();
         private readonly Timer _timer = new();
+        private readonly Sound _sound = new();
         private readonly PPU _ppu;
 
         private UInt16 _WAITCNT;
@@ -48,12 +49,10 @@ namespace Iris.GBA
 
             _communication.Reset();
             _timer.Reset();
+            _sound.Reset();
             _ppu.Reset();
             BIOS_Reset();
 
-            _SOUNDCNT_H = 0;
-            _SOUNDCNT_X = 0;
-            _SOUNDBIAS = 0;
             _DMA0CNT_H = 0;
             _DMA1SAD_L = 0;
             _DMA1SAD_H = 0;
