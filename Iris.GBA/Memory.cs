@@ -130,7 +130,7 @@ namespace Iris.GBA
         {
             MapMemory(_eWRAM, EWRAMSize / PageSize, 0x0200_0000, 0x0300_0000, MemoryFlag.All);
             MapMemory(_iWRAM, IWRAMSize / PageSize, 0x0300_0000, 0x0400_0000, MemoryFlag.All);
-            MapMemory(_ppu.PaletteRAM, PPU.PaletteRAMSize / PageSize, 0x0500_0000, 0x0600_0000, MemoryFlag.All & ~(MemoryFlag.Read8 | MemoryFlag.Write8));
+            MapMemory(_ppu!.PaletteRAM, PPU.PaletteRAMSize / PageSize, 0x0500_0000, 0x0600_0000, MemoryFlag.All & ~(MemoryFlag.Read8 | MemoryFlag.Write8));
             MapMemory(_ppu.VRAM, PPU.VRAMSize / PageSize, 0x0600_0000, 0x0700_0000, MemoryFlag.All & ~(MemoryFlag.Read8 | MemoryFlag.Write8));
             MapMemory(_ppu.OAM, PPU.OAMSize / PageSize, 0x0700_0000, 0x0800_0000, MemoryFlag.All & ~(MemoryFlag.Read8 | MemoryFlag.Write8));
             MapMemory(_SRAM, SRAMSize / PageSize, 0x0e00_0000, 0x1000_0000, MemoryFlag.Read8 | MemoryFlag.Write8 | MemoryFlag.Mirrored);
@@ -175,7 +175,7 @@ namespace Iris.GBA
                 // BIOS
                 case 0x0:
                 case 0x1:
-                    return _bios.Read8(address);
+                    return _bios!.Read8(address);
 
                 // IO and registers
                 case 0x4:
@@ -190,179 +190,179 @@ namespace Iris.GBA
 
                         return offset switch
                         {
-                            0x000 => GetLowByte(_ppu.DISPCNT),
-                            0x001 => GetHighByte(_ppu.DISPCNT),
+                            0x000 => GetLowByte(_ppu!.DISPCNT),
+                            0x001 => GetHighByte(_ppu!.DISPCNT),
 
-                            0x004 => GetLowByte(_ppu.DISPSTAT),
-                            0x005 => GetHighByte(_ppu.DISPSTAT),
+                            0x004 => GetLowByte(_ppu!.DISPSTAT),
+                            0x005 => GetHighByte(_ppu!.DISPSTAT),
 
-                            0x006 => GetLowByte(_ppu.VCOUNT),
-                            0x007 => GetHighByte(_ppu.VCOUNT),
+                            0x006 => GetLowByte(_ppu!.VCOUNT),
+                            0x007 => GetHighByte(_ppu!.VCOUNT),
 
-                            0x008 => GetLowByte(_ppu.BG0CNT),
-                            0x009 => GetHighByte(_ppu.BG0CNT),
+                            0x008 => GetLowByte(_ppu!.BG0CNT),
+                            0x009 => GetHighByte(_ppu!.BG0CNT),
 
-                            0x00a => GetLowByte(_ppu.BG1CNT),
-                            0x00b => GetHighByte(_ppu.BG1CNT),
+                            0x00a => GetLowByte(_ppu!.BG1CNT),
+                            0x00b => GetHighByte(_ppu!.BG1CNT),
 
-                            0x00c => GetLowByte(_ppu.BG2CNT),
-                            0x00d => GetHighByte(_ppu.BG2CNT),
+                            0x00c => GetLowByte(_ppu!.BG2CNT),
+                            0x00d => GetHighByte(_ppu!.BG2CNT),
 
-                            0x00e => GetLowByte(_ppu.BG3CNT),
-                            0x00f => GetHighByte(_ppu.BG3CNT),
+                            0x00e => GetLowByte(_ppu!.BG3CNT),
+                            0x00f => GetHighByte(_ppu!.BG3CNT),
 
-                            0x048 => GetLowByte(_ppu.WININ),
-                            0x049 => GetHighByte(_ppu.WININ),
+                            0x048 => GetLowByte(_ppu!.WININ),
+                            0x049 => GetHighByte(_ppu!.WININ),
 
-                            0x04a => GetLowByte(_ppu.WINOUT),
-                            0x04b => GetHighByte(_ppu.WINOUT),
+                            0x04a => GetLowByte(_ppu!.WINOUT),
+                            0x04b => GetHighByte(_ppu!.WINOUT),
 
-                            0x050 => GetLowByte(_ppu.BLDCNT),
-                            0x051 => GetHighByte(_ppu.BLDCNT),
+                            0x050 => GetLowByte(_ppu!.BLDCNT),
+                            0x051 => GetHighByte(_ppu!.BLDCNT),
 
-                            0x052 => GetLowByte(_ppu.BLDALPHA),
-                            0x053 => GetHighByte(_ppu.BLDALPHA),
+                            0x052 => GetLowByte(_ppu!.BLDALPHA),
+                            0x053 => GetHighByte(_ppu!.BLDALPHA),
 
-                            0x060 => GetLowByte(_sound._SOUND1CNT_L),
-                            0x061 => GetHighByte(_sound._SOUND1CNT_L),
+                            0x060 => GetLowByte(_sound!._SOUND1CNT_L),
+                            0x061 => GetHighByte(_sound!._SOUND1CNT_L),
 
-                            0x062 => GetLowByte(_sound._SOUND1CNT_H),
-                            0x063 => GetHighByte(_sound._SOUND1CNT_H),
+                            0x062 => GetLowByte(_sound!._SOUND1CNT_H),
+                            0x063 => GetHighByte(_sound!._SOUND1CNT_H),
 
-                            0x064 => GetLowByte(_sound._SOUND1CNT_X),
-                            0x065 => GetHighByte(_sound._SOUND1CNT_X),
+                            0x064 => GetLowByte(_sound!._SOUND1CNT_X),
+                            0x065 => GetHighByte(_sound!._SOUND1CNT_X),
 
-                            0x068 => GetLowByte(_sound._SOUND2CNT_L),
-                            0x069 => GetHighByte(_sound._SOUND2CNT_L),
+                            0x068 => GetLowByte(_sound!._SOUND2CNT_L),
+                            0x069 => GetHighByte(_sound!._SOUND2CNT_L),
 
-                            0x06c => GetLowByte(_sound._SOUND2CNT_H),
-                            0x06d => GetHighByte(_sound._SOUND2CNT_H),
+                            0x06c => GetLowByte(_sound!._SOUND2CNT_H),
+                            0x06d => GetHighByte(_sound!._SOUND2CNT_H),
 
-                            0x070 => GetLowByte(_sound._SOUND3CNT_L),
-                            0x071 => GetHighByte(_sound._SOUND3CNT_L),
+                            0x070 => GetLowByte(_sound!._SOUND3CNT_L),
+                            0x071 => GetHighByte(_sound!._SOUND3CNT_L),
 
-                            0x072 => GetLowByte(_sound._SOUND3CNT_H),
-                            0x073 => GetHighByte(_sound._SOUND3CNT_H),
+                            0x072 => GetLowByte(_sound!._SOUND3CNT_H),
+                            0x073 => GetHighByte(_sound!._SOUND3CNT_H),
 
-                            0x074 => GetLowByte(_sound._SOUND3CNT_X),
-                            0x075 => GetHighByte(_sound._SOUND3CNT_X),
+                            0x074 => GetLowByte(_sound!._SOUND3CNT_X),
+                            0x075 => GetHighByte(_sound!._SOUND3CNT_X),
 
-                            0x078 => GetLowByte(_sound._SOUND4CNT_L),
-                            0x079 => GetHighByte(_sound._SOUND4CNT_L),
+                            0x078 => GetLowByte(_sound!._SOUND4CNT_L),
+                            0x079 => GetHighByte(_sound!._SOUND4CNT_L),
 
-                            0x07c => GetLowByte(_sound._SOUND4CNT_H),
-                            0x07d => GetHighByte(_sound._SOUND4CNT_H),
+                            0x07c => GetLowByte(_sound!._SOUND4CNT_H),
+                            0x07d => GetHighByte(_sound!._SOUND4CNT_H),
 
-                            0x080 => GetLowByte(_sound._SOUNDCNT_L),
-                            0x081 => GetHighByte(_sound._SOUNDCNT_L),
+                            0x080 => GetLowByte(_sound!._SOUNDCNT_L),
+                            0x081 => GetHighByte(_sound!._SOUNDCNT_L),
 
-                            0x082 => GetLowByte(_sound._SOUNDCNT_H),
-                            0x083 => GetHighByte(_sound._SOUNDCNT_H),
+                            0x082 => GetLowByte(_sound!._SOUNDCNT_H),
+                            0x083 => GetHighByte(_sound!._SOUNDCNT_H),
 
-                            0x084 => GetLowByte(_sound._SOUNDCNT_X),
-                            0x085 => GetHighByte(_sound._SOUNDCNT_X),
+                            0x084 => GetLowByte(_sound!._SOUNDCNT_X),
+                            0x085 => GetHighByte(_sound!._SOUNDCNT_X),
 
-                            0x088 => GetLowByte(_sound._SOUNDBIAS),
-                            0x089 => GetHighByte(_sound._SOUNDBIAS),
+                            0x088 => GetLowByte(_sound!._SOUNDBIAS),
+                            0x089 => GetHighByte(_sound!._SOUNDBIAS),
 
-                            0x090 => GetLowByte(_sound._WAVE_RAM0_L),
-                            0x091 => GetHighByte(_sound._WAVE_RAM0_L),
+                            0x090 => GetLowByte(_sound!._WAVE_RAM0_L),
+                            0x091 => GetHighByte(_sound!._WAVE_RAM0_L),
 
-                            0x092 => GetLowByte(_sound._WAVE_RAM0_H),
-                            0x093 => GetHighByte(_sound._WAVE_RAM0_H),
+                            0x092 => GetLowByte(_sound!._WAVE_RAM0_H),
+                            0x093 => GetHighByte(_sound!._WAVE_RAM0_H),
 
-                            0x094 => GetLowByte(_sound._WAVE_RAM1_L),
-                            0x095 => GetHighByte(_sound._WAVE_RAM1_L),
+                            0x094 => GetLowByte(_sound!._WAVE_RAM1_L),
+                            0x095 => GetHighByte(_sound!._WAVE_RAM1_L),
 
-                            0x096 => GetLowByte(_sound._WAVE_RAM1_H),
-                            0x097 => GetHighByte(_sound._WAVE_RAM1_H),
+                            0x096 => GetLowByte(_sound!._WAVE_RAM1_H),
+                            0x097 => GetHighByte(_sound!._WAVE_RAM1_H),
 
-                            0x098 => GetLowByte(_sound._WAVE_RAM2_L),
-                            0x099 => GetHighByte(_sound._WAVE_RAM2_L),
+                            0x098 => GetLowByte(_sound!._WAVE_RAM2_L),
+                            0x099 => GetHighByte(_sound!._WAVE_RAM2_L),
 
-                            0x09a => GetLowByte(_sound._WAVE_RAM2_H),
-                            0x09b => GetHighByte(_sound._WAVE_RAM2_H),
+                            0x09a => GetLowByte(_sound!._WAVE_RAM2_H),
+                            0x09b => GetHighByte(_sound!._WAVE_RAM2_H),
 
-                            0x09c => GetLowByte(_sound._WAVE_RAM3_L),
-                            0x09d => GetHighByte(_sound._WAVE_RAM3_L),
+                            0x09c => GetLowByte(_sound!._WAVE_RAM3_L),
+                            0x09d => GetHighByte(_sound!._WAVE_RAM3_L),
 
-                            0x09e => GetLowByte(_sound._WAVE_RAM3_H),
-                            0x09f => GetHighByte(_sound._WAVE_RAM3_H),
+                            0x09e => GetLowByte(_sound!._WAVE_RAM3_H),
+                            0x09f => GetHighByte(_sound!._WAVE_RAM3_H),
 
-                            0x0ba => GetLowByte(_dma._DMA0CNT_H),
-                            0x0bb => GetHighByte(_dma._DMA0CNT_H),
+                            0x0ba => GetLowByte(_dma!._DMA0CNT_H),
+                            0x0bb => GetHighByte(_dma!._DMA0CNT_H),
 
-                            0x0c6 => GetLowByte(_dma._DMA1CNT_H),
-                            0x0c7 => GetHighByte(_dma._DMA1CNT_H),
+                            0x0c6 => GetLowByte(_dma!._DMA1CNT_H),
+                            0x0c7 => GetHighByte(_dma!._DMA1CNT_H),
 
-                            0x0d2 => GetLowByte(_dma._DMA2CNT_H),
-                            0x0d3 => GetHighByte(_dma._DMA2CNT_H),
+                            0x0d2 => GetLowByte(_dma!._DMA2CNT_H),
+                            0x0d3 => GetHighByte(_dma!._DMA2CNT_H),
 
-                            0x0de => GetLowByte(_dma._DMA3CNT_H),
-                            0x0df => GetHighByte(_dma._DMA3CNT_H),
+                            0x0de => GetLowByte(_dma!._DMA3CNT_H),
+                            0x0df => GetHighByte(_dma!._DMA3CNT_H),
 
-                            0x100 => GetLowByte(_timer._TM0CNT_L),
-                            0x101 => GetHighByte(_timer._TM0CNT_L),
+                            0x100 => GetLowByte(_timer!._TM0CNT_L),
+                            0x101 => GetHighByte(_timer!._TM0CNT_L),
 
-                            0x102 => GetLowByte(_timer._TM0CNT_H),
-                            0x103 => GetHighByte(_timer._TM0CNT_H),
+                            0x102 => GetLowByte(_timer!._TM0CNT_H),
+                            0x103 => GetHighByte(_timer!._TM0CNT_H),
 
-                            0x104 => GetLowByte(_timer._TM1CNT_L),
-                            0x105 => GetHighByte(_timer._TM1CNT_L),
+                            0x104 => GetLowByte(_timer!._TM1CNT_L),
+                            0x105 => GetHighByte(_timer!._TM1CNT_L),
 
-                            0x106 => GetLowByte(_timer._TM1CNT_H),
-                            0x107 => GetHighByte(_timer._TM1CNT_H),
+                            0x106 => GetLowByte(_timer!._TM1CNT_H),
+                            0x107 => GetHighByte(_timer!._TM1CNT_H),
 
-                            0x108 => GetLowByte(_timer._TM2CNT_L),
-                            0x109 => GetHighByte(_timer._TM2CNT_L),
+                            0x108 => GetLowByte(_timer!._TM2CNT_L),
+                            0x109 => GetHighByte(_timer!._TM2CNT_L),
 
-                            0x10a => GetLowByte(_timer._TM2CNT_H),
-                            0x10b => GetHighByte(_timer._TM2CNT_H),
+                            0x10a => GetLowByte(_timer!._TM2CNT_H),
+                            0x10b => GetHighByte(_timer!._TM2CNT_H),
 
-                            0x10c => GetLowByte(_timer._TM3CNT_L),
-                            0x10d => GetHighByte(_timer._TM3CNT_L),
+                            0x10c => GetLowByte(_timer!._TM3CNT_L),
+                            0x10d => GetHighByte(_timer!._TM3CNT_L),
 
-                            0x10e => GetLowByte(_timer._TM3CNT_H),
-                            0x10f => GetHighByte(_timer._TM3CNT_H),
+                            0x10e => GetLowByte(_timer!._TM3CNT_H),
+                            0x10f => GetHighByte(_timer!._TM3CNT_H),
 
-                            0x120 => GetLowByte(_communication._SIODATA0),
-                            0x121 => GetHighByte(_communication._SIODATA0),
+                            0x120 => GetLowByte(_communication!._SIODATA0),
+                            0x121 => GetHighByte(_communication!._SIODATA0),
 
-                            0x122 => GetLowByte(_communication._SIODATA1),
-                            0x123 => GetHighByte(_communication._SIODATA1),
+                            0x122 => GetLowByte(_communication!._SIODATA1),
+                            0x123 => GetHighByte(_communication!._SIODATA1),
 
-                            0x124 => GetLowByte(_communication._SIODATA2),
-                            0x125 => GetHighByte(_communication._SIODATA2),
+                            0x124 => GetLowByte(_communication!._SIODATA2),
+                            0x125 => GetHighByte(_communication!._SIODATA2),
 
-                            0x126 => GetLowByte(_communication._SIODATA3),
-                            0x127 => GetHighByte(_communication._SIODATA3),
+                            0x126 => GetLowByte(_communication!._SIODATA3),
+                            0x127 => GetHighByte(_communication!._SIODATA3),
 
-                            0x128 => GetLowByte(_communication._SIOCNT),
-                            0x129 => GetHighByte(_communication._SIOCNT),
+                            0x128 => GetLowByte(_communication!._SIOCNT),
+                            0x129 => GetHighByte(_communication!._SIOCNT),
 
-                            0x12a => GetLowByte(_communication._SIODATA_SEND),
-                            0x12b => GetHighByte(_communication._SIODATA_SEND),
+                            0x12a => GetLowByte(_communication!._SIODATA_SEND),
+                            0x12b => GetHighByte(_communication!._SIODATA_SEND),
 
-                            0x130 => GetLowByte(_keyInput._KEYINPUT),
-                            0x131 => GetHighByte(_keyInput._KEYINPUT),
+                            0x130 => GetLowByte(_keyInput!._KEYINPUT),
+                            0x131 => GetHighByte(_keyInput!._KEYINPUT),
 
-                            0x132 => GetLowByte(_keyInput._KEYCNT),
-                            0x133 => GetHighByte(_keyInput._KEYCNT),
+                            0x132 => GetLowByte(_keyInput!._KEYCNT),
+                            0x133 => GetHighByte(_keyInput!._KEYCNT),
 
-                            0x134 => GetLowByte(_communication._RCNT),
-                            0x135 => GetHighByte(_communication._RCNT),
+                            0x134 => GetLowByte(_communication!._RCNT),
+                            0x135 => GetHighByte(_communication!._RCNT),
 
-                            0x200 => GetLowByte(_interruptControl._IE),
-                            0x201 => GetHighByte(_interruptControl._IE),
+                            0x200 => GetLowByte(_interruptControl!._IE),
+                            0x201 => GetHighByte(_interruptControl!._IE),
 
-                            0x202 => GetLowByte(_interruptControl._IF),
-                            0x203 => GetHighByte(_interruptControl._IF),
+                            0x202 => GetLowByte(_interruptControl!._IF),
+                            0x203 => GetHighByte(_interruptControl!._IF),
 
-                            0x204 => GetLowByte(_system._WAITCNT),
-                            0x205 => GetHighByte(_system._WAITCNT),
+                            0x204 => GetLowByte(_system!._WAITCNT),
+                            0x205 => GetHighByte(_system!._WAITCNT),
 
-                            0x208 => GetLowByte(_interruptControl._IME),
-                            0x209 => GetHighByte(_interruptControl._IME),
+                            0x208 => GetLowByte(_interruptControl!._IME),
+                            0x209 => GetHighByte(_interruptControl!._IME),
 
                             _ => throw new Exception(string.Format("Iris.GBA.Memory: Unhandled read from address 0x{0:x8}", address)),
                         };
@@ -444,7 +444,7 @@ namespace Iris.GBA
                 // BIOS
                 case 0x0:
                 case 0x1:
-                    return _bios.Read16(address);
+                    return _bios!.Read16(address);
 
                 // IO and registers
                 case 0x4:
@@ -453,64 +453,64 @@ namespace Iris.GBA
 
                         return offset switch
                         {
-                            0x000 => _ppu.DISPCNT,
-                            0x004 => _ppu.DISPSTAT,
-                            0x006 => _ppu.VCOUNT,
-                            0x008 => _ppu.BG0CNT,
-                            0x00a => _ppu.BG1CNT,
-                            0x00c => _ppu.BG2CNT,
-                            0x00e => _ppu.BG3CNT,
-                            0x048 => _ppu.WININ,
-                            0x04a => _ppu.WINOUT,
-                            0x050 => _ppu.BLDCNT,
-                            0x052 => _ppu.BLDALPHA,
-                            0x060 => _sound._SOUND1CNT_L,
-                            0x062 => _sound._SOUND1CNT_H,
-                            0x064 => _sound._SOUND1CNT_X,
-                            0x068 => _sound._SOUND2CNT_L,
-                            0x06c => _sound._SOUND2CNT_H,
-                            0x070 => _sound._SOUND3CNT_L,
-                            0x072 => _sound._SOUND3CNT_H,
-                            0x074 => _sound._SOUND3CNT_X,
-                            0x078 => _sound._SOUND4CNT_L,
-                            0x07c => _sound._SOUND4CNT_H,
-                            0x080 => _sound._SOUNDCNT_L,
-                            0x082 => _sound._SOUNDCNT_H,
-                            0x084 => _sound._SOUNDCNT_X,
-                            0x088 => _sound._SOUNDBIAS,
-                            0x090 => _sound._WAVE_RAM0_L,
-                            0x092 => _sound._WAVE_RAM0_H,
-                            0x094 => _sound._WAVE_RAM1_L,
-                            0x096 => _sound._WAVE_RAM1_H,
-                            0x098 => _sound._WAVE_RAM2_L,
-                            0x09a => _sound._WAVE_RAM2_H,
-                            0x09c => _sound._WAVE_RAM3_L,
-                            0x09e => _sound._WAVE_RAM3_H,
-                            0x0ba => _dma._DMA0CNT_H,
-                            0x0c6 => _dma._DMA1CNT_H,
-                            0x0d2 => _dma._DMA2CNT_H,
-                            0x0de => _dma._DMA3CNT_H,
-                            0x100 => _timer._TM0CNT_L,
-                            0x102 => _timer._TM0CNT_H,
-                            0x104 => _timer._TM1CNT_L,
-                            0x106 => _timer._TM1CNT_H,
-                            0x108 => _timer._TM2CNT_L,
-                            0x10a => _timer._TM2CNT_H,
-                            0x10c => _timer._TM3CNT_L,
-                            0x10e => _timer._TM3CNT_H,
-                            0x120 => _communication._SIODATA0,
-                            0x122 => _communication._SIODATA1,
-                            0x124 => _communication._SIODATA2,
-                            0x126 => _communication._SIODATA3,
-                            0x128 => _communication._SIOCNT,
-                            0x12a => _communication._SIODATA_SEND,
-                            0x130 => _keyInput._KEYINPUT,
-                            0x132 => _keyInput._KEYCNT,
-                            0x134 => _communication._RCNT,
-                            0x200 => _interruptControl._IE,
-                            0x202 => _interruptControl._IF,
-                            0x204 => _system._WAITCNT,
-                            0x208 => _interruptControl._IME,
+                            0x000 => _ppu!.DISPCNT,
+                            0x004 => _ppu!.DISPSTAT,
+                            0x006 => _ppu!.VCOUNT,
+                            0x008 => _ppu!.BG0CNT,
+                            0x00a => _ppu!.BG1CNT,
+                            0x00c => _ppu!.BG2CNT,
+                            0x00e => _ppu!.BG3CNT,
+                            0x048 => _ppu!.WININ,
+                            0x04a => _ppu!.WINOUT,
+                            0x050 => _ppu!.BLDCNT,
+                            0x052 => _ppu!.BLDALPHA,
+                            0x060 => _sound!._SOUND1CNT_L,
+                            0x062 => _sound!._SOUND1CNT_H,
+                            0x064 => _sound!._SOUND1CNT_X,
+                            0x068 => _sound!._SOUND2CNT_L,
+                            0x06c => _sound!._SOUND2CNT_H,
+                            0x070 => _sound!._SOUND3CNT_L,
+                            0x072 => _sound!._SOUND3CNT_H,
+                            0x074 => _sound!._SOUND3CNT_X,
+                            0x078 => _sound!._SOUND4CNT_L,
+                            0x07c => _sound!._SOUND4CNT_H,
+                            0x080 => _sound!._SOUNDCNT_L,
+                            0x082 => _sound!._SOUNDCNT_H,
+                            0x084 => _sound!._SOUNDCNT_X,
+                            0x088 => _sound!._SOUNDBIAS,
+                            0x090 => _sound!._WAVE_RAM0_L,
+                            0x092 => _sound!._WAVE_RAM0_H,
+                            0x094 => _sound!._WAVE_RAM1_L,
+                            0x096 => _sound!._WAVE_RAM1_H,
+                            0x098 => _sound!._WAVE_RAM2_L,
+                            0x09a => _sound!._WAVE_RAM2_H,
+                            0x09c => _sound!._WAVE_RAM3_L,
+                            0x09e => _sound!._WAVE_RAM3_H,
+                            0x0ba => _dma!._DMA0CNT_H,
+                            0x0c6 => _dma!._DMA1CNT_H,
+                            0x0d2 => _dma!._DMA2CNT_H,
+                            0x0de => _dma!._DMA3CNT_H,
+                            0x100 => _timer!._TM0CNT_L,
+                            0x102 => _timer!._TM0CNT_H,
+                            0x104 => _timer!._TM1CNT_L,
+                            0x106 => _timer!._TM1CNT_H,
+                            0x108 => _timer!._TM2CNT_L,
+                            0x10a => _timer!._TM2CNT_H,
+                            0x10c => _timer!._TM3CNT_L,
+                            0x10e => _timer!._TM3CNT_H,
+                            0x120 => _communication!._SIODATA0,
+                            0x122 => _communication!._SIODATA1,
+                            0x124 => _communication!._SIODATA2,
+                            0x126 => _communication!._SIODATA3,
+                            0x128 => _communication!._SIOCNT,
+                            0x12a => _communication!._SIODATA_SEND,
+                            0x130 => _keyInput!._KEYINPUT,
+                            0x132 => _keyInput!._KEYCNT,
+                            0x134 => _communication!._RCNT,
+                            0x200 => _interruptControl!._IE,
+                            0x202 => _interruptControl!._IF,
+                            0x204 => _system!._WAITCNT,
+                            0x208 => _interruptControl!._IME,
                             _ => throw new Exception(string.Format("Iris.GBA.Memory: Unhandled read from address 0x{0:x8}", address)),
                         };
                     }
@@ -591,7 +591,7 @@ namespace Iris.GBA
                 // BIOS
                 case 0x0:
                 case 0x1:
-                    return _bios.Read32(address);
+                    return _bios!.Read32(address);
 
                 // IO and registers
                 case 0x4:
@@ -600,15 +600,15 @@ namespace Iris.GBA
 
                         return offset switch
                         {
-                            0x000 => (UInt32)(_ppu.DISPCNT),
-                            0x004 => (UInt32)((_ppu.VCOUNT << 16) | _ppu.DISPSTAT),
-                            0x008 => (UInt32)((_ppu.BG1CNT << 16) | _ppu.BG0CNT),
-                            0x00c => (UInt32)((_ppu.BG3CNT << 16) | _ppu.BG2CNT),
-                            0x0b8 => (UInt32)(_dma._DMA0CNT_H << 16),
-                            0x0c4 => (UInt32)(_dma._DMA1CNT_H << 16),
-                            0x0d0 => (UInt32)(_dma._DMA2CNT_H << 16),
-                            0x0dc => (UInt32)(_dma._DMA3CNT_H << 16),
-                            0x200 => (UInt32)((_interruptControl._IF << 16) | _interruptControl._IE),
+                            0x000 => (UInt32)(_ppu!.DISPCNT),
+                            0x004 => (UInt32)((_ppu!.VCOUNT << 16) | _ppu.DISPSTAT),
+                            0x008 => (UInt32)((_ppu!.BG1CNT << 16) | _ppu.BG0CNT),
+                            0x00c => (UInt32)((_ppu!.BG3CNT << 16) | _ppu.BG2CNT),
+                            0x0b8 => (UInt32)(_dma!._DMA0CNT_H << 16),
+                            0x0c4 => (UInt32)(_dma!._DMA1CNT_H << 16),
+                            0x0d0 => (UInt32)(_dma!._DMA2CNT_H << 16),
+                            0x0dc => (UInt32)(_dma!._DMA3CNT_H << 16),
+                            0x200 => (UInt32)((_interruptControl!._IF << 16) | _interruptControl._IE),
                             _ => throw new Exception(string.Format("Iris.GBA.Memory: Unhandled read from address 0x{0:x8}", address)),
                         };
                     }
@@ -707,645 +707,645 @@ namespace Iris.GBA
                         switch (offset)
                         {
                             case 0x000:
-                                SetLowByte(ref _ppu.DISPCNT, value);
+                                SetLowByte(ref _ppu!.DISPCNT, value);
                                 break;
                             case 0x001:
-                                SetHighByte(ref _ppu.DISPCNT, value);
+                                SetHighByte(ref _ppu!.DISPCNT, value);
                                 break;
 
                             case 0x004:
-                                SetLowByte(ref _ppu.DISPSTAT, value);
+                                SetLowByte(ref _ppu!.DISPSTAT, value);
                                 break;
                             case 0x005:
-                                SetHighByte(ref _ppu.DISPSTAT, value);
+                                SetHighByte(ref _ppu!.DISPSTAT, value);
                                 break;
 
                             case 0x008:
-                                SetLowByte(ref _ppu.BG0CNT, value);
+                                SetLowByte(ref _ppu!.BG0CNT, value);
                                 break;
                             case 0x009:
-                                SetHighByte(ref _ppu.BG0CNT, value);
+                                SetHighByte(ref _ppu!.BG0CNT, value);
                                 break;
 
                             case 0x00a:
-                                SetLowByte(ref _ppu.BG1CNT, value);
+                                SetLowByte(ref _ppu!.BG1CNT, value);
                                 break;
                             case 0x00b:
-                                SetHighByte(ref _ppu.BG1CNT, value);
+                                SetHighByte(ref _ppu!.BG1CNT, value);
                                 break;
 
                             case 0x00c:
-                                SetLowByte(ref _ppu.BG2CNT, value);
+                                SetLowByte(ref _ppu!.BG2CNT, value);
                                 break;
                             case 0x00d:
-                                SetHighByte(ref _ppu.BG2CNT, value);
+                                SetHighByte(ref _ppu!.BG2CNT, value);
                                 break;
 
                             case 0x00e:
-                                SetLowByte(ref _ppu.BG3CNT, value);
+                                SetLowByte(ref _ppu!.BG3CNT, value);
                                 break;
                             case 0x00f:
-                                SetHighByte(ref _ppu.BG3CNT, value);
+                                SetHighByte(ref _ppu!.BG3CNT, value);
                                 break;
 
                             case 0x010:
-                                SetLowByte(ref _ppu.BG0HOFS, value);
+                                SetLowByte(ref _ppu!.BG0HOFS, value);
                                 break;
                             case 0x011:
-                                SetHighByte(ref _ppu.BG0HOFS, value);
+                                SetHighByte(ref _ppu!.BG0HOFS, value);
                                 break;
 
                             case 0x012:
-                                SetLowByte(ref _ppu.BG0VOFS, value);
+                                SetLowByte(ref _ppu!.BG0VOFS, value);
                                 break;
                             case 0x013:
-                                SetHighByte(ref _ppu.BG0VOFS, value);
+                                SetHighByte(ref _ppu!.BG0VOFS, value);
                                 break;
 
                             case 0x014:
-                                SetLowByte(ref _ppu.BG1HOFS, value);
+                                SetLowByte(ref _ppu!.BG1HOFS, value);
                                 break;
                             case 0x015:
-                                SetHighByte(ref _ppu.BG1HOFS, value);
+                                SetHighByte(ref _ppu!.BG1HOFS, value);
                                 break;
 
                             case 0x016:
-                                SetLowByte(ref _ppu.BG1VOFS, value);
+                                SetLowByte(ref _ppu!.BG1VOFS, value);
                                 break;
                             case 0x017:
-                                SetHighByte(ref _ppu.BG1VOFS, value);
+                                SetHighByte(ref _ppu!.BG1VOFS, value);
                                 break;
 
                             case 0x018:
-                                SetLowByte(ref _ppu.BG2HOFS, value);
+                                SetLowByte(ref _ppu!.BG2HOFS, value);
                                 break;
                             case 0x019:
-                                SetHighByte(ref _ppu.BG2HOFS, value);
+                                SetHighByte(ref _ppu!.BG2HOFS, value);
                                 break;
 
                             case 0x01a:
-                                SetLowByte(ref _ppu.BG2VOFS, value);
+                                SetLowByte(ref _ppu!.BG2VOFS, value);
                                 break;
                             case 0x01b:
-                                SetHighByte(ref _ppu.BG2VOFS, value);
+                                SetHighByte(ref _ppu!.BG2VOFS, value);
                                 break;
 
                             case 0x01c:
-                                SetLowByte(ref _ppu.BG3HOFS, value);
+                                SetLowByte(ref _ppu!.BG3HOFS, value);
                                 break;
                             case 0x01d:
-                                SetHighByte(ref _ppu.BG3HOFS, value);
+                                SetHighByte(ref _ppu!.BG3HOFS, value);
                                 break;
 
                             case 0x01e:
-                                SetLowByte(ref _ppu.BG3VOFS, value);
+                                SetLowByte(ref _ppu!.BG3VOFS, value);
                                 break;
                             case 0x01f:
-                                SetHighByte(ref _ppu.BG3VOFS, value);
+                                SetHighByte(ref _ppu!.BG3VOFS, value);
                                 break;
 
                             case 0x040:
-                                SetLowByte(ref _ppu.WIN0H, value);
+                                SetLowByte(ref _ppu!.WIN0H, value);
                                 break;
                             case 0x041:
-                                SetHighByte(ref _ppu.WIN0H, value);
+                                SetHighByte(ref _ppu!.WIN0H, value);
                                 break;
 
                             case 0x042:
-                                SetLowByte(ref _ppu.WIN1H, value);
+                                SetLowByte(ref _ppu!.WIN1H, value);
                                 break;
                             case 0x043:
-                                SetHighByte(ref _ppu.WIN1H, value);
+                                SetHighByte(ref _ppu!.WIN1H, value);
                                 break;
 
                             case 0x044:
-                                SetLowByte(ref _ppu.WIN0V, value);
+                                SetLowByte(ref _ppu!.WIN0V, value);
                                 break;
                             case 0x045:
-                                SetHighByte(ref _ppu.WIN0V, value);
+                                SetHighByte(ref _ppu!.WIN0V, value);
                                 break;
 
                             case 0x046:
-                                SetLowByte(ref _ppu.WIN1V, value);
+                                SetLowByte(ref _ppu!.WIN1V, value);
                                 break;
                             case 0x047:
-                                SetHighByte(ref _ppu.WIN1V, value);
+                                SetHighByte(ref _ppu!.WIN1V, value);
                                 break;
 
                             case 0x048:
-                                SetLowByte(ref _ppu.WININ, value);
+                                SetLowByte(ref _ppu!.WININ, value);
                                 break;
                             case 0x049:
-                                SetHighByte(ref _ppu.WININ, value);
+                                SetHighByte(ref _ppu!.WININ, value);
                                 break;
 
                             case 0x04a:
-                                SetLowByte(ref _ppu.WINOUT, value);
+                                SetLowByte(ref _ppu!.WINOUT, value);
                                 break;
                             case 0x04b:
-                                SetHighByte(ref _ppu.WINOUT, value);
+                                SetHighByte(ref _ppu!.WINOUT, value);
                                 break;
 
                             case 0x04c:
-                                SetLowByte(ref _ppu.MOSAIC, value);
+                                SetLowByte(ref _ppu!.MOSAIC, value);
                                 break;
                             case 0x04d:
-                                SetHighByte(ref _ppu.MOSAIC, value);
+                                SetHighByte(ref _ppu!.MOSAIC, value);
                                 break;
 
                             case 0x050:
-                                SetLowByte(ref _ppu.BLDCNT, value);
+                                SetLowByte(ref _ppu!.BLDCNT, value);
                                 break;
                             case 0x051:
-                                SetHighByte(ref _ppu.BLDCNT, value);
+                                SetHighByte(ref _ppu!.BLDCNT, value);
                                 break;
 
                             case 0x052:
-                                SetLowByte(ref _ppu.BLDALPHA, value);
+                                SetLowByte(ref _ppu!.BLDALPHA, value);
                                 break;
                             case 0x053:
-                                SetHighByte(ref _ppu.BLDALPHA, value);
+                                SetHighByte(ref _ppu!.BLDALPHA, value);
                                 break;
 
                             case 0x054:
-                                SetLowByte(ref _ppu.BLDY, value);
+                                SetLowByte(ref _ppu!.BLDY, value);
                                 break;
                             case 0x055:
-                                SetHighByte(ref _ppu.BLDY, value);
+                                SetHighByte(ref _ppu!.BLDY, value);
                                 break;
 
                             case 0x060:
-                                SetLowByte(ref _sound._SOUND1CNT_L, value);
+                                SetLowByte(ref _sound!._SOUND1CNT_L, value);
                                 break;
                             case 0x061:
-                                SetHighByte(ref _sound._SOUND1CNT_L, value);
+                                SetHighByte(ref _sound!._SOUND1CNT_L, value);
                                 break;
 
                             case 0x062:
-                                SetLowByte(ref _sound._SOUND1CNT_H, value);
+                                SetLowByte(ref _sound!._SOUND1CNT_H, value);
                                 break;
                             case 0x063:
-                                SetHighByte(ref _sound._SOUND1CNT_H, value);
+                                SetHighByte(ref _sound!._SOUND1CNT_H, value);
                                 break;
 
                             case 0x064:
-                                SetLowByte(ref _sound._SOUND1CNT_X, value);
+                                SetLowByte(ref _sound!._SOUND1CNT_X, value);
                                 break;
                             case 0x065:
-                                SetHighByte(ref _sound._SOUND1CNT_X, value);
+                                SetHighByte(ref _sound!._SOUND1CNT_X, value);
                                 break;
 
                             case 0x068:
-                                SetLowByte(ref _sound._SOUND2CNT_L, value);
+                                SetLowByte(ref _sound!._SOUND2CNT_L, value);
                                 break;
                             case 0x069:
-                                SetHighByte(ref _sound._SOUND2CNT_L, value);
+                                SetHighByte(ref _sound!._SOUND2CNT_L, value);
                                 break;
 
                             case 0x06c:
-                                SetLowByte(ref _sound._SOUND2CNT_H, value);
+                                SetLowByte(ref _sound!._SOUND2CNT_H, value);
                                 break;
                             case 0x06d:
-                                SetHighByte(ref _sound._SOUND2CNT_H, value);
+                                SetHighByte(ref _sound!._SOUND2CNT_H, value);
                                 break;
 
                             case 0x070:
-                                SetLowByte(ref _sound._SOUND3CNT_L, value);
+                                SetLowByte(ref _sound!._SOUND3CNT_L, value);
                                 break;
                             case 0x071:
-                                SetHighByte(ref _sound._SOUND3CNT_L, value);
+                                SetHighByte(ref _sound!._SOUND3CNT_L, value);
                                 break;
 
                             case 0x072:
-                                SetLowByte(ref _sound._SOUND3CNT_H, value);
+                                SetLowByte(ref _sound!._SOUND3CNT_H, value);
                                 break;
                             case 0x073:
-                                SetHighByte(ref _sound._SOUND3CNT_H, value);
+                                SetHighByte(ref _sound!._SOUND3CNT_H, value);
                                 break;
 
                             case 0x074:
-                                SetLowByte(ref _sound._SOUND3CNT_X, value);
+                                SetLowByte(ref _sound!._SOUND3CNT_X, value);
                                 break;
                             case 0x075:
-                                SetHighByte(ref _sound._SOUND3CNT_X, value);
+                                SetHighByte(ref _sound!._SOUND3CNT_X, value);
                                 break;
 
                             case 0x078:
-                                SetLowByte(ref _sound._SOUND4CNT_L, value);
+                                SetLowByte(ref _sound!._SOUND4CNT_L, value);
                                 break;
                             case 0x079:
-                                SetHighByte(ref _sound._SOUND4CNT_L, value);
+                                SetHighByte(ref _sound!._SOUND4CNT_L, value);
                                 break;
 
                             case 0x07c:
-                                SetLowByte(ref _sound._SOUND4CNT_H, value);
+                                SetLowByte(ref _sound!._SOUND4CNT_H, value);
                                 break;
                             case 0x07d:
-                                SetHighByte(ref _sound._SOUND4CNT_H, value);
+                                SetHighByte(ref _sound!._SOUND4CNT_H, value);
                                 break;
 
                             case 0x080:
-                                SetLowByte(ref _sound._SOUNDCNT_L, value);
+                                SetLowByte(ref _sound!._SOUNDCNT_L, value);
                                 break;
                             case 0x081:
-                                SetHighByte(ref _sound._SOUNDCNT_L, value);
+                                SetHighByte(ref _sound!._SOUNDCNT_L, value);
                                 break;
 
                             case 0x082:
-                                SetLowByte(ref _sound._SOUNDCNT_H, value);
+                                SetLowByte(ref _sound!._SOUNDCNT_H, value);
                                 break;
                             case 0x083:
-                                SetHighByte(ref _sound._SOUNDCNT_H, value);
+                                SetHighByte(ref _sound!._SOUNDCNT_H, value);
                                 break;
 
                             case 0x084:
-                                SetLowByte(ref _sound._SOUNDCNT_X, value);
+                                SetLowByte(ref _sound!._SOUNDCNT_X, value);
                                 break;
                             case 0x085:
-                                SetHighByte(ref _sound._SOUNDCNT_X, value);
+                                SetHighByte(ref _sound!._SOUNDCNT_X, value);
                                 break;
 
                             case 0x088:
-                                SetLowByte(ref _sound._SOUNDBIAS, value);
+                                SetLowByte(ref _sound!._SOUNDBIAS, value);
                                 break;
                             case 0x089:
-                                SetHighByte(ref _sound._SOUNDBIAS, value);
+                                SetHighByte(ref _sound!._SOUNDBIAS, value);
                                 break;
 
                             case 0x090:
-                                SetLowByte(ref _sound._WAVE_RAM0_L, value);
+                                SetLowByte(ref _sound!._WAVE_RAM0_L, value);
                                 break;
                             case 0x091:
-                                SetHighByte(ref _sound._WAVE_RAM0_L, value);
+                                SetHighByte(ref _sound!._WAVE_RAM0_L, value);
                                 break;
 
                             case 0x092:
-                                SetLowByte(ref _sound._WAVE_RAM0_H, value);
+                                SetLowByte(ref _sound!._WAVE_RAM0_H, value);
                                 break;
                             case 0x093:
-                                SetHighByte(ref _sound._WAVE_RAM0_H, value);
+                                SetHighByte(ref _sound!._WAVE_RAM0_H, value);
                                 break;
 
                             case 0x094:
-                                SetLowByte(ref _sound._WAVE_RAM1_L, value);
+                                SetLowByte(ref _sound!._WAVE_RAM1_L, value);
                                 break;
                             case 0x095:
-                                SetHighByte(ref _sound._WAVE_RAM1_L, value);
+                                SetHighByte(ref _sound!._WAVE_RAM1_L, value);
                                 break;
 
                             case 0x096:
-                                SetLowByte(ref _sound._WAVE_RAM1_H, value);
+                                SetLowByte(ref _sound!._WAVE_RAM1_H, value);
                                 break;
                             case 0x097:
-                                SetHighByte(ref _sound._WAVE_RAM1_H, value);
+                                SetHighByte(ref _sound!._WAVE_RAM1_H, value);
                                 break;
 
                             case 0x098:
-                                SetLowByte(ref _sound._WAVE_RAM2_L, value);
+                                SetLowByte(ref _sound!._WAVE_RAM2_L, value);
                                 break;
                             case 0x099:
-                                SetHighByte(ref _sound._WAVE_RAM2_L, value);
+                                SetHighByte(ref _sound!._WAVE_RAM2_L, value);
                                 break;
 
                             case 0x09a:
-                                SetLowByte(ref _sound._WAVE_RAM2_H, value);
+                                SetLowByte(ref _sound!._WAVE_RAM2_H, value);
                                 break;
                             case 0x09b:
-                                SetHighByte(ref _sound._WAVE_RAM2_H, value);
+                                SetHighByte(ref _sound!._WAVE_RAM2_H, value);
                                 break;
 
                             case 0x09c:
-                                SetLowByte(ref _sound._WAVE_RAM3_L, value);
+                                SetLowByte(ref _sound!._WAVE_RAM3_L, value);
                                 break;
                             case 0x09d:
-                                SetHighByte(ref _sound._WAVE_RAM3_L, value);
+                                SetHighByte(ref _sound!._WAVE_RAM3_L, value);
                                 break;
 
                             case 0x09e:
-                                SetLowByte(ref _sound._WAVE_RAM3_H, value);
+                                SetLowByte(ref _sound!._WAVE_RAM3_H, value);
                                 break;
                             case 0x09f:
-                                SetHighByte(ref _sound._WAVE_RAM3_H, value);
+                                SetHighByte(ref _sound!._WAVE_RAM3_H, value);
                                 break;
 
                             case 0x0b0:
-                                SetLowByte(ref _dma._DMA0SAD_L, value);
+                                SetLowByte(ref _dma!._DMA0SAD_L, value);
                                 break;
                             case 0x0b1:
-                                SetHighByte(ref _dma._DMA0SAD_L, value);
+                                SetHighByte(ref _dma!._DMA0SAD_L, value);
                                 break;
 
                             case 0x0b2:
-                                SetLowByte(ref _dma._DMA0SAD_H, value);
+                                SetLowByte(ref _dma!._DMA0SAD_H, value);
                                 break;
                             case 0x0b3:
-                                SetHighByte(ref _dma._DMA0SAD_H, value);
+                                SetHighByte(ref _dma!._DMA0SAD_H, value);
                                 break;
 
                             case 0x0b4:
-                                SetLowByte(ref _dma._DMA0DAD_L, value);
+                                SetLowByte(ref _dma!._DMA0DAD_L, value);
                                 break;
                             case 0x0b5:
-                                SetHighByte(ref _dma._DMA0DAD_L, value);
+                                SetHighByte(ref _dma!._DMA0DAD_L, value);
                                 break;
 
                             case 0x0b6:
-                                SetLowByte(ref _dma._DMA0DAD_H, value);
+                                SetLowByte(ref _dma!._DMA0DAD_H, value);
                                 break;
                             case 0x0b7:
-                                SetHighByte(ref _dma._DMA0DAD_H, value);
+                                SetHighByte(ref _dma!._DMA0DAD_H, value);
                                 break;
 
                             case 0x0b8:
-                                SetLowByte(ref _dma._DMA0CNT_L, value);
+                                SetLowByte(ref _dma!._DMA0CNT_L, value);
                                 break;
                             case 0x0b9:
-                                SetHighByte(ref _dma._DMA0CNT_L, value);
+                                SetHighByte(ref _dma!._DMA0CNT_L, value);
                                 break;
 
                             case 0x0ba:
-                                SetLowByte(ref _dma._DMA0CNT_H, value);
+                                SetLowByte(ref _dma!._DMA0CNT_H, value);
                                 break;
                             case 0x0bb:
-                                SetHighByte(ref _dma._DMA0CNT_H, value);
+                                SetHighByte(ref _dma!._DMA0CNT_H, value);
                                 break;
 
                             case 0x0bc:
-                                SetLowByte(ref _dma._DMA1SAD_L, value);
+                                SetLowByte(ref _dma!._DMA1SAD_L, value);
                                 break;
                             case 0x0bd:
-                                SetHighByte(ref _dma._DMA1SAD_L, value);
+                                SetHighByte(ref _dma!._DMA1SAD_L, value);
                                 break;
 
                             case 0x0be:
-                                SetLowByte(ref _dma._DMA1SAD_H, value);
+                                SetLowByte(ref _dma!._DMA1SAD_H, value);
                                 break;
                             case 0x0bf:
-                                SetHighByte(ref _dma._DMA1SAD_H, value);
+                                SetHighByte(ref _dma!._DMA1SAD_H, value);
                                 break;
 
                             case 0x0c0:
-                                SetLowByte(ref _dma._DMA1DAD_L, value);
+                                SetLowByte(ref _dma!._DMA1DAD_L, value);
                                 break;
                             case 0x0c1:
-                                SetHighByte(ref _dma._DMA1DAD_L, value);
+                                SetHighByte(ref _dma!._DMA1DAD_L, value);
                                 break;
 
                             case 0x0c2:
-                                SetLowByte(ref _dma._DMA1DAD_H, value);
+                                SetLowByte(ref _dma!._DMA1DAD_H, value);
                                 break;
                             case 0x0c3:
-                                SetHighByte(ref _dma._DMA1DAD_H, value);
+                                SetHighByte(ref _dma!._DMA1DAD_H, value);
                                 break;
 
                             case 0x0c4:
-                                SetLowByte(ref _dma._DMA1CNT_L, value);
+                                SetLowByte(ref _dma!._DMA1CNT_L, value);
                                 break;
                             case 0x0c5:
-                                SetHighByte(ref _dma._DMA1CNT_L, value);
+                                SetHighByte(ref _dma!._DMA1CNT_L, value);
                                 break;
 
                             case 0x0c6:
-                                SetLowByte(ref _dma._DMA1CNT_H, value);
+                                SetLowByte(ref _dma!._DMA1CNT_H, value);
                                 break;
                             case 0x0c7:
-                                SetHighByte(ref _dma._DMA1CNT_H, value);
+                                SetHighByte(ref _dma!._DMA1CNT_H, value);
                                 break;
 
                             case 0x0c8:
-                                SetLowByte(ref _dma._DMA2SAD_L, value);
+                                SetLowByte(ref _dma!._DMA2SAD_L, value);
                                 break;
                             case 0x0c9:
-                                SetHighByte(ref _dma._DMA2SAD_L, value);
+                                SetHighByte(ref _dma!._DMA2SAD_L, value);
                                 break;
 
                             case 0x0ca:
-                                SetLowByte(ref _dma._DMA2SAD_H, value);
+                                SetLowByte(ref _dma!._DMA2SAD_H, value);
                                 break;
                             case 0x0cb:
-                                SetHighByte(ref _dma._DMA2SAD_H, value);
+                                SetHighByte(ref _dma!._DMA2SAD_H, value);
                                 break;
 
                             case 0x0cc:
-                                SetLowByte(ref _dma._DMA2DAD_L, value);
+                                SetLowByte(ref _dma!._DMA2DAD_L, value);
                                 break;
                             case 0x0cd:
-                                SetHighByte(ref _dma._DMA2DAD_L, value);
+                                SetHighByte(ref _dma!._DMA2DAD_L, value);
                                 break;
 
                             case 0x0ce:
-                                SetLowByte(ref _dma._DMA2DAD_H, value);
+                                SetLowByte(ref _dma!._DMA2DAD_H, value);
                                 break;
                             case 0x0cf:
-                                SetHighByte(ref _dma._DMA2DAD_H, value);
+                                SetHighByte(ref _dma!._DMA2DAD_H, value);
                                 break;
 
                             case 0x0d0:
-                                SetLowByte(ref _dma._DMA2CNT_L, value);
+                                SetLowByte(ref _dma!._DMA2CNT_L, value);
                                 break;
                             case 0x0d1:
-                                SetHighByte(ref _dma._DMA2CNT_L, value);
+                                SetHighByte(ref _dma!._DMA2CNT_L, value);
                                 break;
 
                             case 0x0d2:
-                                SetLowByte(ref _dma._DMA2CNT_H, value);
+                                SetLowByte(ref _dma!._DMA2CNT_H, value);
                                 break;
                             case 0x0d3:
-                                SetHighByte(ref _dma._DMA2CNT_H, value);
+                                SetHighByte(ref _dma!._DMA2CNT_H, value);
                                 break;
 
                             case 0x0d4:
-                                SetLowByte(ref _dma._DMA3SAD_L, value);
+                                SetLowByte(ref _dma!._DMA3SAD_L, value);
                                 break;
                             case 0x0d5:
-                                SetHighByte(ref _dma._DMA3SAD_L, value);
+                                SetHighByte(ref _dma!._DMA3SAD_L, value);
                                 break;
 
                             case 0x0d6:
-                                SetLowByte(ref _dma._DMA3SAD_H, value);
+                                SetLowByte(ref _dma!._DMA3SAD_H, value);
                                 break;
                             case 0x0d7:
-                                SetHighByte(ref _dma._DMA3SAD_H, value);
+                                SetHighByte(ref _dma!._DMA3SAD_H, value);
                                 break;
 
                             case 0x0d8:
-                                SetLowByte(ref _dma._DMA3DAD_L, value);
+                                SetLowByte(ref _dma!._DMA3DAD_L, value);
                                 break;
                             case 0x0d9:
-                                SetHighByte(ref _dma._DMA3DAD_L, value);
+                                SetHighByte(ref _dma!._DMA3DAD_L, value);
                                 break;
 
                             case 0x0da:
-                                SetLowByte(ref _dma._DMA3DAD_H, value);
+                                SetLowByte(ref _dma!._DMA3DAD_H, value);
                                 break;
                             case 0x0db:
-                                SetHighByte(ref _dma._DMA3DAD_H, value);
+                                SetHighByte(ref _dma!._DMA3DAD_H, value);
                                 break;
 
                             case 0x0dc:
-                                SetLowByte(ref _dma._DMA3CNT_L, value);
+                                SetLowByte(ref _dma!._DMA3CNT_L, value);
                                 break;
                             case 0x0dd:
-                                SetHighByte(ref _dma._DMA3CNT_L, value);
+                                SetHighByte(ref _dma!._DMA3CNT_L, value);
                                 break;
 
                             case 0x0de:
-                                SetLowByte(ref _dma._DMA3CNT_H, value);
+                                SetLowByte(ref _dma!._DMA3CNT_H, value);
                                 break;
                             case 0x0df:
-                                SetHighByte(ref _dma._DMA3CNT_H, value);
+                                SetHighByte(ref _dma!._DMA3CNT_H, value);
                                 break;
 
                             case 0x100:
-                                SetLowByte(ref _timer._TM0CNT_L, value);
+                                SetLowByte(ref _timer!._TM0CNT_L, value);
                                 break;
                             case 0x101:
-                                SetHighByte(ref _timer._TM0CNT_L, value);
+                                SetHighByte(ref _timer!._TM0CNT_L, value);
                                 break;
 
                             case 0x102:
-                                SetLowByte(ref _timer._TM0CNT_H, value);
+                                SetLowByte(ref _timer!._TM0CNT_H, value);
                                 break;
                             case 0x103:
-                                SetHighByte(ref _timer._TM0CNT_H, value);
+                                SetHighByte(ref _timer!._TM0CNT_H, value);
                                 break;
 
                             case 0x104:
-                                SetLowByte(ref _timer._TM1CNT_L, value);
+                                SetLowByte(ref _timer!._TM1CNT_L, value);
                                 break;
                             case 0x105:
-                                SetHighByte(ref _timer._TM1CNT_L, value);
+                                SetHighByte(ref _timer!._TM1CNT_L, value);
                                 break;
 
                             case 0x106:
-                                SetLowByte(ref _timer._TM1CNT_H, value);
+                                SetLowByte(ref _timer!._TM1CNT_H, value);
                                 break;
                             case 0x107:
-                                SetHighByte(ref _timer._TM1CNT_H, value);
+                                SetHighByte(ref _timer!._TM1CNT_H, value);
                                 break;
 
                             case 0x108:
-                                SetLowByte(ref _timer._TM2CNT_L, value);
+                                SetLowByte(ref _timer!._TM2CNT_L, value);
                                 break;
                             case 0x109:
-                                SetHighByte(ref _timer._TM2CNT_L, value);
+                                SetHighByte(ref _timer!._TM2CNT_L, value);
                                 break;
 
                             case 0x10a:
-                                SetLowByte(ref _timer._TM2CNT_H, value);
+                                SetLowByte(ref _timer!._TM2CNT_H, value);
                                 break;
                             case 0x10b:
-                                SetHighByte(ref _timer._TM2CNT_H, value);
+                                SetHighByte(ref _timer!._TM2CNT_H, value);
                                 break;
 
                             case 0x10c:
-                                SetLowByte(ref _timer._TM3CNT_L, value);
+                                SetLowByte(ref _timer!._TM3CNT_L, value);
                                 break;
                             case 0x10d:
-                                SetHighByte(ref _timer._TM3CNT_L, value);
+                                SetHighByte(ref _timer!._TM3CNT_L, value);
                                 break;
 
                             case 0x10e:
-                                SetLowByte(ref _timer._TM3CNT_H, value);
+                                SetLowByte(ref _timer!._TM3CNT_H, value);
                                 break;
                             case 0x10f:
-                                SetHighByte(ref _timer._TM3CNT_H, value);
+                                SetHighByte(ref _timer!._TM3CNT_H, value);
                                 break;
 
                             case 0x120:
-                                SetLowByte(ref _communication._SIODATA0, value);
+                                SetLowByte(ref _communication!._SIODATA0, value);
                                 break;
                             case 0x121:
-                                SetHighByte(ref _communication._SIODATA0, value);
+                                SetHighByte(ref _communication!._SIODATA0, value);
                                 break;
 
                             case 0x122:
-                                SetLowByte(ref _communication._SIODATA1, value);
+                                SetLowByte(ref _communication!._SIODATA1, value);
                                 break;
                             case 0x123:
-                                SetHighByte(ref _communication._SIODATA1, value);
+                                SetHighByte(ref _communication!._SIODATA1, value);
                                 break;
 
                             case 0x124:
-                                SetLowByte(ref _communication._SIODATA2, value);
+                                SetLowByte(ref _communication!._SIODATA2, value);
                                 break;
                             case 0x125:
-                                SetHighByte(ref _communication._SIODATA2, value);
+                                SetHighByte(ref _communication!._SIODATA2, value);
                                 break;
 
                             case 0x126:
-                                SetLowByte(ref _communication._SIODATA3, value);
+                                SetLowByte(ref _communication!._SIODATA3, value);
                                 break;
                             case 0x127:
-                                SetHighByte(ref _communication._SIODATA3, value);
+                                SetHighByte(ref _communication!._SIODATA3, value);
                                 break;
 
                             case 0x128:
-                                SetLowByte(ref _communication._SIOCNT, value);
+                                SetLowByte(ref _communication!._SIOCNT, value);
                                 break;
                             case 0x129:
-                                SetHighByte(ref _communication._SIOCNT, value);
+                                SetHighByte(ref _communication!._SIOCNT, value);
                                 break;
 
                             case 0x12a:
-                                SetLowByte(ref _communication._SIODATA_SEND, value);
+                                SetLowByte(ref _communication!._SIODATA_SEND, value);
                                 break;
                             case 0x12b:
-                                SetHighByte(ref _communication._SIODATA_SEND, value);
+                                SetHighByte(ref _communication!._SIODATA_SEND, value);
                                 break;
 
                             case 0x130:
-                                SetLowByte(ref _keyInput._KEYINPUT, value);
+                                SetLowByte(ref _keyInput!._KEYINPUT, value);
                                 break;
                             case 0x131:
-                                SetHighByte(ref _keyInput._KEYINPUT, value);
+                                SetHighByte(ref _keyInput!._KEYINPUT, value);
                                 break;
 
                             case 0x132:
-                                SetLowByte(ref _keyInput._KEYCNT, value);
+                                SetLowByte(ref _keyInput!._KEYCNT, value);
                                 break;
                             case 0x133:
-                                SetHighByte(ref _keyInput._KEYCNT, value);
+                                SetHighByte(ref _keyInput!._KEYCNT, value);
                                 break;
 
                             case 0x134:
-                                SetLowByte(ref _communication._RCNT, value);
+                                SetLowByte(ref _communication!._RCNT, value);
                                 break;
                             case 0x135:
-                                SetHighByte(ref _communication._RCNT, value);
+                                SetHighByte(ref _communication!._RCNT, value);
                                 break;
 
                             case 0x200:
-                                SetLowByte(ref _interruptControl._IE, value);
+                                SetLowByte(ref _interruptControl!._IE, value);
                                 _interruptControl.UpdateInterrupts();
                                 break;
                             case 0x201:
-                                SetHighByte(ref _interruptControl._IE, value);
+                                SetHighByte(ref _interruptControl!._IE, value);
                                 _interruptControl.UpdateInterrupts();
                                 break;
 
                             case 0x202:
-                                _interruptControl._IF &= (UInt16)~value;
+                                _interruptControl!._IF &= (UInt16)~value;
                                 _interruptControl.UpdateInterrupts();
                                 break;
                             case 0x203:
-                                _interruptControl._IF &= (UInt16)~(value << 8);
+                                _interruptControl!._IF &= (UInt16)~(value << 8);
                                 _interruptControl.UpdateInterrupts();
                                 break;
 
                             case 0x204:
-                                SetLowByte(ref _system._WAITCNT, value);
+                                SetLowByte(ref _system!._WAITCNT, value);
                                 break;
                             case 0x205:
-                                SetHighByte(ref _system._WAITCNT, value);
+                                SetHighByte(ref _system!._WAITCNT, value);
                                 break;
 
                             case 0x208:
-                                SetLowByte(ref _interruptControl._IME, value);
+                                SetLowByte(ref _interruptControl!._IME, value);
                                 _interruptControl.UpdateInterrupts();
                                 break;
                             case 0x209:
-                                SetHighByte(ref _interruptControl._IME, value);
+                                SetHighByte(ref _interruptControl!._IME, value);
                                 _interruptControl.UpdateInterrupts();
                                 break;
 
@@ -1402,279 +1402,279 @@ namespace Iris.GBA
                         switch (offset)
                         {
                             case 0x000:
-                                _ppu.DISPCNT = value;
+                                _ppu!.DISPCNT = value;
                                 break;
                             case 0x004:
-                                _ppu.DISPSTAT = value;
+                                _ppu!.DISPSTAT = value;
                                 break;
                             case 0x008:
-                                _ppu.BG0CNT = value;
+                                _ppu!.BG0CNT = value;
                                 break;
                             case 0x00a:
-                                _ppu.BG1CNT = value;
+                                _ppu!.BG1CNT = value;
                                 break;
                             case 0x00c:
-                                _ppu.BG2CNT = value;
+                                _ppu!.BG2CNT = value;
                                 break;
                             case 0x00e:
-                                _ppu.BG3CNT = value;
+                                _ppu!.BG3CNT = value;
                                 break;
                             case 0x010:
-                                _ppu.BG0HOFS = value;
+                                _ppu!.BG0HOFS = value;
                                 break;
                             case 0x012:
-                                _ppu.BG0VOFS = value;
+                                _ppu!.BG0VOFS = value;
                                 break;
                             case 0x014:
-                                _ppu.BG1HOFS = value;
+                                _ppu!.BG1HOFS = value;
                                 break;
                             case 0x016:
-                                _ppu.BG1VOFS = value;
+                                _ppu!.BG1VOFS = value;
                                 break;
                             case 0x018:
-                                _ppu.BG2HOFS = value;
+                                _ppu!.BG2HOFS = value;
                                 break;
                             case 0x01a:
-                                _ppu.BG2VOFS = value;
+                                _ppu!.BG2VOFS = value;
                                 break;
                             case 0x01c:
-                                _ppu.BG3HOFS = value;
+                                _ppu!.BG3HOFS = value;
                                 break;
                             case 0x01e:
-                                _ppu.BG3VOFS = value;
+                                _ppu!.BG3VOFS = value;
                                 break;
                             case 0x040:
-                                _ppu.WIN0H = value;
+                                _ppu!.WIN0H = value;
                                 break;
                             case 0x042:
-                                _ppu.WIN1H = value;
+                                _ppu!.WIN1H = value;
                                 break;
                             case 0x044:
-                                _ppu.WIN0V = value;
+                                _ppu!.WIN0V = value;
                                 break;
                             case 0x046:
-                                _ppu.WIN1V = value;
+                                _ppu!.WIN1V = value;
                                 break;
                             case 0x048:
-                                _ppu.WININ = value;
+                                _ppu!.WININ = value;
                                 break;
                             case 0x04a:
-                                _ppu.WINOUT = value;
+                                _ppu!.WINOUT = value;
                                 break;
                             case 0x04c:
-                                _ppu.MOSAIC = value;
+                                _ppu!.MOSAIC = value;
                                 break;
                             case 0x050:
-                                _ppu.BLDCNT = value;
+                                _ppu!.BLDCNT = value;
                                 break;
                             case 0x052:
-                                _ppu.BLDALPHA = value;
+                                _ppu!.BLDALPHA = value;
                                 break;
                             case 0x054:
-                                _ppu.BLDY = value;
+                                _ppu!.BLDY = value;
                                 break;
                             case 0x060:
-                                _sound._SOUND1CNT_L = value;
+                                _sound!._SOUND1CNT_L = value;
                                 break;
                             case 0x062:
-                                _sound._SOUND1CNT_H = value;
+                                _sound!._SOUND1CNT_H = value;
                                 break;
                             case 0x064:
-                                _sound._SOUND1CNT_X = value;
+                                _sound!._SOUND1CNT_X = value;
                                 break;
                             case 0x068:
-                                _sound._SOUND2CNT_L = value;
+                                _sound!._SOUND2CNT_L = value;
                                 break;
                             case 0x06c:
-                                _sound._SOUND2CNT_H = value;
+                                _sound!._SOUND2CNT_H = value;
                                 break;
                             case 0x070:
-                                _sound._SOUND3CNT_L = value;
+                                _sound!._SOUND3CNT_L = value;
                                 break;
                             case 0x072:
-                                _sound._SOUND3CNT_H = value;
+                                _sound!._SOUND3CNT_H = value;
                                 break;
                             case 0x074:
-                                _sound._SOUND3CNT_X = value;
+                                _sound!._SOUND3CNT_X = value;
                                 break;
                             case 0x078:
-                                _sound._SOUND4CNT_L = value;
+                                _sound!._SOUND4CNT_L = value;
                                 break;
                             case 0x07c:
-                                _sound._SOUND4CNT_H = value;
+                                _sound!._SOUND4CNT_H = value;
                                 break;
                             case 0x080:
-                                _sound._SOUNDCNT_L = value;
+                                _sound!._SOUNDCNT_L = value;
                                 break;
                             case 0x082:
-                                _sound._SOUNDCNT_H = value;
+                                _sound!._SOUNDCNT_H = value;
                                 break;
                             case 0x084:
-                                _sound._SOUNDCNT_X = value;
+                                _sound!._SOUNDCNT_X = value;
                                 break;
                             case 0x088:
-                                _sound._SOUNDBIAS = value;
+                                _sound!._SOUNDBIAS = value;
                                 break;
                             case 0x090:
-                                _sound._WAVE_RAM0_L = value;
+                                _sound!._WAVE_RAM0_L = value;
                                 break;
                             case 0x092:
-                                _sound._WAVE_RAM0_H = value;
+                                _sound!._WAVE_RAM0_H = value;
                                 break;
                             case 0x094:
-                                _sound._WAVE_RAM1_L = value;
+                                _sound!._WAVE_RAM1_L = value;
                                 break;
                             case 0x096:
-                                _sound._WAVE_RAM1_H = value;
+                                _sound!._WAVE_RAM1_H = value;
                                 break;
                             case 0x098:
-                                _sound._WAVE_RAM2_L = value;
+                                _sound!._WAVE_RAM2_L = value;
                                 break;
                             case 0x09a:
-                                _sound._WAVE_RAM2_H = value;
+                                _sound!._WAVE_RAM2_H = value;
                                 break;
                             case 0x09c:
-                                _sound._WAVE_RAM3_L = value;
+                                _sound!._WAVE_RAM3_L = value;
                                 break;
                             case 0x09e:
-                                _sound._WAVE_RAM3_H = value;
+                                _sound!._WAVE_RAM3_H = value;
                                 break;
                             case 0x0b0:
-                                _dma._DMA0SAD_L = value;
+                                _dma!._DMA0SAD_L = value;
                                 break;
                             case 0x0b2:
-                                _dma._DMA0SAD_H = value;
+                                _dma!._DMA0SAD_H = value;
                                 break;
                             case 0x0b4:
-                                _dma._DMA0DAD_L = value;
+                                _dma!._DMA0DAD_L = value;
                                 break;
                             case 0x0b6:
-                                _dma._DMA0DAD_H = value;
+                                _dma!._DMA0DAD_H = value;
                                 break;
                             case 0x0b8:
-                                _dma._DMA0CNT_L = value;
+                                _dma!._DMA0CNT_L = value;
                                 break;
                             case 0x0ba:
-                                _dma._DMA0CNT_H = value;
+                                _dma!._DMA0CNT_H = value;
                                 break;
                             case 0x0bc:
-                                _dma._DMA1SAD_L = value;
+                                _dma!._DMA1SAD_L = value;
                                 break;
                             case 0x0be:
-                                _dma._DMA1SAD_H = value;
+                                _dma!._DMA1SAD_H = value;
                                 break;
                             case 0x0c0:
-                                _dma._DMA1DAD_L = value;
+                                _dma!._DMA1DAD_L = value;
                                 break;
                             case 0x0c2:
-                                _dma._DMA1DAD_H = value;
+                                _dma!._DMA1DAD_H = value;
                                 break;
                             case 0x0c4:
-                                _dma._DMA1CNT_L = value;
+                                _dma!._DMA1CNT_L = value;
                                 break;
                             case 0x0c6:
-                                _dma._DMA1CNT_H = value;
+                                _dma!._DMA1CNT_H = value;
                                 break;
                             case 0x0c8:
-                                _dma._DMA2SAD_L = value;
+                                _dma!._DMA2SAD_L = value;
                                 break;
                             case 0x0ca:
-                                _dma._DMA2SAD_H = value;
+                                _dma!._DMA2SAD_H = value;
                                 break;
                             case 0x0cc:
-                                _dma._DMA2DAD_L = value;
+                                _dma!._DMA2DAD_L = value;
                                 break;
                             case 0x0ce:
-                                _dma._DMA2DAD_H = value;
+                                _dma!._DMA2DAD_H = value;
                                 break;
                             case 0x0d0:
-                                _dma._DMA2CNT_L = value;
+                                _dma!._DMA2CNT_L = value;
                                 break;
                             case 0x0d2:
-                                _dma._DMA2CNT_H = value;
+                                _dma!._DMA2CNT_H = value;
                                 break;
                             case 0x0d4:
-                                _dma._DMA3SAD_L = value;
+                                _dma!._DMA3SAD_L = value;
                                 break;
                             case 0x0d6:
-                                _dma._DMA3SAD_H = value;
+                                _dma!._DMA3SAD_H = value;
                                 break;
                             case 0x0d8:
-                                _dma._DMA3DAD_L = value;
+                                _dma!._DMA3DAD_L = value;
                                 break;
                             case 0x0da:
-                                _dma._DMA3DAD_H = value;
+                                _dma!._DMA3DAD_H = value;
                                 break;
                             case 0x0dc:
-                                _dma._DMA3CNT_L = value;
+                                _dma!._DMA3CNT_L = value;
                                 break;
                             case 0x0de:
-                                _dma._DMA3CNT_H = value;
+                                _dma!._DMA3CNT_H = value;
                                 break;
                             case 0x100:
-                                _timer._TM0CNT_L = value;
+                                _timer!._TM0CNT_L = value;
                                 break;
                             case 0x102:
-                                _timer._TM0CNT_H = value;
+                                _timer!._TM0CNT_H = value;
                                 break;
                             case 0x104:
-                                _timer._TM1CNT_L = value;
+                                _timer!._TM1CNT_L = value;
                                 break;
                             case 0x106:
-                                _timer._TM1CNT_H = value;
+                                _timer!._TM1CNT_H = value;
                                 break;
                             case 0x108:
-                                _timer._TM2CNT_L = value;
+                                _timer!._TM2CNT_L = value;
                                 break;
                             case 0x10a:
-                                _timer._TM2CNT_H = value;
+                                _timer!._TM2CNT_H = value;
                                 break;
                             case 0x10c:
-                                _timer._TM3CNT_L = value;
+                                _timer!._TM3CNT_L = value;
                                 break;
                             case 0x10e:
-                                _timer._TM3CNT_H = value;
+                                _timer!._TM3CNT_H = value;
                                 break;
                             case 0x120:
-                                _communication._SIODATA0 = value;
+                                _communication!._SIODATA0 = value;
                                 break;
                             case 0x122:
-                                _communication._SIODATA1 = value;
+                                _communication!._SIODATA1 = value;
                                 break;
                             case 0x124:
-                                _communication._SIODATA2 = value;
+                                _communication!._SIODATA2 = value;
                                 break;
                             case 0x126:
-                                _communication._SIODATA3 = value;
+                                _communication!._SIODATA3 = value;
                                 break;
                             case 0x128:
-                                _communication._SIOCNT = value;
+                                _communication!._SIOCNT = value;
                                 break;
                             case 0x12a:
-                                _communication._SIODATA_SEND = value;
+                                _communication!._SIODATA_SEND = value;
                                 break;
                             case 0x130:
-                                _keyInput._KEYINPUT = value;
+                                _keyInput!._KEYINPUT = value;
                                 break;
                             case 0x132:
-                                _keyInput._KEYCNT = value;
+                                _keyInput!._KEYCNT = value;
                                 break;
                             case 0x134:
-                                _communication._RCNT = value;
+                                _communication!._RCNT = value;
                                 break;
                             case 0x200:
-                                _interruptControl._IE = value;
+                                _interruptControl!._IE = value;
                                 _interruptControl.UpdateInterrupts();
                                 break;
                             case 0x202:
-                                _interruptControl._IF &= (UInt16)~value;
+                                _interruptControl!._IF &= (UInt16)~value;
                                 _interruptControl.UpdateInterrupts();
                                 break;
                             case 0x204:
-                                _system._WAITCNT = value;
+                                _system!._WAITCNT = value;
                                 break;
                             case 0x208:
-                                _interruptControl._IME = value;
+                                _interruptControl!._IME = value;
                                 _interruptControl.UpdateInterrupts();
                                 break;
                             default:
@@ -1736,91 +1736,91 @@ namespace Iris.GBA
                         switch (offset)
                         {
                             case 0x000:
-                                _ppu.DISPCNT = GetLowHalfword(value);
+                                _ppu!.DISPCNT = GetLowHalfword(value);
                                 // 16 upper bits are undocumented (green swap register)
                                 break;
                             case 0x10:
-                                _ppu.BG0HOFS = GetLowHalfword(value);
+                                _ppu!.BG0HOFS = GetLowHalfword(value);
                                 _ppu.BG0VOFS = GetHighHalfword(value);
                                 break;
                             case 0x090:
-                                _sound._WAVE_RAM0_L = GetLowHalfword(value);
+                                _sound!._WAVE_RAM0_L = GetLowHalfword(value);
                                 _sound._WAVE_RAM0_H = GetHighHalfword(value);
                                 break;
                             case 0x094:
-                                _sound._WAVE_RAM1_L = GetLowHalfword(value);
+                                _sound!._WAVE_RAM1_L = GetLowHalfword(value);
                                 _sound._WAVE_RAM1_H = GetHighHalfword(value);
                                 break;
                             case 0x098:
-                                _sound._WAVE_RAM2_L = GetLowHalfword(value);
+                                _sound!._WAVE_RAM2_L = GetLowHalfword(value);
                                 _sound._WAVE_RAM2_H = GetHighHalfword(value);
                                 break;
                             case 0x09c:
-                                _sound._WAVE_RAM3_L = GetLowHalfword(value);
+                                _sound!._WAVE_RAM3_L = GetLowHalfword(value);
                                 _sound._WAVE_RAM3_H = GetHighHalfword(value);
                                 break;
                             case 0x0b0:
-                                _dma._DMA0SAD_L = GetLowHalfword(value);
+                                _dma!._DMA0SAD_L = GetLowHalfword(value);
                                 _dma._DMA0SAD_H = GetHighHalfword(value);
                                 break;
                             case 0x0b4:
-                                _dma._DMA0DAD_L = GetLowHalfword(value);
+                                _dma!._DMA0DAD_L = GetLowHalfword(value);
                                 _dma._DMA0DAD_H = GetHighHalfword(value);
                                 break;
                             case 0x0b8:
-                                _dma._DMA0CNT_L = GetLowHalfword(value);
+                                _dma!._DMA0CNT_L = GetLowHalfword(value);
                                 _dma._DMA0CNT_H = GetHighHalfword(value);
                                 break;
                             case 0x0bc:
-                                _dma._DMA1SAD_L = GetLowHalfword(value);
+                                _dma!._DMA1SAD_L = GetLowHalfword(value);
                                 _dma._DMA1SAD_H = GetHighHalfword(value);
                                 break;
                             case 0x0c0:
-                                _dma._DMA1DAD_L = GetLowHalfword(value);
+                                _dma!._DMA1DAD_L = GetLowHalfword(value);
                                 _dma._DMA1DAD_H = GetHighHalfword(value);
                                 break;
                             case 0x0c4:
-                                _dma._DMA1CNT_L = GetLowHalfword(value);
+                                _dma!._DMA1CNT_L = GetLowHalfword(value);
                                 _dma._DMA1CNT_H = GetHighHalfword(value);
                                 break;
                             case 0x0c8:
-                                _dma._DMA2SAD_L = GetLowHalfword(value);
+                                _dma!._DMA2SAD_L = GetLowHalfword(value);
                                 _dma._DMA2SAD_H = GetHighHalfword(value);
                                 break;
                             case 0x0cc:
-                                _dma._DMA2DAD_L = GetLowHalfword(value);
+                                _dma!._DMA2DAD_L = GetLowHalfword(value);
                                 _dma._DMA2DAD_H = GetHighHalfword(value);
                                 break;
                             case 0x0d0:
-                                _dma._DMA2CNT_L = GetLowHalfword(value);
+                                _dma!._DMA2CNT_L = GetLowHalfword(value);
                                 _dma._DMA2CNT_H = GetHighHalfword(value);
                                 break;
                             case 0x0d4:
-                                _dma._DMA3SAD_L = GetLowHalfword(value);
+                                _dma!._DMA3SAD_L = GetLowHalfword(value);
                                 _dma._DMA3SAD_H = GetHighHalfword(value);
                                 break;
                             case 0x0d8:
-                                _dma._DMA3DAD_L = GetLowHalfword(value);
+                                _dma!._DMA3DAD_L = GetLowHalfword(value);
                                 _dma._DMA3DAD_H = GetHighHalfword(value);
                                 break;
                             case 0x0dc:
-                                _dma._DMA3CNT_L = GetLowHalfword(value);
+                                _dma!._DMA3CNT_L = GetLowHalfword(value);
                                 _dma._DMA3CNT_H = GetHighHalfword(value);
                                 break;
                             case 0x10c:
-                                _timer._TM3CNT_L = GetLowHalfword(value);
+                                _timer!._TM3CNT_L = GetLowHalfword(value);
                                 _timer._TM3CNT_H = GetHighHalfword(value);
                                 break;
                             case 0x128:
-                                _communication._SIOCNT = GetLowHalfword(value);
+                                _communication!._SIOCNT = GetLowHalfword(value);
                                 _communication._SIODATA_SEND = GetHighHalfword(value);
                                 break;
                             case 0x204:
-                                _system._WAITCNT = GetLowHalfword(value);
+                                _system!._WAITCNT = GetLowHalfword(value);
                                 // 16 upper bits are unused
                                 break;
                             case 0x208:
-                                _interruptControl._IME = GetLowHalfword(value);
+                                _interruptControl!._IME = GetLowHalfword(value);
                                 _interruptControl.UpdateInterrupts();
                                 // 16 upper bits are unused
                                 break;
