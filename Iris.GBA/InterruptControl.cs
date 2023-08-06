@@ -26,9 +26,9 @@ namespace Iris.GBA
         internal UInt16 _IF;
         internal UInt16 _IME;
 
-        private readonly CPU_Core _cpu;
+        private CPU_Core? _cpu;
 
-        internal InterruptControl(CPU_Core cpu)
+        internal void Init(CPU_Core cpu)
         {
             _cpu = cpu;
         }
@@ -39,7 +39,7 @@ namespace Iris.GBA
             _IF = 0;
             _IME = 0;
 
-            _cpu.NIRQ = CPU_Core.Signal.High;
+            _cpu!.NIRQ = CPU_Core.Signal.High;
         }
 
         internal void RequestInterrupt(Interrupt interrupt)
@@ -50,7 +50,7 @@ namespace Iris.GBA
 
         internal void UpdateInterrupts()
         {
-            _cpu.NIRQ = ((_IME == 0) || ((_IE & _IF) == 0)) ? CPU_Core.Signal.High : CPU_Core.Signal.Low;
+            _cpu!.NIRQ = ((_IME == 0) || ((_IE & _IF) == 0)) ? CPU_Core.Signal.High : CPU_Core.Signal.Low;
         }
     }
 }

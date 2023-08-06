@@ -15,7 +15,7 @@ namespace Iris.GBA
         private readonly Sound _sound = new();
         private readonly DMA _dma = new();
         private readonly KeyInput _keyInput = new();
-        private readonly InterruptControl _interruptControl;
+        private readonly InterruptControl _interruptControl = new();
         private readonly BIOS _bios;
         private readonly Memory _memory = new();
         private readonly PPU _ppu;
@@ -45,10 +45,10 @@ namespace Iris.GBA
             };
 
             _cpu = new(CPU_Core.Model.ARM7TDMI, cpuCallbackInterface);
-            _interruptControl = new(_cpu);
             _ppu = new(_scheduler, ppuCallbackInterface);
             _bios = new(_cpu, _memory);
 
+            _interruptControl.Init(_cpu);
             _memory.Init(_communication, _timer, _sound, _dma, _keyInput, _interruptControl, _bios, _ppu, this);
         }
 
