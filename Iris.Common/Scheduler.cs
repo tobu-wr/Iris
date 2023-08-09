@@ -63,6 +63,7 @@ namespace Iris.Common
             return (_taskCount > 0) && (MemoryMarshal.GetArrayDataReference(_taskList).CycleCount <= _cycleCounter);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AdvanceCycleCounter(UInt32 cycleCount)
         {
             _cycleCounter += cycleCount;
