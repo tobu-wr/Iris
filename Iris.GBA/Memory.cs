@@ -10,10 +10,10 @@ namespace Iris.GBA
         private Sound? _sound;
         private DMA? _dma;
         private KeyInput? _keyInput;
+        private SystemControl? _systemControl;
         private InterruptControl? _interruptControl;
         private BIOS? _bios;
         private PPU? _ppu;
-        private GBA_System? _system;
 
         [Flags]
         private enum MemoryFlag
@@ -54,17 +54,17 @@ namespace Iris.GBA
         private readonly IntPtr[] _write16PageTable = new IntPtr[PageTableSize];
         private readonly IntPtr[] _write32PageTable = new IntPtr[PageTableSize];
 
-        internal void Init(Communication communication, Timer timer, Sound sound, DMA dma, KeyInput keyInput, InterruptControl interruptControl, BIOS bios, PPU ppu, GBA_System system)
+        internal void Init(Communication communication, Timer timer, Sound sound, DMA dma, KeyInput keyInput, SystemControl systemControl, InterruptControl interruptControl, BIOS bios, PPU ppu)
         {
             _communication = communication;
             _timer = timer;
             _sound = sound;
             _dma = dma;
             _keyInput = keyInput;
+            _systemControl = systemControl;
             _interruptControl = interruptControl;
             _bios = bios;
             _ppu = ppu;
-            _system = system;
 
             InitPageTables();
         }
@@ -358,8 +358,8 @@ namespace Iris.GBA
                             0x202 => GetLowByte(_interruptControl!._IF),
                             0x203 => GetHighByte(_interruptControl!._IF),
 
-                            0x204 => GetLowByte(_system!._WAITCNT),
-                            0x205 => GetHighByte(_system!._WAITCNT),
+                            0x204 => GetLowByte(_systemControl!._WAITCNT),
+                            0x205 => GetHighByte(_systemControl!._WAITCNT),
 
                             0x208 => GetLowByte(_interruptControl!._IME),
                             0x209 => GetHighByte(_interruptControl!._IME),
@@ -509,7 +509,7 @@ namespace Iris.GBA
                             0x134 => _communication!._RCNT,
                             0x200 => _interruptControl!._IE,
                             0x202 => _interruptControl!._IF,
-                            0x204 => _system!._WAITCNT,
+                            0x204 => _systemControl!._WAITCNT,
                             0x208 => _interruptControl!._IME,
                             _ => throw new Exception(string.Format("Iris.GBA.Memory: Unhandled read from address 0x{0:x8}", address)),
                         };
@@ -1334,10 +1334,10 @@ namespace Iris.GBA
                                 break;
 
                             case 0x204:
-                                SetLowByte(ref _system!._WAITCNT, value);
+                                SetLowByte(ref _systemControl!._WAITCNT, value);
                                 break;
                             case 0x205:
-                                SetHighByte(ref _system!._WAITCNT, value);
+                                SetHighByte(ref _systemControl!._WAITCNT, value);
                                 break;
 
                             case 0x208:
@@ -1671,7 +1671,7 @@ namespace Iris.GBA
                                 _interruptControl.UpdateInterrupts();
                                 break;
                             case 0x204:
-                                _system!._WAITCNT = value;
+                                _systemControl!._WAITCNT = value;
                                 break;
                             case 0x208:
                                 _interruptControl!._IME = value;
@@ -1816,7 +1816,7 @@ namespace Iris.GBA
                                 _communication._SIODATA_SEND = GetHighHalfword(value);
                                 break;
                             case 0x204:
-                                _system!._WAITCNT = GetLowHalfword(value);
+                                _systemControl!._WAITCNT = GetLowHalfword(value);
                                 // 16 upper bits are unused
                                 break;
                             case 0x208:

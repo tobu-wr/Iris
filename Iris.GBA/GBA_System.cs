@@ -15,12 +15,11 @@ namespace Iris.GBA
         private readonly Sound _sound = new();
         private readonly DMA _dma = new();
         private readonly KeyInput _keyInput = new();
+        private readonly SystemControl _systemControl = new();
         private readonly InterruptControl _interruptControl = new();
         private readonly BIOS _bios = new();
         private readonly Memory _memory = new();
         private readonly PPU _ppu;
-
-        internal UInt16 _WAITCNT;
 
         private bool _running;
 
@@ -50,7 +49,7 @@ namespace Iris.GBA
 
             _interruptControl.Init(_cpu);
             _bios.Init(_cpu, _memory);
-            _memory.Init(_communication, _timer, _sound, _dma, _keyInput, _interruptControl, _bios, _ppu, this);
+            _memory.Init(_communication, _timer, _sound, _dma, _keyInput, _systemControl, _interruptControl, _bios, _ppu);
         }
 
         public void Reset()
@@ -62,11 +61,10 @@ namespace Iris.GBA
             _sound.Reset();
             _dma.Reset();
             _keyInput.Reset();
+            _systemControl.Reset();
             _interruptControl.Reset();
             _bios.Reset();
             _ppu.Reset();
-
-            _WAITCNT = 0;
         }
 
         public void LoadROM(string filename)
