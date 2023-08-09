@@ -71,27 +71,30 @@ namespace Iris.Common
 
         public void ProcessTasks()
         {
-            ref TaskListEntry firstEntryRef = ref MemoryMarshal.GetArrayDataReference(_taskList);
-
             int i = 0;
+            ref TaskListEntry entry = ref MemoryMarshal.GetArrayDataReference(_taskList);
 
-            while ((i < _taskCount) && (_taskList[i].CycleCount <= _cycleCounter))
+            while ((i < _taskCount) && (entry.CycleCount <= _cycleCounter))
             {
-                _taskList[i].CycleCount = 0; // ensure that task won't move in the list if another task get added while executing that one
-                _taskList[i].Task();
+                entry.CycleCount = 0; // ensure that task won't move in the list if another task get added while executing that one
+                entry.Task();
 
                 ++i;
+                entry = ref Unsafe.Add(ref entry, 1);
             }
 
-            if (i < _taskCount)
-                Array.Copy(_taskList, i, _taskList, 0, _taskCount - i);
+            int remainingTaskCount = _taskCount - i;
 
-            _taskCount -= i;
+            if (remainingTaskCount > 0)
+            {
+                Array.Copy(_taskList, i, _taskList, 0, remainingTaskCount);
 
-            for (i = 0; i < _taskCount; ++i)
-                Unsafe.Add(ref firstEntryRef, i).CycleCount -= _cycleCounter;
+                for (i = 0; i < remainingTaskCount; ++i)
+                    Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_taskList), i).CycleCount -= _cycleCounter;
+            }
 
             _cycleCounter = 0;
+            _taskCount = remainingTaskCount;
         }
     }
 }
