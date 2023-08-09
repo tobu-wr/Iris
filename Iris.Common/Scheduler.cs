@@ -24,6 +24,7 @@ namespace Iris.Common
             _taskCount = 0;
         }
 
+        // cycleCount should be greater than 0
         public void AddTask(UInt32 cycleCount, Task_Delegate task)
         {
             // adjust the cycle count of the new task
@@ -45,8 +46,8 @@ namespace Iris.Common
             ++i;
             entry = ref Unsafe.Add(ref entry, 1);
 
-            // move the following tasks to make space for the new one
-            if (i < _taskCount) // (if it's not added at the end ofc)
+            // move the following tasks to make space for the new one (if it's not added at the end ofc)
+            if (i < _taskCount)
                 Array.Copy(_taskList, i, _taskList, i + 1, _taskCount - i);
 
             // add the new task
@@ -77,6 +78,7 @@ namespace Iris.Common
             {
                 _taskList[i].CycleCount = 0; // ensure that task won't move in the list if another task get added while executing that one
                 _taskList[i].Task();
+
                 ++i;
             }
 
