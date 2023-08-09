@@ -10,7 +10,7 @@ namespace Iris.Common
         private record struct TaskListEntry(UInt32 CycleCount, Task_Delegate Task);
 
         private UInt32 _cycleCounter;
-        private readonly TaskListEntry[] _taskList;
+        private readonly TaskListEntry[] _taskList; // sorted by CycleCount from smallest to largest
         private int _taskCount;
 
         public Scheduler(int taskListSize)
@@ -26,24 +26,34 @@ namespace Iris.Common
 
         public void AddTask(UInt32 cycleCount, Task_Delegate task)
         {
-            ref TaskListEntry firstEntryRef = ref MemoryMarshal.GetArrayDataReference(_taskList);
-
+            // adjust the cycle count of the new task
             cycleCount += _cycleCounter;
 
+            // get the position and reference of the last task
             int i = _taskCount - 1;
+            ref TaskListEntry entry = ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_taskList), i);
 
-            while ((i >= 0) && (Unsafe.Add(ref firstEntryRef, i).CycleCount > cycleCount))
+            // find the last task whose the cycle count is smaller or equal to the new one
+            // (searching is done backward because the new task is more likely to be added towards the end)
+            while ((i >= 0) && (entry.CycleCount > cycleCount))
+            {
                 --i;
+                entry = ref Unsafe.Subtract(ref entry, 1);
+            }
 
+            // the position and reference of the new task is the next one
             ++i;
+            entry = ref Unsafe.Add(ref entry, 1);
 
-            if (i < _taskCount)
+            // move the following tasks to make space for the new one
+            if (i < _taskCount) // (if it's not added at the end ofc)
                 Array.Copy(_taskList, i, _taskList, i + 1, _taskCount - i);
 
-            ref TaskListEntry entry = ref Unsafe.Add(ref firstEntryRef, i);
+            // add the new task
             entry.CycleCount = cycleCount;
             entry.Task = task;
 
+            // increment the task count
             ++_taskCount;
         }
 
