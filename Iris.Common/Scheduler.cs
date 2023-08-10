@@ -10,7 +10,7 @@ namespace Iris.Common
         private record struct TaskListEntry(UInt32 CycleCount, Task_Delegate Task);
 
         private UInt32 _cycleCounter;
-        private readonly TaskListEntry[] _taskList; // sorted by CycleCount from smallest to largest
+        private readonly TaskListEntry[] _taskList; // sorted by cycle count from smallest to largest
         private int _taskCount;
 
         public Scheduler(int taskListSize)
@@ -24,29 +24,26 @@ namespace Iris.Common
             _taskCount = 0;
         }
 
-        // cycleCount should be greater than 0
+        // the cycle count of the new task should be greater than zero
         public void AddTask(UInt32 cycleCount, Task_Delegate task)
         {
             // adjust the cycle count of the new task
             cycleCount += _cycleCounter;
 
-            // get the position and reference of the last task
-            int i = _taskCount - 1;
-            ref TaskListEntry entry = ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_taskList), i);
-
-            // find the last task whose the cycle count is smaller or equal to the new one
+            // get the position and reference of the new task by finding the last task whose cycle count is smaller or equal to the new one, the new task is next to it
             // (searching is done backward because the new task is more likely to be added towards the end)
-            while ((i >= 0) && (entry.CycleCount > cycleCount))
+            int i = _taskCount;
+            ref TaskListEntry entry = ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_taskList), i - 1);
+
+            while ((i > 0) && (entry.CycleCount > cycleCount))
             {
                 --i;
                 entry = ref Unsafe.Subtract(ref entry, 1);
             }
 
-            // the position and reference of the new task is the next one
-            ++i;
             entry = ref Unsafe.Add(ref entry, 1);
 
-            // move the following tasks to make space for the new one (if it's not added at the end ofc)
+            // move the following tasks to make space for the new one
             if (i < _taskCount)
                 Array.Copy(_taskList, i, _taskList, i + 1, _taskCount - i);
 
@@ -73,18 +70,20 @@ namespace Iris.Common
         {
             ref TaskListEntry taskListDataRef = ref MemoryMarshal.GetArrayDataReference(_taskList);
 
+            // execute the tasks whose cycle count is lower or equal to the cycle counter
             int i = 0;
             ref TaskListEntry entry = ref taskListDataRef;
 
             while ((i < _taskCount) && (entry.CycleCount <= _cycleCounter))
             {
-                entry.CycleCount = 0; // ensure that task won't move in the list if another task get added while executing that one
+                entry.CycleCount = 0; // ensure that the task won't move if another task is added
                 entry.Task();
 
                 ++i;
                 entry = ref Unsafe.Add(ref entry, 1);
             }
 
+            // move the remaining tasks at the begin and update their cycle count
             int remainingTaskCount = _taskCount - i;
 
             if (remainingTaskCount > 0)
@@ -95,6 +94,7 @@ namespace Iris.Common
                     Unsafe.Add(ref taskListDataRef, i).CycleCount -= _cycleCounter;
             }
 
+            // reset the cycle counter and update the task count
             _cycleCounter = 0;
             _taskCount = remainingTaskCount;
         }
