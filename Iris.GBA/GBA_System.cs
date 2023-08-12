@@ -64,6 +64,7 @@ namespace Iris.GBA
             _systemControl.Reset();
             _interruptControl.Reset();
             _bios.Reset();
+            _memory.Reset();
             _ppu.Reset();
         }
 

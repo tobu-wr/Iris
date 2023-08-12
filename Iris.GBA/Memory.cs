@@ -69,6 +69,11 @@ namespace Iris.GBA
             InitPageTables();
         }
 
+        internal void Reset()
+        {
+            // TODO
+        }
+
         private void MapMemory(IntPtr data, int pageCount, UInt32 startAddress, UInt32 endAddress, MemoryFlag flags)
         {
             int startTablePageIndex = (int)(startAddress >> 10);
