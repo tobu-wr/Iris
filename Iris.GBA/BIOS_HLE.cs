@@ -2,7 +2,7 @@
 
 namespace Iris.GBA
 {
-    internal sealed class BIOS
+    internal sealed class BIOS_HLE
     {
         private CPU_Core? _cpu;
         private Memory? _memory;
