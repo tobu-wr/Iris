@@ -80,7 +80,7 @@ namespace Iris.Common
                 entry = ref Unsafe.Add(ref entry, 1);
             }
 
-            // move the remaining tasks at the begin of the task list and update their cycle count
+            // move the remaining tasks at the begin and update their cycle count
             int remainingTaskCount = _taskCount - i;
 
             if (remainingTaskCount > 0)
