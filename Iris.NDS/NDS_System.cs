@@ -12,17 +12,7 @@ namespace Iris.NDS
 
         public NDS_System(ISystem.DrawFrame_Delegate drawFrameCallback)
         {
-            CPU_Core.CallbackInterface cpuCallbackInterface = new()
-            {
-                ReadMemory8 = ReadMemory8,
-                ReadMemory16 = ReadMemory16,
-                ReadMemory32 = ReadMemory32,
-                WriteMemory8 = WriteMemory8,
-                WriteMemory16 = WriteMemory16,
-                WriteMemory32 = WriteMemory32,
-                HandleSWI = HandleSWI,
-                HandleIRQ = HandleIRQ
-            };
+            CPU_Core.CallbackInterface cpuCallbackInterface = new(ReadMemory8, ReadMemory16, ReadMemory32, WriteMemory8, WriteMemory16, WriteMemory32, HandleSWI, HandleIRQ);
 
             _cpu = new(CPU_Core.Model.ARM946ES, cpuCallbackInterface);
             _ppu = new(drawFrameCallback);

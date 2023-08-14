@@ -12,7 +12,7 @@ namespace Iris.CPU
         }
 
         // could have used function pointers (delegate*) for performance instead of delegates but it's less flexible (cannot use non-static function for instance)
-        public struct CallbackInterface
+        public sealed class CallbackInterface
         {
             public delegate Byte ReadMemory8_Delegate(UInt32 address);
             public delegate UInt16 ReadMemory16_Delegate(UInt32 address);
@@ -23,14 +23,29 @@ namespace Iris.CPU
             public delegate void HandleSWI_Delegate(UInt32 value);
             public delegate void HandleIRQ_Delegate();
 
-            public ReadMemory8_Delegate ReadMemory8;
-            public ReadMemory16_Delegate ReadMemory16;
-            public ReadMemory32_Delegate ReadMemory32;
-            public WriteMemory8_Delegate WriteMemory8;
-            public WriteMemory16_Delegate WriteMemory16;
-            public WriteMemory32_Delegate WriteMemory32;
-            public HandleSWI_Delegate HandleSWI;
-            public HandleIRQ_Delegate HandleIRQ;
+            internal readonly ReadMemory8_Delegate ReadMemory8;
+            internal readonly ReadMemory16_Delegate ReadMemory16;
+            internal readonly ReadMemory32_Delegate ReadMemory32;
+            internal readonly WriteMemory8_Delegate WriteMemory8;
+            internal readonly WriteMemory16_Delegate WriteMemory16;
+            internal readonly WriteMemory32_Delegate WriteMemory32;
+            internal readonly HandleSWI_Delegate HandleSWI;
+            internal readonly HandleIRQ_Delegate HandleIRQ;
+
+            public CallbackInterface(
+                ReadMemory8_Delegate readMemory8, ReadMemory16_Delegate readMemory16, ReadMemory32_Delegate readMemory32,
+                WriteMemory8_Delegate writeMemory8, WriteMemory16_Delegate writeMemory16, WriteMemory32_Delegate writeMemory32,
+                HandleSWI_Delegate handleSWI, HandleIRQ_Delegate handleIRQ)
+            {
+                ReadMemory8 = readMemory8;
+                ReadMemory16 = readMemory16;
+                ReadMemory32 = readMemory32;
+                WriteMemory8 = writeMemory8;
+                WriteMemory16 = writeMemory16;
+                WriteMemory32 = writeMemory32;
+                HandleSWI = handleSWI;
+                HandleIRQ = handleIRQ;
+            }
         }
 
         public enum Signal

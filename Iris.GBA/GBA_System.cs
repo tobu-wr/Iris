@@ -25,17 +25,7 @@ namespace Iris.GBA
 
         public GBA_System(DrawFrame_Delegate drawFrame)
         {
-            CPU_Core.CallbackInterface cpuCallbackInterface = new()
-            {
-                ReadMemory8 = _memory.ReadMemory8,
-                ReadMemory16 = _memory.ReadMemory16,
-                ReadMemory32 = _memory.ReadMemory32,
-                WriteMemory8 = _memory.WriteMemory8,
-                WriteMemory16 = _memory.WriteMemory16,
-                WriteMemory32 = _memory.WriteMemory32,
-                HandleSWI = _bios.HandleSWI,
-                HandleIRQ = _bios.HandleIRQ
-            };
+            CPU_Core.CallbackInterface cpuCallbackInterface = new(_memory.ReadMemory8, _memory.ReadMemory16, _memory.ReadMemory32, _memory.WriteMemory8, _memory.WriteMemory16, _memory.WriteMemory32, _bios.HandleSWI, _bios.HandleIRQ);
 
             _cpu = new(CPU_Core.Model.ARM7TDMI, cpuCallbackInterface);
 
