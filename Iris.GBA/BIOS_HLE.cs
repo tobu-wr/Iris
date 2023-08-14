@@ -2,18 +2,18 @@
 
 namespace Iris.GBA
 {
-    internal sealed class BIOS_HLE
+    internal sealed class BIOS_HLE : BIOS
     {
         private CPU_Core? _cpu;
         private Memory? _memory;
 
-        internal void Init(CPU_Core cpu, Memory memory)
+        internal override void Init(CPU_Core cpu, Memory memory)
         {
             _cpu = cpu;
             _memory = memory;
         }
 
-        internal void Reset()
+        internal override void Reset()
         {
             const UInt32 ROMAddress = 0x800_0000;
 
@@ -39,7 +39,7 @@ namespace Iris.GBA
                 _memory!.WriteMemory32(address, 0);
         }
 
-        internal Byte Read8(UInt32 address)
+        internal override Byte Read8(UInt32 address)
         {
             return address switch
             {
@@ -53,7 +53,7 @@ namespace Iris.GBA
             };
         }
 
-        internal UInt16 Read16(UInt32 address)
+        internal override UInt16 Read16(UInt32 address)
         {
             return address switch
             {
@@ -65,13 +65,13 @@ namespace Iris.GBA
             };
         }
 
-        internal UInt32 Read32(UInt32 address)
+        internal override UInt32 Read32(UInt32 address)
         {
             // SWI 0xff (fallback to HLE, see ReturnFromIRQ)
             return (address == 0x138) ? 0xefff_0000 : 0;
         }
 
-        internal void HandleSWI(UInt32 value)
+        internal override void HandleSWI(UInt32 value)
         {
             Byte function = (Byte)((value >> 16) & 0xff);
 
@@ -110,7 +110,7 @@ namespace Iris.GBA
         }
 
         // IRQ handler start
-        internal void HandleIRQ()
+        internal override void HandleIRQ()
         {
             _cpu!.Reg14_irq = _cpu.NextInstructionAddress + 4;
             _cpu.SPSR_irq = _cpu.CPSR;

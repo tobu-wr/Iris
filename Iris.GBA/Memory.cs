@@ -12,7 +12,7 @@ namespace Iris.GBA
         private KeyInput? _keyInput;
         private SystemControl? _systemControl;
         private InterruptControl? _interruptControl;
-        private BIOS_HLE? _bios;
+        private BIOS? _bios;
         private PPU? _ppu;
 
         [Flags]
@@ -54,7 +54,7 @@ namespace Iris.GBA
         private readonly IntPtr[] _write16PageTable = new IntPtr[PageTableSize];
         private readonly IntPtr[] _write32PageTable = new IntPtr[PageTableSize];
 
-        internal void Init(Communication communication, Timer timer, Sound sound, DMA dma, KeyInput keyInput, SystemControl systemControl, InterruptControl interruptControl, BIOS_HLE bios, PPU ppu)
+        internal void Init(Communication communication, Timer timer, Sound sound, DMA dma, KeyInput keyInput, SystemControl systemControl, InterruptControl interruptControl, BIOS bios, PPU ppu)
         {
             _communication = communication;
             _timer = timer;
