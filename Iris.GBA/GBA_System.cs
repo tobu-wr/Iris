@@ -16,7 +16,7 @@ namespace Iris.GBA
         private readonly KeyInput _keyInput = new();
         private readonly SystemControl _systemControl = new();
         private readonly InterruptControl _interruptControl = new();
-        private readonly BIOS _bios = new BIOS_HLE();
+        private readonly BIOS _bios = new BIOS_LLE("D:\\dev\\Iris\\ROMs\\GBA\\gba_bios.bin");
         private readonly Memory _memory = new();
         private readonly PPU _ppu;
 
