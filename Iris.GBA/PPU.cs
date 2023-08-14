@@ -59,12 +59,18 @@ namespace Iris.GBA
         private const UInt32 HorizontalLineCount = 228;
         private const UInt32 PhysicalScreenSize = PhysicalScreenWidth * PhysicalScreenHeight;
 
-        internal struct CallbackInterface
+        internal sealed class CallbackInterface
         {
             internal delegate void RequestInterrupt_Delegate();
 
             internal DrawFrame_Delegate DrawFrame;
             internal RequestInterrupt_Delegate RequestVBlankInterrupt;
+
+            internal CallbackInterface(DrawFrame_Delegate drawFrame, RequestInterrupt_Delegate requestVBlankInterrupt)
+            {
+                DrawFrame = drawFrame;
+                RequestVBlankInterrupt = requestVBlankInterrupt;
+            }
         }
 
         private readonly Scheduler _scheduler;
