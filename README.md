@@ -6,23 +6,40 @@ Iris is a WIP GameBoy Advance emulator (and maybe DS in the future). I wanted to
 
 ### GBA
 
-- Reorganize architecture
-- Waitstates
-- BIOS function timings
-- Sprites
-- Add Settings dialog
-- Allow to specify and load a BIOS (settings)
+#### Short term
+
+- BIOS LLE
+- Missing PPU features used in Pokemon Mystery Dungeon (sprites, etc..)
+- Limit framerate to 60 FPS
 - Pokemon Mystery Dungeon in playable state
 - Load/save states
-- Use OpenGL/Vulkan to make rendering faster
+
+#### Middle term
+
+- Use OpenGL or Vulkan to make rendering faster (OpenTK or Silk.NET)
+- Kirby Nightmare in Dreamland in playable state
+- Waitstates
+- BIOS HLE: timings
+- Add settings dialog
+- Add option to choose between BIOS HLE and BIOS LLE
+- Add option to enable/disable framerate limiter
+- Rudimentary audio
 
 ### NDS
 
+#### Short term
+
+- TinyFB test ROM
 - Missing ARMv5TE instructions
 - Pass ARMWrestler test ROM
-- ARM946E-S instruction timings
+- BIOS + Firmware LLE
+- All PPU features used in Pokemon Mystery Dungeon
 - Pokemon Mystery Dungeon in playable state
 - Rudimentary audio
+
+#### Middle term
+
+- ARM946E-S instruction timings
 
 ## Compatible games
 
