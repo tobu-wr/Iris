@@ -115,13 +115,13 @@ namespace Iris.GBA
         {
             ++VCOUNT;
 
-            switch (VCOUNT)
+            switch ((UInt32)VCOUNT)
             {
-                case (UInt16)PhysicalScreenHeight:
+                case PhysicalScreenHeight:
                     StartVBlank();
                     break;
 
-                case (UInt16)HorizontalLineCount:
+                case HorizontalLineCount:
                     EndVBlank();
                     break;
             }
