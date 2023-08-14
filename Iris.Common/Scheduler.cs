@@ -10,7 +10,7 @@ namespace Iris.Common
         private record struct TaskListEntry(UInt32 CycleCount, Task_Delegate Task);
 
         private UInt32 _cycleCounter;
-        private readonly TaskListEntry[] _taskList; // sorted by cycle count from smallest to largest
+        private readonly TaskListEntry[] _taskList; // sorted by CycleCount from smallest to largest
         private int _taskCount;
 
         public Scheduler(int taskListSize)
@@ -24,14 +24,14 @@ namespace Iris.Common
             _taskCount = 0;
         }
 
-        // the cycle count of the new task should be greater than zero
+        // cycleCount must be greater than 0
         public void AddTask(UInt32 cycleCount, Task_Delegate task)
         {
-            // adjust the cycle count of the new task
             cycleCount += _cycleCounter;
 
-            // get the position and reference of the new task by finding the last task whose cycle count is smaller or equal to the new one, the new task is next to it
-            // (searching is done backward because the new task is more likely to be added towards the end)
+            // get the position and reference of the new task by finding the last task whose cycle count
+            // is smaller or equal to the new one, the new task is next to it
+            // (searching is done backward because the new task is more likely to be inserted towards the end)
             int i = _taskCount;
             ref TaskListEntry entry = ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_taskList), i - 1);
 
@@ -43,15 +43,13 @@ namespace Iris.Common
 
             entry = ref Unsafe.Add(ref entry, 1);
 
-            // move the following tasks to make space for the new one
+            // insert the new task
             if (i < _taskCount)
                 Array.Copy(_taskList, i, _taskList, i + 1, _taskCount - i);
 
-            // add the new task
             entry.CycleCount = cycleCount;
             entry.Task = task;
 
-            // increment the task count
             ++_taskCount;
         }
 
@@ -70,20 +68,19 @@ namespace Iris.Common
         {
             ref TaskListEntry taskListDataRef = ref MemoryMarshal.GetArrayDataReference(_taskList);
 
-            // execute the tasks whose cycle count is lower or equal to the cycle counter
+            // execute the tasks whose cycle count is lower or equal to the cycle counter of the scheduler
             int i = 0;
             ref TaskListEntry entry = ref taskListDataRef;
 
             while ((i < _taskCount) && (entry.CycleCount <= _cycleCounter))
             {
-                entry.CycleCount = 0; // ensure that the task won't move if another task is added
                 entry.Task();
 
                 ++i;
                 entry = ref Unsafe.Add(ref entry, 1);
             }
 
-            // move the remaining tasks at the begin and update their cycle count
+            // move the remaining tasks at the begin of the task list and update their cycle count
             int remainingTaskCount = _taskCount - i;
 
             if (remainingTaskCount > 0)
