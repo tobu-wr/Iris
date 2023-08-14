@@ -1,4 +1,3 @@
-using Iris.Common;
 using Iris.GBA;
 using System.Drawing.Imaging;
 
@@ -6,23 +5,23 @@ namespace Iris.UserInterface
 {
     public partial class MainWindow : Form
     {
-        private static readonly Dictionary<Keys, ISystem.Key> KeyMapping = new()
+        private static readonly Dictionary<Keys, Common.System.Key> KeyMapping = new()
         {
-            { Keys.A, ISystem.Key.A },
-            { Keys.Z, ISystem.Key.B },
-            { Keys.Space, ISystem.Key.Select },
-            { Keys.Enter, ISystem.Key.Start },
-            { Keys.Right, ISystem.Key.Right },
-            { Keys.Left, ISystem.Key.Left },
-            { Keys.Up, ISystem.Key.Up },
-            { Keys.Down, ISystem.Key.Down },
-            { Keys.S, ISystem.Key.R },
-            { Keys.Q, ISystem.Key.L },
-            { Keys.E, ISystem.Key.X },
-            { Keys.R, ISystem.Key.Y },
+            { Keys.A, Common.System.Key.A },
+            { Keys.Z, Common.System.Key.B },
+            { Keys.Space, Common.System.Key.Select },
+            { Keys.Enter, Common.System.Key.Start },
+            { Keys.Right, Common.System.Key.Right },
+            { Keys.Left, Common.System.Key.Left },
+            { Keys.Up, Common.System.Key.Up },
+            { Keys.Down, Common.System.Key.Down },
+            { Keys.S, Common.System.Key.R },
+            { Keys.Q, Common.System.Key.L },
+            { Keys.E, Common.System.Key.X },
+            { Keys.R, Common.System.Key.Y },
         };
 
-        private readonly ISystem _system;
+        private readonly Common.System _system;
         private int _frameCount = 0;
         private readonly System.Timers.Timer _performanceUpdateTimer = new(1000);
 
@@ -229,14 +228,14 @@ namespace Iris.UserInterface
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
-            if (KeyMapping.TryGetValue(e.KeyCode, out ISystem.Key value))
-                _system.SetKeyStatus(value, ISystem.KeyStatus.Input);
+            if (KeyMapping.TryGetValue(e.KeyCode, out Common.System.Key value))
+                _system.SetKeyStatus(value, Common.System.KeyStatus.Input);
         }
 
         private void MainWindow_KeyUp(object sender, KeyEventArgs e)
         {
-            if (KeyMapping.TryGetValue(e.KeyCode, out ISystem.Key value))
-                _system.SetKeyStatus(value, ISystem.KeyStatus.NoInput);
+            if (KeyMapping.TryGetValue(e.KeyCode, out Common.System.Key value))
+                _system.SetKeyStatus(value, Common.System.KeyStatus.NoInput);
         }
     }
 }

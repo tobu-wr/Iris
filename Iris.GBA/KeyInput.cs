@@ -1,4 +1,4 @@
-﻿using static Iris.Common.ISystem;
+﻿using static Iris.Common.System;
 
 namespace Iris.GBA
 {

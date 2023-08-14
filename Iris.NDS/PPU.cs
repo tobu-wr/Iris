@@ -1,4 +1,4 @@
-﻿using Iris.Common;
+﻿using static Iris.Common.System;
 
 namespace Iris.NDS
 {
@@ -6,9 +6,9 @@ namespace Iris.NDS
     {
         private const int KB = 1024;
 
-        private readonly ISystem.DrawFrame_Delegate _drawFrameCallback;
+        private readonly DrawFrame_Delegate _drawFrameCallback;
 
-        internal PPU(ISystem.DrawFrame_Delegate drawFrameCallback)
+        internal PPU(DrawFrame_Delegate drawFrameCallback)
         {
             _drawFrameCallback = drawFrameCallback;
         }

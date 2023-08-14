@@ -1,6 +1,6 @@
 ﻿namespace Iris.Common
 {
-    public interface ISystem
+    public abstract class System
     {
         public delegate void DrawFrame_Delegate(UInt16[] frameBuffer);
 
@@ -26,11 +26,11 @@
             NoInput = 1
         }
 
-        public void Reset();
-        public void LoadROM(string filename);
-        public bool IsRunning();
-        public void Run();
-        public void Pause();
-        public void SetKeyStatus(Key key, KeyStatus status);
+        public abstract void Reset();
+        public abstract void LoadROM(string filename);
+        public abstract bool IsRunning();
+        public abstract void Run();
+        public abstract void Pause();
+        public abstract void SetKeyStatus(Key key, KeyStatus status);
     }
 }

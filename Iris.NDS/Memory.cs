@@ -6,7 +6,7 @@
 
         private Byte[]? _ROM;
 
-        public void LoadROM(string filename)
+        public override void LoadROM(string filename)
         {
             _ROM = File.ReadAllBytes(filename);
         }

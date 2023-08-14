@@ -1,11 +1,10 @@
 ﻿using Iris.Common;
 using Iris.CPU;
-using static Iris.Common.ISystem;
 using static Iris.GBA.InterruptControl;
 
 namespace Iris.GBA
 {
-    public sealed class GBA_System : ISystem
+    public sealed class GBA_System : Common.System
     {
         private readonly Scheduler _scheduler = new(2);
 
@@ -36,7 +35,7 @@ namespace Iris.GBA
             _memory.Init(_communication, _timer, _sound, _dma, _keyInput, _systemControl, _interruptControl, _bios, _ppu);
         }
 
-        public void Reset()
+        public override void Reset()
         {
             _scheduler.Reset();
 
@@ -52,17 +51,17 @@ namespace Iris.GBA
             _ppu.Reset();
         }
 
-        public void LoadROM(string filename)
+        public override void LoadROM(string filename)
         {
             _memory.LoadROM(filename);
         }
 
-        public bool IsRunning()
+        public override bool IsRunning()
         {
             return _running;
         }
 
-        public void Run()
+        public override void Run()
         {
             _running = true;
 
@@ -78,12 +77,12 @@ namespace Iris.GBA
             }
         }
 
-        public void Pause()
+        public override void Pause()
         {
             _running = false;
         }
 
-        public void SetKeyStatus(Key key, KeyStatus status)
+        public override void SetKeyStatus(Key key, KeyStatus status)
         {
             _keyInput.SetKeyStatus(key, status);
         }
