@@ -59,19 +59,14 @@ namespace Iris.GBA
         private const UInt32 HorizontalLineCount = 228;
         private const UInt32 PhysicalScreenSize = PhysicalScreenWidth * PhysicalScreenHeight;
 
-        internal sealed class CallbackInterface
-        {
-            internal delegate void RequestInterrupt_Delegate();
+        internal delegate void RequestInterrupt_Delegate();
 
-            internal DrawFrame_Delegate DrawFrame;
-            internal RequestInterrupt_Delegate RequestVBlankInterrupt;
-
-            internal CallbackInterface(DrawFrame_Delegate drawFrame, RequestInterrupt_Delegate requestVBlankInterrupt)
-            {
-                DrawFrame = drawFrame;
-                RequestVBlankInterrupt = requestVBlankInterrupt;
-            }
-        }
+        // could have used function pointers (delegate*) for performance instead of delegates but it's less flexible (cannot use non-static function for instance)
+        internal readonly record struct CallbackInterface
+        (
+            DrawFrame_Delegate DrawFrame,
+            RequestInterrupt_Delegate RequestVBlankInterrupt
+        );
 
         private readonly Scheduler _scheduler;
         private readonly CallbackInterface _callbackInterface;
