@@ -10,6 +10,8 @@ namespace Iris.GBA
         private readonly IntPtr _bios = Marshal.AllocHGlobal(BIOS_Size);
 
         private CPU_Core _cpu;
+        private Memory _memory;
+
         private bool _disposed;
 
         internal BIOS_LLE(string filename)
@@ -33,6 +35,7 @@ namespace Iris.GBA
 
         ~BIOS_LLE()
         {
+            // TODO: unmap memory
             Marshal.FreeHGlobal(_bios);
         }
 
@@ -41,6 +44,7 @@ namespace Iris.GBA
             if (_disposed)
                 return;
 
+            // TODO: unmap memory
             Marshal.FreeHGlobal(_bios);
             GC.SuppressFinalize(this);
             _disposed = true;
@@ -49,8 +53,10 @@ namespace Iris.GBA
         internal override void Init(CPU_Core cpu, Memory memory)
         {
             _cpu = cpu;
+            _memory = memory;
 
-            // TODO: map BIOS to memory
+            int pageCount = BIOS_Size / Memory.PageSize;
+            _memory.MapMemory(_bios, pageCount, 0, BIOS_Size, Memory.MemoryFlag.AllRead);
         }
 
         internal override void Reset()

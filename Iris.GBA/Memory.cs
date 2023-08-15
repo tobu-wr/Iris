@@ -16,7 +16,7 @@ namespace Iris.GBA
         private PPU? _ppu;
 
         [Flags]
-        private enum MemoryFlag
+        internal enum MemoryFlag
         {
             Read8 = 1 << 0,
             Read16 = 1 << 1,
@@ -44,7 +44,7 @@ namespace Iris.GBA
         private readonly IntPtr _eWRAM = Marshal.AllocHGlobal(EWRAMSize);
         private readonly IntPtr _iWRAM = Marshal.AllocHGlobal(IWRAMSize);
 
-        private const int PageSize = 1 * KB;
+        internal const int PageSize = 1 * KB;
         private const int PageTableSize = 1 << 18;
 
         private readonly IntPtr[] _read8PageTable = new IntPtr[PageTableSize];
@@ -74,7 +74,7 @@ namespace Iris.GBA
             // TODO
         }
 
-        private void MapMemory(IntPtr data, int pageCount, UInt32 startAddress, UInt32 endAddress, MemoryFlag flags)
+        internal void MapMemory(IntPtr data, int pageCount, UInt32 startAddress, UInt32 endAddress, MemoryFlag flags)
         {
             int startTablePageIndex = (int)(startAddress >> 10);
             int endPageTableIndex = (int)(endAddress >> 10);
