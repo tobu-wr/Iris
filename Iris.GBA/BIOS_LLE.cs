@@ -61,6 +61,7 @@ namespace Iris.GBA
 
         internal override void Reset()
         {
+            _cpu.CPSR = 0xd3;
             _cpu.NextInstructionAddress = 0;
         }
 
