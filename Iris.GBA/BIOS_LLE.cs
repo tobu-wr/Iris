@@ -35,7 +35,7 @@ namespace Iris.GBA
 
         ~BIOS_LLE()
         {
-            // TODO: unmap memory
+            _memory.UnmapMemory(0, BIOS_Size);
             Marshal.FreeHGlobal(_bios);
         }
 
@@ -44,7 +44,7 @@ namespace Iris.GBA
             if (_disposed)
                 return;
 
-            // TODO: unmap memory
+            _memory.UnmapMemory(0, BIOS_Size);
             Marshal.FreeHGlobal(_bios);
             GC.SuppressFinalize(this);
             _disposed = true;
@@ -81,11 +81,13 @@ namespace Iris.GBA
 
         internal override void HandleSWI(uint value)
         {
+            // TODO
             throw new NotImplementedException();
         }
 
         internal override void HandleIRQ()
         {
+            // TODO
             throw new NotImplementedException();
         }
     }
