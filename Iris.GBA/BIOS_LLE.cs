@@ -66,17 +66,17 @@ namespace Iris.GBA
 
         internal override byte Read8(uint address)
         {
-            throw new Exception("Iris.GBA.BIOS_LLE: BIOS should be correctly mapped to memory");
+            throw new Exception("Iris.GBA.BIOS_LLE: Unhandled read from BIOS");
         }
 
         internal override ushort Read16(uint address)
         {
-            throw new Exception("Iris.GBA.BIOS_LLE: BIOS should be correctly mapped to memory");
+            throw new Exception("Iris.GBA.BIOS_LLE: Unhandled read from BIOS");
         }
 
         internal override uint Read32(uint address)
         {
-            throw new Exception("Iris.GBA.BIOS_LLE: BIOS should be correctly mapped to memory");
+            throw new Exception("Iris.GBA.BIOS_LLE: Unhandled read from BIOS");
         }
 
         internal override void HandleSWI(uint value)
