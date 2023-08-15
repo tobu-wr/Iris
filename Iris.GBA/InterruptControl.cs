@@ -28,7 +28,7 @@ namespace Iris.GBA
 
         private CPU_Core? _cpu;
 
-        internal void Init(CPU_Core cpu)
+        internal void Initialize(CPU_Core cpu)
         {
             _cpu = cpu;
         }

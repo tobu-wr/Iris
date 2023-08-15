@@ -7,7 +7,7 @@ namespace Iris.GBA
         private CPU_Core? _cpu;
         private Memory? _memory;
 
-        internal override void Init(CPU_Core cpu, Memory memory)
+        internal override void Initialize(CPU_Core cpu, Memory memory)
         {
             _cpu = cpu;
             _memory = memory;

@@ -4,7 +4,7 @@ namespace Iris.GBA
 {
     internal abstract class BIOS
     {
-        internal abstract void Init(CPU_Core cpu, Memory memory);
+        internal abstract void Initialize(CPU_Core cpu, Memory memory);
         internal abstract void Reset();
         internal abstract Byte Read8(UInt32 address);
         internal abstract UInt16 Read16(UInt32 address);

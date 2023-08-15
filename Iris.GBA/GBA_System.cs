@@ -30,9 +30,9 @@ namespace Iris.GBA
             PPU.CallbackInterface ppuCallbackInterface = new(drawFrame, () => _interruptControl.RequestInterrupt(Interrupt.VBlank));
             _ppu = new(_scheduler, ppuCallbackInterface);
 
-            _interruptControl.Init(_cpu);
-            _bios.Init(_cpu, _memory);
-            _memory.Init(_communication, _timer, _sound, _dma, _keyInput, _systemControl, _interruptControl, _bios, _ppu);
+            _interruptControl.Initialize(_cpu);
+            _bios.Initialize(_cpu, _memory);
+            _memory.Initialize(_communication, _timer, _sound, _dma, _keyInput, _systemControl, _interruptControl, _bios, _ppu);
         }
 
         public override void Reset()
