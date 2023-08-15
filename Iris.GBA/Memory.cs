@@ -1361,6 +1361,10 @@ namespace Iris.GBA
                                 _interruptControl.UpdateInterrupts();
                                 break;
 
+                            case 0x410:
+                                // undocumented
+                                break;
+
                             default:
                                 throw new Exception(string.Format("Iris.GBA.Memory: Unhandled write to address 0x{0:x8}", address));
                         }
@@ -1751,9 +1755,84 @@ namespace Iris.GBA
                                 _ppu!.DISPCNT = GetLowHalfword(value);
                                 // 16 upper bits are undocumented (green swap register)
                                 break;
-                            case 0x10:
+                            case 0x004:
+                                _ppu!.DISPSTAT = GetLowHalfword(value);
+                                break;
+                            case 0x008:
+                                _ppu!.BG0CNT = GetLowHalfword(value);
+                                _ppu.BG1CNT = GetHighHalfword(value);
+                                break;
+                            case 0x00c:
+                                _ppu!.BG2CNT = GetLowHalfword(value);
+                                _ppu.BG3CNT = GetHighHalfword(value);
+                                break;
+                            case 0x010:
                                 _ppu!.BG0HOFS = GetLowHalfword(value);
                                 _ppu.BG0VOFS = GetHighHalfword(value);
+                                break;
+                            case 0x014:
+                                _ppu!.BG1HOFS = GetLowHalfword(value);
+                                _ppu.BG1VOFS = GetHighHalfword(value);
+                                break;
+                            case 0x018:
+                                _ppu!.BG2HOFS = GetLowHalfword(value);
+                                _ppu.BG2VOFS = GetHighHalfword(value);
+                                break;
+                            case 0x01c:
+                                _ppu!.BG3HOFS = GetLowHalfword(value);
+                                _ppu.BG3VOFS = GetHighHalfword(value);
+                                break;
+                            case 0x020:
+                                _ppu!.BG2PA = GetLowHalfword(value);
+                                _ppu.BG2PB = GetHighHalfword(value);
+                                break;
+                            case 0x024:
+                                _ppu!.BG2PC = GetLowHalfword(value);
+                                _ppu.BG2PD = GetHighHalfword(value);
+                                break;
+                            case 0x028:
+                                _ppu!.BG2X = value;
+                                break;
+                            case 0x02c:
+                                _ppu!.BG2Y = value;
+                                break;
+                            case 0x030:
+                                _ppu!.BG3PA = GetLowHalfword(value);
+                                _ppu.BG3PB = GetHighHalfword(value);
+                                break;
+                            case 0x034:
+                                _ppu!.BG3PC = GetLowHalfword(value);
+                                _ppu.BG3PD = GetHighHalfword(value);
+                                break;
+                            case 0x038:
+                                _ppu!.BG3X = value;
+                                break;
+                            case 0x03c:
+                                _ppu!.BG3Y = value;
+                                break;
+                            case 0x040:
+                                _ppu!.WIN0H = GetLowHalfword(value);
+                                _ppu.WIN1H = GetHighHalfword(value);
+                                break;
+                            case 0x044:
+                                _ppu!.WIN0V = GetLowHalfword(value);
+                                _ppu.WIN1V = GetHighHalfword(value);
+                                break;
+                            case 0x048:
+                                _ppu!.WININ = GetLowHalfword(value);
+                                _ppu.WINOUT = GetHighHalfword(value);
+                                break;
+                            case 0x04c:
+                                _ppu!.MOSAIC = GetLowHalfword(value);
+                                // 16 upper bits are unused
+                                break;
+                            case 0x050:
+                                _ppu!.BLDCNT = GetLowHalfword(value);
+                                _ppu.BLDALPHA = GetHighHalfword(value);
+                                break;
+                            case 0x054:
+                                _ppu!.BLDY = GetLowHalfword(value);
+                                // 16 upper bits are unused
                                 break;
                             case 0x090:
                                 _sound!._WAVE_RAM0_L = GetLowHalfword(value);
@@ -1827,6 +1906,11 @@ namespace Iris.GBA
                                 _communication!._SIOCNT = GetLowHalfword(value);
                                 _communication._SIODATA_SEND = GetHighHalfword(value);
                                 break;
+                            case 0x200:
+                                _interruptControl!._IE = GetLowHalfword(value);
+                                _interruptControl._IF &= (UInt16)~GetHighHalfword(value);
+                                _interruptControl.UpdateInterrupts();
+                                break;
                             case 0x204:
                                 _systemControl!._WAITCNT = GetLowHalfword(value);
                                 // 16 upper bits are unused
@@ -1835,6 +1919,13 @@ namespace Iris.GBA
                                 _interruptControl!._IME = GetLowHalfword(value);
                                 _interruptControl.UpdateInterrupts();
                                 // 16 upper bits are unused
+                                break;
+                            case 0x20c:
+                            case 0x210:
+                            case 0x214:
+                            case 0x218:
+                            case 0x21c:
+                                // unused
                                 break;
                             default:
                                 throw new Exception(string.Format("Iris.GBA.Memory: Unhandled write to address 0x{0:x8}", address));

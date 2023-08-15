@@ -38,6 +38,20 @@ namespace Iris.GBA
         internal UInt16 BG3HOFS;
         internal UInt16 BG3VOFS;
 
+        internal UInt16 BG2PA;
+        internal UInt16 BG2PB;
+        internal UInt16 BG2PC;
+        internal UInt16 BG2PD;
+        internal UInt32 BG2X;
+        internal UInt32 BG2Y;
+
+        internal UInt16 BG3PA;
+        internal UInt16 BG3PB;
+        internal UInt16 BG3PC;
+        internal UInt16 BG3PD;
+        internal UInt32 BG3X;
+        internal UInt32 BG3Y;
+
         internal UInt16 WIN0H;
         internal UInt16 WIN1H;
 
