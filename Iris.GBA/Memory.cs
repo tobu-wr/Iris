@@ -16,7 +16,7 @@ namespace Iris.GBA
         private PPU? _ppu;
 
         [Flags]
-        internal enum MemoryFlag
+        internal enum Flag
         {
             Read8 = 1 << 0,
             Read16 = 1 << 1,
@@ -74,18 +74,18 @@ namespace Iris.GBA
             // TODO
         }
 
-        internal void MapMemory(IntPtr data, int pageCount, UInt32 startAddress, UInt32 endAddress, MemoryFlag flags)
+        internal void Map(IntPtr data, int pageCount, UInt32 startAddress, UInt32 endAddress, Flag flags)
         {
             int startTablePageIndex = (int)(startAddress >> 10);
             int endPageTableIndex = (int)(endAddress >> 10);
 
-            bool readable8 = flags.HasFlag(MemoryFlag.Read8);
-            bool readable16 = flags.HasFlag(MemoryFlag.Read16);
-            bool readable32 = flags.HasFlag(MemoryFlag.Read32);
-            bool writable8 = flags.HasFlag(MemoryFlag.Write8);
-            bool writable16 = flags.HasFlag(MemoryFlag.Write16);
-            bool writable32 = flags.HasFlag(MemoryFlag.Write32);
-            bool mirrored = flags.HasFlag(MemoryFlag.Mirrored);
+            bool readable8 = flags.HasFlag(Flag.Read8);
+            bool readable16 = flags.HasFlag(Flag.Read16);
+            bool readable32 = flags.HasFlag(Flag.Read32);
+            bool writable8 = flags.HasFlag(Flag.Write8);
+            bool writable16 = flags.HasFlag(Flag.Write16);
+            bool writable32 = flags.HasFlag(Flag.Write32);
+            bool mirrored = flags.HasFlag(Flag.Mirrored);
 
             for (int pageTableIndex = startTablePageIndex, pageIndex = 0; pageTableIndex != endPageTableIndex; ++pageTableIndex, ++pageIndex)
             {
@@ -131,19 +131,19 @@ namespace Iris.GBA
             }
         }
 
-        internal void UnmapMemory(UInt32 startAddress, UInt32 endAddress)
+        internal void Unmap(UInt32 startAddress, UInt32 endAddress)
         {
             // TODO
         }
 
         internal void InitPageTables()
         {
-            MapMemory(_eWRAM, EWRAMSize / PageSize, 0x0200_0000, 0x0300_0000, MemoryFlag.All);
-            MapMemory(_iWRAM, IWRAMSize / PageSize, 0x0300_0000, 0x0400_0000, MemoryFlag.All);
-            MapMemory(_ppu!.PaletteRAM, PPU.PaletteRAMSize / PageSize, 0x0500_0000, 0x0600_0000, MemoryFlag.All & ~(MemoryFlag.Read8 | MemoryFlag.Write8));
-            MapMemory(_ppu.VRAM, PPU.VRAMSize / PageSize, 0x0600_0000, 0x0700_0000, MemoryFlag.All & ~(MemoryFlag.Read8 | MemoryFlag.Write8));
-            MapMemory(_ppu.OAM, PPU.OAMSize / PageSize, 0x0700_0000, 0x0800_0000, MemoryFlag.All & ~(MemoryFlag.Read8 | MemoryFlag.Write8));
-            MapMemory(_SRAM, SRAMSize / PageSize, 0x0e00_0000, 0x1000_0000, MemoryFlag.Read8 | MemoryFlag.Write8 | MemoryFlag.Mirrored);
+            Map(_eWRAM, EWRAMSize / PageSize, 0x0200_0000, 0x0300_0000, Flag.All);
+            Map(_iWRAM, IWRAMSize / PageSize, 0x0300_0000, 0x0400_0000, Flag.All);
+            Map(_ppu!.PaletteRAM, PPU.PaletteRAMSize / PageSize, 0x0500_0000, 0x0600_0000, Flag.All & ~(Flag.Read8 | Flag.Write8));
+            Map(_ppu.VRAM, PPU.VRAMSize / PageSize, 0x0600_0000, 0x0700_0000, Flag.All & ~(Flag.Read8 | Flag.Write8));
+            Map(_ppu.OAM, PPU.OAMSize / PageSize, 0x0700_0000, 0x0800_0000, Flag.All & ~(Flag.Read8 | Flag.Write8));
+            Map(_SRAM, SRAMSize / PageSize, 0x0e00_0000, 0x1000_0000, Flag.Read8 | Flag.Write8 | Flag.Mirrored);
         }
 
         internal void LoadROM(string filename)
@@ -159,9 +159,9 @@ namespace Iris.GBA
             Marshal.Copy(data, 0, _ROM, _ROMSize);
 
             int pageCount = _ROMSize / PageSize;
-            MapMemory(_ROM, pageCount, 0x0800_0000, 0x0a00_0000, MemoryFlag.AllRead);
-            MapMemory(_ROM, pageCount, 0x0a00_0000, 0x0c00_0000, MemoryFlag.AllRead);
-            MapMemory(_ROM, pageCount, 0x0c00_0000, 0x0e00_0000, MemoryFlag.AllRead);
+            Map(_ROM, pageCount, 0x0800_0000, 0x0a00_0000, Flag.AllRead);
+            Map(_ROM, pageCount, 0x0a00_0000, 0x0c00_0000, Flag.AllRead);
+            Map(_ROM, pageCount, 0x0c00_0000, 0x0e00_0000, Flag.AllRead);
         }
 
         internal Byte ReadMemory8(UInt32 address)

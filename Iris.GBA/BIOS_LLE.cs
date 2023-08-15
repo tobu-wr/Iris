@@ -35,7 +35,7 @@ namespace Iris.GBA
 
         ~BIOS_LLE()
         {
-            _memory.UnmapMemory(0, BIOS_Size);
+            _memory.Unmap(0, BIOS_Size);
             Marshal.FreeHGlobal(_bios);
         }
 
@@ -44,7 +44,7 @@ namespace Iris.GBA
             if (_disposed)
                 return;
 
-            _memory.UnmapMemory(0, BIOS_Size);
+            _memory.Unmap(0, BIOS_Size);
             Marshal.FreeHGlobal(_bios);
             GC.SuppressFinalize(this);
             _disposed = true;
@@ -56,7 +56,7 @@ namespace Iris.GBA
             _memory = memory;
 
             int pageCount = BIOS_Size / Memory.PageSize;
-            _memory.MapMemory(_bios, pageCount, 0, BIOS_Size, Memory.MemoryFlag.AllRead);
+            _memory.Map(_bios, pageCount, 0, BIOS_Size, Memory.Flag.AllRead);
         }
 
         internal override void Reset()
