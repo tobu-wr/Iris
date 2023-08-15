@@ -374,6 +374,8 @@ namespace Iris.GBA
                             0x208 => GetLowByte(_interruptControl!._IME),
                             0x209 => GetHighByte(_interruptControl!._IME),
 
+                            0x300 => _systemControl._POSTFLG,
+
                             _ => throw new Exception(string.Format("Iris.GBA.Memory: Unhandled read from address 0x{0:x8}", address)),
                         };
                     }
