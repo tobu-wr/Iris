@@ -196,7 +196,7 @@ namespace Iris.CPU
 
         internal UInt32 Step()
         {
-            UInt16 instruction = _cpu._callbackInterface.ReadMemory16(_cpu.NextInstructionAddress);
+            UInt16 instruction = _cpu._callbackInterface.Read16(_cpu.NextInstructionAddress);
             _cpu.NextInstructionAddress += 2;
 
             ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(_cpu.Reg);
@@ -684,7 +684,7 @@ namespace Iris.CPU
             if (registerList == 0)
             {
                 regRn += 0x40;
-                SetPC(cpu, cpu._callbackInterface.ReadMemory32(address));
+                SetPC(cpu, cpu._callbackInterface.Read32(address));
 
                 return 5;
             }
@@ -699,7 +699,7 @@ namespace Iris.CPU
                     {
                         ref UInt32 regRi = ref Unsafe.Add(ref regDataRef, i);
 
-                        regRi = cpu._callbackInterface.ReadMemory32(address);
+                        regRi = cpu._callbackInterface.Read32(address);
                         address += 4;
                     }
                 }
@@ -719,7 +719,7 @@ namespace Iris.CPU
             ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
 
             UInt32 address = regRn + (imm * 4u);
-            UInt32 data = BitOperations.RotateRight(cpu._callbackInterface.ReadMemory32(address), (int)(8 * (address & 0b11)));
+            UInt32 data = BitOperations.RotateRight(cpu._callbackInterface.Read32(address), (int)(8 * (address & 0b11)));
             regRd = data;
 
             return 3;
@@ -737,7 +737,7 @@ namespace Iris.CPU
             ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
 
             UInt32 address = regRn + regRm;
-            UInt32 data = BitOperations.RotateRight(cpu._callbackInterface.ReadMemory32(address), (int)(8 * (address & 0b11)));
+            UInt32 data = BitOperations.RotateRight(cpu._callbackInterface.Read32(address), (int)(8 * (address & 0b11)));
             regRd = data;
 
             return 3;
@@ -753,7 +753,7 @@ namespace Iris.CPU
             ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
 
             UInt32 address = regPC + (imm * 4u);
-            UInt32 data = cpu._callbackInterface.ReadMemory32(address);
+            UInt32 data = cpu._callbackInterface.Read32(address);
             regRd = data;
 
             return 3;
@@ -769,7 +769,7 @@ namespace Iris.CPU
             ref UInt32 regSP = ref Unsafe.Add(ref regDataRef, SP);
 
             UInt32 address = regSP + (imm * 4u);
-            UInt32 data = BitOperations.RotateRight(cpu._callbackInterface.ReadMemory32(address), (int)(8 * (address & 0b11)));
+            UInt32 data = BitOperations.RotateRight(cpu._callbackInterface.Read32(address), (int)(8 * (address & 0b11)));
             regRd = data;
 
             return 3;
@@ -786,7 +786,7 @@ namespace Iris.CPU
             ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
 
             UInt32 address = regRn + imm;
-            Byte data = cpu._callbackInterface.ReadMemory8(address);
+            Byte data = cpu._callbackInterface.Read8(address);
             regRd = data;
 
             return 3;
@@ -804,7 +804,7 @@ namespace Iris.CPU
             ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
 
             UInt32 address = regRn + regRm;
-            Byte data = cpu._callbackInterface.ReadMemory8(address);
+            Byte data = cpu._callbackInterface.Read8(address);
             regRd = data;
 
             return 3;
@@ -821,7 +821,7 @@ namespace Iris.CPU
             ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
 
             UInt32 address = regRn + (imm * 2u);
-            UInt32 data = BitOperations.RotateRight(cpu._callbackInterface.ReadMemory16(address), (int)(8 * (address & 1)));
+            UInt32 data = BitOperations.RotateRight(cpu._callbackInterface.Read16(address), (int)(8 * (address & 1)));
             regRd = data;
 
             return 3;
@@ -839,7 +839,7 @@ namespace Iris.CPU
             ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
 
             UInt32 address = regRn + regRm;
-            UInt32 data = BitOperations.RotateRight(cpu._callbackInterface.ReadMemory16(address), (int)(8 * (address & 1)));
+            UInt32 data = BitOperations.RotateRight(cpu._callbackInterface.Read16(address), (int)(8 * (address & 1)));
             regRd = data;
 
             return 3;
@@ -857,7 +857,7 @@ namespace Iris.CPU
             ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
 
             UInt32 address = regRn + regRm;
-            Byte data = cpu._callbackInterface.ReadMemory8(address);
+            Byte data = cpu._callbackInterface.Read8(address);
             regRd = SignExtend(data, 8);
 
             return 3;
@@ -878,12 +878,12 @@ namespace Iris.CPU
 
             if ((address & 1) == 1)
             {
-                Byte data = cpu._callbackInterface.ReadMemory8(address);
+                Byte data = cpu._callbackInterface.Read8(address);
                 regRd = SignExtend(data, 8);
             }
             else
             {
-                UInt16 data = cpu._callbackInterface.ReadMemory16(address);
+                UInt16 data = cpu._callbackInterface.Read16(address);
                 regRd = SignExtend(data, 16);
             }
 
@@ -1147,14 +1147,14 @@ namespace Iris.CPU
                 {
                     ref UInt32 regRi = ref Unsafe.Add(ref regDataRef, i);
 
-                    regRi = cpu._callbackInterface.ReadMemory32(address);
+                    regRi = cpu._callbackInterface.Read32(address);
                     address += 4;
                 }
             }
 
             if (r == 1)
             {
-                SetPC(cpu, cpu._callbackInterface.ReadMemory32(address));
+                SetPC(cpu, cpu._callbackInterface.Read32(address));
 
                 return n + 5;
             }
@@ -1182,7 +1182,7 @@ namespace Iris.CPU
                 {
                     ref UInt32 regRi = ref Unsafe.Add(ref regDataRef, i);
 
-                    cpu._callbackInterface.WriteMemory32(address, regRi);
+                    cpu._callbackInterface.Write32(address, regRi);
                     address += 4;
                 }
             }
@@ -1191,7 +1191,7 @@ namespace Iris.CPU
             {
                 ref UInt32 regLR = ref Unsafe.Add(ref regDataRef, LR);
 
-                cpu._callbackInterface.WriteMemory32(address, regLR);
+                cpu._callbackInterface.Write32(address, regLR);
 
                 return n + 2;
             }
@@ -1267,7 +1267,7 @@ namespace Iris.CPU
                 ref UInt32 regPC = ref Unsafe.Add(ref regDataRef, PC);
 
                 regRn += 0x40;
-                cpu._callbackInterface.WriteMemory32(address, regPC + 2);
+                cpu._callbackInterface.Write32(address, regPC + 2);
 
                 return 2;
             }
@@ -1283,13 +1283,13 @@ namespace Iris.CPU
                     {
                         if ((i == rn) && ((registerList & ~(0xff << i)) == 0))
                         {
-                            cpu._callbackInterface.WriteMemory32(address, oldRegRn);
+                            cpu._callbackInterface.Write32(address, oldRegRn);
                         }
                         else
                         {
                             ref UInt32 regRi = ref Unsafe.Add(ref regDataRef, i);
 
-                            cpu._callbackInterface.WriteMemory32(address, regRi);
+                            cpu._callbackInterface.Write32(address, regRi);
                         }
 
                         address += 4;
@@ -1311,7 +1311,7 @@ namespace Iris.CPU
             ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
 
             UInt32 address = regRn + (imm * 4u);
-            cpu._callbackInterface.WriteMemory32(address, regRd);
+            cpu._callbackInterface.Write32(address, regRd);
 
             return 2;
         }
@@ -1328,7 +1328,7 @@ namespace Iris.CPU
             ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
 
             UInt32 address = regRn + regRm;
-            cpu._callbackInterface.WriteMemory32(address, regRd);
+            cpu._callbackInterface.Write32(address, regRd);
 
             return 2;
         }
@@ -1343,7 +1343,7 @@ namespace Iris.CPU
             ref UInt32 regSP = ref Unsafe.Add(ref regDataRef, SP);
 
             UInt32 address = regSP + (imm * 4u);
-            cpu._callbackInterface.WriteMemory32(address, regRd);
+            cpu._callbackInterface.Write32(address, regRd);
 
             return 2;
         }
@@ -1359,7 +1359,7 @@ namespace Iris.CPU
             ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
 
             UInt32 address = regRn + imm;
-            cpu._callbackInterface.WriteMemory8(address, (Byte)regRd);
+            cpu._callbackInterface.Write8(address, (Byte)regRd);
 
             return 2;
         }
@@ -1376,7 +1376,7 @@ namespace Iris.CPU
             ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
 
             UInt32 address = regRn + regRm;
-            cpu._callbackInterface.WriteMemory8(address, (Byte)regRd);
+            cpu._callbackInterface.Write8(address, (Byte)regRd);
 
             return 2;
         }
@@ -1392,7 +1392,7 @@ namespace Iris.CPU
             ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
 
             UInt32 address = regRn + (imm * 2u);
-            cpu._callbackInterface.WriteMemory16(address, (UInt16)regRd);
+            cpu._callbackInterface.Write16(address, (UInt16)regRd);
 
             return 2;
         }
@@ -1409,7 +1409,7 @@ namespace Iris.CPU
             ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
 
             UInt32 address = regRn + regRm;
-            cpu._callbackInterface.WriteMemory16(address, (UInt16)regRd);
+            cpu._callbackInterface.Write16(address, (UInt16)regRd);
 
             return 2;
         }

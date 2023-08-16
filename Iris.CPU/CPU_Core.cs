@@ -11,24 +11,24 @@ namespace Iris.CPU
             ARM946ES
         }
 
-        public delegate Byte ReadMemory8_Delegate(UInt32 address);
-        public delegate UInt16 ReadMemory16_Delegate(UInt32 address);
-        public delegate UInt32 ReadMemory32_Delegate(UInt32 address);
-        public delegate void WriteMemory8_Delegate(UInt32 address, Byte value);
-        public delegate void WriteMemory16_Delegate(UInt32 address, UInt16 value);
-        public delegate void WriteMemory32_Delegate(UInt32 address, UInt32 value);
+        public delegate Byte Read8_Delegate(UInt32 address);
+        public delegate UInt16 Read16_Delegate(UInt32 address);
+        public delegate UInt32 Read32_Delegate(UInt32 address);
+        public delegate void Write8_Delegate(UInt32 address, Byte value);
+        public delegate void Write16_Delegate(UInt32 address, UInt16 value);
+        public delegate void Write32_Delegate(UInt32 address, UInt32 value);
         public delegate UInt32 HandleSWI_Delegate();
         public delegate UInt32 HandleIRQ_Delegate();
 
         // could have used function pointers (delegate*) for performance instead of delegates but it's less flexible (cannot use non-static function for instance)
         public readonly record struct CallbackInterface
         (
-            ReadMemory8_Delegate ReadMemory8,
-            ReadMemory16_Delegate ReadMemory16,
-            ReadMemory32_Delegate ReadMemory32,
-            WriteMemory8_Delegate WriteMemory8,
-            WriteMemory16_Delegate WriteMemory16,
-            WriteMemory32_Delegate WriteMemory32,
+            Read8_Delegate Read8,
+            Read16_Delegate Read16,
+            Read32_Delegate Read32,
+            Write8_Delegate Write8,
+            Write16_Delegate Write16,
+            Write32_Delegate Write32,
             HandleSWI_Delegate HandleSWI,
             HandleIRQ_Delegate HandleIRQ
         );
