@@ -28,14 +28,11 @@ Iris is a WIP GameBoy Advance emulator (and maybe DS in the future). I wanted to
 ### v2
 
 - GBA: Rudimentary audio
-- NDS: Nothing atm
 - Common: Use OpenGL to make rendering faster with Silk.NET
 
 ### v3
 
 - GBA: Kirby Nightmare in Dreamland in playable state
-- NDS: Nothing atm
-- Common: Nothing atm
 
 ### Later
 
