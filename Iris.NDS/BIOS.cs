@@ -14,7 +14,7 @@ namespace Iris.NDS
             _cpu.NextInstructionAddress = ROMAddress;
         }
 
-        private void HandleSWI(UInt32 value)
+        private void HandleSWI()
         {
             throw new NotImplementedException("Iris.NDS.Core.BIOS: HandleSWI unimplemented");
         }

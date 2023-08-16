@@ -17,7 +17,7 @@ namespace Iris.CPU
         public delegate void WriteMemory8_Delegate(UInt32 address, Byte value);
         public delegate void WriteMemory16_Delegate(UInt32 address, UInt16 value);
         public delegate void WriteMemory32_Delegate(UInt32 address, UInt32 value);
-        public delegate void HandleSWI_Delegate(UInt32 value);
+        public delegate void HandleSWI_Delegate();
         public delegate void HandleIRQ_Delegate();
 
         // could have used function pointers (delegate*) for performance instead of delegates but it's less flexible (cannot use non-static function for instance)

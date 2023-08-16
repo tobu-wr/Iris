@@ -71,9 +71,9 @@ namespace Iris.GBA
             return (address == 0x138) ? 0xefff_0000 : 0;
         }
 
-        internal override void HandleSWI(UInt32 value)
+        internal override void HandleSWI()
         {
-            Byte function = (Byte)((value >> 16) & 0xff);
+            Byte function = _memory.ReadMemory8(_cpu.NextInstructionAddress - 2);
 
             switch (function)
             {

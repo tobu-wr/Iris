@@ -65,22 +65,22 @@ namespace Iris.GBA
             _cpu.NextInstructionAddress = 0;
         }
 
-        internal override byte Read8(uint address)
+        internal override Byte Read8(UInt32 address)
         {
             throw new Exception("Iris.GBA.BIOS_LLE: BIOS is not correctly mapped to memory");
         }
 
-        internal override ushort Read16(uint address)
+        internal override UInt16 Read16(UInt32 address)
         {
             throw new Exception("Iris.GBA.BIOS_LLE: BIOS is not correctly mapped to memory");
         }
 
-        internal override uint Read32(uint address)
+        internal override UInt32 Read32(UInt32 address)
         {
             throw new Exception("Iris.GBA.BIOS_LLE: BIOS is not correctly mapped to memory");
         }
 
-        internal override void HandleSWI(uint value)
+        internal override void HandleSWI()
         {
             _cpu.Reg14_svc = _cpu.NextInstructionAddress;
             _cpu.SPSR_svc = _cpu.CPSR;

@@ -1863,9 +1863,7 @@ namespace Iris.CPU
 
         private static UInt32 SWI(CPU_Core cpu, UInt32 instruction)
         {
-            UInt32 imm = instruction & 0xff_ffff;
-
-            cpu._callbackInterface.HandleSWI(imm);
+            cpu._callbackInterface.HandleSWI();
 
             return 3;
         }
