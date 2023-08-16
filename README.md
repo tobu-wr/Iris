@@ -7,7 +7,6 @@ Iris is a WIP GameBoy Advance emulator (and maybe DS in the future). I wanted to
 ### v1
 
 - GBA:
-  - BIOS LLE
   - Missing PPU features used in Pokemon Mystery Dungeon (sprites, etc..)
   - Pokemon Mystery Dungeon in playable state
 
