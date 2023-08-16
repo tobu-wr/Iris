@@ -71,7 +71,7 @@ namespace Iris.GBA
             return (address == 0x138) ? 0xefff_0000 : 0;
         }
 
-        internal override void HandleSWI()
+        internal override UInt32 HandleSWI()
         {
             Byte function = _memory.ReadMemory8(_cpu.NextInstructionAddress - 2);
 
@@ -107,10 +107,13 @@ namespace Iris.GBA
                 default:
                     throw new Exception(string.Format("Iris.GBA.BIOS: Unknown BIOS function 0x{0:x2}", function));
             }
+
+            // TODO: fix cycle count
+            return 3;
         }
 
         // IRQ handler start
-        internal override void HandleIRQ()
+        internal override UInt32 HandleIRQ()
         {
             _cpu!.Reg14_irq = _cpu.NextInstructionAddress + 4;
             _cpu.SPSR_irq = _cpu.CPSR;
@@ -132,6 +135,9 @@ namespace Iris.GBA
             _cpu.Reg[0] = 0x400_0000;
             _cpu.Reg[CPU_Core.LR] = 0x138;
             _cpu.NextInstructionAddress = _memory!.ReadMemory32(0x300_7ffc);
+
+            // TODO: fix cycle count
+            return 3;
         }
 
         private void RegisterRamReset()

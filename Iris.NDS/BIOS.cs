@@ -14,12 +14,12 @@ namespace Iris.NDS
             _cpu.NextInstructionAddress = ROMAddress;
         }
 
-        private void HandleSWI()
+        private UInt32 HandleSWI()
         {
             throw new NotImplementedException("Iris.NDS.Core.BIOS: HandleSWI unimplemented");
         }
 
-        private void HandleIRQ()
+        private UInt32 HandleIRQ()
         {
             throw new NotImplementedException("Iris.NDS.Core.BIOS: HandleIRQ unimplemented");
         }

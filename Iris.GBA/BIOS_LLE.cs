@@ -80,20 +80,22 @@ namespace Iris.GBA
             throw new Exception("Iris.GBA.BIOS_LLE: BIOS is not correctly mapped to memory");
         }
 
-        internal override void HandleSWI()
+        internal override UInt32 HandleSWI()
         {
             _cpu.Reg14_svc = _cpu.NextInstructionAddress;
             _cpu.SPSR_svc = _cpu.CPSR;
             _cpu.SetCPSR((_cpu.CPSR & ~0xbfu) | 0x93u);
             _cpu.NextInstructionAddress = 0x08;
+            return 3;
         }
 
-        internal override void HandleIRQ()
+        internal override UInt32 HandleIRQ()
         {
             _cpu.Reg14_irq = _cpu.NextInstructionAddress + 4;
             _cpu.SPSR_irq = _cpu.CPSR;
             _cpu.SetCPSR((_cpu.CPSR & ~0xbfu) | 0x92u);
             _cpu.NextInstructionAddress = 0x18;
+            return 3;
         }
     }
 }
