@@ -6,77 +6,55 @@ Iris is a WIP GameBoy Advance emulator (and maybe DS in the future). I wanted to
 
 ### v1
 
-#### GBA
+- GBA:
+  - BIOS LLE
+  - Missing PPU features used in Pokemon Mystery Dungeon (sprites, etc..)
+  - Pokemon Mystery Dungeon in playable state
 
-- BIOS LLE
-- Missing PPU features used in Pokemon Mystery Dungeon (sprites, etc..)
-- Pokemon Mystery Dungeon in playable state
+- NDS:
+  - TinyFB test ROM
+  - Missing ARMv5TE instructions
+  - Pass ARMWrestler test ROM
+  - BIOS + Firmware LLE
+  - All PPU features used in Pokemon Mystery Dungeon
+  - Pokemon Mystery Dungeon in playable state
+  - Rudimentary audio
 
-#### NDS
-
-- TinyFB test ROM
-- Missing ARMv5TE instructions
-- Pass ARMWrestler test ROM
-- BIOS + Firmware LLE
-- All PPU features used in Pokemon Mystery Dungeon
-- Pokemon Mystery Dungeon in playable state
-- Rudimentary audio
-
-#### Common
-
-- Limit framerate to 60 FPS
-- Load/save states
-- Error reporting (ROM infos, emulator version, emulator state, etc..)
+- Common:
+  - Limit framerate to 60 FPS
+  - Load/save states
+  - Error reporting (ROM infos, emulator version, emulator state, etc..)
 
 ### v2
 
-#### GBA
-
-- Rudimentary audio
-
-#### NDS
-
-Nothing atm
-
-#### Common
-
-- Use OpenGL to make rendering faster with Silk.NET
+- GBA: Rudimentary audio
+- NDS: Nothing atm
+- Common: Use OpenGL to make rendering faster with Silk.NET
 
 ### v3
 
-#### GBA
-
-- Kirby Nightmare in Dreamland in playable state
-
-#### NDS
-
-Nothing atm
-
-#### Common
-
-Nothing atm
+- GBA: Kirby Nightmare in Dreamland in playable state
+- NDS: Nothing atm
+- Common: Nothing atm
 
 ### Later
 
-#### GBA
+- GBA:
+  - Be able to boot from BIOS LLE
+  - Waitstates
+  - Instruction pipeline flush timing
+  - Prefetch buffer
+  - BIOS HLE timings
 
-- Be able to boot from BIOS LLE
-- Waitstates
-- Instruction pipeline flush timing
-- Prefetch buffer
-- BIOS HLE timings
+- NDS:
+  - Be able to boot from BIOS/Firmware LLE
+  - Timings (same as GBA: ARM946E-S instruction timings, waitstates, instruction pipeline flush, BIOS HLE, etc..)
 
-#### NDS
-
-- Be able to boot from BIOS/Firmware LLE
-- Timings (same as GBA: ARM946E-S instruction timings, waitstates, instruction pipeline flush, BIOS HLE, etc..)
-
-#### Common
-
-- Add settings dialog
-- Add option to choose between BIOS HLE and BIOS LLE
-- Add option to enable/disable framerate limiter
-- Add about dialog
+- Common:
+  - Add settings dialog
+  - Add option to choose between BIOS HLE and BIOS LLE
+  - Add option to enable/disable framerate limiter
+  - Add about dialog
 
 ## Tested games
 
