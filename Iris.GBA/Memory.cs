@@ -164,7 +164,7 @@ namespace Iris.GBA
             Map(_ROM, pageCount, 0x0c00_0000, 0x0e00_0000, Flag.AllRead);
         }
 
-        internal Byte ReadMemory8(UInt32 address)
+        internal Byte Read8(UInt32 address)
         {
             address &= 0x0fff_ffff;
 
@@ -435,7 +435,7 @@ namespace Iris.GBA
             throw new Exception(string.Format("Iris.GBA.Memory: Unhandled read from address 0x{0:x8}", address));
         }
 
-        internal UInt16 ReadMemory16(UInt32 address)
+        internal UInt16 Read16(UInt32 address)
         {
             address &= 0x0fff_fffe;
 
@@ -582,7 +582,7 @@ namespace Iris.GBA
             throw new Exception(string.Format("Iris.GBA.Memory: Unhandled read from address 0x{0:x8}", address));
         }
 
-        internal UInt32 ReadMemory32(UInt32 address)
+        internal UInt32 Read32(UInt32 address)
         {
             address &= 0x0fff_fffc;
 
@@ -680,7 +680,7 @@ namespace Iris.GBA
             throw new Exception(string.Format("Iris.GBA.Memory: Unhandled read from address 0x{0:x8}", address));
         }
 
-        internal void WriteMemory8(UInt32 address, Byte value)
+        internal void Write8(UInt32 address, Byte value)
         {
             address &= 0x0fff_ffff;
 
@@ -1389,7 +1389,7 @@ namespace Iris.GBA
             }
         }
 
-        internal void WriteMemory16(UInt32 address, UInt16 value)
+        internal void Write16(UInt32 address, UInt16 value)
         {
             address &= 0x0fff_fffe;
 
@@ -1717,7 +1717,7 @@ namespace Iris.GBA
             }
         }
 
-        internal void WriteMemory32(UInt32 address, UInt32 value)
+        internal void Write32(UInt32 address, UInt32 value)
         {
             address &= 0x0fff_fffc;
 
