@@ -1361,6 +1361,10 @@ namespace Iris.GBA
                                 _interruptControl.UpdateInterrupts();
                                 break;
 
+                            case 0x301:
+                                _systemControl!._HALTCNT = value;
+                                break;
+
                             case 0x410:
                                 // undocumented
                                 break;
