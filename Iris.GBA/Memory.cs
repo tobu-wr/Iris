@@ -1463,6 +1463,54 @@ namespace Iris.GBA
                             case 0x01e:
                                 _ppu!.BG3VOFS = value;
                                 break;
+                            case 0x020:
+                                _ppu!.BG2PA = value;
+                                break;
+                            case 0x022:
+                                _ppu!.BG2PB = value;
+                                break;
+                            case 0x024:
+                                _ppu!.BG2PC = value;
+                                break;
+                            case 0x026:
+                                _ppu!.BG2PD = value;
+                                break;
+                            case 0x028:
+                                _ppu!.BG2X = (_ppu.BG2X & 0xffff_0000) | value;
+                                break;
+                            case 0x02a:
+                                _ppu!.BG2X = (_ppu.BG2X & 0x0000_ffff) | ((UInt32)value << 16);
+                                break;
+                            case 0x02c:
+                                _ppu!.BG2Y = (_ppu.BG2Y & 0xffff_0000) | value;
+                                break;
+                            case 0x02e:
+                                _ppu!.BG2Y = (_ppu.BG2Y & 0x0000_ffff) | ((UInt32)value << 16);
+                                break;
+                            case 0x030:
+                                _ppu!.BG3PA = value;
+                                break;
+                            case 0x032:
+                                _ppu!.BG3PB = value;
+                                break;
+                            case 0x034:
+                                _ppu!.BG3PC = value;
+                                break;
+                            case 0x036:
+                                _ppu!.BG3PD = value;
+                                break;
+                            case 0x038:
+                                _ppu!.BG3X = (_ppu.BG3X & 0xffff_0000) | value;
+                                break;
+                            case 0x03a:
+                                _ppu!.BG3X = (_ppu.BG3X & 0x0000_ffff) | ((UInt32)value << 16);
+                                break;
+                            case 0x03c:
+                                _ppu!.BG3Y = (_ppu.BG3Y & 0xffff_0000) | value;
+                                break;
+                            case 0x03e:
+                                _ppu!.BG3Y = (_ppu.BG3Y & 0x0000_ffff) | ((UInt32)value << 16);
+                                break;
                             case 0x040:
                                 _ppu!.WIN0H = value;
                                 break;
@@ -1905,6 +1953,10 @@ namespace Iris.GBA
                             case 0x0dc:
                                 _dma!._DMA3CNT_L = GetLowHalfword(value);
                                 _dma._DMA3CNT_H = GetHighHalfword(value);
+                                break;
+                            case 0x100:
+                                _timer!._TM0CNT_L = GetLowHalfword(value);
+                                _timer._TM0CNT_H = GetHighHalfword(value);
                                 break;
                             case 0x10c:
                                 _timer!._TM3CNT_L = GetLowHalfword(value);
