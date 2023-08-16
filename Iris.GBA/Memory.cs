@@ -1838,6 +1838,10 @@ namespace Iris.GBA
                                 _ppu!.BLDY = GetLowHalfword(value);
                                 // 16 upper bits are unused
                                 break;
+                            case 0x58:
+                            case 0x5c:
+                                // unused
+                                break;
                             case 0x090:
                                 _sound!._WAVE_RAM0_L = GetLowHalfword(value);
                                 _sound._WAVE_RAM0_H = GetHighHalfword(value);
