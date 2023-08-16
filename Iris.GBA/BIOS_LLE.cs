@@ -82,14 +82,18 @@ namespace Iris.GBA
 
         internal override void HandleSWI(uint value)
         {
-            // TODO
-            throw new NotImplementedException();
+            _cpu.Reg14_svc = _cpu.NextInstructionAddress;
+            _cpu.SPSR_svc = _cpu.CPSR;
+            _cpu.SetCPSR((_cpu.CPSR & ~0xbfu) | 0x93u);
+            _cpu.NextInstructionAddress = 0x08;
         }
 
         internal override void HandleIRQ()
         {
-            // TODO
-            throw new NotImplementedException();
+            _cpu.Reg14_irq = _cpu.NextInstructionAddress + 4;
+            _cpu.SPSR_irq = _cpu.CPSR;
+            _cpu.SetCPSR((_cpu.CPSR & ~0xbfu) | 0x92u);
+            _cpu.NextInstructionAddress = 0x18;
         }
     }
 }
