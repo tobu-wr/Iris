@@ -49,6 +49,12 @@ namespace Iris.GBA
             _bios.Reset();
             _memory.Reset();
             _ppu.Reset();
+
+            // skip BIOS LLE startup
+            // (temp until we are able to boot from BIOS)
+            BIOS_HLE biosHLE = new();
+            biosHLE.Initialize(_cpu, _memory);
+            biosHLE.Reset();
         }
 
         public override void LoadROM(string filename)
