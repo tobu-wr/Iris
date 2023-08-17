@@ -1,11 +1,10 @@
 ﻿using Iris.Common;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using static Iris.Common.System;
 
 namespace Iris.GBA
 {
-    internal sealed class Video
+    internal sealed class Video : IDisposable
     {
         private const int KB = 1024;
 
@@ -16,6 +15,15 @@ namespace Iris.GBA
         private readonly IntPtr _paletteRAM = Marshal.AllocHGlobal(PaletteRAM_Size);
         private readonly IntPtr _vram = Marshal.AllocHGlobal(VRAM_Size);
         private readonly IntPtr _oam = Marshal.AllocHGlobal(OAM_Size);
+
+        private const UInt32 PaletteRAM_StartAddress = 0x0500_0000;
+        private const UInt32 PaletteRAM_EndAddress = 0x0600_0000;
+
+        private const UInt32 VRAM_StartAddress = 0x0600_0000;
+        private const UInt32 VRAM_EndAddress = 0x0700_0000;
+
+        private const UInt32 OAM_StartAddress = 0x0700_0000;
+        private const UInt32 OAM_EndAddress = 0x0800_0000;
 
         internal UInt16 DISPSTAT;
         internal UInt16 DISPCNT;
@@ -78,7 +86,7 @@ namespace Iris.GBA
         // could have used function pointers (delegate*) for performance instead of delegates but it's less flexible (cannot use non-static function for instance)
         internal readonly record struct CallbackInterface
         (
-            DrawFrame_Delegate DrawFrame,
+            Common.System.DrawFrame_Delegate DrawFrame,
             RequestInterrupt_Delegate RequestVBlankInterrupt
         );
 
@@ -88,7 +96,7 @@ namespace Iris.GBA
         private Memory _memory;
 
         private bool _initialized;
-        //private bool _disposed;
+        private bool _disposed;
 
         internal Video(Scheduler scheduler, CallbackInterface callbackInterface)
         {
@@ -96,25 +104,39 @@ namespace Iris.GBA
             _callbackInterface = callbackInterface;
         }
 
-        //~PPU()
-        //{
-        //    Marshal.FreeHGlobal(PaletteRAM);
-        //    Marshal.FreeHGlobal(VRAM);
-        //    Marshal.FreeHGlobal(OAM);
-        //}
+        ~Video()
+        {
+            if (_initialized)
+            {
+                _memory.Unmap(PaletteRAM_StartAddress, PaletteRAM_EndAddress);
+                _memory.Unmap(VRAM_StartAddress, VRAM_EndAddress);
+                _memory.Unmap(OAM_StartAddress, OAM_EndAddress);
+            }
 
-        //internal void Dispose()
-        //{
-        //    if (_disposed)
-        //        return;
+            Marshal.FreeHGlobal(_paletteRAM);
+            Marshal.FreeHGlobal(_vram);
+            Marshal.FreeHGlobal(_oam);
+        }
 
-        //    Marshal.FreeHGlobal(PaletteRAM);
-        //    Marshal.FreeHGlobal(VRAM);
-        //    Marshal.FreeHGlobal(OAM);
+        public void Dispose()
+        {
+            if (_disposed)
+                return;
 
-        //    GC.SuppressFinalize(this);
-        //    _disposed = true;
-        //}
+            if (_initialized)
+            {
+                _memory.Unmap(PaletteRAM_StartAddress, PaletteRAM_EndAddress);
+                _memory.Unmap(VRAM_StartAddress, VRAM_EndAddress);
+                _memory.Unmap(OAM_StartAddress, OAM_EndAddress);
+            }
+
+            Marshal.FreeHGlobal(_paletteRAM);
+            Marshal.FreeHGlobal(_vram);
+            Marshal.FreeHGlobal(_oam);
+
+            GC.SuppressFinalize(this);
+            _disposed = true;
+        }
 
         internal void Initialize(Memory memory)
         {
@@ -123,9 +145,9 @@ namespace Iris.GBA
 
             _memory = memory;
 
-            _memory.Map(_paletteRAM, PaletteRAM_Size / Memory.PageSize, 0x0500_0000, 0x0600_0000, Memory.Flag.All & ~(Memory.Flag.Read8 | Memory.Flag.Write8));
-            _memory.Map(_vram, VRAM_Size / Memory.PageSize, 0x0600_0000, 0x0700_0000, Memory.Flag.All & ~(Memory.Flag.Read8 | Memory.Flag.Write8));
-            _memory.Map(_oam, OAM_Size / Memory.PageSize, 0x0700_0000, 0x0800_0000, Memory.Flag.All & ~(Memory.Flag.Read8 | Memory.Flag.Write8));
+            _memory.Map(_paletteRAM, PaletteRAM_Size / Memory.PageSize, PaletteRAM_StartAddress, PaletteRAM_EndAddress, Memory.Flag.All & ~(Memory.Flag.Read8 | Memory.Flag.Write8));
+            _memory.Map(_vram, VRAM_Size / Memory.PageSize, VRAM_StartAddress, VRAM_EndAddress, Memory.Flag.All & ~(Memory.Flag.Read8 | Memory.Flag.Write8));
+            _memory.Map(_oam, OAM_Size / Memory.PageSize, OAM_StartAddress, OAM_EndAddress, Memory.Flag.All & ~(Memory.Flag.Read8 | Memory.Flag.Write8));
 
             _initialized = true;
         }
