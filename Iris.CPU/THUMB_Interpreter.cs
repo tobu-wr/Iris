@@ -7,7 +7,7 @@ namespace Iris.CPU
 {
     internal sealed class THUMB_Interpreter
     {
-        private unsafe readonly InstructionLUTEntry<UInt16>[] _instructionLUT = new InstructionLUTEntry<UInt16>[1 << 10];
+        private readonly InstructionLUTEntry<UInt16>[] _instructionLUT = new InstructionLUTEntry<UInt16>[1 << 10];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static UInt16 InstructionLUTHash(UInt16 value)

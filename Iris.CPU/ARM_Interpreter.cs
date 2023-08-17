@@ -7,7 +7,7 @@ namespace Iris.CPU
 {
     internal sealed class ARM_Interpreter
     {
-        private unsafe readonly InstructionLUTEntry<UInt32>[] _instructionLUT = new InstructionLUTEntry<UInt32>[1 << 12];
+        private readonly InstructionLUTEntry<UInt32>[] _instructionLUT = new InstructionLUTEntry<UInt32>[1 << 12];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static UInt32 InstructionLUTHash(UInt32 value)
