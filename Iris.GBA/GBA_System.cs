@@ -18,7 +18,7 @@ namespace Iris.GBA
         private readonly InterruptControl _interruptControl = new();
         private readonly BIOS _bios = new BIOS_LLE("D:\\dev\\Iris\\ROMs\\GBA\\gba_bios.bin");
         private readonly Memory _memory = new();
-        private readonly PPU _ppu;
+        private readonly Video _video;
 
         private bool _running;
 
@@ -27,12 +27,12 @@ namespace Iris.GBA
             CPU_Core.CallbackInterface cpuCallbackInterface = new(_memory.Read8, _memory.Read16, _memory.Read32, _memory.Write8, _memory.Write16, _memory.Write32, _bios.HandleSWI, _bios.HandleIRQ);
             _cpu = new(CPU_Core.Model.ARM7TDMI, cpuCallbackInterface);
 
-            PPU.CallbackInterface ppuCallbackInterface = new(drawFrame, () => _interruptControl.RequestInterrupt(Interrupt.VBlank));
-            _ppu = new(_scheduler, ppuCallbackInterface);
+            Video.CallbackInterface ppuCallbackInterface = new(drawFrame, () => _interruptControl.RequestInterrupt(Interrupt.VBlank));
+            _video = new(_scheduler, ppuCallbackInterface);
 
             _interruptControl.Initialize(_cpu);
             _bios.Initialize(_cpu, _memory);
-            _memory.Initialize(_communication, _timer, _sound, _dma, _keyInput, _systemControl, _interruptControl, _bios, _ppu);
+            _memory.Initialize(_communication, _timer, _sound, _dma, _keyInput, _systemControl, _interruptControl, _bios, _video);
         }
 
         public override void Reset()
@@ -48,7 +48,7 @@ namespace Iris.GBA
             _interruptControl.Reset();
             _bios.Reset();
             _memory.Reset();
-            _ppu.Reset();
+            _video.Reset();
 
             // skip BIOS LLE startup
             // (temp until we are able to boot from BIOS)

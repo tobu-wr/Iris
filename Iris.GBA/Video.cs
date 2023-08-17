@@ -5,7 +5,7 @@ using static Iris.Common.System;
 
 namespace Iris.GBA
 {
-    internal sealed class PPU
+    internal sealed class Video
     {
         private const int KB = 1024;
 
@@ -87,7 +87,7 @@ namespace Iris.GBA
 
         //private bool _disposed;
 
-        internal PPU(Scheduler scheduler, CallbackInterface callbackInterface)
+        internal Video(Scheduler scheduler, CallbackInterface callbackInterface)
         {
             _scheduler = scheduler;
             _callbackInterface = callbackInterface;
