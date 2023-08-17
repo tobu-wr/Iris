@@ -5,7 +5,7 @@ namespace Iris.Common
 {
     public sealed class Scheduler
     {
-        public delegate void Task_Delegate();
+        public delegate void Task_Delegate(UInt32 cycleCountDelay);
 
         private record struct TaskListEntry(UInt32 CycleCount, Task_Delegate Task);
 
@@ -74,7 +74,7 @@ namespace Iris.Common
 
             while ((i < _taskCount) && (entry.CycleCount <= _cycleCounter))
             {
-                entry.Task();
+                entry.Task(_cycleCounter - entry.CycleCount);
 
                 ++i;
                 entry = ref Unsafe.Add(ref entry, 1);

@@ -120,7 +120,7 @@ namespace Iris.GBA
         //    _disposed = true;
         //}
 
-        internal void StartHorizontalLine()
+        internal void StartHorizontalLine(UInt32 cycleCountDelay)
         {
             ++VCOUNT;
 
@@ -135,7 +135,7 @@ namespace Iris.GBA
                     break;
             }
 
-            _scheduler.AddTask(4 * HorizontalLineWidth, StartHorizontalLine);
+            _scheduler.AddTask(4 * HorizontalLineWidth - cycleCountDelay, StartHorizontalLine);
         }
 
         internal void StartVBlank()
