@@ -46,6 +46,7 @@ namespace Iris.GBA
 
             _memory.Unmap(0, BIOS_Size);
             Marshal.FreeHGlobal(_bios);
+
             GC.SuppressFinalize(this);
             _disposed = true;
         }
