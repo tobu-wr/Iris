@@ -197,38 +197,38 @@ namespace Iris.GBA
 
                         return offset switch
                         {
-                            0x000 => GetLowByte(_video!.DISPCNT),
-                            0x001 => GetHighByte(_video!.DISPCNT),
+                            0x000 => GetLowByte(_video!._DISPCNT),
+                            0x001 => GetHighByte(_video!._DISPCNT),
 
-                            0x004 => GetLowByte(_video!.DISPSTAT),
-                            0x005 => GetHighByte(_video!.DISPSTAT),
+                            0x004 => GetLowByte(_video!._DISPSTAT),
+                            0x005 => GetHighByte(_video!._DISPSTAT),
 
-                            0x006 => GetLowByte(_video!.VCOUNT),
-                            0x007 => GetHighByte(_video!.VCOUNT),
+                            0x006 => GetLowByte(_video!._VCOUNT),
+                            0x007 => GetHighByte(_video!._VCOUNT),
 
-                            0x008 => GetLowByte(_video!.BG0CNT),
-                            0x009 => GetHighByte(_video!.BG0CNT),
+                            0x008 => GetLowByte(_video!._BG0CNT),
+                            0x009 => GetHighByte(_video!._BG0CNT),
 
-                            0x00a => GetLowByte(_video!.BG1CNT),
-                            0x00b => GetHighByte(_video!.BG1CNT),
+                            0x00a => GetLowByte(_video!._BG1CNT),
+                            0x00b => GetHighByte(_video!._BG1CNT),
 
-                            0x00c => GetLowByte(_video!.BG2CNT),
-                            0x00d => GetHighByte(_video!.BG2CNT),
+                            0x00c => GetLowByte(_video!._BG2CNT),
+                            0x00d => GetHighByte(_video!._BG2CNT),
 
-                            0x00e => GetLowByte(_video!.BG3CNT),
-                            0x00f => GetHighByte(_video!.BG3CNT),
+                            0x00e => GetLowByte(_video!._BG3CNT),
+                            0x00f => GetHighByte(_video!._BG3CNT),
 
-                            0x048 => GetLowByte(_video!.WININ),
-                            0x049 => GetHighByte(_video!.WININ),
+                            0x048 => GetLowByte(_video!._WININ),
+                            0x049 => GetHighByte(_video!._WININ),
 
-                            0x04a => GetLowByte(_video!.WINOUT),
-                            0x04b => GetHighByte(_video!.WINOUT),
+                            0x04a => GetLowByte(_video!._WINOUT),
+                            0x04b => GetHighByte(_video!._WINOUT),
 
-                            0x050 => GetLowByte(_video!.BLDCNT),
-                            0x051 => GetHighByte(_video!.BLDCNT),
+                            0x050 => GetLowByte(_video!._BLDCNT),
+                            0x051 => GetHighByte(_video!._BLDCNT),
 
-                            0x052 => GetLowByte(_video!.BLDALPHA),
-                            0x053 => GetHighByte(_video!.BLDALPHA),
+                            0x052 => GetLowByte(_video!._BLDALPHA),
+                            0x053 => GetHighByte(_video!._BLDALPHA),
 
                             0x060 => GetLowByte(_sound!._SOUND1CNT_L),
                             0x061 => GetHighByte(_sound!._SOUND1CNT_L),
@@ -462,17 +462,17 @@ namespace Iris.GBA
 
                         return offset switch
                         {
-                            0x000 => _video!.DISPCNT,
-                            0x004 => _video!.DISPSTAT,
-                            0x006 => _video!.VCOUNT,
-                            0x008 => _video!.BG0CNT,
-                            0x00a => _video!.BG1CNT,
-                            0x00c => _video!.BG2CNT,
-                            0x00e => _video!.BG3CNT,
-                            0x048 => _video!.WININ,
-                            0x04a => _video!.WINOUT,
-                            0x050 => _video!.BLDCNT,
-                            0x052 => _video!.BLDALPHA,
+                            0x000 => _video!._DISPCNT,
+                            0x004 => _video!._DISPSTAT,
+                            0x006 => _video!._VCOUNT,
+                            0x008 => _video!._BG0CNT,
+                            0x00a => _video!._BG1CNT,
+                            0x00c => _video!._BG2CNT,
+                            0x00e => _video!._BG3CNT,
+                            0x048 => _video!._WININ,
+                            0x04a => _video!._WINOUT,
+                            0x050 => _video!._BLDCNT,
+                            0x052 => _video!._BLDALPHA,
                             0x060 => _sound!._SOUND1CNT_L,
                             0x062 => _sound!._SOUND1CNT_H,
                             0x064 => _sound!._SOUND1CNT_X,
@@ -609,10 +609,10 @@ namespace Iris.GBA
 
                         return offset switch
                         {
-                            0x000 => (UInt32)(_video!.DISPCNT),
-                            0x004 => (UInt32)((_video!.VCOUNT << 16) | _video.DISPSTAT),
-                            0x008 => (UInt32)((_video!.BG1CNT << 16) | _video.BG0CNT),
-                            0x00c => (UInt32)((_video!.BG3CNT << 16) | _video.BG2CNT),
+                            0x000 => (UInt32)(_video!._DISPCNT),
+                            0x004 => (UInt32)((_video!._VCOUNT << 16) | _video._DISPSTAT),
+                            0x008 => (UInt32)((_video!._BG1CNT << 16) | _video._BG0CNT),
+                            0x00c => (UInt32)((_video!._BG3CNT << 16) | _video._BG2CNT),
                             0x0b8 => (UInt32)(_dma!._DMA0CNT_H << 16),
                             0x0c4 => (UInt32)(_dma!._DMA1CNT_H << 16),
                             0x0d0 => (UInt32)(_dma!._DMA2CNT_H << 16),
@@ -716,171 +716,171 @@ namespace Iris.GBA
                         switch (offset)
                         {
                             case 0x000:
-                                SetLowByte(ref _video!.DISPCNT, value);
+                                SetLowByte(ref _video!._DISPCNT, value);
                                 break;
                             case 0x001:
-                                SetHighByte(ref _video!.DISPCNT, value);
+                                SetHighByte(ref _video!._DISPCNT, value);
                                 break;
 
                             case 0x004:
-                                SetLowByte(ref _video!.DISPSTAT, value);
+                                SetLowByte(ref _video!._DISPSTAT, value);
                                 break;
                             case 0x005:
-                                SetHighByte(ref _video!.DISPSTAT, value);
+                                SetHighByte(ref _video!._DISPSTAT, value);
                                 break;
 
                             case 0x008:
-                                SetLowByte(ref _video!.BG0CNT, value);
+                                SetLowByte(ref _video!._BG0CNT, value);
                                 break;
                             case 0x009:
-                                SetHighByte(ref _video!.BG0CNT, value);
+                                SetHighByte(ref _video!._BG0CNT, value);
                                 break;
 
                             case 0x00a:
-                                SetLowByte(ref _video!.BG1CNT, value);
+                                SetLowByte(ref _video!._BG1CNT, value);
                                 break;
                             case 0x00b:
-                                SetHighByte(ref _video!.BG1CNT, value);
+                                SetHighByte(ref _video!._BG1CNT, value);
                                 break;
 
                             case 0x00c:
-                                SetLowByte(ref _video!.BG2CNT, value);
+                                SetLowByte(ref _video!._BG2CNT, value);
                                 break;
                             case 0x00d:
-                                SetHighByte(ref _video!.BG2CNT, value);
+                                SetHighByte(ref _video!._BG2CNT, value);
                                 break;
 
                             case 0x00e:
-                                SetLowByte(ref _video!.BG3CNT, value);
+                                SetLowByte(ref _video!._BG3CNT, value);
                                 break;
                             case 0x00f:
-                                SetHighByte(ref _video!.BG3CNT, value);
+                                SetHighByte(ref _video!._BG3CNT, value);
                                 break;
 
                             case 0x010:
-                                SetLowByte(ref _video!.BG0HOFS, value);
+                                SetLowByte(ref _video!._BG0HOFS, value);
                                 break;
                             case 0x011:
-                                SetHighByte(ref _video!.BG0HOFS, value);
+                                SetHighByte(ref _video!._BG0HOFS, value);
                                 break;
 
                             case 0x012:
-                                SetLowByte(ref _video!.BG0VOFS, value);
+                                SetLowByte(ref _video!._BG0VOFS, value);
                                 break;
                             case 0x013:
-                                SetHighByte(ref _video!.BG0VOFS, value);
+                                SetHighByte(ref _video!._BG0VOFS, value);
                                 break;
 
                             case 0x014:
-                                SetLowByte(ref _video!.BG1HOFS, value);
+                                SetLowByte(ref _video!._BG1HOFS, value);
                                 break;
                             case 0x015:
-                                SetHighByte(ref _video!.BG1HOFS, value);
+                                SetHighByte(ref _video!._BG1HOFS, value);
                                 break;
 
                             case 0x016:
-                                SetLowByte(ref _video!.BG1VOFS, value);
+                                SetLowByte(ref _video!._BG1VOFS, value);
                                 break;
                             case 0x017:
-                                SetHighByte(ref _video!.BG1VOFS, value);
+                                SetHighByte(ref _video!._BG1VOFS, value);
                                 break;
 
                             case 0x018:
-                                SetLowByte(ref _video!.BG2HOFS, value);
+                                SetLowByte(ref _video!._BG2HOFS, value);
                                 break;
                             case 0x019:
-                                SetHighByte(ref _video!.BG2HOFS, value);
+                                SetHighByte(ref _video!._BG2HOFS, value);
                                 break;
 
                             case 0x01a:
-                                SetLowByte(ref _video!.BG2VOFS, value);
+                                SetLowByte(ref _video!._BG2VOFS, value);
                                 break;
                             case 0x01b:
-                                SetHighByte(ref _video!.BG2VOFS, value);
+                                SetHighByte(ref _video!._BG2VOFS, value);
                                 break;
 
                             case 0x01c:
-                                SetLowByte(ref _video!.BG3HOFS, value);
+                                SetLowByte(ref _video!._BG3HOFS, value);
                                 break;
                             case 0x01d:
-                                SetHighByte(ref _video!.BG3HOFS, value);
+                                SetHighByte(ref _video!._BG3HOFS, value);
                                 break;
 
                             case 0x01e:
-                                SetLowByte(ref _video!.BG3VOFS, value);
+                                SetLowByte(ref _video!._BG3VOFS, value);
                                 break;
                             case 0x01f:
-                                SetHighByte(ref _video!.BG3VOFS, value);
+                                SetHighByte(ref _video!._BG3VOFS, value);
                                 break;
 
                             case 0x040:
-                                SetLowByte(ref _video!.WIN0H, value);
+                                SetLowByte(ref _video!._WIN0H, value);
                                 break;
                             case 0x041:
-                                SetHighByte(ref _video!.WIN0H, value);
+                                SetHighByte(ref _video!._WIN0H, value);
                                 break;
 
                             case 0x042:
-                                SetLowByte(ref _video!.WIN1H, value);
+                                SetLowByte(ref _video!._WIN1H, value);
                                 break;
                             case 0x043:
-                                SetHighByte(ref _video!.WIN1H, value);
+                                SetHighByte(ref _video!._WIN1H, value);
                                 break;
 
                             case 0x044:
-                                SetLowByte(ref _video!.WIN0V, value);
+                                SetLowByte(ref _video!._WIN0V, value);
                                 break;
                             case 0x045:
-                                SetHighByte(ref _video!.WIN0V, value);
+                                SetHighByte(ref _video!._WIN0V, value);
                                 break;
 
                             case 0x046:
-                                SetLowByte(ref _video!.WIN1V, value);
+                                SetLowByte(ref _video!._WIN1V, value);
                                 break;
                             case 0x047:
-                                SetHighByte(ref _video!.WIN1V, value);
+                                SetHighByte(ref _video!._WIN1V, value);
                                 break;
 
                             case 0x048:
-                                SetLowByte(ref _video!.WININ, value);
+                                SetLowByte(ref _video!._WININ, value);
                                 break;
                             case 0x049:
-                                SetHighByte(ref _video!.WININ, value);
+                                SetHighByte(ref _video!._WININ, value);
                                 break;
 
                             case 0x04a:
-                                SetLowByte(ref _video!.WINOUT, value);
+                                SetLowByte(ref _video!._WINOUT, value);
                                 break;
                             case 0x04b:
-                                SetHighByte(ref _video!.WINOUT, value);
+                                SetHighByte(ref _video!._WINOUT, value);
                                 break;
 
                             case 0x04c:
-                                SetLowByte(ref _video!.MOSAIC, value);
+                                SetLowByte(ref _video!._MOSAIC, value);
                                 break;
                             case 0x04d:
-                                SetHighByte(ref _video!.MOSAIC, value);
+                                SetHighByte(ref _video!._MOSAIC, value);
                                 break;
 
                             case 0x050:
-                                SetLowByte(ref _video!.BLDCNT, value);
+                                SetLowByte(ref _video!._BLDCNT, value);
                                 break;
                             case 0x051:
-                                SetHighByte(ref _video!.BLDCNT, value);
+                                SetHighByte(ref _video!._BLDCNT, value);
                                 break;
 
                             case 0x052:
-                                SetLowByte(ref _video!.BLDALPHA, value);
+                                SetLowByte(ref _video!._BLDALPHA, value);
                                 break;
                             case 0x053:
-                                SetHighByte(ref _video!.BLDALPHA, value);
+                                SetHighByte(ref _video!._BLDALPHA, value);
                                 break;
 
                             case 0x054:
-                                SetLowByte(ref _video!.BLDY, value);
+                                SetLowByte(ref _video!._BLDY, value);
                                 break;
                             case 0x055:
-                                SetHighByte(ref _video!.BLDY, value);
+                                SetHighByte(ref _video!._BLDY, value);
                                 break;
 
                             case 0x060:
@@ -1430,124 +1430,124 @@ namespace Iris.GBA
                         switch (offset)
                         {
                             case 0x000:
-                                _video!.DISPCNT = value;
+                                _video!._DISPCNT = value;
                                 break;
                             case 0x004:
-                                _video!.DISPSTAT = value;
+                                _video!._DISPSTAT = value;
                                 break;
                             case 0x008:
-                                _video!.BG0CNT = value;
+                                _video!._BG0CNT = value;
                                 break;
                             case 0x00a:
-                                _video!.BG1CNT = value;
+                                _video!._BG1CNT = value;
                                 break;
                             case 0x00c:
-                                _video!.BG2CNT = value;
+                                _video!._BG2CNT = value;
                                 break;
                             case 0x00e:
-                                _video!.BG3CNT = value;
+                                _video!._BG3CNT = value;
                                 break;
                             case 0x010:
-                                _video!.BG0HOFS = value;
+                                _video!._BG0HOFS = value;
                                 break;
                             case 0x012:
-                                _video!.BG0VOFS = value;
+                                _video!._BG0VOFS = value;
                                 break;
                             case 0x014:
-                                _video!.BG1HOFS = value;
+                                _video!._BG1HOFS = value;
                                 break;
                             case 0x016:
-                                _video!.BG1VOFS = value;
+                                _video!._BG1VOFS = value;
                                 break;
                             case 0x018:
-                                _video!.BG2HOFS = value;
+                                _video!._BG2HOFS = value;
                                 break;
                             case 0x01a:
-                                _video!.BG2VOFS = value;
+                                _video!._BG2VOFS = value;
                                 break;
                             case 0x01c:
-                                _video!.BG3HOFS = value;
+                                _video!._BG3HOFS = value;
                                 break;
                             case 0x01e:
-                                _video!.BG3VOFS = value;
+                                _video!._BG3VOFS = value;
                                 break;
                             case 0x020:
-                                _video!.BG2PA = value;
+                                _video!._BG2PA = value;
                                 break;
                             case 0x022:
-                                _video!.BG2PB = value;
+                                _video!._BG2PB = value;
                                 break;
                             case 0x024:
-                                _video!.BG2PC = value;
+                                _video!._BG2PC = value;
                                 break;
                             case 0x026:
-                                _video!.BG2PD = value;
+                                _video!._BG2PD = value;
                                 break;
                             case 0x028:
-                                _video!.BG2X = (_video.BG2X & 0xffff_0000) | value;
+                                _video!._BG2X = (_video._BG2X & 0xffff_0000) | value;
                                 break;
                             case 0x02a:
-                                _video!.BG2X = (_video.BG2X & 0x0000_ffff) | ((UInt32)value << 16);
+                                _video!._BG2X = (_video._BG2X & 0x0000_ffff) | ((UInt32)value << 16);
                                 break;
                             case 0x02c:
-                                _video!.BG2Y = (_video.BG2Y & 0xffff_0000) | value;
+                                _video!._BG2Y = (_video._BG2Y & 0xffff_0000) | value;
                                 break;
                             case 0x02e:
-                                _video!.BG2Y = (_video.BG2Y & 0x0000_ffff) | ((UInt32)value << 16);
+                                _video!._BG2Y = (_video._BG2Y & 0x0000_ffff) | ((UInt32)value << 16);
                                 break;
                             case 0x030:
-                                _video!.BG3PA = value;
+                                _video!._BG3PA = value;
                                 break;
                             case 0x032:
-                                _video!.BG3PB = value;
+                                _video!._BG3PB = value;
                                 break;
                             case 0x034:
-                                _video!.BG3PC = value;
+                                _video!._BG3PC = value;
                                 break;
                             case 0x036:
-                                _video!.BG3PD = value;
+                                _video!._BG3PD = value;
                                 break;
                             case 0x038:
-                                _video!.BG3X = (_video.BG3X & 0xffff_0000) | value;
+                                _video!._BG3X = (_video._BG3X & 0xffff_0000) | value;
                                 break;
                             case 0x03a:
-                                _video!.BG3X = (_video.BG3X & 0x0000_ffff) | ((UInt32)value << 16);
+                                _video!._BG3X = (_video._BG3X & 0x0000_ffff) | ((UInt32)value << 16);
                                 break;
                             case 0x03c:
-                                _video!.BG3Y = (_video.BG3Y & 0xffff_0000) | value;
+                                _video!._BG3Y = (_video._BG3Y & 0xffff_0000) | value;
                                 break;
                             case 0x03e:
-                                _video!.BG3Y = (_video.BG3Y & 0x0000_ffff) | ((UInt32)value << 16);
+                                _video!._BG3Y = (_video._BG3Y & 0x0000_ffff) | ((UInt32)value << 16);
                                 break;
                             case 0x040:
-                                _video!.WIN0H = value;
+                                _video!._WIN0H = value;
                                 break;
                             case 0x042:
-                                _video!.WIN1H = value;
+                                _video!._WIN1H = value;
                                 break;
                             case 0x044:
-                                _video!.WIN0V = value;
+                                _video!._WIN0V = value;
                                 break;
                             case 0x046:
-                                _video!.WIN1V = value;
+                                _video!._WIN1V = value;
                                 break;
                             case 0x048:
-                                _video!.WININ = value;
+                                _video!._WININ = value;
                                 break;
                             case 0x04a:
-                                _video!.WINOUT = value;
+                                _video!._WINOUT = value;
                                 break;
                             case 0x04c:
-                                _video!.MOSAIC = value;
+                                _video!._MOSAIC = value;
                                 break;
                             case 0x050:
-                                _video!.BLDCNT = value;
+                                _video!._BLDCNT = value;
                                 break;
                             case 0x052:
-                                _video!.BLDALPHA = value;
+                                _video!._BLDALPHA = value;
                                 break;
                             case 0x054:
-                                _video!.BLDY = value;
+                                _video!._BLDY = value;
                                 break;
                             case 0x060:
                                 _sound!._SOUND1CNT_L = value;
@@ -1812,86 +1812,86 @@ namespace Iris.GBA
                         switch (offset)
                         {
                             case 0x000:
-                                _video!.DISPCNT = GetLowHalfword(value);
+                                _video!._DISPCNT = GetLowHalfword(value);
                                 // 16 upper bits are undocumented (green swap register)
                                 break;
                             case 0x004:
-                                _video!.DISPSTAT = GetLowHalfword(value);
+                                _video!._DISPSTAT = GetLowHalfword(value);
                                 break;
                             case 0x008:
-                                _video!.BG0CNT = GetLowHalfword(value);
-                                _video.BG1CNT = GetHighHalfword(value);
+                                _video!._BG0CNT = GetLowHalfword(value);
+                                _video._BG1CNT = GetHighHalfword(value);
                                 break;
                             case 0x00c:
-                                _video!.BG2CNT = GetLowHalfword(value);
-                                _video.BG3CNT = GetHighHalfword(value);
+                                _video!._BG2CNT = GetLowHalfword(value);
+                                _video._BG3CNT = GetHighHalfword(value);
                                 break;
                             case 0x010:
-                                _video!.BG0HOFS = GetLowHalfword(value);
-                                _video.BG0VOFS = GetHighHalfword(value);
+                                _video!._BG0HOFS = GetLowHalfword(value);
+                                _video._BG0VOFS = GetHighHalfword(value);
                                 break;
                             case 0x014:
-                                _video!.BG1HOFS = GetLowHalfword(value);
-                                _video.BG1VOFS = GetHighHalfword(value);
+                                _video!._BG1HOFS = GetLowHalfword(value);
+                                _video._BG1VOFS = GetHighHalfword(value);
                                 break;
                             case 0x018:
-                                _video!.BG2HOFS = GetLowHalfword(value);
-                                _video.BG2VOFS = GetHighHalfword(value);
+                                _video!._BG2HOFS = GetLowHalfword(value);
+                                _video._BG2VOFS = GetHighHalfword(value);
                                 break;
                             case 0x01c:
-                                _video!.BG3HOFS = GetLowHalfword(value);
-                                _video.BG3VOFS = GetHighHalfword(value);
+                                _video!._BG3HOFS = GetLowHalfword(value);
+                                _video._BG3VOFS = GetHighHalfword(value);
                                 break;
                             case 0x020:
-                                _video!.BG2PA = GetLowHalfword(value);
-                                _video.BG2PB = GetHighHalfword(value);
+                                _video!._BG2PA = GetLowHalfword(value);
+                                _video._BG2PB = GetHighHalfword(value);
                                 break;
                             case 0x024:
-                                _video!.BG2PC = GetLowHalfword(value);
-                                _video.BG2PD = GetHighHalfword(value);
+                                _video!._BG2PC = GetLowHalfword(value);
+                                _video._BG2PD = GetHighHalfword(value);
                                 break;
                             case 0x028:
-                                _video!.BG2X = value;
+                                _video!._BG2X = value;
                                 break;
                             case 0x02c:
-                                _video!.BG2Y = value;
+                                _video!._BG2Y = value;
                                 break;
                             case 0x030:
-                                _video!.BG3PA = GetLowHalfword(value);
-                                _video.BG3PB = GetHighHalfword(value);
+                                _video!._BG3PA = GetLowHalfword(value);
+                                _video._BG3PB = GetHighHalfword(value);
                                 break;
                             case 0x034:
-                                _video!.BG3PC = GetLowHalfword(value);
-                                _video.BG3PD = GetHighHalfword(value);
+                                _video!._BG3PC = GetLowHalfword(value);
+                                _video._BG3PD = GetHighHalfword(value);
                                 break;
                             case 0x038:
-                                _video!.BG3X = value;
+                                _video!._BG3X = value;
                                 break;
                             case 0x03c:
-                                _video!.BG3Y = value;
+                                _video!._BG3Y = value;
                                 break;
                             case 0x040:
-                                _video!.WIN0H = GetLowHalfword(value);
-                                _video.WIN1H = GetHighHalfword(value);
+                                _video!._WIN0H = GetLowHalfword(value);
+                                _video._WIN1H = GetHighHalfword(value);
                                 break;
                             case 0x044:
-                                _video!.WIN0V = GetLowHalfword(value);
-                                _video.WIN1V = GetHighHalfword(value);
+                                _video!._WIN0V = GetLowHalfword(value);
+                                _video._WIN1V = GetHighHalfword(value);
                                 break;
                             case 0x048:
-                                _video!.WININ = GetLowHalfword(value);
-                                _video.WINOUT = GetHighHalfword(value);
+                                _video!._WININ = GetLowHalfword(value);
+                                _video._WINOUT = GetHighHalfword(value);
                                 break;
                             case 0x04c:
-                                _video!.MOSAIC = GetLowHalfword(value);
+                                _video!._MOSAIC = GetLowHalfword(value);
                                 // 16 upper bits are unused
                                 break;
                             case 0x050:
-                                _video!.BLDCNT = GetLowHalfword(value);
-                                _video.BLDALPHA = GetHighHalfword(value);
+                                _video!._BLDCNT = GetLowHalfword(value);
+                                _video._BLDALPHA = GetHighHalfword(value);
                                 break;
                             case 0x054:
-                                _video!.BLDY = GetLowHalfword(value);
+                                _video!._BLDY = GetLowHalfword(value);
                                 // 16 upper bits are unused
                                 break;
                             case 0x58:

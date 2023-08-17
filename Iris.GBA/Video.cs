@@ -25,55 +25,55 @@ namespace Iris.GBA
         private const UInt32 OAM_StartAddress = 0x0700_0000;
         private const UInt32 OAM_EndAddress = 0x0800_0000;
 
-        internal UInt16 DISPSTAT;
-        internal UInt16 DISPCNT;
-        internal UInt16 VCOUNT;
+        internal UInt16 _DISPSTAT;
+        internal UInt16 _DISPCNT;
+        internal UInt16 _VCOUNT;
 
-        internal UInt16 BG0CNT;
-        internal UInt16 BG1CNT;
-        internal UInt16 BG2CNT;
-        internal UInt16 BG3CNT;
+        internal UInt16 _BG0CNT;
+        internal UInt16 _BG1CNT;
+        internal UInt16 _BG2CNT;
+        internal UInt16 _BG3CNT;
 
-        internal UInt16 BG0HOFS;
-        internal UInt16 BG0VOFS;
+        internal UInt16 _BG0HOFS;
+        internal UInt16 _BG0VOFS;
 
-        internal UInt16 BG1HOFS;
-        internal UInt16 BG1VOFS;
+        internal UInt16 _BG1HOFS;
+        internal UInt16 _BG1VOFS;
 
-        internal UInt16 BG2HOFS;
-        internal UInt16 BG2VOFS;
+        internal UInt16 _BG2HOFS;
+        internal UInt16 _BG2VOFS;
 
-        internal UInt16 BG3HOFS;
-        internal UInt16 BG3VOFS;
+        internal UInt16 _BG3HOFS;
+        internal UInt16 _BG3VOFS;
 
-        internal UInt16 BG2PA;
-        internal UInt16 BG2PB;
-        internal UInt16 BG2PC;
-        internal UInt16 BG2PD;
-        internal UInt32 BG2X;
-        internal UInt32 BG2Y;
+        internal UInt16 _BG2PA;
+        internal UInt16 _BG2PB;
+        internal UInt16 _BG2PC;
+        internal UInt16 _BG2PD;
+        internal UInt32 _BG2X;
+        internal UInt32 _BG2Y;
 
-        internal UInt16 BG3PA;
-        internal UInt16 BG3PB;
-        internal UInt16 BG3PC;
-        internal UInt16 BG3PD;
-        internal UInt32 BG3X;
-        internal UInt32 BG3Y;
+        internal UInt16 _BG3PA;
+        internal UInt16 _BG3PB;
+        internal UInt16 _BG3PC;
+        internal UInt16 _BG3PD;
+        internal UInt32 _BG3X;
+        internal UInt32 _BG3Y;
 
-        internal UInt16 WIN0H;
-        internal UInt16 WIN1H;
+        internal UInt16 _WIN0H;
+        internal UInt16 _WIN1H;
 
-        internal UInt16 WIN0V;
-        internal UInt16 WIN1V;
+        internal UInt16 _WIN0V;
+        internal UInt16 _WIN1V;
 
-        internal UInt16 WININ;
-        internal UInt16 WINOUT;
+        internal UInt16 _WININ;
+        internal UInt16 _WINOUT;
 
-        internal UInt16 MOSAIC;
+        internal UInt16 _MOSAIC;
 
-        internal UInt16 BLDCNT;
-        internal UInt16 BLDALPHA;
-        internal UInt16 BLDY;
+        internal UInt16 _BLDCNT;
+        internal UInt16 _BLDALPHA;
+        internal UInt16 _BLDY;
 
         private const UInt32 PhysicalScreenWidth = 240;
         private const UInt32 PhysicalScreenHeight = 160;
@@ -154,64 +154,64 @@ namespace Iris.GBA
 
         internal void Reset()
         {
-            DISPSTAT = 0;
-            DISPCNT = 0;
-            VCOUNT = 0;
+            _DISPSTAT = 0;
+            _DISPCNT = 0;
+            _VCOUNT = 0;
 
-            BG0CNT = 0;
-            BG1CNT = 0;
-            BG2CNT = 0;
-            BG3CNT = 0;
+            _BG0CNT = 0;
+            _BG1CNT = 0;
+            _BG2CNT = 0;
+            _BG3CNT = 0;
 
-            BG0HOFS = 0;
-            BG0VOFS = 0;
+            _BG0HOFS = 0;
+            _BG0VOFS = 0;
 
-            BG1HOFS = 0;
-            BG1VOFS = 0;
+            _BG1HOFS = 0;
+            _BG1VOFS = 0;
 
-            BG2HOFS = 0;
-            BG2VOFS = 0;
+            _BG2HOFS = 0;
+            _BG2VOFS = 0;
 
-            BG3HOFS = 0;
-            BG3VOFS = 0;
+            _BG3HOFS = 0;
+            _BG3VOFS = 0;
 
-            BG2PA = 0;
-            BG2PB = 0;
-            BG2PC = 0;
-            BG2PD = 0;
-            BG2X = 0;
-            BG2Y = 0;
+            _BG2PA = 0;
+            _BG2PB = 0;
+            _BG2PC = 0;
+            _BG2PD = 0;
+            _BG2X = 0;
+            _BG2Y = 0;
 
-            BG3PA = 0;
-            BG3PB = 0;
-            BG3PC = 0;
-            BG3PD = 0;
-            BG3X = 0;
-            BG3Y = 0;
+            _BG3PA = 0;
+            _BG3PB = 0;
+            _BG3PC = 0;
+            _BG3PD = 0;
+            _BG3X = 0;
+            _BG3Y = 0;
 
-            WIN0H = 0;
-            WIN1H = 0;
+            _WIN0H = 0;
+            _WIN1H = 0;
 
-            WIN0V = 0;
-            WIN1V = 0;
+            _WIN0V = 0;
+            _WIN1V = 0;
 
-            WININ = 0;
-            WINOUT = 0;
+            _WININ = 0;
+            _WINOUT = 0;
 
-            MOSAIC = 0;
+            _MOSAIC = 0;
 
-            BLDCNT = 0;
-            BLDALPHA = 0;
-            BLDY = 0;
+            _BLDCNT = 0;
+            _BLDALPHA = 0;
+            _BLDY = 0;
 
             _scheduler.AddTask(4 * HorizontalLineWidth, StartHorizontalLine);
         }
 
         private void StartHorizontalLine(UInt32 cycleCountDelay)
         {
-            ++VCOUNT;
+            ++_VCOUNT;
 
-            switch ((UInt32)VCOUNT)
+            switch ((UInt32)_VCOUNT)
             {
                 case PhysicalScreenHeight:
                     StartVBlank();
@@ -227,7 +227,7 @@ namespace Iris.GBA
 
         private void StartVBlank()
         {
-            UInt16 bgMode = (UInt16)(DISPCNT & 0b111);
+            UInt16 bgMode = (UInt16)(_DISPCNT & 0b111);
 
             switch (bgMode)
             {
@@ -236,10 +236,10 @@ namespace Iris.GBA
                         UInt16[] screenFrameBuffer = new UInt16[PhysicalScreenSize];
 
 #if !RELEASE_NOPPU
-                        UInt16 bg0 = (UInt16)((DISPCNT >> 8) & 1);
-                        UInt16 bg1 = (UInt16)((DISPCNT >> 9) & 1);
-                        UInt16 bg2 = (UInt16)((DISPCNT >> 10) & 1);
-                        UInt16 bg3 = (UInt16)((DISPCNT >> 11) & 1);
+                        UInt16 bg0 = (UInt16)((_DISPCNT >> 8) & 1);
+                        UInt16 bg1 = (UInt16)((_DISPCNT >> 9) & 1);
+                        UInt16 bg2 = (UInt16)((_DISPCNT >> 10) & 1);
+                        UInt16 bg3 = (UInt16)((_DISPCNT >> 11) & 1);
 
                         if (bg3 == 1)
                             RenderBackground(3, screenFrameBuffer);
@@ -259,14 +259,14 @@ namespace Iris.GBA
                     }
                 case 0b100:
                     {
-                        UInt16 bg2 = (UInt16)((DISPCNT >> 10) & 1);
+                        UInt16 bg2 = (UInt16)((_DISPCNT >> 10) & 1);
 
                         if (bg2 == 1)
                         {
                             UInt16[] screenFrameBuffer = new UInt16[PhysicalScreenSize];
 
 #if !RELEASE_NOPPU
-                            UInt16 frameBuffer = (UInt16)((DISPCNT >> 4) & 1);
+                            UInt16 frameBuffer = (UInt16)((_DISPCNT >> 4) & 1);
                             UInt32 frameBufferAddress = (frameBuffer == 0) ? 0x0_0000u : 0x0_a000u;
 
                             for (UInt32 i = 0; i < PhysicalScreenSize; ++i)
@@ -289,16 +289,16 @@ namespace Iris.GBA
                     break;
             }
 
-            if ((DISPSTAT & 0x0008) != 0)
+            if ((_DISPSTAT & 0x0008) != 0)
                 _callbackInterface.RequestVBlankInterrupt();
 
-            DISPSTAT |= 1;
+            _DISPSTAT |= 1;
         }
 
         private void EndVBlank()
         {
-            DISPSTAT &= ~1 & 0xffff;
-            VCOUNT = 0;
+            _DISPSTAT &= ~1 & 0xffff;
+            _VCOUNT = 0;
         }
 
         private void RenderBackground(int bg, UInt16[] screenFrameBuffer)
@@ -310,24 +310,24 @@ namespace Iris.GBA
             switch (bg)
             {
                 case 0:
-                    bgcnt = BG0CNT;
-                    bgvofs = BG0VOFS;
-                    bghofs = BG0HOFS;
+                    bgcnt = _BG0CNT;
+                    bgvofs = _BG0VOFS;
+                    bghofs = _BG0HOFS;
                     break;
                 case 1:
-                    bgcnt = BG1CNT;
-                    bgvofs = BG1VOFS;
-                    bghofs = BG1HOFS;
+                    bgcnt = _BG1CNT;
+                    bgvofs = _BG1VOFS;
+                    bghofs = _BG1HOFS;
                     break;
                 case 2:
-                    bgcnt = BG2CNT;
-                    bgvofs = BG2VOFS;
-                    bghofs = BG2HOFS;
+                    bgcnt = _BG2CNT;
+                    bgvofs = _BG2VOFS;
+                    bghofs = _BG2HOFS;
                     break;
                 case 3:
-                    bgcnt = BG3CNT;
-                    bgvofs = BG3VOFS;
-                    bghofs = BG3HOFS;
+                    bgcnt = _BG3CNT;
+                    bgvofs = _BG3VOFS;
+                    bghofs = _BG3HOFS;
                     break;
             }
 
