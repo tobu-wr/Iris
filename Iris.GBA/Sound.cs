@@ -34,11 +34,11 @@
         internal UInt16 _WAVE_RAM3_L;
         internal UInt16 _WAVE_RAM3_H;
 
-        //internal UInt16 _FIFO_A_L;
-        //internal UInt16 _FIFO_A_H;
+        internal UInt16 _FIFO_A_L;
+        internal UInt16 _FIFO_A_H;
 
-        //internal UInt16 _FIFO_B_L;
-        //internal UInt16 _FIFO_B_H;
+        internal UInt16 _FIFO_B_L;
+        internal UInt16 _FIFO_B_H;
 
         internal void Reset()
         {
@@ -73,11 +73,11 @@
             _WAVE_RAM3_L = 0;
             _WAVE_RAM3_H = 0;
 
-            //_FIFO_A_L = 0;
-            //_FIFO_A_H = 0;
+            _FIFO_A_L = 0;
+            _FIFO_A_H = 0;
 
-            //_FIFO_B_L = 0;
-            //_FIFO_B_H = 0;
+            _FIFO_B_L = 0;
+            _FIFO_B_H = 0;
         }
     }
 }

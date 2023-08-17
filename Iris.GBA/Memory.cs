@@ -1327,6 +1327,13 @@ namespace Iris.GBA
                                 SetHighByte(ref _communication!._RCNT, value);
                                 break;
 
+                            case 0x140:
+                                SetLowByte(ref _communication!._JOYCNT, value);
+                                break;
+                            case 0x141:
+                                SetHighByte(ref _communication!._JOYCNT, value);
+                                break;
+
                             case 0x200:
                                 SetLowByte(ref _interruptControl!._IE, value);
                                 _interruptControl.UpdateInterrupts();
@@ -1359,6 +1366,10 @@ namespace Iris.GBA
                             case 0x209:
                                 SetHighByte(ref _interruptControl!._IME, value);
                                 _interruptControl.UpdateInterrupts();
+                                break;
+
+                            case 0x300:
+                                _systemControl!._POSTFLG = value;
                                 break;
 
                             case 0x301:
@@ -1890,6 +1901,10 @@ namespace Iris.GBA
                             case 0x5c:
                                 // unused
                                 break;
+                            case 0x080:
+                                _sound!._SOUNDCNT_L = GetLowHalfword(value);
+                                _sound._SOUNDCNT_H = GetHighHalfword(value);
+                                break;
                             case 0x090:
                                 _sound!._WAVE_RAM0_L = GetLowHalfword(value);
                                 _sound._WAVE_RAM0_H = GetHighHalfword(value);
@@ -1905,6 +1920,18 @@ namespace Iris.GBA
                             case 0x09c:
                                 _sound!._WAVE_RAM3_L = GetLowHalfword(value);
                                 _sound._WAVE_RAM3_H = GetHighHalfword(value);
+                                break;
+                            case 0x0a0:
+                                _sound!._FIFO_A_L = GetLowHalfword(value);
+                                _sound._FIFO_A_H = GetHighHalfword(value);
+                                break;
+                            case 0x0a4:
+                                _sound!._FIFO_B_L = GetLowHalfword(value);
+                                _sound._FIFO_B_H = GetHighHalfword(value);
+                                break;
+                            case 0x0a8:
+                            case 0x0ac:
+                                // unused
                                 break;
                             case 0x0b0:
                                 _dma!._DMA0SAD_L = GetLowHalfword(value);
@@ -1954,17 +1981,80 @@ namespace Iris.GBA
                                 _dma!._DMA3CNT_L = GetLowHalfword(value);
                                 _dma._DMA3CNT_H = GetHighHalfword(value);
                                 break;
+                            case 0x0e0:
+                            case 0x0e4:
+                            case 0x0e8:
+                            case 0x0ec:
+                            case 0x0f0:
+                            case 0x0f4:
+                            case 0x0f8:
+                            case 0x0fc:
+                                // unused
+                                break;
                             case 0x100:
                                 _timer!._TM0CNT_L = GetLowHalfword(value);
                                 _timer._TM0CNT_H = GetHighHalfword(value);
+                                break;
+                            case 0x104:
+                                _timer!._TM1CNT_L = GetLowHalfword(value);
+                                _timer._TM1CNT_H = GetHighHalfword(value);
+                                break;
+                            case 0x108:
+                                _timer!._TM2CNT_L = GetLowHalfword(value);
+                                _timer._TM2CNT_H = GetHighHalfword(value);
                                 break;
                             case 0x10c:
                                 _timer!._TM3CNT_L = GetLowHalfword(value);
                                 _timer._TM3CNT_H = GetHighHalfword(value);
                                 break;
+                            case 0x110:
+                            case 0x114:
+                            case 0x118:
+                            case 0x11c:
+                                // unused
+                                break;
+                            case 0x120:
+                                _communication!._SIODATA0 = GetLowHalfword(value);
+                                _communication._SIODATA1 = GetHighHalfword(value);
+                                break;
+                            case 0x124:
+                                _communication!._SIODATA2 = GetLowHalfword(value);
+                                _communication._SIODATA3 = GetHighHalfword(value);
+                                break;
                             case 0x128:
                                 _communication!._SIOCNT = GetLowHalfword(value);
                                 _communication._SIODATA_SEND = GetHighHalfword(value);
+                                break;
+                            case 0x12c:
+                                // unused
+                                break;
+                            case 0x130:
+                                _keyInput!._KEYINPUT = GetLowHalfword(value);
+                                _keyInput._KEYCNT = GetHighHalfword(value);
+                                break;
+                            case 0x140:
+                                _communication!._JOYCNT = GetLowHalfword(value);
+                                // 16 upper bits are unused
+                                break;
+                            case 0x144:
+                            case 0x148:
+                            case 0x14c:
+                                // unused
+                                break;
+                            case 0x150:
+                                _communication!._JOY_RECV_L = GetLowHalfword(value);
+                                _communication._JOY_RECV_H = GetHighHalfword(value);
+                                break;
+                            case 0x154:
+                                _communication!._JOY_TRANS_L = GetLowHalfword(value);
+                                _communication._JOY_TRANS_H = GetHighHalfword(value);
+                                break;
+                            case 0x158:
+                                _communication!._JOYSTAT = GetLowHalfword(value);
+                                // 16 upper bits are unused
+                                break;
+                            case 0x15c:
+                                // unused
                                 break;
                             case 0x200:
                                 _interruptControl!._IE = GetLowHalfword(value);

@@ -12,15 +12,15 @@
 
         internal UInt16 _RCNT;
 
-        //internal UInt16 _JOYCNT;
+        internal UInt16 _JOYCNT;
 
-        //internal UInt16 _JOY_RECV_L;
-        //internal UInt16 _JOY_RECV_H;
+        internal UInt16 _JOY_RECV_L;
+        internal UInt16 _JOY_RECV_H;
 
-        //internal UInt16 _JOY_TRANS_L;
-        //internal UInt16 _JOY_TRANS_H;
+        internal UInt16 _JOY_TRANS_L;
+        internal UInt16 _JOY_TRANS_H;
 
-        //internal UInt16 _JOYSTAT;
+        internal UInt16 _JOYSTAT;
 
         internal void Reset()
         {
@@ -34,15 +34,15 @@
 
             _RCNT = 0;
 
-            //_JOYCNT = 0;
+            _JOYCNT = 0;
 
-            //_JOY_RECV_L = 0;
-            //_JOY_RECV_H = 0;
+            _JOY_RECV_L = 0;
+            _JOY_RECV_H = 0;
 
-            //_JOY_TRANS_L = 0;
-            //_JOY_TRANS_H = 0;
+            _JOY_TRANS_L = 0;
+            _JOY_TRANS_H = 0;
 
-            //_JOYSTAT = 0;
+            _JOYSTAT = 0;
         }
     }
 }
