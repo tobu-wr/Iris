@@ -154,8 +154,57 @@ namespace Iris.GBA
 
         internal void Reset()
         {
+            DISPSTAT = 0;
+            DISPCNT = 0;
             VCOUNT = 0;
-            _scheduler.AddTask(HorizontalLineWidth * 4, StartHorizontalLine);
+
+            BG0CNT = 0;
+            BG1CNT = 0;
+            BG2CNT = 0;
+            BG3CNT = 0;
+
+            BG0HOFS = 0;
+            BG0VOFS = 0;
+
+            BG1HOFS = 0;
+            BG1VOFS = 0;
+
+            BG2HOFS = 0;
+            BG2VOFS = 0;
+
+            BG3HOFS = 0;
+            BG3VOFS = 0;
+
+            BG2PA = 0;
+            BG2PB = 0;
+            BG2PC = 0;
+            BG2PD = 0;
+            BG2X = 0;
+            BG2Y = 0;
+
+            BG3PA = 0;
+            BG3PB = 0;
+            BG3PC = 0;
+            BG3PD = 0;
+            BG3X = 0;
+            BG3Y = 0;
+
+            WIN0H = 0;
+            WIN1H = 0;
+
+            WIN0V = 0;
+            WIN1V = 0;
+
+            WININ = 0;
+            WINOUT = 0;
+
+            MOSAIC = 0;
+
+            BLDCNT = 0;
+            BLDALPHA = 0;
+            BLDY = 0;
+
+            _scheduler.AddTask(4 * HorizontalLineWidth, StartHorizontalLine);
         }
 
         private void StartHorizontalLine(UInt32 cycleCountDelay)
