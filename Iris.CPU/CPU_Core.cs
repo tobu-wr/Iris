@@ -115,6 +115,51 @@ namespace Iris.CPU
             _thumbInterpreter = new(this);
         }
 
+        public void Reset()
+        {
+            Array.Clear(Reg);
+
+            CPSR = 0b1_0000;
+            SPSR = 0;
+
+            Reg8_usr = 0;
+            Reg9_usr = 0;
+            Reg10_usr = 0;
+            Reg11_usr = 0;
+            Reg12_usr = 0;
+            Reg13_usr = 0;
+            Reg14_usr = 0;
+
+            Reg13_svc = 0;
+            Reg14_svc = 0;
+
+            Reg13_abt = 0;
+            Reg14_abt = 0;
+
+            Reg13_und = 0;
+            Reg14_und = 0;
+
+            Reg13_irq = 0;
+            Reg14_irq = 0;
+
+            Reg8_fiq = 0;
+            Reg9_fiq = 0;
+            Reg10_fiq = 0;
+            Reg11_fiq = 0;
+            Reg12_fiq = 0;
+            Reg13_fiq = 0;
+            Reg14_fiq = 0;
+
+            SPSR_svc = 0;
+            SPSR_abt = 0;
+            SPSR_und = 0;
+            SPSR_irq = 0;
+            SPSR_fiq = 0;
+
+            NextInstructionAddress = 0;
+            NIRQ = 0;
+        }
+
         public UInt32 Step()
         {
             UInt32 i = (CPSR >> 7) & 1;

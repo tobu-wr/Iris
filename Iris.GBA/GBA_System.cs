@@ -16,9 +16,10 @@ namespace Iris.GBA
         private readonly KeyInput _keyInput = new();
         private readonly SystemControl _systemControl = new();
         private readonly InterruptControl _interruptControl = new();
-        private readonly BIOS _bios = new BIOS_LLE("D:\\dev\\Iris\\ROMs\\GBA\\gba_bios.bin");
         private readonly Memory _memory = new();
         private readonly Video _video;
+
+        private readonly BIOS _bios = new BIOS_LLE("D:\\dev\\Iris\\ROMs\\GBA\\gba_bios.bin");
 
         private bool _running;
 
@@ -39,6 +40,7 @@ namespace Iris.GBA
         {
             _scheduler.Reset();
 
+            _cpu.Reset();
             _communication.Reset();
             _timer.Reset();
             _sound.Reset();
@@ -46,9 +48,10 @@ namespace Iris.GBA
             _keyInput.Reset();
             _systemControl.Reset();
             _interruptControl.Reset();
-            _bios.Reset();
             _memory.Reset();
             _video.Reset();
+
+            _bios.Reset();
 
             // skip BIOS LLE startup
             // (temp until we are able to boot from BIOS)
