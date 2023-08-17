@@ -120,7 +120,7 @@ namespace Iris.GBA
         //    _disposed = true;
         //}
 
-        internal void StartHorizontalLine(UInt32 cycleCountDelay)
+        private void StartHorizontalLine(UInt32 cycleCountDelay)
         {
             ++VCOUNT;
 
@@ -138,7 +138,7 @@ namespace Iris.GBA
             _scheduler.AddTask(4 * HorizontalLineWidth - cycleCountDelay, StartHorizontalLine);
         }
 
-        internal void StartVBlank()
+        private void StartVBlank()
         {
             UInt16 bgMode = (UInt16)(DISPCNT & 0b111);
 
@@ -208,7 +208,7 @@ namespace Iris.GBA
             DISPSTAT |= 1;
         }
 
-        internal void EndVBlank()
+        private void EndVBlank()
         {
             DISPSTAT &= ~1 & 0xffff;
             VCOUNT = 0;
