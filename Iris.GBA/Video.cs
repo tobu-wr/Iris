@@ -9,13 +9,13 @@ namespace Iris.GBA
     {
         private const int KB = 1024;
 
-        internal const int PaletteRAMSize = 1 * KB;
-        internal const int VRAMSize = 96 * KB;
-        internal const int OAMSize = 1 * KB;
+        private const int PaletteRAM_Size = 1 * KB;
+        private const int VRAM_Size = 96 * KB;
+        private const int OAM_Size = 1 * KB;
 
-        internal readonly IntPtr PaletteRAM = Marshal.AllocHGlobal(PaletteRAMSize);
-        internal readonly IntPtr VRAM = Marshal.AllocHGlobal(VRAMSize);
-        internal readonly IntPtr OAM = Marshal.AllocHGlobal(OAMSize);
+        private readonly IntPtr _paletteRAM = Marshal.AllocHGlobal(PaletteRAM_Size);
+        private readonly IntPtr _vram = Marshal.AllocHGlobal(VRAM_Size);
+        private readonly IntPtr _oam = Marshal.AllocHGlobal(OAM_Size);
 
         internal UInt16 DISPSTAT;
         internal UInt16 DISPCNT;
@@ -85,18 +85,15 @@ namespace Iris.GBA
         private readonly Scheduler _scheduler;
         private readonly CallbackInterface _callbackInterface;
 
+        private Memory _memory;
+
+        private bool _initialized;
         //private bool _disposed;
 
         internal Video(Scheduler scheduler, CallbackInterface callbackInterface)
         {
             _scheduler = scheduler;
             _callbackInterface = callbackInterface;
-        }
-
-        internal void Reset()
-        {
-            VCOUNT = 0;
-            _scheduler.AddTask(HorizontalLineWidth * 4, StartHorizontalLine);
         }
 
         //~PPU()
@@ -116,9 +113,28 @@ namespace Iris.GBA
         //    Marshal.FreeHGlobal(OAM);
 
         //    GC.SuppressFinalize(this);
-
         //    _disposed = true;
         //}
+
+        internal void Initialize(Memory memory)
+        {
+            if (_initialized)
+                return;
+
+            _memory = memory;
+
+            _memory.Map(_paletteRAM, PaletteRAM_Size / Memory.PageSize, 0x0500_0000, 0x0600_0000, Memory.Flag.All & ~(Memory.Flag.Read8 | Memory.Flag.Write8));
+            _memory.Map(_vram, VRAM_Size / Memory.PageSize, 0x0600_0000, 0x0700_0000, Memory.Flag.All & ~(Memory.Flag.Read8 | Memory.Flag.Write8));
+            _memory.Map(_oam, OAM_Size / Memory.PageSize, 0x0700_0000, 0x0800_0000, Memory.Flag.All & ~(Memory.Flag.Read8 | Memory.Flag.Write8));
+
+            _initialized = true;
+        }
+
+        internal void Reset()
+        {
+            VCOUNT = 0;
+            _scheduler.AddTask(HorizontalLineWidth * 4, StartHorizontalLine);
+        }
 
         private void StartHorizontalLine(UInt32 cycleCountDelay)
         {
@@ -186,8 +202,8 @@ namespace Iris.GBA
                             {
                                 unsafe
                                 {
-                                    Byte colorNo = Unsafe.Read<Byte>((Byte*)VRAM + (frameBufferAddress + i));
-                                    UInt16 color = Unsafe.Read<UInt16>((Byte*)PaletteRAM + (colorNo * 2));
+                                    Byte colorNo = Unsafe.Read<Byte>((Byte*)_vram + (frameBufferAddress + i));
+                                    UInt16 color = Unsafe.Read<UInt16>((Byte*)_paletteRAM + (colorNo * 2));
                                     screenFrameBuffer[i] = color;
                                 }
                             }
@@ -287,7 +303,7 @@ namespace Iris.GBA
 
                 unsafe
                 {
-                    UInt16 screenData = Unsafe.Read<UInt16>((Byte*)VRAM + screenDataAddress);
+                    UInt16 screenData = Unsafe.Read<UInt16>((Byte*)_vram + screenDataAddress);
 
                     UInt16 palette = (UInt16)(screenData >> 12);
                     UInt16 verticalFlip = (UInt16)((screenData >> 11) & 1);
@@ -306,7 +322,7 @@ namespace Iris.GBA
                     else
                         characterDataAddress += (7 - (h % CharacterWidth)) / ((CharacterHeight * CharacterWidth) / characterDataSize);
 
-                    Byte characterData = Unsafe.Read<Byte>((Byte*)VRAM + characterDataAddress);
+                    Byte characterData = Unsafe.Read<Byte>((Byte*)_vram + characterDataAddress);
 
                     Byte colorNumber = characterData;
 
@@ -323,7 +339,7 @@ namespace Iris.GBA
 
                     UInt32 paletteAddress = (colorMode == 0) ? (palette * 16u * ColorSize) : 0u;
 
-                    UInt16 color = Unsafe.Read<UInt16>((Byte*)PaletteRAM + paletteAddress + (colorNumber * ColorSize));
+                    UInt16 color = Unsafe.Read<UInt16>((Byte*)_paletteRAM + paletteAddress + (colorNumber * ColorSize));
                     screenFrameBuffer[i] = color;
                 }
             }

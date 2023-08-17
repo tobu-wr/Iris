@@ -140,9 +140,6 @@ namespace Iris.GBA
         {
             Map(_eWRAM, EWRAMSize / PageSize, 0x0200_0000, 0x0300_0000, Flag.All);
             Map(_iWRAM, IWRAMSize / PageSize, 0x0300_0000, 0x0400_0000, Flag.All);
-            Map(_video!.PaletteRAM, Video.PaletteRAMSize / PageSize, 0x0500_0000, 0x0600_0000, Flag.All & ~(Flag.Read8 | Flag.Write8));
-            Map(_video.VRAM, Video.VRAMSize / PageSize, 0x0600_0000, 0x0700_0000, Flag.All & ~(Flag.Read8 | Flag.Write8));
-            Map(_video.OAM, Video.OAMSize / PageSize, 0x0700_0000, 0x0800_0000, Flag.All & ~(Flag.Read8 | Flag.Write8));
             Map(_SRAM, SRAMSize / PageSize, 0x0e00_0000, 0x1000_0000, Flag.Read8 | Flag.Write8 | Flag.Mirrored);
         }
 

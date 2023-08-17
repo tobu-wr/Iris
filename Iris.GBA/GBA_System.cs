@@ -32,8 +32,9 @@ namespace Iris.GBA
             _video = new(_scheduler, ppuCallbackInterface);
 
             _interruptControl.Initialize(_cpu);
-            _bios.Initialize(_cpu, _memory);
             _memory.Initialize(_communication, _timer, _sound, _dma, _keyInput, _systemControl, _interruptControl, _bios, _video);
+            _video.Initialize(_memory);
+            _bios.Initialize(_cpu, _memory);
         }
 
         public override void Reset()
