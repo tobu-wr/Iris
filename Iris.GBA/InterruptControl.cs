@@ -19,7 +19,7 @@ namespace Iris.GBA
             //DMA2 = 1 << 10,
             //DMA3 = 1 << 11,
             //Key = 1 << 12,
-            //GamePak = 1 << 13,
+            //GamePak = 1 << 13
         }
 
         internal UInt16 _IE;
@@ -38,8 +38,6 @@ namespace Iris.GBA
             _IE = 0;
             _IF = 0;
             _IME = 0;
-
-            _cpu!.NIRQ = CPU_Core.Signal.High;
         }
 
         internal void RequestInterrupt(Interrupt interrupt)

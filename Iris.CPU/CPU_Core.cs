@@ -35,8 +35,8 @@ namespace Iris.CPU
 
         public enum Signal
         {
-            Low,
-            High
+            High,
+            Low
         }
 
         internal enum Flag
