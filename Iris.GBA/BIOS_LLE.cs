@@ -9,6 +9,9 @@ namespace Iris.GBA
         private const int BIOS_Size = 16 * KB;
         private readonly IntPtr _bios = Marshal.AllocHGlobal(BIOS_Size);
 
+        private const UInt32 BIOS_StartAddress = 0x0000_0000;
+        private const UInt32 BIOS_EndAddress = 0x0000_4000;
+
         private CPU_Core _cpu;
         private Memory _memory;
 
@@ -37,7 +40,7 @@ namespace Iris.GBA
         ~BIOS_LLE()
         {
             if (_initialized)
-                _memory.Unmap(0, BIOS_Size);
+                _memory.Unmap(BIOS_StartAddress, BIOS_EndAddress);
 
             Marshal.FreeHGlobal(_bios);
         }
@@ -48,7 +51,7 @@ namespace Iris.GBA
                 return;
 
             if (_initialized)
-                _memory.Unmap(0, BIOS_Size);
+                _memory.Unmap(BIOS_StartAddress, BIOS_EndAddress);
 
             Marshal.FreeHGlobal(_bios);
 
@@ -64,8 +67,7 @@ namespace Iris.GBA
             _cpu = cpu;
             _memory = memory;
 
-            int pageCount = BIOS_Size / Memory.PageSize;
-            _memory.Map(_bios, pageCount, 0, BIOS_Size, Memory.Flag.AllRead);
+            _memory.Map(_bios, BIOS_Size / Memory.PageSize, BIOS_StartAddress, BIOS_EndAddress, Memory.Flag.AllRead);
 
             _initialized = true;
         }
