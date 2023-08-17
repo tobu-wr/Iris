@@ -12,6 +12,7 @@ namespace Iris.GBA
         private CPU_Core _cpu;
         private Memory _memory;
 
+        private bool _initialized;
         private bool _disposed;
 
         internal BIOS_LLE(string filename)
@@ -35,7 +36,9 @@ namespace Iris.GBA
 
         ~BIOS_LLE()
         {
-            _memory.Unmap(0, BIOS_Size);
+            if (_initialized)
+                _memory.Unmap(0, BIOS_Size);
+
             Marshal.FreeHGlobal(_bios);
         }
 
@@ -44,7 +47,9 @@ namespace Iris.GBA
             if (_disposed)
                 return;
 
-            _memory.Unmap(0, BIOS_Size);
+            if (_initialized)
+                _memory.Unmap(0, BIOS_Size);
+
             Marshal.FreeHGlobal(_bios);
 
             GC.SuppressFinalize(this);
@@ -53,11 +58,16 @@ namespace Iris.GBA
 
         internal override void Initialize(CPU_Core cpu, Memory memory)
         {
+            if (_initialized)
+                return;
+
             _cpu = cpu;
             _memory = memory;
 
             int pageCount = BIOS_Size / Memory.PageSize;
             _memory.Map(_bios, pageCount, 0, BIOS_Size, Memory.Flag.AllRead);
+
+            _initialized = true;
         }
 
         internal override void Reset()
