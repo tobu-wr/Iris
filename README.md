@@ -22,7 +22,6 @@ Iris is a WIP GameBoy Advance emulator (and maybe DS in the future). I wanted to
 - Common:
   - Limit framerate to 60 FPS
   - Load/save states
-  - Error reporting (ROM infos, emulator version, emulator state, etc..)
 
 ### v2
 
@@ -51,6 +50,7 @@ Iris is a WIP GameBoy Advance emulator (and maybe DS in the future). I wanted to
   - Add option to choose between BIOS HLE and BIOS LLE
   - Add option to enable/disable framerate limiter
   - Add about dialog
+  - Error reporting (ROM infos, emulator version, emulator state, etc..)
 
 ## Tested games
 
