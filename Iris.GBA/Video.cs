@@ -75,12 +75,6 @@ namespace Iris.GBA
         internal UInt16 _BLDALPHA;
         internal UInt16 _BLDY;
 
-        private const UInt32 PhysicalScreenWidth = 240;
-        private const UInt32 PhysicalScreenHeight = 160;
-        private const UInt32 HorizontalLineWidth = 308;
-        private const UInt32 HorizontalLineCount = 228;
-        private const UInt32 PhysicalScreenSize = PhysicalScreenWidth * PhysicalScreenHeight;
-
         internal delegate void RequestInterrupt_Delegate();
 
         // could have used function pointers (delegate*) for performance instead of delegates but it's less flexible (cannot use non-static function for instance)
@@ -89,6 +83,12 @@ namespace Iris.GBA
             Common.System.DrawFrame_Delegate DrawFrame,
             RequestInterrupt_Delegate RequestVBlankInterrupt
         );
+
+        private const UInt32 PhysicalScreenWidth = 240;
+        private const UInt32 PhysicalScreenHeight = 160;
+        private const UInt32 HorizontalLineWidth = 308;
+        private const UInt32 HorizontalLineCount = 228;
+        private const UInt32 PhysicalScreenSize = PhysicalScreenWidth * PhysicalScreenHeight;
 
         private readonly Scheduler _scheduler;
         private readonly CallbackInterface _callbackInterface;
@@ -386,12 +386,12 @@ namespace Iris.GBA
                     if (verticalFlip == 0)
                         characterDataAddress += (v % CharacterHeight) * (characterDataSize / CharacterHeight);
                     else
-                        characterDataAddress += (7 - (v % CharacterHeight)) * (characterDataSize / CharacterHeight);
+                        characterDataAddress += (CharacterHeight - 1 - (v % CharacterHeight)) * (characterDataSize / CharacterHeight);
 
                     if (horizontalFlip == 0)
                         characterDataAddress += (h % CharacterWidth) / ((CharacterHeight * CharacterWidth) / characterDataSize);
                     else
-                        characterDataAddress += (7 - (h % CharacterWidth)) / ((CharacterHeight * CharacterWidth) / characterDataSize);
+                        characterDataAddress += (CharacterWidth - 1 - (h % CharacterWidth)) / ((CharacterHeight * CharacterWidth) / characterDataSize);
 
                     Byte characterData = Unsafe.Read<Byte>((Byte*)_vram + characterDataAddress);
 
@@ -399,10 +399,21 @@ namespace Iris.GBA
 
                     if (colorMode == 0)
                     {
-                        if ((h % 2) == 0)
-                            colorNumber &= 0xf;
+                        if (horizontalFlip == 0)
+                        {
+                            if ((h % 2) == 0)
+                                colorNumber &= 0xf;
+                            else
+                                colorNumber >>= 4;
+                        }
                         else
-                            colorNumber >>= 4;
+                        {
+                            if ((h % 2) == 0)
+                                colorNumber >>= 4;
+                            else
+                                colorNumber &= 0xf;
+                        }
+
                     }
 
                     if ((colorNumber == 0) && (bg != 3))
