@@ -56,6 +56,7 @@
             _SOUND4CNT_L = 0;
             _SOUND4CNT_H = 0;
 
+            _SOUNDCNT_L = 0;
             _SOUNDCNT_H = 0;
             _SOUNDCNT_X = 0;
 

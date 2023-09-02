@@ -87,7 +87,7 @@ namespace Iris.CPU
         public const UInt32 PC = 15;
 
         public readonly UInt32[] Reg = new UInt32[16];
-        public UInt32 CPSR = 0b1_0000;
+        public UInt32 CPSR;
         public UInt32 SPSR;
 
         public UInt32 Reg8_usr, Reg9_usr, Reg10_usr, Reg11_usr, Reg12_usr, Reg13_usr, Reg14_usr;
