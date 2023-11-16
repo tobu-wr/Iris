@@ -157,7 +157,7 @@ namespace Iris.CPU
             SPSR_fiq = 0;
 
             NextInstructionAddress = 0;
-            NIRQ = 0;
+            NIRQ = Signal.High;
         }
 
         public UInt32 Step()

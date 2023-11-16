@@ -44,7 +44,7 @@ namespace Iris.GBA
         private readonly IntPtr _eWRAM = Marshal.AllocHGlobal(EWRAMSize);
         private readonly IntPtr _iWRAM = Marshal.AllocHGlobal(IWRAMSize);
 
-        internal const int PageSize = 1 * KB;
+        private const int PageSize = 1 * KB;
         private const int PageTableSize = 1 << 18;
 
         private readonly IntPtr[] _read8PageTable = new IntPtr[PageTableSize];
@@ -74,8 +74,9 @@ namespace Iris.GBA
             // TODO
         }
 
-        internal void Map(IntPtr data, int pageCount, UInt32 startAddress, UInt32 endAddress, Flag flags)
+        internal void Map(IntPtr data, int size, UInt32 startAddress, UInt32 endAddress, Flag flags)
         {
+            int pageCount = size / PageSize;
             int startTablePageIndex = (int)(startAddress >> 10);
             int endPageTableIndex = (int)(endAddress >> 10);
 

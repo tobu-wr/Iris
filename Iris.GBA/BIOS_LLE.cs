@@ -67,7 +67,7 @@ namespace Iris.GBA
             _cpu = cpu;
             _memory = memory;
 
-            _memory.Map(_bios, BIOS_Size / Memory.PageSize, BIOS_StartAddress, BIOS_EndAddress, Memory.Flag.AllRead);
+            _memory.Map(_bios, BIOS_Size, BIOS_StartAddress, BIOS_EndAddress, Memory.Flag.AllRead);
 
             _initialized = true;
         }

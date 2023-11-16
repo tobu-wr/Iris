@@ -145,9 +145,9 @@ namespace Iris.GBA
 
             _memory = memory;
 
-            _memory.Map(_paletteRAM, PaletteRAM_Size / Memory.PageSize, PaletteRAM_StartAddress, PaletteRAM_EndAddress, Memory.Flag.All & ~(Memory.Flag.Read8 | Memory.Flag.Write8));
-            _memory.Map(_vram, VRAM_Size / Memory.PageSize, VRAM_StartAddress, VRAM_EndAddress, Memory.Flag.All & ~(Memory.Flag.Read8 | Memory.Flag.Write8));
-            _memory.Map(_oam, OAM_Size / Memory.PageSize, OAM_StartAddress, OAM_EndAddress, Memory.Flag.All & ~(Memory.Flag.Read8 | Memory.Flag.Write8));
+            _memory.Map(_paletteRAM, PaletteRAM_Size, PaletteRAM_StartAddress, PaletteRAM_EndAddress, Memory.Flag.All & ~(Memory.Flag.Read8 | Memory.Flag.Write8));
+            _memory.Map(_vram, VRAM_Size, VRAM_StartAddress, VRAM_EndAddress, Memory.Flag.All & ~(Memory.Flag.Read8 | Memory.Flag.Write8));
+            _memory.Map(_oam, OAM_Size, OAM_StartAddress, OAM_EndAddress, Memory.Flag.All & ~(Memory.Flag.Read8 | Memory.Flag.Write8));
 
             _initialized = true;
         }
