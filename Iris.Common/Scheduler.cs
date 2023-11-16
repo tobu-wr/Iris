@@ -3,20 +3,15 @@ using System.Runtime.InteropServices;
 
 namespace Iris.Common
 {
-    public sealed class Scheduler
+    public sealed class Scheduler(int taskListSize)
     {
         public delegate void Task_Delegate(UInt32 cycleCountDelay);
 
         private record struct TaskListEntry(UInt32 CycleCount, Task_Delegate Task);
 
         private UInt32 _cycleCounter;
-        private readonly TaskListEntry[] _taskList; // sorted by CycleCount from smallest to largest
+        private readonly TaskListEntry[] _taskList = new TaskListEntry[taskListSize]; // sorted by CycleCount from smallest to largest
         private int _taskCount;
-
-        public Scheduler(int taskListSize)
-        {
-            _taskList = new TaskListEntry[taskListSize];
-        }
 
         public void Reset()
         {
