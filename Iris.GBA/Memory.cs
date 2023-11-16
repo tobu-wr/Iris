@@ -139,9 +139,9 @@ namespace Iris.GBA
 
         internal void InitPageTables()
         {
-            Map(_eWRAM, EWRAMSize / PageSize, 0x0200_0000, 0x0300_0000, Flag.All);
-            Map(_iWRAM, IWRAMSize / PageSize, 0x0300_0000, 0x0400_0000, Flag.All);
-            Map(_SRAM, SRAMSize / PageSize, 0x0e00_0000, 0x1000_0000, Flag.Read8 | Flag.Write8 | Flag.Mirrored);
+            Map(_eWRAM, EWRAMSize, 0x0200_0000, 0x0300_0000, Flag.All);
+            Map(_iWRAM, IWRAMSize, 0x0300_0000, 0x0400_0000, Flag.All);
+            Map(_SRAM, SRAMSize, 0x0e00_0000, 0x1000_0000, Flag.Read8 | Flag.Write8 | Flag.Mirrored);
         }
 
         internal void LoadROM(string filename)
@@ -156,10 +156,9 @@ namespace Iris.GBA
             _ROM = Marshal.AllocHGlobal(_ROMSize);
             Marshal.Copy(data, 0, _ROM, _ROMSize);
 
-            int pageCount = _ROMSize / PageSize;
-            Map(_ROM, pageCount, 0x0800_0000, 0x0a00_0000, Flag.AllRead);
-            Map(_ROM, pageCount, 0x0a00_0000, 0x0c00_0000, Flag.AllRead);
-            Map(_ROM, pageCount, 0x0c00_0000, 0x0e00_0000, Flag.AllRead);
+            Map(_ROM, _ROMSize, 0x0800_0000, 0x0a00_0000, Flag.AllRead);
+            Map(_ROM, _ROMSize, 0x0a00_0000, 0x0c00_0000, Flag.AllRead);
+            Map(_ROM, _ROMSize, 0x0c00_0000, 0x0e00_0000, Flag.AllRead);
         }
 
         internal Byte Read8(UInt32 address)
