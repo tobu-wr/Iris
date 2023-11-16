@@ -617,6 +617,7 @@ namespace Iris.GBA
                             0x0c4 => (UInt32)(_dma!._DMA1CNT_H << 16),
                             0x0d0 => (UInt32)(_dma!._DMA2CNT_H << 16),
                             0x0dc => (UInt32)(_dma!._DMA3CNT_H << 16),
+                            0x150 => (UInt32)((_communication._JOY_RECV_H << 16) | _communication._JOY_RECV_L),
                             0x200 => (UInt32)((_interruptControl!._IF << 16) | _interruptControl._IE),
                             _ => throw new Exception(string.Format("Iris.GBA.Memory: Unhandled read from address 0x{0:x8}", address)),
                         };
@@ -1737,6 +1738,12 @@ namespace Iris.GBA
                                 break;
                             case 0x134:
                                 _communication!._RCNT = value;
+                                break;
+                            case 0x140:
+                                _communication!._JOYCNT = value;
+                                break;
+                            case 0x158:
+                                _communication!._JOYSTAT = value;
                                 break;
                             case 0x200:
                                 _interruptControl!._IE = value;
