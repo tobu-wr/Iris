@@ -214,13 +214,10 @@ namespace Iris.CPU
 
                 foreach (InstructionListEntry<UInt32> entry in InstructionList)
                 {
-                    if ((instruction & InstructionLUTHash(entry._mask)) == InstructionLUTHash(entry._expected))
+                    if (((instruction & InstructionLUTHash(entry._mask)) == InstructionLUTHash(entry._expected)) && (entry._modelList.Contains(_cpu._model)))
                     {
-                        if (entry._modelList.Contains(_cpu._model))
-                        {
-                            _instructionLUT[instruction] = new(entry._handler);
-                            unknownInstruction = false;
-                        }
+                        _instructionLUT[instruction] = new(entry._handler);
+                        unknownInstruction = false;
                         break;
                     }
                 }
