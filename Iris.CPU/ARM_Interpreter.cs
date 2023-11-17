@@ -208,7 +208,7 @@ namespace Iris.CPU
                 new(0x0fe0_00f0, 0x0080_0090, &UMULL, [Model.ARM7TDMI]),
             ];
 
-            for (UInt64 instruction = 0; instruction < (UInt64)_instructionLUT.LongLength; ++instruction)
+            for (UInt32 instruction = 0; instruction < _instructionLUT.Length; ++instruction)
             {
                 bool unknownInstruction = true;
 

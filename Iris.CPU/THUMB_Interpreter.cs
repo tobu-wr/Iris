@@ -164,7 +164,7 @@ namespace Iris.CPU
                 new(0xffc0, 0x4200, &TST, [Model.ARM7TDMI]),
             ];
 
-            for (UInt32 instruction = 0; instruction < _instructionLUT.Length; ++instruction)
+            for (UInt16 instruction = 0; instruction < _instructionLUT.Length; ++instruction)
             {
                 bool unknownInstruction = true;
 
