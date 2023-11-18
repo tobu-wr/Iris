@@ -235,7 +235,6 @@ namespace Iris.GBA
                     {
                         UInt16[] screenFrameBuffer = new UInt16[PhysicalScreenSize];
 
-#if !RELEASE_NOPPU
                         UInt16 bg0 = (UInt16)((_DISPCNT >> 8) & 1);
                         UInt16 bg1 = (UInt16)((_DISPCNT >> 9) & 1);
                         UInt16 bg2 = (UInt16)((_DISPCNT >> 10) & 1);
@@ -252,7 +251,6 @@ namespace Iris.GBA
 
                         if (bg0 == 1)
                             RenderBackground(0, screenFrameBuffer);
-#endif
 
                         _callbackInterface.DrawFrame(screenFrameBuffer);
                         break;
@@ -265,7 +263,6 @@ namespace Iris.GBA
                         {
                             UInt16[] screenFrameBuffer = new UInt16[PhysicalScreenSize];
 
-#if !RELEASE_NOPPU
                             for (UInt32 i = 0; i < PhysicalScreenSize; ++i)
                             {
                                 unsafe
@@ -274,7 +271,6 @@ namespace Iris.GBA
                                     screenFrameBuffer[i] = color;
                                 }
                             }
-#endif
 
                             _callbackInterface.DrawFrame(screenFrameBuffer);
                         }
@@ -288,7 +284,6 @@ namespace Iris.GBA
                         {
                             UInt16[] screenFrameBuffer = new UInt16[PhysicalScreenSize];
 
-#if !RELEASE_NOPPU
                             UInt16 frameBuffer = (UInt16)((_DISPCNT >> 4) & 1);
                             UInt32 frameBufferAddress = (frameBuffer == 0) ? 0x0_0000u : 0x0_a000u;
 
@@ -301,7 +296,6 @@ namespace Iris.GBA
                                     screenFrameBuffer[i] = color;
                                 }
                             }
-#endif
 
                             _callbackInterface.DrawFrame(screenFrameBuffer);
                         }
