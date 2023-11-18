@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace Iris.GBA
 {
-    internal sealed class Video : IDisposable
+    internal sealed class Video(Scheduler scheduler, Video.CallbackInterface callbackInterface) : IDisposable
     {
         private const int KB = 1024;
 
@@ -84,25 +84,20 @@ namespace Iris.GBA
             RequestInterrupt_Delegate RequestVBlankInterrupt
         );
 
-        private const UInt32 PhysicalScreenWidth = 240;
-        private const UInt32 PhysicalScreenHeight = 160;
-        private const UInt32 HorizontalLineWidth = 308;
-        private const UInt32 HorizontalLineCount = 228;
-        private const UInt32 PhysicalScreenSize = PhysicalScreenWidth * PhysicalScreenHeight;
+        private const int DisplayScreenWidth = 240;
+        private const int DisplayScreenHeight = 160;
+        private const int DisplayScreenSize = DisplayScreenWidth * DisplayScreenHeight;
 
-        private readonly Scheduler _scheduler;
-        private readonly CallbackInterface _callbackInterface;
+        private const int HorizontalLineWidth = 308;
+        private const int HorizontalLineCount = 228;
+
+        private readonly Scheduler _scheduler = scheduler;
+        private readonly CallbackInterface _callbackInterface = callbackInterface;
 
         private Memory _memory;
 
         private bool _initialized;
         private bool _disposed;
-
-        internal Video(Scheduler scheduler, CallbackInterface callbackInterface)
-        {
-            _scheduler = scheduler;
-            _callbackInterface = callbackInterface;
-        }
 
         ~Video()
         {
@@ -213,7 +208,7 @@ namespace Iris.GBA
 
             switch ((UInt32)_VCOUNT)
             {
-                case PhysicalScreenHeight:
+                case DisplayScreenHeight:
                     StartVBlank();
                     break;
 
@@ -233,7 +228,7 @@ namespace Iris.GBA
             {
                 case 0b000:
                     {
-                        UInt16[] screenFrameBuffer = new UInt16[PhysicalScreenSize];
+                        UInt16[] screenFrameBuffer = new UInt16[DisplayScreenSize];
 
                         UInt16 bg0 = (UInt16)((_DISPCNT >> 8) & 1);
                         UInt16 bg1 = (UInt16)((_DISPCNT >> 9) & 1);
@@ -261,9 +256,9 @@ namespace Iris.GBA
 
                         if (bg2 == 1)
                         {
-                            UInt16[] screenFrameBuffer = new UInt16[PhysicalScreenSize];
+                            UInt16[] screenFrameBuffer = new UInt16[DisplayScreenSize];
 
-                            for (UInt32 i = 0; i < PhysicalScreenSize; ++i)
+                            for (UInt32 i = 0; i < DisplayScreenSize; ++i)
                             {
                                 unsafe
                                 {
@@ -282,12 +277,12 @@ namespace Iris.GBA
 
                         if (bg2 == 1)
                         {
-                            UInt16[] screenFrameBuffer = new UInt16[PhysicalScreenSize];
+                            UInt16[] screenFrameBuffer = new UInt16[DisplayScreenSize];
 
                             UInt16 frameBuffer = (UInt16)((_DISPCNT >> 4) & 1);
                             UInt32 frameBufferAddress = (frameBuffer == 0) ? 0x0_0000u : 0x0_a000u;
 
-                            for (UInt32 i = 0; i < PhysicalScreenSize; ++i)
+                            for (UInt32 i = 0; i < DisplayScreenSize; ++i)
                             {
                                 unsafe
                                 {
@@ -374,10 +369,10 @@ namespace Iris.GBA
 
             const UInt32 ColorSize = 2;
 
-            for (UInt32 i = 0; i < PhysicalScreenSize; ++i)
+            for (UInt32 i = 0; i < DisplayScreenSize; ++i)
             {
-                UInt32 h = ((i % PhysicalScreenWidth) + hOffset) % screenWidth;
-                UInt32 v = ((i / PhysicalScreenWidth) + vOffset) % screenHeight;
+                UInt32 h = ((i % DisplayScreenWidth) + hOffset) % screenWidth;
+                UInt32 v = ((i / DisplayScreenWidth) + vOffset) % screenHeight;
 
                 UInt32 screenCharacterNumber = (((v % 256) / CharacterHeight) * (256 / CharacterWidth)) + ((h % 256) / CharacterWidth);
 
