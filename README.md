@@ -1,14 +1,16 @@
 # Iris
 
-Iris is a WIP GameBoy Advance emulator (and maybe DS in the future). I wanted to emulate the GameBoy Advance and needed a project as a playground to learn the C# language so I started this.
+Iris is a WIP GameBoy Advance and Nintendo DS emulator. I wanted to emulate the GBA and the NDS and needed a project as a playground to learn the C# language so I started this.
 
 ## TODOLIST
 
 ### v1
 
 - GBA:
+  - More TONC demos
   - Missing PPU features used in Pokemon Mystery Dungeon (sprites, etc..)
   - Pokemon Mystery Dungeon in playable state
+  - Rudimentary audio
 
 - NDS:
   - TinyFB test ROM
@@ -22,15 +24,6 @@ Iris is a WIP GameBoy Advance emulator (and maybe DS in the future). I wanted to
 - Common:
   - Limit framerate to 60 FPS
   - Load/save states
-
-### v2
-
-- GBA: Rudimentary audio
-- Common: Use OpenGL to make rendering faster with Silk.NET
-
-### v3
-
-- GBA: Kirby Nightmare in Dreamland in playable state
 
 ### Later
 
@@ -46,11 +39,12 @@ Iris is a WIP GameBoy Advance emulator (and maybe DS in the future). I wanted to
   - Timings (same as GBA: ARM946E-S instruction timings, waitstates, instruction pipeline flush, BIOS HLE, etc..)
 
 - Common:
-  - Add settings dialog
+  - Use OpenTK to make rendering faster
+  - Add 'settings' dialog
   - Add option to choose between BIOS HLE and BIOS LLE
   - Add option to enable/disable framerate limiter
-  - Add about dialog
-  - Error reporting (ROM infos, emulator version, emulator state, etc..)
+  - Add 'about' dialog
+  - Error reporting (ROM infos, emulator version, emulator state, etc..)?
 
 ## Tested games
 
@@ -78,4 +72,4 @@ None atm
 - [ARMWrestler test ROM](https://github.com/destoer/armwrestler-gba-fixed)
 - [gba-tests test ROMs](https://github.com/jsmolka/gba-tests) (arm.gba and thumb.gba)
 - [FuzzARM test ROMs](https://github.com/DenSinH/FuzzARM)
-- [TONC demos](https://www.coranac.com/tonc/text/toc.htm) (key_demo.gba)
+- [TONC demos](https://www.coranac.com/tonc/text/toc.htm)
