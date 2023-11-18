@@ -257,6 +257,29 @@ namespace Iris.GBA
                         _callbackInterface.DrawFrame(screenFrameBuffer);
                         break;
                     }
+                case 0b011:
+                    {
+                        UInt16 bg2 = (UInt16)((_DISPCNT >> 10) & 1);
+
+                        if (bg2 == 1)
+                        {
+                            UInt16[] screenFrameBuffer = new UInt16[PhysicalScreenSize];
+
+#if !RELEASE_NOPPU
+                            for (UInt32 i = 0; i < PhysicalScreenSize; ++i)
+                            {
+                                unsafe
+                                {
+                                    UInt16 color = Unsafe.Read<UInt16>((Byte*)_vram + (i * 2));
+                                    screenFrameBuffer[i] = color;
+                                }
+                            }
+#endif
+
+                            _callbackInterface.DrawFrame(screenFrameBuffer);
+                        }
+                        break;
+                    }
                 case 0b100:
                     {
                         UInt16 bg2 = (UInt16)((_DISPCNT >> 10) & 1);

@@ -53,6 +53,10 @@ namespace Iris.GBA
             _video.Reset();
 
             _bios.Reset();
+
+            BIOS_HLE biosHLE = new();
+            biosHLE.Initialize(_cpu, _memory);
+            biosHLE.Reset();
         }
 
         public override void LoadROM(string filename)
