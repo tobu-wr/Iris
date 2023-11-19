@@ -91,6 +91,8 @@ namespace Iris.GBA
         private const int HorizontalLineWidth = 308;
         private const int HorizontalLineCount = 228;
 
+        private const int PixelCycleCount = 4;
+
         private readonly Scheduler _scheduler = scheduler;
         private readonly CallbackInterface _callbackInterface = callbackInterface;
 
@@ -199,7 +201,7 @@ namespace Iris.GBA
             _BLDALPHA = 0;
             _BLDY = 0;
 
-            _scheduler.AddTask(4 * HorizontalLineWidth, StartHorizontalLine);
+            _scheduler.AddTask(HorizontalLineWidth * PixelCycleCount, StartHorizontalLine);
         }
 
         private void StartHorizontalLine(UInt32 cycleCountDelay)
@@ -217,7 +219,7 @@ namespace Iris.GBA
                     break;
             }
 
-            _scheduler.AddTask(4 * HorizontalLineWidth - cycleCountDelay, StartHorizontalLine);
+            _scheduler.AddTask(HorizontalLineWidth * PixelCycleCount - cycleCountDelay, StartHorizontalLine);
         }
 
         private void StartVBlank()
