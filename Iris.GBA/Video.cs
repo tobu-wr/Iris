@@ -101,6 +101,8 @@ namespace Iris.GBA
         private bool _initialized;
         private bool _disposed;
 
+        private readonly UInt16[] _frameBuffer = new UInt16[DisplayScreenSize];
+
         ~Video()
         {
             if (_initialized)
@@ -142,9 +144,10 @@ namespace Iris.GBA
 
             _memory = memory;
 
-            _memory.Map(_paletteRAM, PaletteRAM_Size, PaletteRAM_StartAddress, PaletteRAM_EndAddress, Memory.Flag.All & ~(Memory.Flag.Read8 | Memory.Flag.Write8));
-            _memory.Map(_vram, VRAM_Size, VRAM_StartAddress, VRAM_EndAddress, Memory.Flag.All & ~(Memory.Flag.Read8 | Memory.Flag.Write8));
-            _memory.Map(_oam, OAM_Size, OAM_StartAddress, OAM_EndAddress, Memory.Flag.All & ~(Memory.Flag.Read8 | Memory.Flag.Write8));
+            const Memory.Flag flags = Memory.Flag.All & ~(Memory.Flag.Read8 | Memory.Flag.Write8);
+            _memory.Map(_paletteRAM, PaletteRAM_Size, PaletteRAM_StartAddress, PaletteRAM_EndAddress, flags);
+            _memory.Map(_vram, VRAM_Size, VRAM_StartAddress, VRAM_EndAddress, flags);
+            _memory.Map(_oam, OAM_Size, OAM_StartAddress, OAM_EndAddress, flags);
 
             _initialized = true;
         }
@@ -201,244 +204,288 @@ namespace Iris.GBA
             _BLDALPHA = 0;
             _BLDY = 0;
 
+            Array.Clear(_frameBuffer);
+
             _scheduler.AddTask(HorizontalLineWidth * PixelCycleCount, StartHorizontalLine);
         }
 
         private void StartHorizontalLine(UInt32 cycleCountDelay)
         {
-            ++_VCOUNT;
-
-            switch ((UInt32)_VCOUNT)
+            switch (_VCOUNT)
             {
-                case DisplayScreenHeight:
-                    StartVBlank();
+                case < DisplayScreenHeight - 1:
+                    ++_VCOUNT;
+                    RenderHorizontalLine();
                     break;
 
-                case HorizontalLineCount:
-                    EndVBlank();
+                // VBlank start
+                case DisplayScreenHeight - 1:
+                    _VCOUNT = DisplayScreenHeight;
+                    _DISPSTAT |= 0x0001;
+
+                    if ((_DISPSTAT & 0x0008) == 0x0008)
+                        _callbackInterface.RequestVBlankInterrupt();
+
+                    _callbackInterface.DrawFrame(_frameBuffer);
+                    Array.Clear(_frameBuffer); // TODO: find something faster
+                    break;
+
+                // VBlank end
+                case HorizontalLineCount - 1:
+                    _VCOUNT = 0;
+                    _DISPSTAT = (UInt16)(_DISPSTAT & ~0x0001);
+                    RenderHorizontalLine();
+                    break;
+
+                // VBlank
+                default:
+                    ++_VCOUNT;
                     break;
             }
 
             _scheduler.AddTask(HorizontalLineWidth * PixelCycleCount - cycleCountDelay, StartHorizontalLine);
         }
 
-        private void StartVBlank()
+        private void RenderHorizontalLine()
         {
-            UInt16 bgMode = (UInt16)(_DISPCNT & 0b111);
-
-            switch (bgMode)
+            switch (_DISPCNT & 0b111)
             {
-                case 0b000:
-                    {
-                        UInt16[] screenFrameBuffer = new UInt16[DisplayScreenSize];
-
-                        UInt16 bg0 = (UInt16)((_DISPCNT >> 8) & 1);
-                        UInt16 bg1 = (UInt16)((_DISPCNT >> 9) & 1);
-                        UInt16 bg2 = (UInt16)((_DISPCNT >> 10) & 1);
-                        UInt16 bg3 = (UInt16)((_DISPCNT >> 11) & 1);
-
-                        if (bg3 == 1)
-                            RenderBackground(3, screenFrameBuffer);
-
-                        if (bg2 == 1)
-                            RenderBackground(2, screenFrameBuffer);
-
-                        if (bg1 == 1)
-                            RenderBackground(1, screenFrameBuffer);
-
-                        if (bg0 == 1)
-                            RenderBackground(0, screenFrameBuffer);
-
-                        _callbackInterface.DrawFrame(screenFrameBuffer);
-                        break;
-                    }
                 case 0b011:
-                    {
-                        UInt16 bg2 = (UInt16)((_DISPCNT >> 10) & 1);
+                    RenderHorizontalLine_Mode3();
+                    break;
 
-                        if (bg2 == 1)
-                        {
-                            UInt16[] screenFrameBuffer = new UInt16[DisplayScreenSize];
-
-                            for (UInt32 i = 0; i < DisplayScreenSize; ++i)
-                            {
-                                unsafe
-                                {
-                                    UInt16 color = Unsafe.Read<UInt16>((Byte*)_vram + (i * 2));
-                                    screenFrameBuffer[i] = color;
-                                }
-                            }
-
-                            _callbackInterface.DrawFrame(screenFrameBuffer);
-                        }
-                        break;
-                    }
-                case 0b100:
-                    {
-                        UInt16 bg2 = (UInt16)((_DISPCNT >> 10) & 1);
-
-                        if (bg2 == 1)
-                        {
-                            UInt16[] screenFrameBuffer = new UInt16[DisplayScreenSize];
-
-                            UInt16 frameBuffer = (UInt16)((_DISPCNT >> 4) & 1);
-                            UInt32 frameBufferAddress = (frameBuffer == 0) ? 0x0_0000u : 0x0_a000u;
-
-                            for (UInt32 i = 0; i < DisplayScreenSize; ++i)
-                            {
-                                unsafe
-                                {
-                                    Byte colorNo = Unsafe.Read<Byte>((Byte*)_vram + (frameBufferAddress + i));
-                                    UInt16 color = Unsafe.Read<UInt16>((Byte*)_paletteRAM + (colorNo * 2));
-                                    screenFrameBuffer[i] = color;
-                                }
-                            }
-
-                            _callbackInterface.DrawFrame(screenFrameBuffer);
-                        }
-                        break;
-                    }
                 default:
-                    Console.WriteLine("Iris.GBA.PPU: BG mode {0} unimplemented", bgMode);
                     break;
             }
-
-            if ((_DISPSTAT & 0x0008) != 0)
-                _callbackInterface.RequestVBlankInterrupt();
-
-            _DISPSTAT |= 1;
         }
 
-        private void EndVBlank()
+        private void RenderHorizontalLine_Mode3()
         {
-            _DISPSTAT &= ~1 & 0xffff;
-            _VCOUNT = 0;
-        }
+            if ((_DISPCNT & 0x0400) == 0)
+                return;
 
-        private void RenderBackground(int bg, UInt16[] screenFrameBuffer)
-        {
-            UInt16 bgcnt = 0;
-            UInt16 bgvofs = 0;
-            UInt16 bghofs = 0;
-
-            switch (bg)
+            for (int i = 0; i < DisplayScreenWidth; ++i)
             {
-                case 0:
-                    bgcnt = _BG0CNT;
-                    bgvofs = _BG0VOFS;
-                    bghofs = _BG0HOFS;
-                    break;
-                case 1:
-                    bgcnt = _BG1CNT;
-                    bgvofs = _BG1VOFS;
-                    bghofs = _BG1HOFS;
-                    break;
-                case 2:
-                    bgcnt = _BG2CNT;
-                    bgvofs = _BG2VOFS;
-                    bghofs = _BG2HOFS;
-                    break;
-                case 3:
-                    bgcnt = _BG3CNT;
-                    bgvofs = _BG3VOFS;
-                    bghofs = _BG3HOFS;
-                    break;
-            }
-
-            UInt16 screenSize = (UInt16)((bgcnt >> 14) & 0b11);
-            UInt16 screenBaseBlock = (UInt16)((bgcnt >> 8) & 0b1_1111);
-            UInt16 colorMode = (UInt16)((bgcnt >> 7) & 1);
-            UInt16 characterBaseBlock = (UInt16)((bgcnt >> 2) & 0b11);
-
-            UInt32 screenWidth = ((screenSize & 0b01) == 0) ? 256u : 512u;
-            UInt32 screenHeight = ((screenSize & 0b10) == 0) ? 256u : 512u;
-
-            const UInt32 ScreenBaseBlockSize = 2u * KB;
-            const UInt32 CharacterBaseBlockSize = 16u * KB;
-
-            UInt32 screenBaseBlockAddress = screenBaseBlock * ScreenBaseBlockSize;
-            UInt32 characterBaseBlockAddress = characterBaseBlock * CharacterBaseBlockSize;
-
-            UInt32 vOffset = bgvofs & 0x1ffu;
-            UInt32 hOffset = bghofs & 0x1ffu;
-
-            const UInt32 CharacterWidth = 8;
-            const UInt32 CharacterHeight = 8;
-
-            const UInt32 ScreenDataSizePerCharacter = 2;
-
-            UInt32 characterDataSize = (colorMode == 0) ? 32u : 64u;
-
-            const UInt32 ColorSize = 2;
-
-            for (UInt32 i = 0; i < DisplayScreenSize; ++i)
-            {
-                UInt32 h = ((i % DisplayScreenWidth) + hOffset) % screenWidth;
-                UInt32 v = ((i / DisplayScreenWidth) + vOffset) % screenHeight;
-
-                UInt32 screenCharacterNumber = (((v % 256) / CharacterHeight) * (256 / CharacterWidth)) + ((h % 256) / CharacterWidth);
-
-                if (h >= 256)
-                    screenCharacterNumber += 0x400;
-
-                if (v >= 256)
-                    screenCharacterNumber += 0x400 * (screenWidth / 256);
-
-                UInt32 screenDataAddress = screenBaseBlockAddress + (screenCharacterNumber * ScreenDataSizePerCharacter);
+                int pixel = _VCOUNT * DisplayScreenWidth + i;
 
                 unsafe
                 {
-                    UInt16 screenData = Unsafe.Read<UInt16>((Byte*)_vram + screenDataAddress);
-
-                    UInt16 palette = (UInt16)(screenData >> 12);
-                    UInt16 verticalFlip = (UInt16)((screenData >> 11) & 1);
-                    UInt16 horizontalFlip = (UInt16)((screenData >> 10) & 1);
-                    UInt16 characterNumber = (UInt16)(screenData & 0x3ff);
-
-                    UInt32 characterDataAddress = characterBaseBlockAddress + (characterNumber * characterDataSize);
-
-                    if (verticalFlip == 0)
-                        characterDataAddress += (v % CharacterHeight) * (characterDataSize / CharacterHeight);
-                    else
-                        characterDataAddress += (CharacterHeight - 1 - (v % CharacterHeight)) * (characterDataSize / CharacterHeight);
-
-                    if (horizontalFlip == 0)
-                        characterDataAddress += (h % CharacterWidth) / ((CharacterHeight * CharacterWidth) / characterDataSize);
-                    else
-                        characterDataAddress += (CharacterWidth - 1 - (h % CharacterWidth)) / ((CharacterHeight * CharacterWidth) / characterDataSize);
-
-                    Byte characterData = Unsafe.Read<Byte>((Byte*)_vram + characterDataAddress);
-
-                    Byte colorNumber = characterData;
-
-                    if (colorMode == 0)
-                    {
-                        if (horizontalFlip == 0)
-                        {
-                            if ((h % 2) == 0)
-                                colorNumber &= 0xf;
-                            else
-                                colorNumber >>= 4;
-                        }
-                        else
-                        {
-                            if ((h % 2) == 0)
-                                colorNumber >>= 4;
-                            else
-                                colorNumber &= 0xf;
-                        }
-
-                    }
-
-                    if ((colorNumber == 0) && (bg != 3))
-                        continue;
-
-                    UInt32 paletteAddress = (colorMode == 0) ? (palette * 16u * ColorSize) : 0u;
-
-                    UInt16 color = Unsafe.Read<UInt16>((Byte*)_paletteRAM + paletteAddress + (colorNumber * ColorSize));
-                    screenFrameBuffer[i] = color;
+                    _frameBuffer[pixel] = Unsafe.Read<UInt16>((Byte*)_vram + (pixel * 2));
                 }
             }
         }
+
+        //private void StartVBlank()
+        //{
+        //    UInt16 bgMode = (UInt16)(_DISPCNT & 0b111);
+
+        //    switch (bgMode)
+        //    {
+        //        case 0b000:
+        //            {
+        //                UInt16[] screenFrameBuffer = new UInt16[DisplayScreenSize];
+
+        //                UInt16 bg0 = (UInt16)((_DISPCNT >> 8) & 1);
+        //                UInt16 bg1 = (UInt16)((_DISPCNT >> 9) & 1);
+        //                UInt16 bg2 = (UInt16)((_DISPCNT >> 10) & 1);
+        //                UInt16 bg3 = (UInt16)((_DISPCNT >> 11) & 1);
+
+        //                if (bg3 == 1)
+        //                    RenderBackground(3, screenFrameBuffer);
+
+        //                if (bg2 == 1)
+        //                    RenderBackground(2, screenFrameBuffer);
+
+        //                if (bg1 == 1)
+        //                    RenderBackground(1, screenFrameBuffer);
+
+        //                if (bg0 == 1)
+        //                    RenderBackground(0, screenFrameBuffer);
+
+        //                _callbackInterface.DrawFrame(screenFrameBuffer);
+        //                break;
+        //            }
+        //        case 0b011:
+        //            {
+        //                UInt16 bg2 = (UInt16)((_DISPCNT >> 10) & 1);
+
+        //                if (bg2 == 1)
+        //                {
+        //                    UInt16[] screenFrameBuffer = new UInt16[DisplayScreenSize];
+
+        //                    for (UInt32 i = 0; i < DisplayScreenSize; ++i)
+        //                    {
+        //                        unsafe
+        //                        {
+        //                            UInt16 color = Unsafe.Read<UInt16>((Byte*)_vram + (i * 2));
+        //                            screenFrameBuffer[i] = color;
+        //                        }
+        //                    }
+
+        //                    _callbackInterface.DrawFrame(screenFrameBuffer);
+        //                }
+        //                break;
+        //            }
+        //        case 0b100:
+        //            {
+        //                UInt16 bg2 = (UInt16)((_DISPCNT >> 10) & 1);
+
+        //                if (bg2 == 1)
+        //                {
+        //                    UInt16[] screenFrameBuffer = new UInt16[DisplayScreenSize];
+
+        //                    UInt16 frameBuffer = (UInt16)((_DISPCNT >> 4) & 1);
+        //                    UInt32 frameBufferAddress = (frameBuffer == 0) ? 0x0_0000u : 0x0_a000u;
+
+        //                    for (UInt32 i = 0; i < DisplayScreenSize; ++i)
+        //                    {
+        //                        unsafe
+        //                        {
+        //                            Byte colorNo = Unsafe.Read<Byte>((Byte*)_vram + (frameBufferAddress + i));
+        //                            UInt16 color = Unsafe.Read<UInt16>((Byte*)_paletteRAM + (colorNo * 2));
+        //                            screenFrameBuffer[i] = color;
+        //                        }
+        //                    }
+
+        //                    _callbackInterface.DrawFrame(screenFrameBuffer);
+        //                }
+        //                break;
+        //            }
+        //        default:
+        //            Console.WriteLine("Iris.GBA.PPU: BG mode {0} unimplemented", bgMode);
+        //            break;
+        //    }
+
+        //    if ((_DISPSTAT & 0x0008) != 0)
+        //        _callbackInterface.RequestVBlankInterrupt();
+
+        //    _DISPSTAT |= 1;
+        //}
+
+        //private void RenderBackground(int bg, UInt16[] screenFrameBuffer)
+        //{
+        //    UInt16 bgcnt = 0;
+        //    UInt16 bgvofs = 0;
+        //    UInt16 bghofs = 0;
+
+        //    switch (bg)
+        //    {
+        //        case 0:
+        //            bgcnt = _BG0CNT;
+        //            bgvofs = _BG0VOFS;
+        //            bghofs = _BG0HOFS;
+        //            break;
+        //        case 1:
+        //            bgcnt = _BG1CNT;
+        //            bgvofs = _BG1VOFS;
+        //            bghofs = _BG1HOFS;
+        //            break;
+        //        case 2:
+        //            bgcnt = _BG2CNT;
+        //            bgvofs = _BG2VOFS;
+        //            bghofs = _BG2HOFS;
+        //            break;
+        //        case 3:
+        //            bgcnt = _BG3CNT;
+        //            bgvofs = _BG3VOFS;
+        //            bghofs = _BG3HOFS;
+        //            break;
+        //    }
+
+        //    UInt16 screenSize = (UInt16)((bgcnt >> 14) & 0b11);
+        //    UInt16 screenBaseBlock = (UInt16)((bgcnt >> 8) & 0b1_1111);
+        //    UInt16 colorMode = (UInt16)((bgcnt >> 7) & 1);
+        //    UInt16 characterBaseBlock = (UInt16)((bgcnt >> 2) & 0b11);
+
+        //    UInt32 screenWidth = ((screenSize & 0b01) == 0) ? 256u : 512u;
+        //    UInt32 screenHeight = ((screenSize & 0b10) == 0) ? 256u : 512u;
+
+        //    const UInt32 ScreenBaseBlockSize = 2u * KB;
+        //    const UInt32 CharacterBaseBlockSize = 16u * KB;
+
+        //    UInt32 screenBaseBlockAddress = screenBaseBlock * ScreenBaseBlockSize;
+        //    UInt32 characterBaseBlockAddress = characterBaseBlock * CharacterBaseBlockSize;
+
+        //    UInt32 vOffset = bgvofs & 0x1ffu;
+        //    UInt32 hOffset = bghofs & 0x1ffu;
+
+        //    const UInt32 CharacterWidth = 8;
+        //    const UInt32 CharacterHeight = 8;
+
+        //    const UInt32 ScreenDataSizePerCharacter = 2;
+
+        //    UInt32 characterDataSize = (colorMode == 0) ? 32u : 64u;
+
+        //    const UInt32 ColorSize = 2;
+
+        //    for (UInt32 i = 0; i < DisplayScreenSize; ++i)
+        //    {
+        //        UInt32 h = ((i % DisplayScreenWidth) + hOffset) % screenWidth;
+        //        UInt32 v = ((i / DisplayScreenWidth) + vOffset) % screenHeight;
+
+        //        UInt32 screenCharacterNumber = (((v % 256) / CharacterHeight) * (256 / CharacterWidth)) + ((h % 256) / CharacterWidth);
+
+        //        if (h >= 256)
+        //            screenCharacterNumber += 0x400;
+
+        //        if (v >= 256)
+        //            screenCharacterNumber += 0x400 * (screenWidth / 256);
+
+        //        UInt32 screenDataAddress = screenBaseBlockAddress + (screenCharacterNumber * ScreenDataSizePerCharacter);
+
+        //        unsafe
+        //        {
+        //            UInt16 screenData = Unsafe.Read<UInt16>((Byte*)_vram + screenDataAddress);
+
+        //            UInt16 palette = (UInt16)(screenData >> 12);
+        //            UInt16 verticalFlip = (UInt16)((screenData >> 11) & 1);
+        //            UInt16 horizontalFlip = (UInt16)((screenData >> 10) & 1);
+        //            UInt16 characterNumber = (UInt16)(screenData & 0x3ff);
+
+        //            UInt32 characterDataAddress = characterBaseBlockAddress + (characterNumber * characterDataSize);
+
+        //            if (verticalFlip == 0)
+        //                characterDataAddress += (v % CharacterHeight) * (characterDataSize / CharacterHeight);
+        //            else
+        //                characterDataAddress += (CharacterHeight - 1 - (v % CharacterHeight)) * (characterDataSize / CharacterHeight);
+
+        //            if (horizontalFlip == 0)
+        //                characterDataAddress += (h % CharacterWidth) / ((CharacterHeight * CharacterWidth) / characterDataSize);
+        //            else
+        //                characterDataAddress += (CharacterWidth - 1 - (h % CharacterWidth)) / ((CharacterHeight * CharacterWidth) / characterDataSize);
+
+        //            Byte characterData = Unsafe.Read<Byte>((Byte*)_vram + characterDataAddress);
+
+        //            Byte colorNumber = characterData;
+
+        //            if (colorMode == 0)
+        //            {
+        //                if (horizontalFlip == 0)
+        //                {
+        //                    if ((h % 2) == 0)
+        //                        colorNumber &= 0xf;
+        //                    else
+        //                        colorNumber >>= 4;
+        //                }
+        //                else
+        //                {
+        //                    if ((h % 2) == 0)
+        //                        colorNumber >>= 4;
+        //                    else
+        //                        colorNumber &= 0xf;
+        //                }
+
+        //            }
+
+        //            if ((colorNumber == 0) && (bg != 3))
+        //                continue;
+
+        //            UInt32 paletteAddress = (colorMode == 0) ? (palette * 16u * ColorSize) : 0u;
+
+        //            UInt16 color = Unsafe.Read<UInt16>((Byte*)_paletteRAM + paletteAddress + (colorNumber * ColorSize));
+        //            screenFrameBuffer[i] = color;
+        //        }
+        //    }
+        //}
     }
 }
