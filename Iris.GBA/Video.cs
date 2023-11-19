@@ -227,7 +227,6 @@ namespace Iris.GBA
                         _callbackInterface.RequestVBlankInterrupt();
 
                     _callbackInterface.DrawFrame(_frameBuffer);
-                    Array.Clear(_frameBuffer); // TODO: find something faster
                     break;
 
                 // VBlank end
