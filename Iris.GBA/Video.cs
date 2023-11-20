@@ -88,7 +88,7 @@ namespace Iris.GBA
         private const int DisplayScreenHeight = 160;
         private const int DisplayScreenSize = DisplayScreenWidth * DisplayScreenHeight;
 
-        private const int HorizontalLineWidth = 308;
+        private const int HorizontalLineLength = 308;
         private const int HorizontalLineCount = 228;
 
         private const int PixelCycleCount = 4;
@@ -206,7 +206,7 @@ namespace Iris.GBA
 
             Array.Clear(_frameBuffer);
 
-            _scheduler.AddTask(HorizontalLineWidth * PixelCycleCount, StartHorizontalLine);
+            _scheduler.AddTask(HorizontalLineLength * PixelCycleCount, StartHorizontalLine);
         }
 
         private void StartHorizontalLine(UInt32 cycleCountDelay)
@@ -215,7 +215,7 @@ namespace Iris.GBA
             {
                 case < DisplayScreenHeight - 1:
                     ++_VCOUNT;
-                    RenderHorizontalLine();
+                    Render();
                     break;
 
                 // VBlank start
@@ -233,7 +233,7 @@ namespace Iris.GBA
                 case HorizontalLineCount - 1:
                     _VCOUNT = 0;
                     _DISPSTAT = (UInt16)(_DISPSTAT & ~0x0001);
-                    RenderHorizontalLine();
+                    Render();
                     break;
 
                 // VBlank
@@ -242,24 +242,24 @@ namespace Iris.GBA
                     break;
             }
 
-            _scheduler.AddTask(HorizontalLineWidth * PixelCycleCount - cycleCountDelay, StartHorizontalLine);
+            _scheduler.AddTask(HorizontalLineLength * PixelCycleCount - cycleCountDelay, StartHorizontalLine);
         }
 
-        private void RenderHorizontalLine()
+        private void Render()
         {
             switch (_DISPCNT & 0b111)
             {
                 case 0b011:
-                    RenderHorizontalLine_Mode3();
+                    RenderMode3();
                     break;
 
                 case 0b100:
-                    RenderHorizontalLine_Mode4();
+                    RenderMode4();
                     break;
             }
         }
 
-        private void RenderHorizontalLine_Mode3()
+        private void RenderMode3()
         {
             if ((_DISPCNT & 0x0400) == 0)
                 return;
@@ -279,7 +279,7 @@ namespace Iris.GBA
             }
         }
 
-        private void RenderHorizontalLine_Mode4()
+        private void RenderMode4()
         {
             if ((_DISPCNT & 0x0400) == 0)
                 return;
