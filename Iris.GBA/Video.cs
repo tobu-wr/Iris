@@ -253,7 +253,8 @@ namespace Iris.GBA
                     RenderHorizontalLine_Mode3();
                     break;
 
-                default:
+                case 0b100:
+                    RenderHorizontalLine_Mode4();
                     break;
             }
         }
@@ -263,13 +264,40 @@ namespace Iris.GBA
             if ((_DISPCNT & 0x0400) == 0)
                 return;
 
-            for (int i = 0; i < DisplayScreenWidth; ++i)
-            {
-                int pixel = _VCOUNT * DisplayScreenWidth + i;
+            ref UInt16 frameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_frameBuffer);
 
+            int pixelNo_Begin = _VCOUNT * DisplayScreenWidth;
+            int pixelNo_End = pixelNo_Begin + DisplayScreenWidth;
+
+            for (int pixelNo = pixelNo_Begin; pixelNo < pixelNo_End; ++pixelNo)
+            {
                 unsafe
                 {
-                    _frameBuffer[pixel] = Unsafe.Read<UInt16>((Byte*)_vram + (pixel * 2));
+                    UInt16 color = Unsafe.Read<UInt16>((UInt16*)_vram + pixelNo);
+                    Unsafe.Add(ref frameBufferDataRef, pixelNo) = color;
+                }
+            }
+        }
+
+        private void RenderHorizontalLine_Mode4()
+        {
+            if ((_DISPCNT & 0x0400) == 0)
+                return;
+
+            ref UInt16 frameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_frameBuffer);
+
+            int pixelNo_Begin = _VCOUNT * DisplayScreenWidth;
+            int pixelNo_End = pixelNo_Begin + DisplayScreenWidth;
+
+            int vramFrameBufferAddress = ((_DISPCNT & 0x0010) == 0) ? 0x0_0000 : 0x0_a000;
+
+            for (int pixelNo = pixelNo_Begin; pixelNo < pixelNo_End; ++pixelNo)
+            {
+                unsafe
+                {
+                    Byte colorNo = Unsafe.Read<Byte>((Byte*)_vram + (vramFrameBufferAddress + pixelNo));
+                    UInt16 color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM + colorNo);
+                    Unsafe.Add(ref frameBufferDataRef, pixelNo) = color;
                 }
             }
         }
@@ -302,52 +330,6 @@ namespace Iris.GBA
         //                    RenderBackground(0, screenFrameBuffer);
 
         //                _callbackInterface.DrawFrame(screenFrameBuffer);
-        //                break;
-        //            }
-        //        case 0b011:
-        //            {
-        //                UInt16 bg2 = (UInt16)((_DISPCNT >> 10) & 1);
-
-        //                if (bg2 == 1)
-        //                {
-        //                    UInt16[] screenFrameBuffer = new UInt16[DisplayScreenSize];
-
-        //                    for (UInt32 i = 0; i < DisplayScreenSize; ++i)
-        //                    {
-        //                        unsafe
-        //                        {
-        //                            UInt16 color = Unsafe.Read<UInt16>((Byte*)_vram + (i * 2));
-        //                            screenFrameBuffer[i] = color;
-        //                        }
-        //                    }
-
-        //                    _callbackInterface.DrawFrame(screenFrameBuffer);
-        //                }
-        //                break;
-        //            }
-        //        case 0b100:
-        //            {
-        //                UInt16 bg2 = (UInt16)((_DISPCNT >> 10) & 1);
-
-        //                if (bg2 == 1)
-        //                {
-        //                    UInt16[] screenFrameBuffer = new UInt16[DisplayScreenSize];
-
-        //                    UInt16 frameBuffer = (UInt16)((_DISPCNT >> 4) & 1);
-        //                    UInt32 frameBufferAddress = (frameBuffer == 0) ? 0x0_0000u : 0x0_a000u;
-
-        //                    for (UInt32 i = 0; i < DisplayScreenSize; ++i)
-        //                    {
-        //                        unsafe
-        //                        {
-        //                            Byte colorNo = Unsafe.Read<Byte>((Byte*)_vram + (frameBufferAddress + i));
-        //                            UInt16 color = Unsafe.Read<UInt16>((Byte*)_paletteRAM + (colorNo * 2));
-        //                            screenFrameBuffer[i] = color;
-        //                        }
-        //                    }
-
-        //                    _callbackInterface.DrawFrame(screenFrameBuffer);
-        //                }
         //                break;
         //            }
         //        default:
