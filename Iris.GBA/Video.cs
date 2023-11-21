@@ -88,11 +88,11 @@ namespace Iris.GBA
         private const int DisplayScreenHeight = 160;
         private const int DisplayScreenSize = DisplayScreenWidth * DisplayScreenHeight;
 
-        private const int HorizontalLineLength = 308;
-        private const int HorizontalLineCount = 228;
+        private const int ScanlineLength = 308;
+        private const int ScanlineCount = 228;
 
-        private const int PixelCycleCount = 4;
-        private const int HorizontalLineCycleCount = HorizontalLineLength * PixelCycleCount;
+        private const UInt32 PixelCycleCount = 4;
+        private const UInt32 ScanlineCycleCount = ScanlineLength * PixelCycleCount;
 
         private readonly Scheduler _scheduler = scheduler;
         private readonly CallbackInterface _callbackInterface = callbackInterface;
@@ -207,10 +207,10 @@ namespace Iris.GBA
 
             Array.Clear(_frameBuffer);
 
-            _scheduler.AddTask(HorizontalLineCycleCount, StartHorizontalLine);
+            _scheduler.AddTask(ScanlineCycleCount, StartScanline);
         }
 
-        private void StartHorizontalLine(UInt32 cycleCountDelay)
+        private void StartScanline(UInt32 cycleCountDelay)
         {
             switch (_VCOUNT)
             {
@@ -231,7 +231,7 @@ namespace Iris.GBA
                     break;
 
                 // VBlank end
-                case HorizontalLineCount - 1:
+                case ScanlineCount - 1:
                     _VCOUNT = 0;
                     _DISPSTAT = (UInt16)(_DISPSTAT & ~0x0001);
                     Render();
@@ -243,7 +243,7 @@ namespace Iris.GBA
                     break;
             }
 
-            _scheduler.AddTask(HorizontalLineCycleCount - cycleCountDelay, StartHorizontalLine);
+            _scheduler.AddTask(ScanlineCycleCount - cycleCountDelay, StartScanline);
         }
 
         private void Render()
@@ -267,15 +267,15 @@ namespace Iris.GBA
 
             ref UInt16 frameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_frameBuffer);
 
-            int pixelNo_Begin = _VCOUNT * DisplayScreenWidth;
-            int pixelNo_End = pixelNo_Begin + DisplayScreenWidth;
+            int pixelNumberBegin = _VCOUNT * DisplayScreenWidth;
+            int pixelNumberEnd = pixelNumberBegin + DisplayScreenWidth;
 
-            for (int pixelNo = pixelNo_Begin; pixelNo < pixelNo_End; ++pixelNo)
+            for (int pixelNumber = pixelNumberBegin; pixelNumber < pixelNumberEnd; ++pixelNumber)
             {
                 unsafe
                 {
-                    UInt16 color = Unsafe.Read<UInt16>((UInt16*)_vram + pixelNo);
-                    Unsafe.Add(ref frameBufferDataRef, pixelNo) = color;
+                    UInt16 color = Unsafe.Read<UInt16>((UInt16*)_vram + pixelNumber);
+                    Unsafe.Add(ref frameBufferDataRef, pixelNumber) = color;
                 }
             }
         }
@@ -287,18 +287,18 @@ namespace Iris.GBA
 
             ref UInt16 frameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_frameBuffer);
 
-            int pixelNo_Begin = _VCOUNT * DisplayScreenWidth;
-            int pixelNo_End = pixelNo_Begin + DisplayScreenWidth;
+            int pixelNumberBegin = _VCOUNT * DisplayScreenWidth;
+            int pixelNumberEnd = pixelNumberBegin + DisplayScreenWidth;
 
-            int vramFrameBufferAddress = ((_DISPCNT & 0x0010) == 0) ? 0x0_0000 : 0x0_a000;
+            UInt32 vramFrameBufferAddress = ((_DISPCNT & 0x0010) == 0) ? 0x0_0000u : 0x0_a000u;
 
-            for (int pixelNo = pixelNo_Begin; pixelNo < pixelNo_End; ++pixelNo)
+            for (int pixelNumber = pixelNumberBegin; pixelNumber < pixelNumberEnd; ++pixelNumber)
             {
                 unsafe
                 {
-                    Byte colorNo = Unsafe.Read<Byte>((Byte*)_vram + (vramFrameBufferAddress + pixelNo));
-                    UInt16 color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM + colorNo);
-                    Unsafe.Add(ref frameBufferDataRef, pixelNo) = color;
+                    Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + (vramFrameBufferAddress + pixelNumber));
+                    UInt16 color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM + colorNumber);
+                    Unsafe.Add(ref frameBufferDataRef, pixelNumber) = color;
                 }
             }
         }
