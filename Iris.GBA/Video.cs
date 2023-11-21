@@ -257,6 +257,10 @@ namespace Iris.GBA
                 case 0b100:
                     RenderMode4();
                     break;
+
+                case 0b101:
+                    RenderMode5();
+                    break;
             }
         }
 
@@ -303,6 +307,40 @@ namespace Iris.GBA
             }
         }
 
+        private void RenderMode5()
+        {
+            if ((_DISPCNT & 0x0400) == 0)
+                return;
+
+            const int VRAM_FrameBufferWidth = 160;
+            const int VRAM_FrameBufferHeight = 128;
+
+            if (_VCOUNT >= VRAM_FrameBufferHeight)
+                return;
+
+            ref UInt16 frameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_frameBuffer);
+
+            int vramFrameBufferPixelNumberBegin = _VCOUNT * VRAM_FrameBufferWidth;
+            int vramFrameBufferPixelNumberEnd = vramFrameBufferPixelNumberBegin + VRAM_FrameBufferWidth;
+
+            int frameBufferPixelNumberBegin = _VCOUNT * DisplayScreenWidth;
+
+            UInt32 vramFrameBufferAddress = ((_DISPCNT & 0x0010) == 0) ? 0x0_0000u : 0x0_a000u;
+
+            for (
+                int vramFrameBufferPixelNumber = vramFrameBufferPixelNumberBegin, frameBufferPixelNumber = frameBufferPixelNumberBegin;
+                vramFrameBufferPixelNumber < vramFrameBufferPixelNumberEnd;
+                ++vramFrameBufferPixelNumber, ++frameBufferPixelNumber
+                )
+            {
+                unsafe
+                {
+                    UInt16 color = Unsafe.Read<UInt16>((Byte*)_vram + (vramFrameBufferAddress + vramFrameBufferPixelNumber * 2));
+                    Unsafe.Add(ref frameBufferDataRef, frameBufferPixelNumber) = color;
+                }
+            }
+        }
+
         //private void StartVBlank()
         //{
         //    UInt16 bgMode = (UInt16)(_DISPCNT & 0b111);
@@ -337,11 +375,6 @@ namespace Iris.GBA
         //            Console.WriteLine("Iris.GBA.PPU: BG mode {0} unimplemented", bgMode);
         //            break;
         //    }
-
-        //    if ((_DISPSTAT & 0x0008) != 0)
-        //        _callbackInterface.RequestVBlankInterrupt();
-
-        //    _DISPSTAT |= 1;
         //}
 
         //private void RenderBackground(int bg, UInt16[] screenFrameBuffer)
