@@ -100,6 +100,9 @@ namespace Iris.GBA
         //private const UInt16 DISPCNT_Window1Enable = 0x4000;
         //private const UInt16 DISPCNT_OBJWindowEnable = 0x8000;
 
+        const UInt32 VRAM_FrameBufferOffset0 = 0x0_0000;
+        const UInt32 VRAM_FrameBufferOffset1 = 0x0_a000;
+
         internal delegate void RequestInterrupt_Delegate();
 
         // could have used function pointers (delegate*) for performance instead of delegates but it's less flexible (cannot use non-static function for instance)
@@ -273,7 +276,9 @@ namespace Iris.GBA
 
         private void Render()
         {
-            switch (_DISPCNT & DISPCNT_BGModeMask)
+            UInt16 mode = (UInt16)(_DISPCNT & DISPCNT_BGModeMask);
+
+            switch (mode)
             {
                 case DISPCNT_BGMode3:
                     RenderMode3();
@@ -286,6 +291,9 @@ namespace Iris.GBA
                 case DISPCNT_BGMode5:
                     RenderMode5();
                     break;
+
+                default:
+                    throw new Exception(string.Format("Iris.GBA.Video: Wrong mode {0}", mode));
             }
         }
 
@@ -319,13 +327,13 @@ namespace Iris.GBA
             int pixelNumberBegin = _VCOUNT * DisplayScreenWidth;
             int pixelNumberEnd = pixelNumberBegin + DisplayScreenWidth;
 
-            UInt32 vramFrameBufferAddress = ((_DISPCNT & DISPCNT_FrameBuffer) == 0) ? 0x0_0000u : 0x0_a000u;
+            UInt32 vramFrameBufferOffset = ((_DISPCNT & DISPCNT_FrameBuffer) == 0) ? VRAM_FrameBufferOffset0 : VRAM_FrameBufferOffset1;
 
             for (int pixelNumber = pixelNumberBegin; pixelNumber < pixelNumberEnd; ++pixelNumber)
             {
                 unsafe
                 {
-                    Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + (vramFrameBufferAddress + pixelNumber));
+                    Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + (vramFrameBufferOffset + pixelNumber));
                     UInt16 color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM + colorNumber);
                     Unsafe.Add(ref frameBufferDataRef, pixelNumber) = color;
                 }
@@ -345,23 +353,19 @@ namespace Iris.GBA
 
             ref UInt16 frameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_frameBuffer);
 
-            int vramFrameBufferPixelNumberBegin = _VCOUNT * VRAM_FrameBufferWidth;
-            int vramFrameBufferPixelNumberEnd = vramFrameBufferPixelNumberBegin + VRAM_FrameBufferWidth;
+            int vramPixelNumberBegin = _VCOUNT * VRAM_FrameBufferWidth;
+            int vramPixelNumberEnd = vramPixelNumberBegin + VRAM_FrameBufferWidth;
 
-            int frameBufferPixelNumberBegin = _VCOUNT * DisplayScreenWidth;
+            int pixelNumberBegin = _VCOUNT * DisplayScreenWidth;
 
-            UInt32 vramFrameBufferAddress = ((_DISPCNT & DISPCNT_FrameBuffer) == 0) ? 0x0_0000u : 0x0_a000u;
+            UInt32 vramFrameBufferOffset = ((_DISPCNT & DISPCNT_FrameBuffer) == 0) ? VRAM_FrameBufferOffset0 : VRAM_FrameBufferOffset1;
 
-            for (
-                int vramFrameBufferPixelNumber = vramFrameBufferPixelNumberBegin, frameBufferPixelNumber = frameBufferPixelNumberBegin;
-                vramFrameBufferPixelNumber < vramFrameBufferPixelNumberEnd;
-                ++vramFrameBufferPixelNumber, ++frameBufferPixelNumber
-                )
+            for (int vramPixelNumber = vramPixelNumberBegin, pixelNumber = pixelNumberBegin; vramPixelNumber < vramPixelNumberEnd; ++vramPixelNumber, ++pixelNumber)
             {
                 unsafe
                 {
-                    UInt16 color = Unsafe.Read<UInt16>((Byte*)_vram + (vramFrameBufferAddress + vramFrameBufferPixelNumber * 2));
-                    Unsafe.Add(ref frameBufferDataRef, frameBufferPixelNumber) = color;
+                    UInt16 color = Unsafe.Read<UInt16>((Byte*)_vram + (vramFrameBufferOffset + vramPixelNumber * 2));
+                    Unsafe.Add(ref frameBufferDataRef, pixelNumber) = color;
                 }
             }
         }
