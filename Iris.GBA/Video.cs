@@ -84,7 +84,7 @@ namespace Iris.GBA
         //private const UInt16 DISPSTAT_VCountSettingMask = 0xf000;
 
         private const UInt16 DISPCNT_BGModeMask = 0x0007;
-        //private const UInt16 DISPCNT_BGMode0 = 0x0000;
+        private const UInt16 DISPCNT_BGMode0 = 0x0000;
         //private const UInt16 DISPCNT_BGMode1 = 0x0001;
         //private const UInt16 DISPCNT_BGMode2 = 0x0002;
         private const UInt16 DISPCNT_BGMode3 = 0x0003;
@@ -110,6 +110,8 @@ namespace Iris.GBA
         (
             Common.System.DrawFrame_Delegate DrawFrame,
             RequestInterrupt_Delegate RequestVBlankInterrupt
+        //RequestInterrupt_Delegate RequestHBlankInterrupt,
+        //RequestInterrupt_Delegate RequestVCountMatchInterrupt
         );
 
         private const int DisplayScreenWidth = 240;
@@ -259,6 +261,10 @@ namespace Iris.GBA
 
             switch (mode)
             {
+                case DISPCNT_BGMode0:
+                    RenderMode0();
+                    break;
+
                 case DISPCNT_BGMode3:
                     RenderMode3();
                     break;
@@ -274,6 +280,11 @@ namespace Iris.GBA
                 default:
                     throw new Exception(string.Format("Iris.GBA.Video: Wrong mode {0}", mode));
             }
+        }
+
+        private void RenderMode0()
+        {
+            // TODO
         }
 
         private void RenderMode3()
