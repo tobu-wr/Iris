@@ -126,21 +126,12 @@ namespace Iris.GBA
         private readonly CallbackInterface _callbackInterface = callbackInterface;
 
         private Memory _memory;
-
-        private bool _initialized;
         private bool _disposed;
 
         private readonly UInt16[] _frameBuffer = new UInt16[DisplayScreenSize];
 
         ~Video()
         {
-            if (_initialized)
-            {
-                _memory.Unmap(PaletteRAM_StartAddress, PaletteRAM_EndAddress);
-                _memory.Unmap(VRAM_StartAddress, VRAM_EndAddress);
-                _memory.Unmap(OAM_StartAddress, OAM_EndAddress);
-            }
-
             Marshal.FreeHGlobal(_paletteRAM);
             Marshal.FreeHGlobal(_vram);
             Marshal.FreeHGlobal(_oam);
@@ -150,13 +141,6 @@ namespace Iris.GBA
         {
             if (_disposed)
                 return;
-
-            if (_initialized)
-            {
-                _memory.Unmap(PaletteRAM_StartAddress, PaletteRAM_EndAddress);
-                _memory.Unmap(VRAM_StartAddress, VRAM_EndAddress);
-                _memory.Unmap(OAM_StartAddress, OAM_EndAddress);
-            }
 
             Marshal.FreeHGlobal(_paletteRAM);
             Marshal.FreeHGlobal(_vram);
@@ -168,17 +152,12 @@ namespace Iris.GBA
 
         internal void Initialize(Memory memory)
         {
-            if (_initialized)
-                return;
-
             _memory = memory;
 
             const Memory.Flag flags = Memory.Flag.All & ~(Memory.Flag.Read8 | Memory.Flag.Write8);
             _memory.Map(_paletteRAM, PaletteRAM_Size, PaletteRAM_StartAddress, PaletteRAM_EndAddress, flags);
             _memory.Map(_vram, VRAM_Size, VRAM_StartAddress, VRAM_EndAddress, flags);
             _memory.Map(_oam, OAM_Size, OAM_StartAddress, OAM_EndAddress, flags);
-
-            _initialized = true;
         }
 
         internal void Reset()

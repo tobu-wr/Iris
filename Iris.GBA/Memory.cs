@@ -132,11 +132,6 @@ namespace Iris.GBA
             }
         }
 
-        internal void Unmap(UInt32 startAddress, UInt32 endAddress)
-        {
-            // TODO
-        }
-
         internal void InitPageTables()
         {
             Map(_eWRAM, EWRAMSize, 0x0200_0000, 0x0300_0000, Flag.All);
