@@ -84,7 +84,7 @@
             _DMA3CNT_H = 0;
         }
 
-        internal void UpdateDMA3()
+        internal void CheckForDMA3()
         {
             if ((_DMA3CNT_H & 0x8000) == 0x8000)
             {

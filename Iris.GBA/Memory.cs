@@ -1196,11 +1196,11 @@ namespace Iris.GBA
 
                             case 0x0de:
                                 SetLowByte(ref _dma!._DMA3CNT_H, value);
-                                _dma.UpdateDMA3();
+                                _dma.CheckForDMA3();
                                 break;
                             case 0x0df:
                                 SetHighByte(ref _dma!._DMA3CNT_H, value);
-                                _dma.UpdateDMA3();
+                                _dma.CheckForDMA3();
                                 break;
 
                             case 0x100:
@@ -1331,20 +1331,20 @@ namespace Iris.GBA
 
                             case 0x200:
                                 SetLowByte(ref _interruptControl!._IE, value);
-                                _interruptControl.UpdateInterrupts();
+                                _interruptControl.CheckForInterrupts();
                                 break;
                             case 0x201:
                                 SetHighByte(ref _interruptControl!._IE, value);
-                                _interruptControl.UpdateInterrupts();
+                                _interruptControl.CheckForInterrupts();
                                 break;
 
                             case 0x202:
                                 _interruptControl!._IF &= (UInt16)~value;
-                                _interruptControl.UpdateInterrupts();
+                                _interruptControl.CheckForInterrupts();
                                 break;
                             case 0x203:
                                 _interruptControl!._IF &= (UInt16)~(value << 8);
-                                _interruptControl.UpdateInterrupts();
+                                _interruptControl.CheckForInterrupts();
                                 break;
 
                             case 0x204:
@@ -1356,11 +1356,11 @@ namespace Iris.GBA
 
                             case 0x208:
                                 SetLowByte(ref _interruptControl!._IME, value);
-                                _interruptControl.UpdateInterrupts();
+                                _interruptControl.CheckForInterrupts();
                                 break;
                             case 0x209:
                                 SetHighByte(ref _interruptControl!._IME, value);
-                                _interruptControl.UpdateInterrupts();
+                                _interruptControl.CheckForInterrupts();
                                 break;
 
                             case 0x300:
@@ -1684,7 +1684,7 @@ namespace Iris.GBA
                                 break;
                             case 0x0de:
                                 _dma!._DMA3CNT_H = value;
-                                _dma.UpdateDMA3();
+                                _dma.CheckForDMA3();
                                 break;
                             case 0x100:
                                 _timer!._TM0CNT_L = value;
@@ -1745,18 +1745,18 @@ namespace Iris.GBA
                                 break;
                             case 0x200:
                                 _interruptControl!._IE = value;
-                                _interruptControl.UpdateInterrupts();
+                                _interruptControl.CheckForInterrupts();
                                 break;
                             case 0x202:
                                 _interruptControl!._IF &= (UInt16)~value;
-                                _interruptControl.UpdateInterrupts();
+                                _interruptControl.CheckForInterrupts();
                                 break;
                             case 0x204:
                                 _systemControl!._WAITCNT = value;
                                 break;
                             case 0x208:
                                 _interruptControl!._IME = value;
-                                _interruptControl.UpdateInterrupts();
+                                _interruptControl.CheckForInterrupts();
                                 break;
                             default:
                                 throw new Exception(string.Format("Iris.GBA.Memory: Unhandled write to address 0x{0:x8}", address));
@@ -1982,7 +1982,7 @@ namespace Iris.GBA
                             case 0x0dc:
                                 _dma!._DMA3CNT_L = GetLowHalfword(value);
                                 _dma._DMA3CNT_H = GetHighHalfword(value);
-                                _dma.UpdateDMA3();
+                                _dma.CheckForDMA3();
                                 break;
                             case 0x0e0:
                             case 0x0e4:
@@ -2062,7 +2062,7 @@ namespace Iris.GBA
                             case 0x200:
                                 _interruptControl!._IE = GetLowHalfword(value);
                                 _interruptControl._IF &= (UInt16)~GetHighHalfword(value);
-                                _interruptControl.UpdateInterrupts();
+                                _interruptControl.CheckForInterrupts();
                                 break;
                             case 0x204:
                                 _systemControl!._WAITCNT = GetLowHalfword(value);
@@ -2070,7 +2070,7 @@ namespace Iris.GBA
                                 break;
                             case 0x208:
                                 _interruptControl!._IME = GetLowHalfword(value);
-                                _interruptControl.UpdateInterrupts();
+                                _interruptControl.CheckForInterrupts();
                                 // 16 upper bits are unused
                                 break;
                             case 0x20c:

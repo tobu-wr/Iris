@@ -43,10 +43,10 @@ namespace Iris.GBA
         internal void RequestInterrupt(Interrupt interrupt)
         {
             _IF |= (UInt16)interrupt;
-            UpdateInterrupts();
+            CheckForInterrupts();
         }
 
-        internal void UpdateInterrupts()
+        internal void CheckForInterrupts()
         {
             _cpu.NIRQ = ((_IME == 0) || ((_IE & _IF) == 0)) ? CPU_Core.Signal.High : CPU_Core.Signal.Low;
         }
