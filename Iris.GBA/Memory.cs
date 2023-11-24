@@ -604,7 +604,7 @@ namespace Iris.GBA
 
                         return offset switch
                         {
-                            0x000 => (UInt32)(_video!._DISPCNT),
+                            0x000 => _video!._DISPCNT,
                             0x004 => (UInt32)((_video!._VCOUNT << 16) | _video._DISPSTAT),
                             0x008 => (UInt32)((_video!._BG1CNT << 16) | _video._BG0CNT),
                             0x00c => (UInt32)((_video!._BG3CNT << 16) | _video._BG2CNT),
@@ -614,6 +614,7 @@ namespace Iris.GBA
                             0x0dc => (UInt32)(_dma!._DMA3CNT_H << 16),
                             0x150 => (UInt32)((_communication._JOY_RECV_H << 16) | _communication._JOY_RECV_L),
                             0x200 => (UInt32)((_interruptControl!._IF << 16) | _interruptControl._IE),
+                            0x208 => _interruptControl!._IME,
                             _ => throw new Exception(string.Format("Iris.GBA.Memory: Unhandled read from address 0x{0:x8}", address)),
                         };
                     }
@@ -2078,6 +2079,10 @@ namespace Iris.GBA
                             case 0x218:
                             case 0x21c:
                                 // unused
+                                break;
+                            case 0x800:
+                                // 16 lower bits are undocumented (internal memory control)
+                                // 16 upper bits are unused
                                 break;
                             default:
                                 throw new Exception(string.Format("Iris.GBA.Memory: Unhandled write to address 0x{0:x8}", address));
