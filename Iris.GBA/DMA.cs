@@ -84,27 +84,55 @@
             _DMA3CNT_H = 0;
         }
 
+        internal void CheckForDMA1()
+        {
+            CheckForDMA(_DMA1CNT_L, ref _DMA1CNT_H, ref _DMA1SAD_L, ref _DMA1SAD_H, ref _DMA1DAD_L, ref _DMA1DAD_H);
+        }
+
         internal void CheckForDMA3()
         {
-            if ((_DMA3CNT_H & 0x8000) == 0x8000)
-            {
-                UInt32 source = (UInt32)((_DMA3SAD_H << 16) | _DMA3SAD_L);
-                UInt32 destination = (UInt32)((_DMA3DAD_H << 16) | _DMA3DAD_L);
-                UInt16 length = _DMA3CNT_L;
-                UInt32 lastDestination = (UInt32)(destination + (length * 2));
+            CheckForDMA(_DMA3CNT_L, ref _DMA3CNT_H, ref _DMA3SAD_L, ref _DMA3SAD_H, ref _DMA3DAD_L, ref _DMA3DAD_H);
+        }
 
-                while (destination < lastDestination)
+        private void CheckForDMA(UInt16 cnt_l, ref UInt16 cnt_h, ref UInt16 sad_l, ref UInt16 sad_h, ref UInt16 dad_l, ref UInt16 dad_h)
+        {
+            if ((cnt_h & 0x8000) == 0x8000)
+            {
+                UInt32 source = (UInt32)((sad_h << 16) | sad_l);
+                UInt32 destination = (UInt32)((dad_h << 16) | dad_l);
+                UInt16 length = cnt_l;
+
+                // 16 bits
+                if ((cnt_h & 0x0400) == 0)
                 {
-                    _memory.Write16(destination, _memory.Read16(source));
-                    destination += 2;
-                    source += 2;
+                    UInt32 lastDestination = (UInt32)(destination + (length * 2));
+
+                    while (destination < lastDestination)
+                    {
+                        _memory.Write16(destination, _memory.Read16(source));
+                        destination += 2;
+                        source += 2;
+                    }
                 }
 
-                _DMA3CNT_H = (UInt16)(_DMA3CNT_H & ~0x8000);
-                _DMA3SAD_L = (UInt16)source;
-                _DMA3SAD_H = (UInt16)(source >> 16);
-                _DMA3DAD_L = (UInt16)destination;
-                _DMA3DAD_H = (UInt16)(destination >> 16);
+                // 32 bits
+                else
+                {
+                    UInt32 lastDestination = (UInt32)(destination + (length * 4));
+
+                    while (destination < lastDestination)
+                    {
+                        _memory.Write32(destination, _memory.Read32(source));
+                        destination += 4;
+                        source += 4;
+                    }
+                }
+
+                cnt_h = (UInt16)(cnt_h & ~0x8000);
+                sad_l = (UInt16)source;
+                sad_h = (UInt16)(source >> 16);
+                dad_l = (UInt16)destination;
+                dad_h = (UInt16)(destination >> 16);
             }
         }
     }
