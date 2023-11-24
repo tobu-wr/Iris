@@ -31,6 +31,7 @@ namespace Iris.GBA
             Video.CallbackInterface ppuCallbackInterface = new(drawFrame, () => _interruptControl.RequestInterrupt(Interrupt.VBlank));
             _video = new(_scheduler, ppuCallbackInterface);
 
+            _dma.Initialize(_memory);
             _interruptControl.Initialize(_cpu);
             _memory.Initialize(_communication, _timer, _sound, _dma, _keyInput, _systemControl, _interruptControl, _bios, _video);
             _video.Initialize(_memory);

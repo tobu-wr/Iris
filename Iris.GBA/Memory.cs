@@ -1196,9 +1196,11 @@ namespace Iris.GBA
 
                             case 0x0de:
                                 SetLowByte(ref _dma!._DMA3CNT_H, value);
+                                _dma.UpdateDMA3();
                                 break;
                             case 0x0df:
                                 SetHighByte(ref _dma!._DMA3CNT_H, value);
+                                _dma.UpdateDMA3();
                                 break;
 
                             case 0x100:
@@ -1682,6 +1684,7 @@ namespace Iris.GBA
                                 break;
                             case 0x0de:
                                 _dma!._DMA3CNT_H = value;
+                                _dma.UpdateDMA3();
                                 break;
                             case 0x100:
                                 _timer!._TM0CNT_L = value;
@@ -1979,6 +1982,7 @@ namespace Iris.GBA
                             case 0x0dc:
                                 _dma!._DMA3CNT_L = GetLowHalfword(value);
                                 _dma._DMA3CNT_H = GetHighHalfword(value);
+                                _dma.UpdateDMA3();
                                 break;
                             case 0x0e0:
                             case 0x0e4:

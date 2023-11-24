@@ -264,19 +264,15 @@ namespace Iris.GBA
                 case DISPCNT_BGMode0:
                     RenderMode0();
                     break;
-
                 case DISPCNT_BGMode3:
                     RenderMode3();
                     break;
-
                 case DISPCNT_BGMode4:
                     RenderMode4();
                     break;
-
                 case DISPCNT_BGMode5:
                     RenderMode5();
                     break;
-
                 default:
                     throw new Exception(string.Format("Iris.GBA.Video: Wrong mode {0}", mode));
             }
