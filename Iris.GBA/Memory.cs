@@ -1196,7 +1196,6 @@ namespace Iris.GBA
 
                             case 0x0de:
                                 SetLowByte(ref _dma!._DMA3CNT_H, value);
-                                _dma.CheckForDMA3();
                                 break;
                             case 0x0df:
                                 SetHighByte(ref _dma!._DMA3CNT_H, value);
