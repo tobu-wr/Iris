@@ -75,8 +75,8 @@ namespace Iris.GBA
         internal UInt16 _BLDALPHA;
         internal UInt16 _BLDY;
 
-        const UInt32 VRAM_FrameBufferOffset0 = 0x0_0000;
-        const UInt32 VRAM_FrameBufferOffset1 = 0x0_a000;
+        private const UInt32 VRAM_FrameBufferOffset0 = 0x0_0000;
+        private const UInt32 VRAM_FrameBufferOffset1 = 0x0_a000;
 
         internal delegate void RequestInterrupt_Delegate();
 
