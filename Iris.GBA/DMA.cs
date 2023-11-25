@@ -84,9 +84,19 @@
             _DMA3CNT_H = 0;
         }
 
+        internal void CheckForDMA0()
+        {
+            CheckForDMA(_DMA0CNT_L, ref _DMA0CNT_H, ref _DMA0SAD_L, ref _DMA0SAD_H, ref _DMA0DAD_L, ref _DMA0DAD_H);
+        }
+
         internal void CheckForDMA1()
         {
             CheckForDMA(_DMA1CNT_L, ref _DMA1CNT_H, ref _DMA1SAD_L, ref _DMA1SAD_H, ref _DMA1DAD_L, ref _DMA1DAD_H);
+        }
+
+        internal void CheckForDMA2()
+        {
+            CheckForDMA(_DMA2CNT_L, ref _DMA2CNT_H, ref _DMA2SAD_L, ref _DMA2SAD_H, ref _DMA2DAD_L, ref _DMA2DAD_H);
         }
 
         internal void CheckForDMA3()

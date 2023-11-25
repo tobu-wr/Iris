@@ -219,45 +219,27 @@ namespace Iris.GBA
             _scheduler.AddTask(ScanlineCycleCount, StartScanline);
         }
 
-        // TODO: mirroring
         internal void Write8_PaletteRAM(UInt32 address, Byte value)
         {
-            UInt32 offset = (UInt32)((address - PaletteRAM_StartAddress) & ~1);
+            UInt32 offset = (UInt32)((address - PaletteRAM_StartAddress) & ~1) % PaletteRAM_Size;
 
-            if (offset < PaletteRAM_Size)
+            unsafe
             {
-                unsafe
-                {
-                    // much faster than Marshal.WriteByte
-                    Unsafe.Write<Byte>((Byte*)_paletteRAM + offset, value);
-                    Unsafe.Write<Byte>((Byte*)_paletteRAM + offset + 1, value);
-                }
-            }
-            else
-            {
-                throw new NotImplementedException("Iris.GBA.Video: Palette RAM mirroring unimplemented for 8bits writes");
+                // much faster than Marshal.WriteByte
+                Unsafe.Write<Byte>((Byte*)_paletteRAM + offset, value);
+                Unsafe.Write<Byte>((Byte*)_paletteRAM + offset + 1, value);
             }
         }
 
-        // TODO:
-        // - mirroring
-        // - ignore OBJ writes (check bitmap mode)
         internal void Write8_VRAM(UInt32 address, Byte value)
         {
-            UInt32 offset = (UInt32)((address - VRAM_StartAddress) & ~1);
+            UInt32 offset = (UInt32)((address - VRAM_StartAddress) & ~1) % VRAM_Size;
 
-            if (offset < VRAM_Size)
+            unsafe
             {
-                unsafe
-                {
-                    // much faster than Marshal.WriteByte
-                    Unsafe.Write<Byte>((Byte*)_vram + offset, value);
-                    Unsafe.Write<Byte>((Byte*)_vram + offset + 1, value);
-                }
-            }
-            else
-            {
-                throw new NotImplementedException("Iris.GBA.Video: VRAM mirroring unimplemented for 8bits writes");
+                // much faster than Marshal.WriteByte
+                Unsafe.Write<Byte>((Byte*)_vram + offset, value);
+                Unsafe.Write<Byte>((Byte*)_vram + offset + 1, value);
             }
         }
 

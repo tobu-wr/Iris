@@ -1074,6 +1074,7 @@ namespace Iris.GBA
                                 break;
                             case 0x0bb:
                                 SetHighByte(ref _dma!._DMA0CNT_H, value);
+                                _dma.CheckForDMA0();
                                 break;
 
                             case 0x0bc:
@@ -1116,6 +1117,7 @@ namespace Iris.GBA
                                 break;
                             case 0x0c7:
                                 SetHighByte(ref _dma!._DMA1CNT_H, value);
+                                _dma.CheckForDMA1();
                                 break;
 
                             case 0x0c8:
@@ -1158,6 +1160,7 @@ namespace Iris.GBA
                                 break;
                             case 0x0d3:
                                 SetHighByte(ref _dma!._DMA2CNT_H, value);
+                                _dma.CheckForDMA2();
                                 break;
 
                             case 0x0d4:
@@ -1644,6 +1647,7 @@ namespace Iris.GBA
                                 break;
                             case 0x0ba:
                                 _dma!._DMA0CNT_H = value;
+                                _dma.CheckForDMA0();
                                 break;
                             case 0x0bc:
                                 _dma!._DMA1SAD_L = value;
@@ -1662,6 +1666,7 @@ namespace Iris.GBA
                                 break;
                             case 0x0c6:
                                 _dma!._DMA1CNT_H = value;
+                                _dma.CheckForDMA1();
                                 break;
                             case 0x0c8:
                                 _dma!._DMA2SAD_L = value;
@@ -1680,6 +1685,7 @@ namespace Iris.GBA
                                 break;
                             case 0x0d2:
                                 _dma!._DMA2CNT_H = value;
+                                _dma.CheckForDMA2();
                                 break;
                             case 0x0d4:
                                 _dma!._DMA3SAD_L = value;
@@ -1960,6 +1966,7 @@ namespace Iris.GBA
                             case 0x0b8:
                                 _dma!._DMA0CNT_L = GetLowHalfword(value);
                                 _dma._DMA0CNT_H = GetHighHalfword(value);
+                                _dma.CheckForDMA0();
                                 break;
                             case 0x0bc:
                                 _dma!._DMA1SAD_L = GetLowHalfword(value);
@@ -1972,6 +1979,7 @@ namespace Iris.GBA
                             case 0x0c4:
                                 _dma!._DMA1CNT_L = GetLowHalfword(value);
                                 _dma._DMA1CNT_H = GetHighHalfword(value);
+                                _dma.CheckForDMA1();
                                 break;
                             case 0x0c8:
                                 _dma!._DMA2SAD_L = GetLowHalfword(value);
@@ -1984,6 +1992,7 @@ namespace Iris.GBA
                             case 0x0d0:
                                 _dma!._DMA2CNT_L = GetLowHalfword(value);
                                 _dma._DMA2CNT_H = GetHighHalfword(value);
+                                _dma.CheckForDMA2();
                                 break;
                             case 0x0d4:
                                 _dma!._DMA3SAD_L = GetLowHalfword(value);
