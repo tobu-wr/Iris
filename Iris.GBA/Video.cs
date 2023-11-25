@@ -156,7 +156,7 @@ namespace Iris.GBA
         {
             _memory = memory;
 
-            const Memory.Flag flags = Memory.Flag.All & ~(Memory.Flag.Read8 | Memory.Flag.Write8);
+            const Memory.Flag flags = Memory.Flag.All & ~Memory.Flag.Write8;
             _memory.Map(_paletteRAM, PaletteRAM_Size, PaletteRAM_StartAddress, PaletteRAM_EndAddress, flags);
             _memory.Map(_vram, VRAM_Size, VRAM_StartAddress, VRAM_EndAddress, flags);
             _memory.Map(_oam, OAM_Size, OAM_StartAddress, OAM_EndAddress, flags);
@@ -217,6 +217,48 @@ namespace Iris.GBA
             Array.Clear(_frameBuffer);
 
             _scheduler.AddTask(ScanlineCycleCount, StartScanline);
+        }
+
+        // TODO: mirroring
+        internal void Write8_PaletteRAM(UInt32 address, Byte value)
+        {
+            UInt32 offset = (UInt32)((address - PaletteRAM_StartAddress) & ~1);
+
+            if (offset < PaletteRAM_Size)
+            {
+                unsafe
+                {
+                    // much faster than Marshal.WriteByte
+                    Unsafe.Write<Byte>((Byte*)_paletteRAM + offset, value);
+                    Unsafe.Write<Byte>((Byte*)_paletteRAM + offset + 1, value);
+                }
+            }
+            else
+            {
+                throw new NotImplementedException("Iris.GBA.Video: Palette RAM mirroring unimplemented for 8bits writes");
+            }
+        }
+
+        // TODO:
+        // - mirroring
+        // - ignore OBJ writes (check bitmap mode)
+        internal void Write8_VRAM(UInt32 address, Byte value)
+        {
+            UInt32 offset = (UInt32)((address - VRAM_StartAddress) & ~1);
+
+            if (offset < VRAM_Size)
+            {
+                unsafe
+                {
+                    // much faster than Marshal.WriteByte
+                    Unsafe.Write<Byte>((Byte*)_vram + offset, value);
+                    Unsafe.Write<Byte>((Byte*)_vram + offset + 1, value);
+                }
+            }
+            else
+            {
+                throw new NotImplementedException("Iris.GBA.Video: VRAM mirroring unimplemented for 8bits writes");
+            }
         }
 
         private void StartScanline(UInt32 cycleCountDelay)

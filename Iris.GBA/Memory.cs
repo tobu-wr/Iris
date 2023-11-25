@@ -5,15 +5,15 @@ namespace Iris.GBA
 {
     internal sealed class Memory
     {
-        private Communication? _communication;
-        private Timer? _timer;
-        private Sound? _sound;
-        private DMA? _dma;
-        private KeyInput? _keyInput;
-        private SystemControl? _systemControl;
-        private InterruptControl? _interruptControl;
-        private BIOS? _bios;
-        private Video? _video;
+        private Communication _communication;
+        private Timer _timer;
+        private Sound _sound;
+        private DMA _dma;
+        private KeyInput _keyInput;
+        private SystemControl _systemControl;
+        private InterruptControl _interruptControl;
+        private BIOS _bios;
+        private Video _video;
 
         [Flags]
         internal enum Flag
@@ -1379,6 +1379,20 @@ namespace Iris.GBA
                                 throw new Exception(string.Format("Iris.GBA.Memory: Unhandled write to address 0x{0:x8}", address));
                         }
                     }
+                    break;
+
+                // Palette RAM
+                case 0x5:
+                    _video!.Write8_PaletteRAM(address, value);
+                    break;
+
+                // VRAM
+                case 0x6:
+                    _video!.Write8_VRAM(address, value);
+                    break;
+
+                // OAM
+                case 0x7:
                     break;
 
                 // ROM
