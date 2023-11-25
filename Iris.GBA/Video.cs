@@ -75,31 +75,6 @@ namespace Iris.GBA
         internal UInt16 _BLDALPHA;
         internal UInt16 _BLDY;
 
-        private const UInt16 DISPSTAT_VBlankStatus = 0x0001;
-        //private const UInt16 DISPSTAT_HBlankStatus = 0x0002;
-        //private const UInt16 DISPSTAT_VCountMatchStatus = 0x0004;
-        private const UInt16 DISPSTAT_VBlankIRQEnable = 0x0008;
-        //private const UInt16 DISPSTAT_HBlankIRQEnable = 0x0010;
-        //private const UInt16 DISPSTAT_VCountMatchIRQEnable = 0x0020;
-        //private const UInt16 DISPSTAT_VCountSettingMask = 0xf000;
-
-        private const UInt16 DISPCNT_BGModeMask = 0x0007;
-        private const UInt16 DISPCNT_BGMode0 = 0x0000;
-        //private const UInt16 DISPCNT_BGMode1 = 0x0001;
-        //private const UInt16 DISPCNT_BGMode2 = 0x0002;
-        private const UInt16 DISPCNT_BGMode3 = 0x0003;
-        private const UInt16 DISPCNT_BGMode4 = 0x0004;
-        private const UInt16 DISPCNT_BGMode5 = 0x0005;
-        private const UInt16 DISPCNT_FrameBuffer = 0x0010;
-        //private const UInt16 DISPCNT_BG0Enable = 0x0100;
-        //private const UInt16 DISPCNT_BG1Enable = 0x0200;
-        private const UInt16 DISPCNT_BG2Enable = 0x0400;
-        //private const UInt16 DISPCNT_BG3Enable = 0x0800;
-        //private const UInt16 DISPCNT_OBJEnable = 0x1000;
-        //private const UInt16 DISPCNT_Window0Enable = 0x2000;
-        //private const UInt16 DISPCNT_Window1Enable = 0x4000;
-        //private const UInt16 DISPCNT_OBJWindowEnable = 0x8000;
-
         const UInt32 VRAM_FrameBufferOffset0 = 0x0_0000;
         const UInt32 VRAM_FrameBufferOffset1 = 0x0_a000;
 
@@ -255,9 +230,9 @@ namespace Iris.GBA
                 // VBlank start
                 case DisplayScreenHeight - 1:
                     _VCOUNT = DisplayScreenHeight;
-                    _DISPSTAT |= DISPSTAT_VBlankStatus;
+                    _DISPSTAT |= 0x0001;
 
-                    if ((_DISPSTAT & DISPSTAT_VBlankIRQEnable) == DISPSTAT_VBlankIRQEnable)
+                    if ((_DISPSTAT & 0x0008) == 0x0008)
                         _callbackInterface.RequestVBlankInterrupt();
 
                     _callbackInterface.DrawFrame(_frameBuffer);
@@ -266,7 +241,7 @@ namespace Iris.GBA
                 // VBlank end
                 case ScanlineCount - 1:
                     _VCOUNT = 0;
-                    _DISPSTAT = (UInt16)(_DISPSTAT & ~DISPSTAT_VBlankStatus);
+                    _DISPSTAT = (UInt16)(_DISPSTAT & ~0x0001);
                     Render();
                     break;
 
@@ -281,20 +256,20 @@ namespace Iris.GBA
 
         private void Render()
         {
-            UInt16 mode = (UInt16)(_DISPCNT & DISPCNT_BGModeMask);
+            UInt16 mode = (UInt16)(_DISPCNT & 0b111);
 
             switch (mode)
             {
-                case DISPCNT_BGMode0:
+                case 0b000:
                     RenderMode0();
                     break;
-                case DISPCNT_BGMode3:
+                case 0b011:
                     RenderMode3();
                     break;
-                case DISPCNT_BGMode4:
+                case 0b100:
                     RenderMode4();
                     break;
-                case DISPCNT_BGMode5:
+                case 0b101:
                     RenderMode5();
                     break;
                 default:
@@ -309,7 +284,7 @@ namespace Iris.GBA
 
         private void RenderMode3()
         {
-            if ((_DISPCNT & DISPCNT_BG2Enable) == 0)
+            if ((_DISPCNT & 0x0400) == 0)
                 return;
 
             ref UInt16 frameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_frameBuffer);
@@ -329,7 +304,7 @@ namespace Iris.GBA
 
         private void RenderMode4()
         {
-            if ((_DISPCNT & DISPCNT_BG2Enable) == 0)
+            if ((_DISPCNT & 0x0400) == 0)
                 return;
 
             ref UInt16 frameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_frameBuffer);
@@ -337,7 +312,7 @@ namespace Iris.GBA
             int pixelNumberBegin = _VCOUNT * DisplayScreenWidth;
             int pixelNumberEnd = pixelNumberBegin + DisplayScreenWidth;
 
-            UInt32 vramFrameBufferOffset = ((_DISPCNT & DISPCNT_FrameBuffer) == 0) ? VRAM_FrameBufferOffset0 : VRAM_FrameBufferOffset1;
+            UInt32 vramFrameBufferOffset = ((_DISPCNT & 0x0010) == 0) ? VRAM_FrameBufferOffset0 : VRAM_FrameBufferOffset1;
 
             for (int pixelNumber = pixelNumberBegin; pixelNumber < pixelNumberEnd; ++pixelNumber)
             {
@@ -352,7 +327,7 @@ namespace Iris.GBA
 
         private void RenderMode5()
         {
-            if ((_DISPCNT & DISPCNT_BG2Enable) == 0)
+            if ((_DISPCNT & 0x0400) == 0)
                 return;
 
             const int VRAM_FrameBufferWidth = 160;
@@ -368,7 +343,7 @@ namespace Iris.GBA
 
             int pixelNumberBegin = _VCOUNT * DisplayScreenWidth;
 
-            UInt32 vramFrameBufferOffset = ((_DISPCNT & DISPCNT_FrameBuffer) == 0) ? VRAM_FrameBufferOffset0 : VRAM_FrameBufferOffset1;
+            UInt32 vramFrameBufferOffset = ((_DISPCNT & 0x0010) == 0) ? VRAM_FrameBufferOffset0 : VRAM_FrameBufferOffset1;
 
             for (int vramPixelNumber = vramPixelNumberBegin, pixelNumber = pixelNumberBegin; vramPixelNumber < vramPixelNumberEnd; ++vramPixelNumber, ++pixelNumber)
             {
