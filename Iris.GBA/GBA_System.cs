@@ -1,6 +1,5 @@
 ﻿using Iris.Common;
 using Iris.CPU;
-using static Iris.GBA.InterruptControl;
 
 namespace Iris.GBA
 {
@@ -28,7 +27,7 @@ namespace Iris.GBA
             CPU_Core.CallbackInterface cpuCallbackInterface = new(_memory.Read8, _memory.Read16, _memory.Read32, _memory.Write8, _memory.Write16, _memory.Write32, _bios.HandleSWI, _bios.HandleIRQ);
             _cpu = new(CPU_Core.Model.ARM7TDMI, cpuCallbackInterface);
 
-            Video.CallbackInterface ppuCallbackInterface = new(drawFrame, () => _interruptControl.RequestInterrupt(Interrupt.VBlank));
+            Video.CallbackInterface ppuCallbackInterface = new(drawFrame, () => _interruptControl.RequestInterrupt(InterruptControl.Interrupt.VBlank));
             _video = new(_scheduler, ppuCallbackInterface);
 
             _dma.Initialize(_memory);

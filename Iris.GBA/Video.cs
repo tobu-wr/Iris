@@ -318,7 +318,7 @@ namespace Iris.GBA
             {
                 unsafe
                 {
-                    Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + (vramFrameBufferOffset + pixelNumber));
+                    Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + vramFrameBufferOffset + pixelNumber);
                     UInt16 color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM + colorNumber);
                     Unsafe.Add(ref frameBufferDataRef, pixelNumber) = color;
                 }
@@ -349,7 +349,7 @@ namespace Iris.GBA
             {
                 unsafe
                 {
-                    UInt16 color = Unsafe.Read<UInt16>((Byte*)_vram + (vramFrameBufferOffset + vramPixelNumber * 2));
+                    UInt16 color = Unsafe.Read<UInt16>((Byte*)_vram + vramFrameBufferOffset + (vramPixelNumber * 2));
                     Unsafe.Add(ref frameBufferDataRef, pixelNumber) = color;
                 }
             }
