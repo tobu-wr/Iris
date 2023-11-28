@@ -75,9 +75,6 @@ namespace Iris.GBA
         internal UInt16 _BLDALPHA;
         internal UInt16 _BLDY;
 
-        private const UInt32 VRAM_FrameBufferOffset0 = 0x0_0000;
-        private const UInt32 VRAM_FrameBufferOffset1 = 0x0_a000;
-
         internal delegate void RequestInterrupt_Delegate();
 
         // could have used function pointers (delegate*) for performance instead of delegates but it's less flexible (cannot use non-static function for instance)
@@ -105,7 +102,7 @@ namespace Iris.GBA
         private Memory _memory;
         private bool _disposed;
 
-        private readonly UInt16[] _frameBuffer = new UInt16[DisplayScreenSize];
+        private readonly UInt16[] _displayFrameBuffer = new UInt16[DisplayScreenSize];
 
         ~Video()
         {
@@ -189,7 +186,7 @@ namespace Iris.GBA
             _BLDALPHA = 0;
             _BLDY = 0;
 
-            Array.Clear(_frameBuffer);
+            Array.Clear(_displayFrameBuffer);
 
             _scheduler.AddTask(ScanlineCycleCount, StartScanline);
         }
@@ -200,7 +197,6 @@ namespace Iris.GBA
 
             unsafe
             {
-                // much faster than Marshal.WriteByte
                 Unsafe.Write<Byte>((Byte*)_paletteRAM + offset, value);
                 Unsafe.Write<Byte>((Byte*)_paletteRAM + offset + 1, value);
             }
@@ -212,7 +208,6 @@ namespace Iris.GBA
 
             unsafe
             {
-                // much faster than Marshal.WriteByte
                 Unsafe.Write<Byte>((Byte*)_vram + offset, value);
                 Unsafe.Write<Byte>((Byte*)_vram + offset + 1, value);
             }
@@ -235,7 +230,7 @@ namespace Iris.GBA
                     if ((_DISPSTAT & 0x0008) == 0x0008)
                         _callbackInterface.RequestVBlankInterrupt();
 
-                    _callbackInterface.DrawFrame(_frameBuffer);
+                    _callbackInterface.DrawFrame(_displayFrameBuffer);
                     break;
 
                 // VBlank end
@@ -279,7 +274,8 @@ namespace Iris.GBA
 
         private void RenderMode0()
         {
-            // TODO
+            if ((_DISPCNT & 0x0100) == 0x0100)
+                RenderBackground(_BG0CNT, _BG0HOFS, _BG0VOFS);
         }
 
         private void RenderMode3()
@@ -287,7 +283,7 @@ namespace Iris.GBA
             if ((_DISPCNT & 0x0400) == 0)
                 return;
 
-            ref UInt16 frameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_frameBuffer);
+            ref UInt16 displayFrameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_displayFrameBuffer);
 
             int pixelNumberBegin = _VCOUNT * DisplayScreenWidth;
             int pixelNumberEnd = pixelNumberBegin + DisplayScreenWidth;
@@ -297,7 +293,7 @@ namespace Iris.GBA
                 unsafe
                 {
                     UInt16 color = Unsafe.Read<UInt16>((UInt16*)_vram + pixelNumber);
-                    Unsafe.Add(ref frameBufferDataRef, pixelNumber) = color;
+                    Unsafe.Add(ref displayFrameBufferDataRef, pixelNumber) = color;
                 }
             }
         }
@@ -307,12 +303,12 @@ namespace Iris.GBA
             if ((_DISPCNT & 0x0400) == 0)
                 return;
 
-            ref UInt16 frameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_frameBuffer);
+            ref UInt16 displayFrameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_displayFrameBuffer);
 
             int pixelNumberBegin = _VCOUNT * DisplayScreenWidth;
             int pixelNumberEnd = pixelNumberBegin + DisplayScreenWidth;
 
-            UInt32 vramFrameBufferOffset = ((_DISPCNT & 0x0010) == 0) ? VRAM_FrameBufferOffset0 : VRAM_FrameBufferOffset1;
+            UInt32 vramFrameBufferOffset = ((_DISPCNT & 0x0010) == 0) ? 0x0_0000u : 0x0_a000u;
 
             for (int pixelNumber = pixelNumberBegin; pixelNumber < pixelNumberEnd; ++pixelNumber)
             {
@@ -320,7 +316,7 @@ namespace Iris.GBA
                 {
                     Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + vramFrameBufferOffset + pixelNumber);
                     UInt16 color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM + colorNumber);
-                    Unsafe.Add(ref frameBufferDataRef, pixelNumber) = color;
+                    Unsafe.Add(ref displayFrameBufferDataRef, pixelNumber) = color;
                 }
             }
         }
@@ -336,91 +332,32 @@ namespace Iris.GBA
             if (_VCOUNT >= VRAM_FrameBufferHeight)
                 return;
 
-            ref UInt16 frameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_frameBuffer);
+            ref UInt16 displayFrameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_displayFrameBuffer);
 
             int vramPixelNumberBegin = _VCOUNT * VRAM_FrameBufferWidth;
             int vramPixelNumberEnd = vramPixelNumberBegin + VRAM_FrameBufferWidth;
 
-            int pixelNumberBegin = _VCOUNT * DisplayScreenWidth;
+            int displayPixelNumberBegin = _VCOUNT * DisplayScreenWidth;
 
-            UInt32 vramFrameBufferOffset = ((_DISPCNT & 0x0010) == 0) ? VRAM_FrameBufferOffset0 : VRAM_FrameBufferOffset1;
+            UInt32 vramFrameBufferOffset = ((_DISPCNT & 0x0010) == 0) ? 0x0_0000u : 0x0_a000u;
 
-            for (int vramPixelNumber = vramPixelNumberBegin, pixelNumber = pixelNumberBegin; vramPixelNumber < vramPixelNumberEnd; ++vramPixelNumber, ++pixelNumber)
+            for (int vramPixelNumber = vramPixelNumberBegin, displayPixelNumber = displayPixelNumberBegin; vramPixelNumber < vramPixelNumberEnd; ++vramPixelNumber, ++displayPixelNumber)
             {
                 unsafe
                 {
                     UInt16 color = Unsafe.Read<UInt16>((Byte*)_vram + vramFrameBufferOffset + (vramPixelNumber * 2));
-                    Unsafe.Add(ref frameBufferDataRef, pixelNumber) = color;
+                    Unsafe.Add(ref displayFrameBufferDataRef, displayPixelNumber) = color;
                 }
             }
         }
 
-        //private void StartVBlank()
-        //{
-        //    UInt16 bgMode = (UInt16)(_DISPCNT & 0b111);
-
-        //    switch (bgMode)
-        //    {
-        //        case 0b000:
-        //            {
-        //                UInt16[] screenFrameBuffer = new UInt16[DisplayScreenSize];
-
-        //                UInt16 bg0 = (UInt16)((_DISPCNT >> 8) & 1);
-        //                UInt16 bg1 = (UInt16)((_DISPCNT >> 9) & 1);
-        //                UInt16 bg2 = (UInt16)((_DISPCNT >> 10) & 1);
-        //                UInt16 bg3 = (UInt16)((_DISPCNT >> 11) & 1);
-
-        //                if (bg3 == 1)
-        //                    RenderBackground(3, screenFrameBuffer);
-
-        //                if (bg2 == 1)
-        //                    RenderBackground(2, screenFrameBuffer);
-
-        //                if (bg1 == 1)
-        //                    RenderBackground(1, screenFrameBuffer);
-
-        //                if (bg0 == 1)
-        //                    RenderBackground(0, screenFrameBuffer);
-
-        //                _callbackInterface.DrawFrame(screenFrameBuffer);
-        //                break;
-        //            }
-        //        default:
-        //            Console.WriteLine("Iris.GBA.PPU: BG mode {0} unimplemented", bgMode);
-        //            break;
-        //    }
-        //}
+        private void RenderBackground(UInt16 cnt, UInt16 hofs, UInt16 vofs)
+        {
+            // TODO
+        }
 
         //private void RenderBackground(int bg, UInt16[] screenFrameBuffer)
         //{
-        //    UInt16 bgcnt = 0;
-        //    UInt16 bgvofs = 0;
-        //    UInt16 bghofs = 0;
-
-        //    switch (bg)
-        //    {
-        //        case 0:
-        //            bgcnt = _BG0CNT;
-        //            bgvofs = _BG0VOFS;
-        //            bghofs = _BG0HOFS;
-        //            break;
-        //        case 1:
-        //            bgcnt = _BG1CNT;
-        //            bgvofs = _BG1VOFS;
-        //            bghofs = _BG1HOFS;
-        //            break;
-        //        case 2:
-        //            bgcnt = _BG2CNT;
-        //            bgvofs = _BG2VOFS;
-        //            bghofs = _BG2HOFS;
-        //            break;
-        //        case 3:
-        //            bgcnt = _BG3CNT;
-        //            bgvofs = _BG3VOFS;
-        //            bghofs = _BG3HOFS;
-        //            break;
-        //    }
-
         //    UInt16 screenSize = (UInt16)((bgcnt >> 14) & 0b11);
         //    UInt16 screenBaseBlock = (UInt16)((bgcnt >> 8) & 0b1_1111);
         //    UInt16 colorMode = (UInt16)((bgcnt >> 7) & 1);

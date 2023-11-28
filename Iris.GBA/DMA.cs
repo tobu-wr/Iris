@@ -110,12 +110,11 @@
             {
                 UInt32 source = (UInt32)((sad_h << 16) | sad_l);
                 UInt32 destination = (UInt32)((dad_h << 16) | dad_l);
-                UInt16 length = cnt_l;
 
                 // 16 bits
                 if ((cnt_h & 0x0400) == 0)
                 {
-                    UInt32 lastDestination = (UInt32)(destination + (length * 2));
+                    UInt32 lastDestination = (UInt32)(destination + (cnt_l * 2));
 
                     while (destination < lastDestination)
                     {
@@ -128,7 +127,7 @@
                 // 32 bits
                 else
                 {
-                    UInt32 lastDestination = (UInt32)(destination + (length * 4));
+                    UInt32 lastDestination = (UInt32)(destination + (cnt_l * 4));
 
                     while (destination < lastDestination)
                     {
