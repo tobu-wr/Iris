@@ -276,6 +276,9 @@ namespace Iris.GBA
         {
             if ((_DISPCNT & 0x0100) == 0x0100)
                 RenderBackground(_BG0CNT, _BG0HOFS, _BG0VOFS);
+
+            if ((_DISPCNT & 0x0200) == 0x0200)
+                RenderBackground(_BG1CNT, _BG1HOFS, _BG1VOFS);
         }
 
         private void RenderMode3()
@@ -381,15 +384,20 @@ namespace Iris.GBA
                 const int CharacterWidth = 8;
                 const int CharacterHeight = 8;
 
-                int characterNumber = ((v / CharacterHeight) * (virtualScreenWidth / CharacterWidth)) + (h / CharacterWidth);
+                const int SC_Width = 256;
+                const int SC_Height = 256;
+                const int SC_Size = (SC_Width / CharacterWidth) * (SC_Height / SC_Height) * 2;
+
+                int scNumber = ((v / SC_Height) * (virtualScreenWidth / SC_Width)) + (h / SC_Width);
+                int characterNumber = (((v % SC_Height) / CharacterHeight) * (SC_Width / CharacterWidth)) + ((h % SC_Width) / CharacterWidth);
 
                 unsafe
                 {
-                    UInt16 screenData = Unsafe.Read<UInt16>((Byte*)_vram + screenBaseBlockOffset + (characterNumber * 2));
+                    UInt16 screenData = Unsafe.Read<UInt16>((Byte*)_vram + screenBaseBlockOffset + (scNumber * SC_Size) + (characterNumber * 2));
 
                     UInt16 colorPalette = (UInt16)((screenData >> 12) & 0b1111);
-                    //UInt16 horizontalFlipFlag = (UInt16)((screenData >> 10) & 1);
                     UInt16 verticalFlipFlag = (UInt16)((screenData >> 11) & 1);
+                    //UInt16 horizontalFlipFlag = (UInt16)((screenData >> 10) & 1);
                     UInt16 characterName = (UInt16)(screenData & 0x3ff);
 
                     int characterPixelNumber;
