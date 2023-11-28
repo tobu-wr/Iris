@@ -353,36 +353,83 @@ namespace Iris.GBA
 
         private void RenderBackground(UInt16 cnt, UInt16 hofs, UInt16 vofs)
         {
-            // TODO
+            ref UInt16 displayFrameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_displayFrameBuffer);
+
+            int displayPixelNumberBegin = _VCOUNT * DisplayScreenWidth;
+
+            UInt16 screenSize = (UInt16)((cnt >> 14) & 0b11);
+            UInt16 screenBaseBlock = (UInt16)((cnt >> 8) & 0b1_1111);
+            UInt16 colorMode = (UInt16)((cnt >> 7) & 1);
+            //UInt16  mosaic = (UInt16)((cnt >> 6) & 1);
+            UInt16 characterBaseBlock = (UInt16)((cnt >> 2) & 0b11);
+            //UInt16  priority = (UInt16)(cnt & 0b11);
+
+            int virtualScreenWidth = ((screenSize & 0b01) == 0) ? 256 : 512;
+            int virtualScreenHeight = ((screenSize & 0b10) == 0) ? 256 : 512;
+
+            UInt32 screenBaseBlockOffset = (UInt32)(screenBaseBlock * 2 * KB);
+            UInt32 characterBaseBlockOffset = (UInt32)(characterBaseBlock * 16 * KB);
+
+            int v = (_VCOUNT + vofs) % virtualScreenHeight;
+
+            for (int hcount = 0; hcount < DisplayScreenWidth; ++hcount)
+            {
+                int displayPixelNumber = displayPixelNumberBegin + hcount;
+
+                int h = (hcount + hofs) % virtualScreenWidth;
+
+                const int CharacterWidth = 8;
+                const int CharacterHeight = 8;
+
+                int characterNumber = ((v / CharacterHeight) * (virtualScreenWidth / CharacterWidth)) + (h / CharacterWidth);
+
+                unsafe
+                {
+                    UInt16 screenData = Unsafe.Read<UInt16>((Byte*)_vram + screenBaseBlockOffset + (characterNumber * 2));
+
+                    UInt16 colorPalette = (UInt16)((screenData >> 12) & 0b1111);
+                    //UInt16 horizontalFlipFlag = (UInt16)((screenData >> 10) & 1);
+                    UInt16 verticalFlipFlag = (UInt16)((screenData >> 11) & 1);
+                    UInt16 characterName = (UInt16)(screenData & 0x3ff);
+
+                    int characterPixelNumber;
+
+                    if (verticalFlipFlag == 0)
+                        characterPixelNumber = ((v % CharacterHeight) * CharacterWidth) + (h % CharacterWidth);
+                    else
+                        characterPixelNumber = ((CharacterHeight - 1 - (v % CharacterHeight)) * CharacterWidth) + (h % CharacterWidth);
+
+                    UInt16 color;
+
+                    // 16 colors x 16 palettes
+                    if (colorMode == 0)
+                    {
+                        Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + characterBaseBlockOffset + (characterName * 32) + (characterPixelNumber / 2));
+
+                        if ((characterPixelNumber % 2) == 0)
+                            colorNumber &= 0b1111;
+                        else
+                            colorNumber >>= 4;
+
+                        color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM + (colorPalette * 16) + colorNumber);
+                    }
+
+                    // 256 colors x 1 palette
+                    else
+                    {
+                        Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + characterBaseBlockOffset + (characterName * 64) + characterPixelNumber);
+                        color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM + colorNumber);
+                    }
+
+                    Unsafe.Add(ref displayFrameBufferDataRef, displayPixelNumber) = color;
+                }
+            }
         }
 
         //private void RenderBackground(int bg, UInt16[] screenFrameBuffer)
         //{
-        //    UInt16 screenSize = (UInt16)((bgcnt >> 14) & 0b11);
-        //    UInt16 screenBaseBlock = (UInt16)((bgcnt >> 8) & 0b1_1111);
-        //    UInt16 colorMode = (UInt16)((bgcnt >> 7) & 1);
-        //    UInt16 characterBaseBlock = (UInt16)((bgcnt >> 2) & 0b11);
-
-        //    UInt32 screenWidth = ((screenSize & 0b01) == 0) ? 256u : 512u;
-        //    UInt32 screenHeight = ((screenSize & 0b10) == 0) ? 256u : 512u;
-
-        //    const UInt32 ScreenBaseBlockSize = 2u * KB;
-        //    const UInt32 CharacterBaseBlockSize = 16u * KB;
-
-        //    UInt32 screenBaseBlockAddress = screenBaseBlock * ScreenBaseBlockSize;
-        //    UInt32 characterBaseBlockAddress = characterBaseBlock * CharacterBaseBlockSize;
-
         //    UInt32 vOffset = bgvofs & 0x1ffu;
         //    UInt32 hOffset = bghofs & 0x1ffu;
-
-        //    const UInt32 CharacterWidth = 8;
-        //    const UInt32 CharacterHeight = 8;
-
-        //    const UInt32 ScreenDataSizePerCharacter = 2;
-
-        //    UInt32 characterDataSize = (colorMode == 0) ? 32u : 64u;
-
-        //    const UInt32 ColorSize = 2;
 
         //    for (UInt32 i = 0; i < DisplayScreenSize; ++i)
         //    {
@@ -397,7 +444,7 @@ namespace Iris.GBA
         //        if (v >= 256)
         //            screenCharacterNumber += 0x400 * (screenWidth / 256);
 
-        //        UInt32 screenDataAddress = screenBaseBlockAddress + (screenCharacterNumber * ScreenDataSizePerCharacter);
+        //        UInt32 screenDataAddress = screenBaseBlockAddress + (screenCharacterNumber * 2);
 
         //        unsafe
         //        {
@@ -440,16 +487,12 @@ namespace Iris.GBA
         //                    else
         //                        colorNumber &= 0xf;
         //                }
-
         //            }
 
         //            if ((colorNumber == 0) && (bg != 3))
         //                continue;
 
-        //            UInt32 paletteAddress = (colorMode == 0) ? (palette * 16u * ColorSize) : 0u;
-
-        //            UInt16 color = Unsafe.Read<UInt16>((Byte*)_paletteRAM + paletteAddress + (colorNumber * ColorSize));
-        //            screenFrameBuffer[i] = color;
+        //            UInt16 color = Unsafe.Read<UInt16>((Byte*)_paletteRAM + paletteAddress + (colorNumber * 2));
         //        }
         //    }
         //}
