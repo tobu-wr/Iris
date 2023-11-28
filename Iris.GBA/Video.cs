@@ -386,7 +386,7 @@ namespace Iris.GBA
 
                 const int SC_Width = 256;
                 const int SC_Height = 256;
-                const int SC_Size = (SC_Width / CharacterWidth) * (SC_Height / SC_Height) * 2;
+                const int SC_Size = (SC_Width / CharacterWidth) * (SC_Height / CharacterHeight) * 2;
 
                 int scNumber = ((v / SC_Height) * (virtualScreenWidth / SC_Width)) + (h / SC_Width);
                 int characterNumber = (((v % SC_Height) / CharacterHeight) * (SC_Width / CharacterWidth)) + ((h % SC_Width) / CharacterWidth);
