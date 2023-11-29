@@ -27,8 +27,8 @@ namespace Iris.GBA
             CPU_Core.CallbackInterface cpuCallbackInterface = new(_memory.Read8, _memory.Read16, _memory.Read32, _memory.Write8, _memory.Write16, _memory.Write32, _bios.HandleSWI, _bios.HandleIRQ);
             _cpu = new(CPU_Core.Model.ARM7TDMI, cpuCallbackInterface);
 
-            Video.CallbackInterface ppuCallbackInterface = new(drawFrame);
-            _video = new(_scheduler, ppuCallbackInterface);
+            Video.CallbackInterface videoCallbackInterface = new(drawFrame);
+            _video = new(_scheduler, videoCallbackInterface);
 
             _dma.Initialize(_memory);
             _interruptControl.Initialize(_cpu);

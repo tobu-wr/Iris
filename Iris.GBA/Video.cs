@@ -96,7 +96,7 @@ namespace Iris.GBA
         private readonly Scheduler _scheduler = scheduler;
         private readonly CallbackInterface _callbackInterface = callbackInterface;
 
-        InterruptControl _interruptControl;
+        private InterruptControl _interruptControl;
         private bool _disposed;
 
         private readonly UInt16[] _displayFrameBuffer = new UInt16[DisplayScreenSize];
