@@ -48,6 +48,7 @@ namespace Iris.Common
             ++_taskCount;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool HasTaskReady()
         {
             return (_taskCount > 0) && (MemoryMarshal.GetArrayDataReference(_taskList).CycleCount <= _cycleCounter);

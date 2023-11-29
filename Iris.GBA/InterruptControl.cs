@@ -1,4 +1,5 @@
 ﻿using Iris.CPU;
+using System.Runtime.CompilerServices;
 
 namespace Iris.GBA
 {
@@ -46,6 +47,7 @@ namespace Iris.GBA
             CheckForInterrupts();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void CheckForInterrupts()
         {
             _cpu.NIRQ = ((_IME == 0) || ((_IE & _IF) == 0)) ? CPU_Core.Signal.High : CPU_Core.Signal.Low;
