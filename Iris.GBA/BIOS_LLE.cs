@@ -13,7 +13,6 @@ namespace Iris.GBA
         private const UInt32 BIOS_EndAddress = 0x0000_4000;
 
         private CPU_Core _cpu;
-        private Memory _memory;
         private bool _disposed;
 
         internal BIOS_LLE(string filename)
@@ -54,9 +53,8 @@ namespace Iris.GBA
         internal override void Initialize(CPU_Core cpu, Memory memory)
         {
             _cpu = cpu;
-            _memory = memory;
 
-            _memory.Map(_bios, BIOS_Size, BIOS_StartAddress, BIOS_EndAddress, Memory.Flag.AllRead);
+            memory.Map(_bios, BIOS_Size, BIOS_StartAddress, BIOS_EndAddress, Memory.Flag.AllRead);
         }
 
         internal override void Reset()

@@ -80,10 +80,7 @@ namespace Iris.GBA
         // could have used function pointers (delegate*) for performance instead of delegates but it's less flexible (cannot use non-static function for instance)
         internal readonly record struct CallbackInterface
         (
-            Common.System.DrawFrame_Delegate DrawFrame,
-            RequestInterrupt_Delegate RequestVBlankInterrupt
-        //RequestInterrupt_Delegate RequestHBlankInterrupt,
-        //RequestInterrupt_Delegate RequestVCountMatchInterrupt
+            Common.System.DrawFrame_Delegate DrawFrame
         );
 
         private const int DisplayScreenWidth = 240;
@@ -99,7 +96,7 @@ namespace Iris.GBA
         private readonly Scheduler _scheduler = scheduler;
         private readonly CallbackInterface _callbackInterface = callbackInterface;
 
-        private Memory _memory;
+        InterruptControl _interruptControl;
         private bool _disposed;
 
         private readonly UInt16[] _displayFrameBuffer = new UInt16[DisplayScreenSize];
@@ -124,14 +121,14 @@ namespace Iris.GBA
             _disposed = true;
         }
 
-        internal void Initialize(Memory memory)
+        internal void Initialize(InterruptControl interruptControl, Memory memory)
         {
-            _memory = memory;
+            _interruptControl = interruptControl;
 
             const Memory.Flag flags = Memory.Flag.All & ~Memory.Flag.Write8;
-            _memory.Map(_paletteRAM, PaletteRAM_Size, PaletteRAM_StartAddress, PaletteRAM_EndAddress, flags);
-            _memory.Map(_vram, VRAM_Size, VRAM_StartAddress, VRAM_EndAddress, flags);
-            _memory.Map(_oam, OAM_Size, OAM_StartAddress, OAM_EndAddress, flags);
+            memory.Map(_paletteRAM, PaletteRAM_Size, PaletteRAM_StartAddress, PaletteRAM_EndAddress, flags);
+            memory.Map(_vram, VRAM_Size, VRAM_StartAddress, VRAM_EndAddress, flags);
+            memory.Map(_oam, OAM_Size, OAM_StartAddress, OAM_EndAddress, flags);
         }
 
         internal void Reset()
@@ -228,7 +225,7 @@ namespace Iris.GBA
                     _DISPSTAT |= 0x0001;
 
                     if ((_DISPSTAT & 0x0008) == 0x0008)
-                        _callbackInterface.RequestVBlankInterrupt();
+                        _interruptControl.RequestInterrupt(InterruptControl.Interrupt.VBlank);
 
                     _callbackInterface.DrawFrame(_displayFrameBuffer);
                     break;

@@ -12,8 +12,8 @@ namespace Iris.GBA
         private KeyInput _keyInput;
         private SystemControl _systemControl;
         private InterruptControl _interruptControl;
-        private BIOS _bios;
         private Video _video;
+        private BIOS _bios;
 
         [Flags]
         internal enum Flag
@@ -54,7 +54,7 @@ namespace Iris.GBA
         private readonly IntPtr[] _write16PageTable = new IntPtr[PageTableSize];
         private readonly IntPtr[] _write32PageTable = new IntPtr[PageTableSize];
 
-        internal void Initialize(Communication communication, Timer timer, Sound sound, DMA dma, KeyInput keyInput, SystemControl systemControl, InterruptControl interruptControl, BIOS bios, Video video)
+        internal void Initialize(Communication communication, Timer timer, Sound sound, DMA dma, KeyInput keyInput, SystemControl systemControl, InterruptControl interruptControl, Video video, BIOS bios)
         {
             _communication = communication;
             _timer = timer;
@@ -63,8 +63,8 @@ namespace Iris.GBA
             _keyInput = keyInput;
             _systemControl = systemControl;
             _interruptControl = interruptControl;
-            _bios = bios;
             _video = video;
+            _bios = bios;
 
             InitPageTables();
         }
