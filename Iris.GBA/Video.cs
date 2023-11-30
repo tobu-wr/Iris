@@ -248,54 +248,57 @@ namespace Iris.GBA
 
         private void Render()
         {
-            UInt16 mode = (UInt16)(_DISPCNT & 0b111);
+            UInt16 bgMode = (UInt16)(_DISPCNT & 0b111);
 
-            switch (mode)
+            switch (bgMode)
             {
                 case 0b000:
-                    RenderMode0();
+                    RenderBackgroundMode0();
                     break;
                 case 0b011:
-                    RenderMode3();
+                    RenderBackgroundMode3();
                     break;
                 case 0b100:
-                    RenderMode4();
+                    RenderBackgroundMode4();
                     break;
                 case 0b101:
-                    RenderMode5();
+                    RenderBackgroundMode5();
                     break;
                 default:
-                    throw new Exception(string.Format("Iris.GBA.Video: Wrong mode {0}", mode));
+                    throw new Exception(string.Format("Iris.GBA.Video: Wrong background mode {0}", bgMode));
             }
+
+            if ((_DISPCNT & 0x1000) == 0x1000)
+                RenderObjects();
         }
 
-        private void RenderMode0()
+        private void RenderBackgroundMode0()
         {
             bool isFirst = true;
 
             if ((_DISPCNT & 0x0800) == 0x0800)
             {
-                RenderBackground(_BG3CNT, _BG3HOFS, _BG3VOFS, isFirst);
+                RenderTextBackground(_BG3CNT, _BG3HOFS, _BG3VOFS, isFirst);
                 isFirst = false;
             }
 
             if ((_DISPCNT & 0x0400) == 0x0400)
             {
-                RenderBackground(_BG2CNT, _BG2HOFS, _BG2VOFS, isFirst);
+                RenderTextBackground(_BG2CNT, _BG2HOFS, _BG2VOFS, isFirst);
                 isFirst = false;
             }
 
             if ((_DISPCNT & 0x0200) == 0x0200)
             {
-                RenderBackground(_BG1CNT, _BG1HOFS, _BG1VOFS, isFirst);
+                RenderTextBackground(_BG1CNT, _BG1HOFS, _BG1VOFS, isFirst);
                 isFirst = false;
             }
 
             if ((_DISPCNT & 0x0100) == 0x0100)
-                RenderBackground(_BG0CNT, _BG0HOFS, _BG0VOFS, isFirst);
+                RenderTextBackground(_BG0CNT, _BG0HOFS, _BG0VOFS, isFirst);
         }
 
-        private void RenderMode3()
+        private void RenderBackgroundMode3()
         {
             if ((_DISPCNT & 0x0400) == 0)
                 return;
@@ -315,7 +318,7 @@ namespace Iris.GBA
             }
         }
 
-        private void RenderMode4()
+        private void RenderBackgroundMode4()
         {
             if ((_DISPCNT & 0x0400) == 0)
                 return;
@@ -338,7 +341,7 @@ namespace Iris.GBA
             }
         }
 
-        private void RenderMode5()
+        private void RenderBackgroundMode5()
         {
             if ((_DISPCNT & 0x0400) == 0)
                 return;
@@ -368,7 +371,7 @@ namespace Iris.GBA
             }
         }
 
-        private void RenderBackground(UInt16 cnt, UInt16 hofs, UInt16 vofs, bool isFirst)
+        private void RenderTextBackground(UInt16 cnt, UInt16 hofs, UInt16 vofs, bool isFirst)
         {
             ref UInt16 displayFrameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_displayFrameBuffer);
 
@@ -454,6 +457,63 @@ namespace Iris.GBA
                     }
 
                     Unsafe.Add(ref displayFrameBufferDataRef, displayPixelNumber) = color;
+                }
+            }
+        }
+
+        private void RenderObjects()
+        {
+            ref UInt16 displayFrameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_displayFrameBuffer);
+
+            //for (;;)
+            {
+                unsafe
+                {
+                    UInt16 attribute0 = 0;
+                    UInt16 attribute1 = 0;
+                    UInt16 attribute2 = 0;
+
+                    UInt16 shape = (UInt16)((attribute0 >> 14) & 0b11);
+                    UInt16 colorMode = (UInt16)((attribute0 >> 13) & 1);
+                    UInt16 y = (UInt16)(attribute0 & 0xff);
+
+                    UInt16 size = (UInt16)((attribute1 >> 14) & 0b11);
+                    UInt16 x = (UInt16)(attribute1 & 0x1ff);
+
+                    UInt16 colorPalette = (UInt16)((attribute2 >> 12) & 0b11);
+                    UInt16 characterName = (UInt16)(attribute2 & 0x3ff);
+
+                    // TODO: check if visible
+
+                    int characterNumber = 0;
+                    int characterPixelNumber = 0;
+                    // TODO: compute
+
+                    UInt16 color;
+
+                    // 16 colors x 16 palettes
+                    if (colorMode == 0)
+                    {
+                        Byte colorNumber = 0; // TODO
+
+                        if ((characterPixelNumber % 2) == 0)
+                            colorNumber &= 0b1111;
+                        else
+                            colorNumber >>= 4;
+
+                        color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM + (colorPalette * 16) + colorNumber);
+                    }
+
+                    // 256 colors x 1 palette
+                    else
+                    {
+                        Byte colorNumber = 0; // TODO
+
+                        color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM + colorNumber);
+                    }
+
+
+                    //Unsafe.Add(ref displayFrameBufferDataRef, displayPixelNumber) = color;
                 }
             }
         }
