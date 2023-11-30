@@ -271,11 +271,17 @@ namespace Iris.GBA
 
         private void RenderMode0()
         {
-            if ((_DISPCNT & 0x0100) == 0x0100)
-                RenderBackground(_BG0CNT, _BG0HOFS, _BG0VOFS);
+            if ((_DISPCNT & 0x0800) == 0x0800)
+                RenderBackground(_BG3CNT, _BG3HOFS, _BG3VOFS, true);
+
+            if ((_DISPCNT & 0x0400) == 0x0400)
+                RenderBackground(_BG2CNT, _BG2HOFS, _BG2VOFS, false);
 
             if ((_DISPCNT & 0x0200) == 0x0200)
-                RenderBackground(_BG1CNT, _BG1HOFS, _BG1VOFS);
+                RenderBackground(_BG1CNT, _BG1HOFS, _BG1VOFS, false);
+
+            if ((_DISPCNT & 0x0100) == 0x0100)
+                RenderBackground(_BG0CNT, _BG0HOFS, _BG0VOFS, false);
         }
 
         private void RenderMode3()
@@ -351,7 +357,7 @@ namespace Iris.GBA
             }
         }
 
-        private void RenderBackground(UInt16 cnt, UInt16 hofs, UInt16 vofs)
+        private void RenderBackground(UInt16 cnt, UInt16 hofs, UInt16 vofs, bool isFirst)
         {
             ref UInt16 displayFrameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_displayFrameBuffer);
 
@@ -394,15 +400,20 @@ namespace Iris.GBA
 
                     UInt16 colorPalette = (UInt16)((screenData >> 12) & 0b1111);
                     UInt16 verticalFlipFlag = (UInt16)((screenData >> 11) & 1);
-                    //UInt16 horizontalFlipFlag = (UInt16)((screenData >> 10) & 1);
+                    UInt16 horizontalFlipFlag = (UInt16)((screenData >> 10) & 1);
                     UInt16 characterName = (UInt16)(screenData & 0x3ff);
 
-                    int characterPixelNumber;
+                    int characterPixelNumber = 0;
 
                     if (verticalFlipFlag == 0)
-                        characterPixelNumber = ((v % CharacterHeight) * CharacterWidth) + (h % CharacterWidth);
+                        characterPixelNumber += (v % CharacterHeight) * CharacterWidth;
                     else
-                        characterPixelNumber = ((CharacterHeight - 1 - (v % CharacterHeight)) * CharacterWidth) + (h % CharacterWidth);
+                        characterPixelNumber += (CharacterHeight - 1 - (v % CharacterHeight)) * CharacterWidth;
+
+                    if (horizontalFlipFlag == 0)
+                        characterPixelNumber += h % CharacterWidth;
+                    else
+                        characterPixelNumber += CharacterWidth - 1 - (h % CharacterWidth);
 
                     UInt16 color;
 
@@ -416,6 +427,9 @@ namespace Iris.GBA
                         else
                             colorNumber >>= 4;
 
+                        if (!isFirst && (colorNumber == 0))
+                            break;
+
                         color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM + (colorPalette * 16) + colorNumber);
                     }
 
@@ -423,6 +437,10 @@ namespace Iris.GBA
                     else
                     {
                         Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + characterBaseBlockOffset + (characterName * 64) + characterPixelNumber);
+
+                        if (!isFirst && (colorNumber == 0))
+                            break;
+
                         color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM + colorNumber);
                     }
 
@@ -430,76 +448,5 @@ namespace Iris.GBA
                 }
             }
         }
-
-        //private void RenderBackground(int bg, UInt16[] screenFrameBuffer)
-        //{
-        //    UInt32 vOffset = bgvofs & 0x1ffu;
-        //    UInt32 hOffset = bghofs & 0x1ffu;
-
-        //    for (UInt32 i = 0; i < DisplayScreenSize; ++i)
-        //    {
-        //        UInt32 h = ((i % DisplayScreenWidth) + hOffset) % screenWidth;
-        //        UInt32 v = ((i / DisplayScreenWidth) + vOffset) % screenHeight;
-
-        //        UInt32 screenCharacterNumber = (((v % 256) / CharacterHeight) * (256 / CharacterWidth)) + ((h % 256) / CharacterWidth);
-
-        //        if (h >= 256)
-        //            screenCharacterNumber += 0x400;
-
-        //        if (v >= 256)
-        //            screenCharacterNumber += 0x400 * (screenWidth / 256);
-
-        //        UInt32 screenDataAddress = screenBaseBlockAddress + (screenCharacterNumber * 2);
-
-        //        unsafe
-        //        {
-        //            UInt16 screenData = Unsafe.Read<UInt16>((Byte*)_vram + screenDataAddress);
-
-        //            UInt16 palette = (UInt16)(screenData >> 12);
-        //            UInt16 verticalFlip = (UInt16)((screenData >> 11) & 1);
-        //            UInt16 horizontalFlip = (UInt16)((screenData >> 10) & 1);
-        //            UInt16 characterNumber = (UInt16)(screenData & 0x3ff);
-
-        //            UInt32 characterDataAddress = characterBaseBlockAddress + (characterNumber * characterDataSize);
-
-        //            if (verticalFlip == 0)
-        //                characterDataAddress += (v % CharacterHeight) * (characterDataSize / CharacterHeight);
-        //            else
-        //                characterDataAddress += (CharacterHeight - 1 - (v % CharacterHeight)) * (characterDataSize / CharacterHeight);
-
-        //            if (horizontalFlip == 0)
-        //                characterDataAddress += (h % CharacterWidth) / ((CharacterHeight * CharacterWidth) / characterDataSize);
-        //            else
-        //                characterDataAddress += (CharacterWidth - 1 - (h % CharacterWidth)) / ((CharacterHeight * CharacterWidth) / characterDataSize);
-
-        //            Byte characterData = Unsafe.Read<Byte>((Byte*)_vram + characterDataAddress);
-
-        //            Byte colorNumber = characterData;
-
-        //            if (colorMode == 0)
-        //            {
-        //                if (horizontalFlip == 0)
-        //                {
-        //                    if ((h % 2) == 0)
-        //                        colorNumber &= 0xf;
-        //                    else
-        //                        colorNumber >>= 4;
-        //                }
-        //                else
-        //                {
-        //                    if ((h % 2) == 0)
-        //                        colorNumber >>= 4;
-        //                    else
-        //                        colorNumber &= 0xf;
-        //                }
-        //            }
-
-        //            if ((colorNumber == 0) && (bg != 3))
-        //                continue;
-
-        //            UInt16 color = Unsafe.Read<UInt16>((Byte*)_paletteRAM + paletteAddress + (colorNumber * 2));
-        //        }
-        //    }
-        //}
     }
 }
