@@ -271,17 +271,28 @@ namespace Iris.GBA
 
         private void RenderMode0()
         {
+            bool isFirst = true;
+
             if ((_DISPCNT & 0x0800) == 0x0800)
-                RenderBackground(_BG3CNT, _BG3HOFS, _BG3VOFS, true);
+            {
+                RenderBackground(_BG3CNT, _BG3HOFS, _BG3VOFS, isFirst);
+                isFirst = false;
+            }
 
             if ((_DISPCNT & 0x0400) == 0x0400)
-                RenderBackground(_BG2CNT, _BG2HOFS, _BG2VOFS, false);
+            {
+                RenderBackground(_BG2CNT, _BG2HOFS, _BG2VOFS, isFirst);
+                isFirst = false;
+            }
 
             if ((_DISPCNT & 0x0200) == 0x0200)
-                RenderBackground(_BG1CNT, _BG1HOFS, _BG1VOFS, false);
+            {
+                RenderBackground(_BG1CNT, _BG1HOFS, _BG1VOFS, isFirst);
+                isFirst = false;
+            }
 
             if ((_DISPCNT & 0x0100) == 0x0100)
-                RenderBackground(_BG0CNT, _BG0HOFS, _BG0VOFS, false);
+                RenderBackground(_BG0CNT, _BG0HOFS, _BG0VOFS, isFirst);
         }
 
         private void RenderMode3()
@@ -366,9 +377,7 @@ namespace Iris.GBA
             UInt16 screenSize = (UInt16)((cnt >> 14) & 0b11);
             UInt16 screenBaseBlock = (UInt16)((cnt >> 8) & 0b1_1111);
             UInt16 colorMode = (UInt16)((cnt >> 7) & 1);
-            //UInt16  mosaic = (UInt16)((cnt >> 6) & 1);
             UInt16 characterBaseBlock = (UInt16)((cnt >> 2) & 0b11);
-            //UInt16  priority = (UInt16)(cnt & 0b11);
 
             int virtualScreenWidth = ((screenSize & 0b01) == 0) ? 256 : 512;
             int virtualScreenHeight = ((screenSize & 0b10) == 0) ? 256 : 512;
@@ -428,7 +437,7 @@ namespace Iris.GBA
                             colorNumber >>= 4;
 
                         if (!isFirst && (colorNumber == 0))
-                            break;
+                            continue;
 
                         color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM + (colorPalette * 16) + colorNumber);
                     }
@@ -439,7 +448,7 @@ namespace Iris.GBA
                         Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + characterBaseBlockOffset + (characterName * 64) + characterPixelNumber);
 
                         if (!isFirst && (colorNumber == 0))
-                            break;
+                            continue;
 
                         color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM + colorNumber);
                     }
