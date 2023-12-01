@@ -390,37 +390,43 @@ namespace Iris.GBA
 
             int v = (_VCOUNT + vofs) % virtualScreenHeight;
 
+            const int CharacterWidth = 8;
+            const int CharacterHeight = 8;
+
+            const int SC_Width = 256;
+            const int SC_Height = 256;
+            const int SC_Size = (SC_Width / CharacterWidth) * (SC_Height / CharacterHeight);
+
+            int scNumberBegin = (v / SC_Height) * (virtualScreenWidth / SC_Width);
+            int characterNumberBegin = ((v % SC_Height) / CharacterHeight) * (SC_Width / CharacterWidth);
+
+            int characterPixelNumberBegin = (v % CharacterHeight) * CharacterWidth;
+            int characterPixelNumberBegin_VerticalFlip = (CharacterHeight - 1 - (v % CharacterHeight)) * CharacterWidth;
+
             for (int hcount = 0; hcount < DisplayScreenWidth; ++hcount)
             {
                 int displayPixelNumber = displayPixelNumberBegin + hcount;
 
                 int h = (hcount + hofs) % virtualScreenWidth;
 
-                const int CharacterWidth = 8;
-                const int CharacterHeight = 8;
-
-                const int SC_Width = 256;
-                const int SC_Height = 256;
-                const int SC_Size = (SC_Width / CharacterWidth) * (SC_Height / CharacterHeight) * 2;
-
-                int scNumber = ((v / SC_Height) * (virtualScreenWidth / SC_Width)) + (h / SC_Width);
-                int characterNumber = (((v % SC_Height) / CharacterHeight) * (SC_Width / CharacterWidth)) + ((h % SC_Width) / CharacterWidth);
+                int scNumber = scNumberBegin + (h / SC_Width);
+                int characterNumber = characterNumberBegin + ((h % SC_Width) / CharacterWidth);
 
                 unsafe
                 {
-                    UInt16 screenData = Unsafe.Read<UInt16>((Byte*)_vram + screenBaseBlockOffset + (scNumber * SC_Size) + (characterNumber * 2));
+                    UInt16 screenData = Unsafe.Read<UInt16>((Byte*)_vram + screenBaseBlockOffset + (scNumber * SC_Size * 2) + (characterNumber * 2));
 
                     UInt16 colorPalette = (UInt16)((screenData >> 12) & 0b1111);
                     UInt16 verticalFlipFlag = (UInt16)((screenData >> 11) & 1);
                     UInt16 horizontalFlipFlag = (UInt16)((screenData >> 10) & 1);
                     UInt16 characterName = (UInt16)(screenData & 0x3ff);
 
-                    int characterPixelNumber = 0;
+                    int characterPixelNumber;
 
                     if (verticalFlipFlag == 0)
-                        characterPixelNumber += (v % CharacterHeight) * CharacterWidth;
+                        characterPixelNumber = characterPixelNumberBegin;
                     else
-                        characterPixelNumber += (CharacterHeight - 1 - (v % CharacterHeight)) * CharacterWidth;
+                        characterPixelNumber = characterPixelNumberBegin_VerticalFlip;
 
                     if (horizontalFlipFlag == 0)
                         characterPixelNumber += h % CharacterWidth;
@@ -465,7 +471,7 @@ namespace Iris.GBA
         {
             ref UInt16 displayFrameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_displayFrameBuffer);
 
-            //for (;;)
+            for (int objNumber = 0; objNumber < 128; ++objNumber)
             {
                 unsafe
                 {
@@ -473,12 +479,14 @@ namespace Iris.GBA
                     UInt16 attribute1 = 0;
                     UInt16 attribute2 = 0;
 
-                    UInt16 shape = (UInt16)((attribute0 >> 14) & 0b11);
+                    UInt16 objShape = (UInt16)((attribute0 >> 14) & 0b11);
                     UInt16 colorMode = (UInt16)((attribute0 >> 13) & 1);
-                    UInt16 y = (UInt16)(attribute0 & 0xff);
+                    UInt16 yCoordinate = (UInt16)(attribute0 & 0xff);
 
-                    UInt16 size = (UInt16)((attribute1 >> 14) & 0b11);
-                    UInt16 x = (UInt16)(attribute1 & 0x1ff);
+                    UInt16 objSize = (UInt16)((attribute1 >> 14) & 0b11);
+                    UInt16 verticalFlipFlag = (UInt16)((attribute1 >> 13) & 1);
+                    UInt16 horizontalFlipFlag = (UInt16)((attribute1 >> 12) & 1);
+                    UInt16 xCoordinate = (UInt16)(attribute1 & 0x1ff);
 
                     UInt16 colorPalette = (UInt16)((attribute2 >> 12) & 0b11);
                     UInt16 characterName = (UInt16)(attribute2 & 0x3ff);
@@ -494,7 +502,44 @@ namespace Iris.GBA
                     // 16 colors x 16 palettes
                     if (colorMode == 0)
                     {
-                        Byte colorNumber = 0; // TODO
+                        UInt16 characterSize = 32;
+
+                        switch ((objShape, objSize))
+                        {
+                            // square
+                            case (0b00, 0b00):
+                                characterSize *= 1;
+                                break;
+                            case (0b00, 0b01):
+                                characterSize *= 1 * 4;
+                                break;
+                            case (0b00, 0b10):
+                                characterSize *= 1 * 4 * 4;
+                                break;
+                            case (0b00, 0b11):
+                                characterSize *= 1 * 4 * 4 * 4;
+                                break;
+
+                            // horizontal/vertical rectangle
+                            case (0b01, 0b00):
+                            case (0b10, 0b00):
+                                characterSize *= 2;
+                                break;
+                            case (0b01, 0b01):
+                            case (0b10, 0b01):
+                                characterSize *= 2 * 2;
+                                break;
+                            case (0b01, 0b10):
+                            case (0b10, 0b10):
+                                characterSize *= 2 * 2 * 2;
+                                break;
+                            case (0b01, 0b11):
+                            case (0b10, 0b11):
+                                characterSize *= 2 * 2 * 2 * 4;
+                                break;
+                        }
+
+                        Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + 0x1_0000 + (characterName * 32) + (characterNumber * characterSize) + (characterPixelNumber / 2));
 
                         if ((characterPixelNumber % 2) == 0)
                             colorNumber &= 0b1111;
@@ -507,11 +552,47 @@ namespace Iris.GBA
                     // 256 colors x 1 palette
                     else
                     {
-                        Byte colorNumber = 0; // TODO
+                        UInt16 characterSize = 64;
+
+                        switch ((objShape, objSize))
+                        {
+                            // square
+                            case (0b00, 0b00):
+                                characterSize *= 1;
+                                break;
+                            case (0b00, 0b01):
+                                characterSize *= 1 * 4;
+                                break;
+                            case (0b00, 0b10):
+                                characterSize *= 1 * 4 * 4;
+                                break;
+                            case (0b00, 0b11):
+                                characterSize *= 1 * 4 * 4 * 4;
+                                break;
+
+                            // horizontal/vertical rectangle
+                            case (0b01, 0b00):
+                            case (0b10, 0b00):
+                                characterSize *= 2;
+                                break;
+                            case (0b01, 0b01):
+                            case (0b10, 0b01):
+                                characterSize *= 2 * 2;
+                                break;
+                            case (0b01, 0b10):
+                            case (0b10, 0b10):
+                                characterSize *= 2 * 2 * 2;
+                                break;
+                            case (0b01, 0b11):
+                            case (0b10, 0b11):
+                                characterSize *= 2 * 2 * 2 * 4;
+                                break;
+                        }
+
+                        Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + 0x1_0000 + (characterName * 64) + (characterNumber * characterSize) + characterPixelNumber);
 
                         color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM + colorNumber);
                     }
-
 
                     //Unsafe.Add(ref displayFrameBufferDataRef, displayPixelNumber) = color;
                 }
