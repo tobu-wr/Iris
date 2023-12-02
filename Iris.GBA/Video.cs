@@ -475,6 +475,8 @@ namespace Iris.GBA
 
             int displayPixelNumberBegin = _VCOUNT * DisplayScreenWidth;
 
+            //UInt16 mappingFormat = (UInt16)((_DISPCNT >> 6) & 1);
+
             for (int objNumber = 0; objNumber < 128; ++objNumber)
             {
                 unsafe
@@ -576,6 +578,7 @@ namespace Iris.GBA
                         int basicCharacterPixelNumber = basicCharacterPixelNumberBegin + (h % BasicCharacterWidth);
 
                         const UInt32 CharacterDataOffset = 0x1_0000;
+                        const UInt32 PaletteOffset = 0x200;
 
                         UInt16 color;
 
@@ -590,7 +593,10 @@ namespace Iris.GBA
                             else
                                 colorNumber >>= 4;
 
-                            color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM + (colorPalette * 16) + colorNumber);
+                            if (colorNumber == 0)
+                                continue;
+
+                            color = Unsafe.Read<UInt16>((Byte*)_paletteRAM + PaletteOffset + (colorPalette * 16 * 2) + (colorNumber * 2));
                         }
 
                         // 256 colors x 1 palette
@@ -599,7 +605,10 @@ namespace Iris.GBA
                             const int BasicCharacterSize = 64;
                             Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + CharacterDataOffset + ((characterName + basicCharacterNumber) * BasicCharacterSize) + basicCharacterPixelNumber);
 
-                            color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM + colorNumber);
+                            if (colorNumber == 0)
+                                continue;
+
+                            color = Unsafe.Read<UInt16>((Byte*)_paletteRAM + PaletteOffset + (colorNumber * 2));
                         }
 
                         Unsafe.Add(ref displayFrameBufferDataRef, displayPixelNumber) = color;
