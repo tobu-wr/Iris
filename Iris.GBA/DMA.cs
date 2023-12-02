@@ -106,6 +106,8 @@
 
         private void CheckForDMA(UInt16 cnt_l, ref UInt16 cnt_h, ref UInt16 sad_l, ref UInt16 sad_h, ref UInt16 dad_l, ref UInt16 dad_h)
         {
+            return;
+
             if ((cnt_h & 0x8000) == 0x8000)
             {
                 UInt32 source = (UInt32)((sad_h << 16) | sad_l);

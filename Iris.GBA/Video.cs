@@ -438,7 +438,8 @@ namespace Iris.GBA
                     // 16 colors x 16 palettes
                     if (colorMode == 0)
                     {
-                        Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + characterBaseBlockOffset + (characterName * 32) + (characterPixelNumber / 2));
+                        const int CharacterSize = 32;
+                        Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + characterBaseBlockOffset + (characterName * CharacterSize) + (characterPixelNumber / 2));
 
                         if ((characterPixelNumber % 2) == 0)
                             colorNumber &= 0b1111;
@@ -454,7 +455,8 @@ namespace Iris.GBA
                     // 256 colors x 1 palette
                     else
                     {
-                        Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + characterBaseBlockOffset + (characterName * 64) + characterPixelNumber);
+                        const int CharacterSize = 64;
+                        Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + characterBaseBlockOffset + (characterName * CharacterSize) + characterPixelNumber);
 
                         if (!isFirst && (colorNumber == 0))
                             continue;
@@ -471,130 +473,137 @@ namespace Iris.GBA
         {
             ref UInt16 displayFrameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_displayFrameBuffer);
 
+            int displayPixelNumberBegin = _VCOUNT * DisplayScreenWidth;
+
             for (int objNumber = 0; objNumber < 128; ++objNumber)
             {
                 unsafe
                 {
-                    UInt16 attribute0 = 0;
-                    UInt16 attribute1 = 0;
-                    UInt16 attribute2 = 0;
+                    UInt16 attribute0 = Unsafe.Read<UInt16>((UInt16*)_oam + (objNumber * 4));
+                    UInt16 attribute1 = Unsafe.Read<UInt16>((UInt16*)_oam + (objNumber * 4) + 1);
+                    UInt16 attribute2 = Unsafe.Read<UInt16>((UInt16*)_oam + (objNumber * 4) + 2);
 
                     UInt16 objShape = (UInt16)((attribute0 >> 14) & 0b11);
                     UInt16 colorMode = (UInt16)((attribute0 >> 13) & 1);
                     UInt16 yCoordinate = (UInt16)(attribute0 & 0xff);
 
                     UInt16 objSize = (UInt16)((attribute1 >> 14) & 0b11);
-                    UInt16 verticalFlipFlag = (UInt16)((attribute1 >> 13) & 1);
-                    UInt16 horizontalFlipFlag = (UInt16)((attribute1 >> 12) & 1);
+                    //UInt16 verticalFlipFlag = (UInt16)((attribute1 >> 13) & 1);
+                    //UInt16 horizontalFlipFlag = (UInt16)((attribute1 >> 12) & 1);
                     UInt16 xCoordinate = (UInt16)(attribute1 & 0x1ff);
 
-                    UInt16 colorPalette = (UInt16)((attribute2 >> 12) & 0b11);
+                    UInt16 colorPalette = (UInt16)((attribute2 >> 12) & 0b1111);
                     UInt16 characterName = (UInt16)(attribute2 & 0x3ff);
 
-                    // TODO: check if visible
+                    int characterWidth;
+                    int characterHeight;
 
-                    int characterNumber = 0;
-                    int characterPixelNumber = 0;
-                    // TODO: compute
-
-                    UInt16 color;
-
-                    // 16 colors x 16 palettes
-                    if (colorMode == 0)
+                    switch ((objShape, objSize))
                     {
-                        UInt16 characterSize = 32;
+                        // square
+                        case (0b00, 0b00):
+                            characterWidth = characterHeight = 8;
+                            break;
+                        case (0b00, 0b01):
+                            characterWidth = characterHeight = 16;
+                            break;
+                        case (0b00, 0b10):
+                            characterWidth = characterHeight = 32;
+                            break;
+                        case (0b00, 0b11):
+                            characterWidth = characterHeight = 64;
+                            break;
 
-                        switch ((objShape, objSize))
+                        // horizontal rectangle
+                        case (0b01, 0b00):
+                            characterWidth = 16;
+                            characterHeight = 8;
+                            break;
+                        case (0b01, 0b01):
+                            characterWidth = 32;
+                            characterHeight = 8;
+                            break;
+                        case (0b01, 0b10):
+                            characterWidth = 32;
+                            characterHeight = 16;
+                            break;
+                        case (0b01, 0b11):
+                            characterWidth = 64;
+                            characterHeight = 32;
+                            break;
+
+                        // vertical rectangle
+                        case (0b10, 0b00):
+                            characterWidth = 8;
+                            characterHeight = 16;
+                            break;
+                        case (0b10, 0b01):
+                            characterWidth = 8;
+                            characterHeight = 32;
+                            break;
+                        case (0b10, 0b10):
+                            characterWidth = 16;
+                            characterHeight = 32;
+                            break;
+                        case (0b10, 0b11):
+                            characterWidth = 32;
+                            characterHeight = 64;
+                            break;
+
+                        default:
+                            throw new Exception(string.Format("Iris.GBA.Video: Prohibited object shape {0}", objShape));
+                    }
+
+                    if (xCoordinate >= DisplayScreenWidth)
+                        continue;
+
+                    if ((yCoordinate > _VCOUNT) || ((yCoordinate + characterHeight) <= _VCOUNT))
+                        continue;
+
+                    const int BasicCharacterWidth = 8;
+                    const int BasicCharacterHeight = 8;
+
+                    int v = yCoordinate - _VCOUNT;
+                    int basicCharacterNumberBegin = (v / BasicCharacterHeight) * (characterWidth / BasicCharacterWidth);
+                    int basicCharacterPixelNumberBegin = (v % BasicCharacterHeight) * BasicCharacterWidth;
+
+                    for (int hcount = xCoordinate; (hcount < (xCoordinate + characterWidth)) && (hcount < DisplayScreenWidth); ++hcount)
+                    {
+                        int displayPixelNumber = displayPixelNumberBegin + hcount;
+
+                        int h = hcount - xCoordinate;
+                        int basicCharacterNumber = basicCharacterNumberBegin + (h / BasicCharacterWidth);
+                        int basicCharacterPixelNumber = basicCharacterPixelNumberBegin + (h % BasicCharacterWidth);
+
+                        const UInt32 CharacterDataOffset = 0x1_0000;
+
+                        UInt16 color;
+
+                        // 16 colors x 16 palettes
+                        if (colorMode == 0)
                         {
-                            // square
-                            case (0b00, 0b00):
-                                characterSize *= 1;
-                                break;
-                            case (0b00, 0b01):
-                                characterSize *= 1 * 4;
-                                break;
-                            case (0b00, 0b10):
-                                characterSize *= 1 * 4 * 4;
-                                break;
-                            case (0b00, 0b11):
-                                characterSize *= 1 * 4 * 4 * 4;
-                                break;
+                            const int BasicCharacterSize = 32;
+                            Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + CharacterDataOffset + ((characterName + basicCharacterNumber) * BasicCharacterSize) + (basicCharacterPixelNumber / 2));
 
-                            // horizontal/vertical rectangle
-                            case (0b01, 0b00):
-                            case (0b10, 0b00):
-                                characterSize *= 2;
-                                break;
-                            case (0b01, 0b01):
-                            case (0b10, 0b01):
-                                characterSize *= 2 * 2;
-                                break;
-                            case (0b01, 0b10):
-                            case (0b10, 0b10):
-                                characterSize *= 2 * 2 * 2;
-                                break;
-                            case (0b01, 0b11):
-                            case (0b10, 0b11):
-                                characterSize *= 2 * 2 * 2 * 4;
-                                break;
+                            if ((basicCharacterPixelNumber % 2) == 0)
+                                colorNumber &= 0b1111;
+                            else
+                                colorNumber >>= 4;
+
+                            color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM + (colorPalette * 16) + colorNumber);
                         }
 
-                        Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + 0x1_0000 + (characterName * 32) + (characterNumber * characterSize) + (characterPixelNumber / 2));
-
-                        if ((characterPixelNumber % 2) == 0)
-                            colorNumber &= 0b1111;
+                        // 256 colors x 1 palette
                         else
-                            colorNumber >>= 4;
-
-                        color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM + (colorPalette * 16) + colorNumber);
-                    }
-
-                    // 256 colors x 1 palette
-                    else
-                    {
-                        UInt16 characterSize = 64;
-
-                        switch ((objShape, objSize))
                         {
-                            // square
-                            case (0b00, 0b00):
-                                characterSize *= 1;
-                                break;
-                            case (0b00, 0b01):
-                                characterSize *= 1 * 4;
-                                break;
-                            case (0b00, 0b10):
-                                characterSize *= 1 * 4 * 4;
-                                break;
-                            case (0b00, 0b11):
-                                characterSize *= 1 * 4 * 4 * 4;
-                                break;
+                            const int BasicCharacterSize = 64;
+                            Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + CharacterDataOffset + ((characterName + basicCharacterNumber) * BasicCharacterSize) + basicCharacterPixelNumber);
 
-                            // horizontal/vertical rectangle
-                            case (0b01, 0b00):
-                            case (0b10, 0b00):
-                                characterSize *= 2;
-                                break;
-                            case (0b01, 0b01):
-                            case (0b10, 0b01):
-                                characterSize *= 2 * 2;
-                                break;
-                            case (0b01, 0b10):
-                            case (0b10, 0b10):
-                                characterSize *= 2 * 2 * 2;
-                                break;
-                            case (0b01, 0b11):
-                            case (0b10, 0b11):
-                                characterSize *= 2 * 2 * 2 * 4;
-                                break;
+                            color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM + colorNumber);
                         }
 
-                        Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + 0x1_0000 + (characterName * 64) + (characterNumber * characterSize) + characterPixelNumber);
-
-                        color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM + colorNumber);
+                        Unsafe.Add(ref displayFrameBufferDataRef, displayPixelNumber) = color;
                     }
-
-                    //Unsafe.Add(ref displayFrameBufferDataRef, displayPixelNumber) = color;
                 }
             }
         }
