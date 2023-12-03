@@ -216,6 +216,7 @@ namespace Iris.GBA
             {
                 case < DisplayScreenHeight - 1:
                     ++_VCOUNT;
+
                     Render();
                     break;
 
@@ -234,6 +235,8 @@ namespace Iris.GBA
                 case ScanlineCount - 1:
                     _VCOUNT = 0;
                     _DISPSTAT = (UInt16)(_DISPSTAT & ~0x0001);
+
+                    Array.Clear(_displayFrameBuffer);
                     Render();
                     break;
 
@@ -490,8 +493,8 @@ namespace Iris.GBA
                     UInt16 yCoordinate = (UInt16)(attribute0 & 0xff);
 
                     UInt16 objSize = (UInt16)((attribute1 >> 14) & 0b11);
-                    //UInt16 verticalFlipFlag = (UInt16)((attribute1 >> 13) & 1);
-                    //UInt16 horizontalFlipFlag = (UInt16)((attribute1 >> 12) & 1);
+                    UInt16 verticalFlipFlag = (UInt16)((attribute1 >> 13) & 1);
+                    UInt16 horizontalFlipFlag = (UInt16)((attribute1 >> 12) & 1);
                     UInt16 xCoordinate = (UInt16)(attribute1 & 0x1ff);
 
                     UInt16 colorPalette = (UInt16)((attribute2 >> 12) & 0b1111);
@@ -566,16 +569,40 @@ namespace Iris.GBA
                     const int BasicCharacterHeight = 8;
 
                     int v = _VCOUNT - yCoordinate;
-                    int basicCharacterNumberBegin = (v / BasicCharacterHeight) * (characterWidth / BasicCharacterWidth);
-                    int basicCharacterPixelNumberBegin = (v % BasicCharacterHeight) * BasicCharacterWidth;
+
+                    int basicCharacterNumberBegin;
+                    int basicCharacterPixelNumberBegin;
+
+                    if (verticalFlipFlag == 0)
+                    {
+                        basicCharacterNumberBegin = (v / BasicCharacterHeight) * (characterWidth / BasicCharacterWidth);
+                        basicCharacterPixelNumberBegin = (v % BasicCharacterHeight) * BasicCharacterWidth;
+                    }
+                    else
+                    {
+                        basicCharacterNumberBegin = ((characterHeight / BasicCharacterHeight) - 1 - (v / BasicCharacterHeight)) * (characterWidth / BasicCharacterWidth);
+                        basicCharacterPixelNumberBegin = (BasicCharacterHeight - 1 - (v % BasicCharacterHeight)) * BasicCharacterWidth;
+                    }
 
                     for (int hcount = xCoordinate; (hcount < (xCoordinate + characterWidth)) && (hcount < DisplayScreenWidth); ++hcount)
                     {
                         int displayPixelNumber = displayPixelNumberBegin + hcount;
 
                         int h = hcount - xCoordinate;
-                        int basicCharacterNumber = basicCharacterNumberBegin + (h / BasicCharacterWidth);
-                        int basicCharacterPixelNumber = basicCharacterPixelNumberBegin + (h % BasicCharacterWidth);
+
+                        int basicCharacterNumber = basicCharacterNumberBegin;
+                        int basicCharacterPixelNumber = basicCharacterPixelNumberBegin;
+
+                        if (horizontalFlipFlag == 0)
+                        {
+                            basicCharacterNumber += h / BasicCharacterWidth;
+                            basicCharacterPixelNumber += h % BasicCharacterWidth;
+                        }
+                        else
+                        {
+                            basicCharacterNumber += (characterWidth / BasicCharacterWidth) - 1 - (h / BasicCharacterWidth);
+                            basicCharacterPixelNumber += BasicCharacterWidth - 1 - (h % BasicCharacterWidth);
+                        }
 
                         const UInt32 CharacterDataOffset = 0x1_0000;
                         const UInt32 PaletteOffset = 0x200;
