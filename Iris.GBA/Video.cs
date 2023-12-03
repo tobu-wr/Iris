@@ -258,47 +258,75 @@ namespace Iris.GBA
                 case 0b000:
                     RenderBackgroundMode0();
                     break;
+
                 case 0b011:
                     RenderBackgroundMode3();
+
+                    if ((_DISPCNT & 0x1000) == 0x1000)
+                    {
+                        for (int priority = 3; priority >= 0; --priority)
+                            RenderObjects((UInt16)priority);
+                    }
                     break;
+
                 case 0b100:
                     RenderBackgroundMode4();
+
+                    if ((_DISPCNT & 0x1000) == 0x1000)
+                    {
+                        for (int priority = 3; priority >= 0; --priority)
+                            RenderObjects((UInt16)priority);
+                    }
                     break;
+
                 case 0b101:
                     RenderBackgroundMode5();
+
+                    if ((_DISPCNT & 0x1000) == 0x1000)
+                    {
+                        for (int priority = 3; priority >= 0; --priority)
+                            RenderObjects((UInt16)priority);
+                    }
                     break;
+
                 default:
                     throw new Exception(string.Format("Iris.GBA.Video: Wrong background mode {0}", bgMode));
             }
-
-            if ((_DISPCNT & 0x1000) == 0x1000)
-                RenderObjects();
         }
 
         private void RenderBackgroundMode0()
         {
             bool isFirst = true;
 
-            if ((_DISPCNT & 0x0800) == 0x0800)
+            for (int priority = 3; priority >= 0; --priority)
             {
-                RenderTextBackground(_BG3CNT, _BG3HOFS, _BG3VOFS, isFirst);
-                isFirst = false;
-            }
+                if (((_DISPCNT & 0x0800) == 0x0800) && ((_BG3CNT & 0b11) == priority))
+                {
+                    RenderTextBackground(_BG3CNT, _BG3HOFS, _BG3VOFS, isFirst);
+                    isFirst = false;
+                }
 
-            if ((_DISPCNT & 0x0400) == 0x0400)
-            {
-                RenderTextBackground(_BG2CNT, _BG2HOFS, _BG2VOFS, isFirst);
-                isFirst = false;
-            }
+                if (((_DISPCNT & 0x0400) == 0x0400) && ((_BG2CNT & 0b11) == priority))
+                {
+                    RenderTextBackground(_BG2CNT, _BG2HOFS, _BG2VOFS, isFirst);
+                    isFirst = false;
+                }
 
-            if ((_DISPCNT & 0x0200) == 0x0200)
-            {
-                RenderTextBackground(_BG1CNT, _BG1HOFS, _BG1VOFS, isFirst);
-                isFirst = false;
-            }
+                if (((_DISPCNT & 0x0200) == 0x0200) && ((_BG1CNT & 0b11) == priority))
+                {
+                    RenderTextBackground(_BG1CNT, _BG1HOFS, _BG1VOFS, isFirst);
+                    isFirst = false;
+                }
 
-            if ((_DISPCNT & 0x0100) == 0x0100)
-                RenderTextBackground(_BG0CNT, _BG0HOFS, _BG0VOFS, isFirst);
+                if (((_DISPCNT & 0x0100) == 0x0100) && ((_BG0CNT & 0b11) == priority))
+                {
+                    RenderTextBackground(_BG0CNT, _BG0HOFS, _BG0VOFS, isFirst);
+                    isFirst = false;
+                }
+
+                if ((_DISPCNT & 0x1000) == 0x1000)
+                    RenderObjects((UInt16)priority);
+            }
         }
 
         private void RenderBackgroundMode3()
@@ -472,7 +500,7 @@ namespace Iris.GBA
             }
         }
 
-        private void RenderObjects()
+        private void RenderObjects(UInt16 priority)
         {
             ref UInt16 displayFrameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_displayFrameBuffer);
 
@@ -498,7 +526,11 @@ namespace Iris.GBA
                     UInt16 xCoordinate = (UInt16)(attribute1 & 0x1ff);
 
                     UInt16 colorPalette = (UInt16)((attribute2 >> 12) & 0b1111);
+                    UInt16 objPriority = (UInt16)((attribute2 >> 10) & 0b11);
                     UInt16 characterName = (UInt16)(attribute2 & 0x3ff);
+
+                    if (objPriority != priority)
+                        continue;
 
                     (int characterWidth, int characterHeight) = (objShape, objSize) switch
                     {
