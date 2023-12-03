@@ -478,9 +478,9 @@ namespace Iris.GBA
 
             int displayPixelNumberBegin = _VCOUNT * DisplayScreenWidth;
 
-            //UInt16 mappingFormat = (UInt16)((_DISPCNT >> 6) & 1);
+            UInt16 mappingFormat = (UInt16)((_DISPCNT >> 6) & 1);
 
-            for (int objNumber = 0; objNumber < 128; ++objNumber)
+            for (int objNumber = 127; objNumber >= 0; --objNumber)
             {
                 unsafe
                 {
