@@ -500,64 +500,29 @@ namespace Iris.GBA
                     UInt16 colorPalette = (UInt16)((attribute2 >> 12) & 0b1111);
                     UInt16 characterName = (UInt16)(attribute2 & 0x3ff);
 
-                    int characterWidth;
-                    int characterHeight;
-
-                    switch ((objShape, objSize))
+                    (int characterWidth, int characterHeight) = (objShape, objSize) switch
                     {
                         // square
-                        case (0b00, 0b00):
-                            characterWidth = characterHeight = 8;
-                            break;
-                        case (0b00, 0b01):
-                            characterWidth = characterHeight = 16;
-                            break;
-                        case (0b00, 0b10):
-                            characterWidth = characterHeight = 32;
-                            break;
-                        case (0b00, 0b11):
-                            characterWidth = characterHeight = 64;
-                            break;
+                        (0b00, 0b00) => (8, 8),
+                        (0b00, 0b01) => (16, 16),
+                        (0b00, 0b10) => (32, 32),
+                        (0b00, 0b11) => (64, 64),
 
                         // horizontal rectangle
-                        case (0b01, 0b00):
-                            characterWidth = 16;
-                            characterHeight = 8;
-                            break;
-                        case (0b01, 0b01):
-                            characterWidth = 32;
-                            characterHeight = 8;
-                            break;
-                        case (0b01, 0b10):
-                            characterWidth = 32;
-                            characterHeight = 16;
-                            break;
-                        case (0b01, 0b11):
-                            characterWidth = 64;
-                            characterHeight = 32;
-                            break;
+                        (0b01, 0b00) => (16, 8),
+                        (0b01, 0b01) => (32, 8),
+                        (0b01, 0b10) => (32, 16),
+                        (0b01, 0b11) => (64, 32),
 
                         // vertical rectangle
-                        case (0b10, 0b00):
-                            characterWidth = 8;
-                            characterHeight = 16;
-                            break;
-                        case (0b10, 0b01):
-                            characterWidth = 8;
-                            characterHeight = 32;
-                            break;
-                        case (0b10, 0b10):
-                            characterWidth = 16;
-                            characterHeight = 32;
-                            break;
-                        case (0b10, 0b11):
-                            characterWidth = 32;
-                            characterHeight = 64;
-                            break;
+                        (0b10, 0b00) => (8, 16),
+                        (0b10, 0b01) => (8, 32),
+                        (0b10, 0b10) => (16, 32),
+                        (0b10, 0b11) => (32, 64),
 
-                        default:
-                            throw new Exception(string.Format("Iris.GBA.Video: Prohibited object shape {0}", objShape));
-                    }
+                        // prohibited
+                        _ => throw new Exception(string.Format("Iris.GBA.Video: Prohibited object shape {0}", objShape))
+                    };
 
                     if (xCoordinate >= DisplayScreenWidth)
                         continue;
