@@ -565,7 +565,7 @@ namespace Iris.GBA
                     const int BasicCharacterWidth = 8;
                     const int BasicCharacterHeight = 8;
 
-                    int v = yCoordinate - _VCOUNT;
+                    int v = _VCOUNT - yCoordinate;
                     int basicCharacterNumberBegin = (v / BasicCharacterHeight) * (characterWidth / BasicCharacterWidth);
                     int basicCharacterPixelNumberBegin = (v % BasicCharacterHeight) * BasicCharacterWidth;
 
