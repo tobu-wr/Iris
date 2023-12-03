@@ -540,12 +540,26 @@ namespace Iris.GBA
 
                     if (verticalFlipFlag == 0)
                     {
-                        basicCharacterNumberBegin = (v / BasicCharacterHeight) * (characterWidth / BasicCharacterWidth);
+                        // 2D mapping
+                        if (mappingFormat == 0)
+                            basicCharacterNumberBegin = (v / BasicCharacterHeight) * 32;
+
+                        // 1D mapping
+                        else
+                            basicCharacterNumberBegin = (v / BasicCharacterHeight) * (characterWidth / BasicCharacterWidth);
+
                         basicCharacterPixelNumberBegin = (v % BasicCharacterHeight) * BasicCharacterWidth;
                     }
                     else
                     {
-                        basicCharacterNumberBegin = ((characterHeight / BasicCharacterHeight) - 1 - (v / BasicCharacterHeight)) * (characterWidth / BasicCharacterWidth);
+                        // 2D mapping
+                        if (mappingFormat == 0)
+                            basicCharacterNumberBegin = ((characterHeight / BasicCharacterHeight) - 1 - (v / BasicCharacterHeight)) * 32;
+
+                        // 1D mapping
+                        else
+                            basicCharacterNumberBegin = ((characterHeight / BasicCharacterHeight) - 1 - (v / BasicCharacterHeight)) * (characterWidth / BasicCharacterWidth);
+
                         basicCharacterPixelNumberBegin = (BasicCharacterHeight - 1 - (v % BasicCharacterHeight)) * BasicCharacterWidth;
                     }
 
