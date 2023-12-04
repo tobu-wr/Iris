@@ -516,7 +516,7 @@ namespace Iris.GBA
                     UInt16 attribute1 = Unsafe.Read<UInt16>((UInt16*)_oam + (objNumber * 4) + 1);
                     UInt16 attribute2 = Unsafe.Read<UInt16>((UInt16*)_oam + (objNumber * 4) + 2);
 
-                    UInt16 objShape = (UInt16)((attribute0 >> 14) & 0b11);
+                    UInt16 shape = (UInt16)((attribute0 >> 14) & 0b11);
                     UInt16 colorMode = (UInt16)((attribute0 >> 13) & 1);
                     UInt16 yCoordinate = (UInt16)(attribute0 & 0xff);
 
@@ -532,7 +532,7 @@ namespace Iris.GBA
                     if (objPriority != priority)
                         continue;
 
-                    (int characterWidth, int characterHeight) = (objShape, objSize) switch
+                    (int characterWidth, int characterHeight) = (shape, objSize) switch
                     {
                         // square
                         (0b00, 0b00) => (8, 8),
@@ -553,7 +553,7 @@ namespace Iris.GBA
                         (0b10, 0b11) => (32, 64),
 
                         // prohibited
-                        _ => throw new Exception(string.Format("Iris.GBA.Video: Prohibited object shape {0}", objShape))
+                        _ => throw new Exception(string.Format("Iris.GBA.Video: Prohibited object shape {0}", shape))
                     };
 
                     if (xCoordinate >= DisplayScreenWidth)

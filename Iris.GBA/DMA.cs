@@ -106,10 +106,11 @@
 
         private void CheckForDMA(UInt16 cnt_l, ref UInt16 cnt_h, ref UInt16 sad_l, ref UInt16 sad_h, ref UInt16 dad_l, ref UInt16 dad_h)
         {
-            return;
-
             if ((cnt_h & 0x8000) == 0x8000)
             {
+                if ((cnt_h & 0x3000) == 0x3000)
+                    return;  // direct-sound FIFO transfer mode (ignore for now)
+
                 UInt32 source = (UInt32)((sad_h << 16) | sad_l);
                 UInt32 destination = (UInt32)((dad_h << 16) | dad_l);
 
@@ -142,8 +143,12 @@
                 cnt_h = (UInt16)(cnt_h & ~0x8000);
                 sad_l = (UInt16)source;
                 sad_h = (UInt16)(source >> 16);
-                dad_l = (UInt16)destination;
-                dad_h = (UInt16)(destination >> 16);
+
+                if ((cnt_h & 0x0060) != 0x0040)
+                {
+                    dad_l = (UInt16)destination;
+                    dad_h = (UInt16)(destination >> 16);
+                }
             }
         }
     }
