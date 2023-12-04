@@ -1308,10 +1308,8 @@ namespace Iris.GBA
                                 break;
 
                             case 0x130:
-                                SetLowByte(ref _keyInput!._KEYINPUT, value);
-                                break;
                             case 0x131:
-                                SetHighByte(ref _keyInput!._KEYINPUT, value);
+                                // KEYINPUT (read-only)
                                 break;
 
                             case 0x132:
@@ -1754,7 +1752,7 @@ namespace Iris.GBA
                                 _communication!._SIODATA_SEND = value;
                                 break;
                             case 0x130:
-                                _keyInput!._KEYINPUT = value;
+                                // KEYINPUT (read-only)
                                 break;
                             case 0x132:
                                 _keyInput!._KEYCNT = value;
@@ -2062,7 +2060,7 @@ namespace Iris.GBA
                                 // unused
                                 break;
                             case 0x130:
-                                _keyInput!._KEYINPUT = GetLowHalfword(value);
+                                // 16 lower bits are read-only (KEYINPUT)
                                 _keyInput._KEYCNT = GetHighHalfword(value);
                                 break;
                             case 0x140:
