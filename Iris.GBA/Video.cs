@@ -259,6 +259,10 @@ namespace Iris.GBA
                     RenderBackgroundMode0();
                     break;
 
+                case 0b001:
+                    RenderBackgroundMode1();
+                    break;
+
                 case 0b011:
                     RenderBackgroundMode3();
 
@@ -309,6 +313,35 @@ namespace Iris.GBA
                 if (((_DISPCNT & 0x0400) == 0x0400) && ((_BG2CNT & 0b11) == priority))
                 {
                     RenderTextBackground(_BG2CNT, _BG2HOFS, _BG2VOFS, isFirst);
+                    isFirst = false;
+                }
+
+                if (((_DISPCNT & 0x0200) == 0x0200) && ((_BG1CNT & 0b11) == priority))
+                {
+                    RenderTextBackground(_BG1CNT, _BG1HOFS, _BG1VOFS, isFirst);
+                    isFirst = false;
+                }
+
+                if (((_DISPCNT & 0x0100) == 0x0100) && ((_BG0CNT & 0b11) == priority))
+                {
+                    RenderTextBackground(_BG0CNT, _BG0HOFS, _BG0VOFS, isFirst);
+                    isFirst = false;
+                }
+
+                if ((_DISPCNT & 0x1000) == 0x1000)
+                    RenderObjects((UInt16)priority);
+            }
+        }
+
+        private void RenderBackgroundMode1()
+        {
+            bool isFirst = true;
+
+            for (int priority = 3; priority >= 0; --priority)
+            {
+                if (((_DISPCNT & 0x0400) == 0x0400) && ((_BG2CNT & 0b11) == priority))
+                {
+                    //RenderAffineBackground();
                     isFirst = false;
                 }
 
