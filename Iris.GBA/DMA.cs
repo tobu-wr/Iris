@@ -86,69 +86,142 @@
 
         internal void CheckForDMA0()
         {
-            CheckForDMA(_DMA0CNT_L, ref _DMA0CNT_H, ref _DMA0SAD_L, ref _DMA0SAD_H, ref _DMA0DAD_L, ref _DMA0DAD_H);
+            if ((_DMA0CNT_H & 0x8000) == 0x8000)
+            {
+                UInt32 source = (UInt32)(((_DMA0SAD_H & 0x07ff) << 16) | _DMA0SAD_L);
+                UInt32 destination = (UInt32)(((_DMA0DAD_H & 0x07ff) << 16) | _DMA0DAD_L);
+                UInt32 length = ((_DMA0CNT_L & 0x3fff) == 0) ? 0x4000u : (UInt32)(_DMA0CNT_L & 0x3fff);
+
+                PerformDMA(ref _DMA0CNT_H, ref source, ref destination, length);
+
+                _DMA0SAD_L = (UInt16)source;
+                _DMA0SAD_H = (UInt16)(source >> 16);
+                _DMA0DAD_L = (UInt16)destination;
+                _DMA0DAD_H = (UInt16)(destination >> 16);
+            }
         }
 
         internal void CheckForDMA1()
         {
-            CheckForDMA(_DMA1CNT_L, ref _DMA1CNT_H, ref _DMA1SAD_L, ref _DMA1SAD_H, ref _DMA1DAD_L, ref _DMA1DAD_H);
+            if ((_DMA1CNT_H & 0x8000) == 0x8000)
+            {
+                if ((_DMA1CNT_H & 0x3000) == 0x3000)
+                    return;  // direct-sound FIFO transfer mode (ignore for now)
+
+                UInt32 source = (UInt32)(((_DMA1SAD_H & 0x0fff) << 16) | _DMA1SAD_L);
+                UInt32 destination = (UInt32)(((_DMA1DAD_H & 0x07ff) << 16) | _DMA1DAD_L);
+                UInt32 length = ((_DMA1CNT_L & 0x3fff) == 0) ? 0x4000u : (UInt32)(_DMA1CNT_L & 0x3fff);
+
+                PerformDMA(ref _DMA1CNT_H, ref source, ref destination, length);
+
+                _DMA1SAD_L = (UInt16)source;
+                _DMA1SAD_H = (UInt16)(source >> 16);
+                _DMA1DAD_L = (UInt16)destination;
+                _DMA1DAD_H = (UInt16)(destination >> 16);
+            }
         }
 
         internal void CheckForDMA2()
         {
-            CheckForDMA(_DMA2CNT_L, ref _DMA2CNT_H, ref _DMA2SAD_L, ref _DMA2SAD_H, ref _DMA2DAD_L, ref _DMA2DAD_H);
+            if ((_DMA2CNT_H & 0x8000) == 0x8000)
+            {
+                if ((_DMA2CNT_H & 0x3000) == 0x3000)
+                    return;  // direct-sound FIFO transfer mode (ignore for now)
+
+                UInt32 source = (UInt32)(((_DMA2SAD_H & 0x0fff) << 16) | _DMA2SAD_L);
+                UInt32 destination = (UInt32)(((_DMA2DAD_H & 0x07ff) << 16) | _DMA2DAD_L);
+                UInt32 length = ((_DMA2CNT_L & 0x3fff) == 0) ? 0x4000u : (UInt32)(_DMA2CNT_L & 0x3fff);
+
+                PerformDMA(ref _DMA2CNT_H, ref source, ref destination, length);
+
+                _DMA2SAD_L = (UInt16)source;
+                _DMA2SAD_H = (UInt16)(source >> 16);
+                _DMA2DAD_L = (UInt16)destination;
+                _DMA2DAD_H = (UInt16)(destination >> 16);
+            }
         }
 
         internal void CheckForDMA3()
         {
-            CheckForDMA(_DMA3CNT_L, ref _DMA3CNT_H, ref _DMA3SAD_L, ref _DMA3SAD_H, ref _DMA3DAD_L, ref _DMA3DAD_H);
+            if ((_DMA3CNT_H & 0x8000) == 0x8000)
+            {
+                UInt32 source = (UInt32)(((_DMA3SAD_H & 0x0fff) << 16) | _DMA3SAD_L);
+                UInt32 destination = (UInt32)(((_DMA3DAD_H & 0x0fff) << 16) | _DMA3DAD_L);
+                UInt32 length = (_DMA3CNT_L == 0) ? 0x1_0000u : _DMA3CNT_L;
+
+                PerformDMA(ref _DMA3CNT_H, ref source, ref destination, length);
+
+                _DMA3SAD_L = (UInt16)source;
+                _DMA3SAD_H = (UInt16)(source >> 16);
+                _DMA3DAD_L = (UInt16)destination;
+                _DMA3DAD_H = (UInt16)(destination >> 16);
+            }
         }
 
-        private void CheckForDMA(UInt16 cnt_l, ref UInt16 cnt_h, ref UInt16 sad_l, ref UInt16 sad_h, ref UInt16 dad_l, ref UInt16 dad_h)
+        private void PerformDMA(ref UInt16 cnt_h, ref UInt32 source, ref UInt32 destination, UInt32 length)
         {
-            if ((cnt_h & 0x8000) == 0x8000)
+            UInt32 tmpSource = source;
+            UInt32 tmpDestination = destination;
+            UInt32 size;
+
+            // 16 bits
+            if ((cnt_h & 0x0400) == 0)
             {
-                if ((cnt_h & 0x3000) == 0x3000)
-                    return;  // direct-sound FIFO transfer mode (ignore for now)
+                size = length * 2;
+                UInt32 lastDestination = destination + size;
 
-                UInt32 source = (UInt32)((sad_h << 16) | sad_l);
-                UInt32 destination = (UInt32)((dad_h << 16) | dad_l);
-
-                // 16 bits
-                if ((cnt_h & 0x0400) == 0)
+                while (tmpDestination < lastDestination)
                 {
-                    UInt32 lastDestination = (UInt32)(destination + (cnt_l * 2));
-
-                    while (destination < lastDestination)
-                    {
-                        _memory.Write16(destination, _memory.Read16(source));
-                        destination += 2;
-                        source += 2;
-                    }
+                    _memory.Write16(tmpDestination, _memory.Read16(tmpSource));
+                    tmpDestination += 2;
+                    tmpSource += 2;
                 }
+            }
 
-                // 32 bits
-                else
+            // 32 bits
+            else
+            {
+                size = length * 4;
+                UInt32 lastDestination = destination + size;
+
+                while (tmpDestination < lastDestination)
                 {
-                    UInt32 lastDestination = (UInt32)(destination + (cnt_l * 4));
-
-                    while (destination < lastDestination)
-                    {
-                        _memory.Write32(destination, _memory.Read32(source));
-                        destination += 4;
-                        source += 4;
-                    }
+                    _memory.Write32(tmpDestination, _memory.Read32(tmpSource));
+                    tmpDestination += 4;
+                    tmpSource += 4;
                 }
+            }
 
-                cnt_h = (UInt16)(cnt_h & ~0x8000);
-                sad_l = (UInt16)source;
-                sad_h = (UInt16)(source >> 16);
+            cnt_h = (UInt16)(cnt_h & ~0x8000);
 
-                if ((cnt_h & 0x0060) != 0x0040)
-                {
-                    dad_l = (UInt16)destination;
-                    dad_h = (UInt16)(destination >> 16);
-                }
+            switch ((cnt_h >> 7) & 0b11)
+            {
+                // increment
+                case 0b00:
+                    source = tmpSource;
+                    break;
+
+                // fixed
+                case 0b10:
+                    break;
+
+                default:
+                    throw new NotImplementedException();
+            }
+
+            switch ((cnt_h >> 5) & 0b11)
+            {
+                // increment
+                case 0b00:
+                    destination = tmpDestination;
+                    break;
+
+                // fixed
+                case 0b10:
+                    break;
+
+                default:
+                    throw new NotImplementedException();
             }
         }
     }
