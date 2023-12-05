@@ -5,7 +5,7 @@ namespace Iris.UserInterface
 {
     public partial class MainWindow : Form
     {
-        private static readonly Dictionary<Keys, Common.System.Key> KeyMapping = new()
+        private static readonly Dictionary<Keys, Common.System.Key> KeyboardMapping = new()
         {
             { Keys.A, Common.System.Key.A },
             { Keys.Z, Common.System.Key.B },
@@ -21,9 +21,26 @@ namespace Iris.UserInterface
             { Keys.R, Common.System.Key.Y },
         };
 
+        private static readonly Dictionary<GameController.Button, Common.System.Key> GameControllerMapping = new()
+        {
+            { GameController.Button.A, Common.System.Key.A },
+            { GameController.Button.B, Common.System.Key.B },
+            { GameController.Button.Back, Common.System.Key.Select },
+            { GameController.Button.Start, Common.System.Key.Start },
+            { GameController.Button.DPadRight, Common.System.Key.Right },
+            { GameController.Button.DPadLeft, Common.System.Key.Left },
+            { GameController.Button.DPadUp, Common.System.Key.Up },
+            { GameController.Button.DPadDown, Common.System.Key.Down },
+            { GameController.Button.RightShoulder, Common.System.Key.R },
+            { GameController.Button.LeftShoulder, Common.System.Key.L },
+            { GameController.Button.X, Common.System.Key.X },
+            { GameController.Button.Y, Common.System.Key.Y },
+        };
+
         private readonly Common.System _system;
         private int _frameCount = 0;
         private readonly System.Timers.Timer _performanceUpdateTimer = new(1000);
+        private readonly GameController _gameController = new();
 
         public MainWindow(string[] args)
         {
@@ -31,6 +48,8 @@ namespace Iris.UserInterface
 
             _system = new GBA_System(DrawFrame);
             _performanceUpdateTimer.Elapsed += PerformanceUpdateTimer_Elapsed;
+            _gameController.ButtonDown += GameController_ButtonDown;
+            _gameController.ButtonUp += GameController_ButtonUp;
 
             if (args.Length > 0 && LoadROM(args[0]))
             {
@@ -73,6 +92,7 @@ namespace Iris.UserInterface
 #endif
 
             ++_frameCount;
+            _gameController.Update();
         }
 
         private bool LoadROM(string fileName)
@@ -222,19 +242,31 @@ namespace Iris.UserInterface
         {
             int fps = (int)(_frameCount * 1000 / _performanceUpdateTimer.Interval);
             menuStrip1.Invoke(() => fpsToolStripStatusLabel.Text = "FPS: " + fps);
-            Console.WriteLine("UserInterface.MainWindow: FPS: {0}", fps);
+            Console.WriteLine("[UserInterface.MainWindow] FPS: {0}", fps);
             _frameCount = 0;
         }
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
-            if (KeyMapping.TryGetValue(e.KeyCode, out Common.System.Key value))
+            if (KeyboardMapping.TryGetValue(e.KeyCode, out Common.System.Key value))
                 _system.SetKeyStatus(value, Common.System.KeyStatus.Input);
         }
 
         private void MainWindow_KeyUp(object sender, KeyEventArgs e)
         {
-            if (KeyMapping.TryGetValue(e.KeyCode, out Common.System.Key value))
+            if (KeyboardMapping.TryGetValue(e.KeyCode, out Common.System.Key value))
+                _system.SetKeyStatus(value, Common.System.KeyStatus.NoInput);
+        }
+
+        private void GameController_ButtonDown(object sender, GameController.ButtonEventArgs e)
+        {
+            if (GameControllerMapping.TryGetValue(e.Button, out Common.System.Key value))
+                _system.SetKeyStatus(value, Common.System.KeyStatus.Input);
+        }
+
+        private void GameController_ButtonUp(object sender, GameController.ButtonEventArgs e)
+        {
+            if (GameControllerMapping.TryGetValue(e.Button, out Common.System.Key value))
                 _system.SetKeyStatus(value, Common.System.KeyStatus.NoInput);
         }
     }
