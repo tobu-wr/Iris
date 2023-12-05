@@ -42,27 +42,27 @@ namespace Iris.UserInterface
             if (!_controller.IsConnected)
                 return;
 
-            Gamepad gamepad = _controller.GetState().Gamepad;
-            CheckButton(gamepad, GamepadButtonFlags.DPadUp, Button.DPadUp);
-            CheckButton(gamepad, GamepadButtonFlags.DPadDown, Button.DPadDown);
-            CheckButton(gamepad, GamepadButtonFlags.DPadLeft, Button.DPadLeft);
-            CheckButton(gamepad, GamepadButtonFlags.DPadRight, Button.DPadRight);
-            CheckButton(gamepad, GamepadButtonFlags.Start, Button.Start);
-            CheckButton(gamepad, GamepadButtonFlags.Back, Button.Back);
-            CheckButton(gamepad, GamepadButtonFlags.LeftShoulder, Button.LeftShoulder);
-            CheckButton(gamepad, GamepadButtonFlags.RightShoulder, Button.RightShoulder);
-            CheckButton(gamepad, GamepadButtonFlags.A, Button.A);
-            CheckButton(gamepad, GamepadButtonFlags.B, Button.B);
-            CheckButton(gamepad, GamepadButtonFlags.X, Button.X);
-            CheckButton(gamepad, GamepadButtonFlags.Y, Button.Y);
-            _gamepad = gamepad;
+            CheckButton(GamepadButtonFlags.DPadUp, Button.DPadUp);
+            CheckButton(GamepadButtonFlags.DPadDown, Button.DPadDown);
+            CheckButton(GamepadButtonFlags.DPadLeft, Button.DPadLeft);
+            CheckButton(GamepadButtonFlags.DPadRight, Button.DPadRight);
+            CheckButton(GamepadButtonFlags.Start, Button.Start);
+            CheckButton(GamepadButtonFlags.Back, Button.Back);
+            CheckButton(GamepadButtonFlags.LeftShoulder, Button.LeftShoulder);
+            CheckButton(GamepadButtonFlags.RightShoulder, Button.RightShoulder);
+            CheckButton(GamepadButtonFlags.A, Button.A);
+            CheckButton(GamepadButtonFlags.B, Button.B);
+            CheckButton(GamepadButtonFlags.X, Button.X);
+            CheckButton(GamepadButtonFlags.Y, Button.Y);
+
+            _gamepad = _controller.GetState().Gamepad;
         }
 
-        private void CheckButton(Gamepad gamepad, GamepadButtonFlags flag, Button button)
+        private void CheckButton(GamepadButtonFlags flag, Button button)
         {
-            if (_gamepad.Buttons.HasFlag(flag) != gamepad.Buttons.HasFlag(flag))
+            if (_gamepad.Buttons.HasFlag(flag) != _controller.GetState().Gamepad.Buttons.HasFlag(flag))
             {
-                if (gamepad.Buttons.HasFlag(flag))
+                if (_controller.GetState().Gamepad.Buttons.HasFlag(flag))
                     ButtonDown?.Invoke(this, new ButtonEventArgs(button));
                 else
                     ButtonUp?.Invoke(this, new ButtonEventArgs(button));

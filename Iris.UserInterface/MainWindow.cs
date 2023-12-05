@@ -1,11 +1,12 @@
 using Iris.GBA;
+using System.Collections.Frozen;
 using System.Drawing.Imaging;
 
 namespace Iris.UserInterface
 {
     public partial class MainWindow : Form
     {
-        private static readonly Dictionary<Keys, Common.System.Key> KeyboardMapping = new()
+        private static readonly FrozenDictionary<Keys, Common.System.Key> s_keyboardMapping = new Dictionary<Keys, Common.System.Key>()
         {
             { Keys.A, Common.System.Key.A },
             { Keys.Z, Common.System.Key.B },
@@ -19,9 +20,9 @@ namespace Iris.UserInterface
             { Keys.Q, Common.System.Key.L },
             { Keys.E, Common.System.Key.X },
             { Keys.R, Common.System.Key.Y },
-        };
+        }.ToFrozenDictionary();
 
-        private static readonly Dictionary<GameController.Button, Common.System.Key> GameControllerMapping = new()
+        private static readonly FrozenDictionary<GameController.Button, Common.System.Key> s_gameControllerMapping = new Dictionary<GameController.Button, Common.System.Key>()
         {
             { GameController.Button.A, Common.System.Key.A },
             { GameController.Button.B, Common.System.Key.B },
@@ -35,7 +36,7 @@ namespace Iris.UserInterface
             { GameController.Button.LeftShoulder, Common.System.Key.L },
             { GameController.Button.X, Common.System.Key.X },
             { GameController.Button.Y, Common.System.Key.Y },
-        };
+        }.ToFrozenDictionary();
 
         private readonly Common.System _system;
         private int _frameCount = 0;
@@ -248,25 +249,25 @@ namespace Iris.UserInterface
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
-            if (KeyboardMapping.TryGetValue(e.KeyCode, out Common.System.Key value))
+            if (s_keyboardMapping.TryGetValue(e.KeyCode, out Common.System.Key value))
                 _system.SetKeyStatus(value, Common.System.KeyStatus.Input);
         }
 
         private void MainWindow_KeyUp(object sender, KeyEventArgs e)
         {
-            if (KeyboardMapping.TryGetValue(e.KeyCode, out Common.System.Key value))
+            if (s_keyboardMapping.TryGetValue(e.KeyCode, out Common.System.Key value))
                 _system.SetKeyStatus(value, Common.System.KeyStatus.NoInput);
         }
 
         private void GameController_ButtonDown(object sender, GameController.ButtonEventArgs e)
         {
-            if (GameControllerMapping.TryGetValue(e.Button, out Common.System.Key value))
+            if (s_gameControllerMapping.TryGetValue(e.Button, out Common.System.Key value))
                 _system.SetKeyStatus(value, Common.System.KeyStatus.Input);
         }
 
         private void GameController_ButtonUp(object sender, GameController.ButtonEventArgs e)
         {
-            if (GameControllerMapping.TryGetValue(e.Button, out Common.System.Key value))
+            if (s_gameControllerMapping.TryGetValue(e.Button, out Common.System.Key value))
                 _system.SetKeyStatus(value, Common.System.KeyStatus.NoInput);
         }
     }
