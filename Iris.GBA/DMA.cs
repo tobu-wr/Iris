@@ -160,6 +160,9 @@
 
         private void PerformDMA(ref UInt16 cnt_h, ref UInt32 source, ref UInt32 destination, UInt32 length)
         {
+            if ((cnt_h & 0x3000) != 0)
+                return;  // vblank/hblank transfer mode (ignore for now)
+
             UInt32 tmpSource = source;
             UInt32 tmpDestination = destination;
             UInt32 size;
@@ -206,7 +209,7 @@
                     break;
 
                 default:
-                    throw new NotImplementedException();
+                    throw new NotImplementedException("Iris.GBA.DMA");
             }
 
             switch ((cnt_h >> 5) & 0b11)
@@ -221,7 +224,7 @@
                     break;
 
                 default:
-                    throw new NotImplementedException();
+                    throw new NotImplementedException("Iris.GBA.DMA");
             }
         }
     }
