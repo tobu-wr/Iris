@@ -1,11 +1,20 @@
 # Iris
 
-Iris is a WIP GameBoy Advance and Nintendo DS emulator.
+Iris is a WIP GameBoy Advance (and Nintendo DS in the future) emulator. The goal is to provide a user-friendly experience with good enough accuracy and speed to play most games without major issues.
 
-<p align="center">
-  <img src="Screenshots/Capture.PNG"/>
-  <img src="Screenshots/Capture-2.PNG"/>
-</p>
+## Controls
+
+| GBA/NDS | Keyboard | Xbox Controller |
+| --- | --- | --- |
+| A | A | A |
+| B | Z | B |
+| X (NDS only) | E | X |
+| Y (NDS only) | R | Y |
+| L | Q | LB |
+| R | S | RB |
+| D-Pad | Arrows | D-Pad |
+| Start | Enter | Start |
+| Select | Space | Back |
 
 ## Resources
 
