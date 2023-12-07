@@ -589,8 +589,10 @@ namespace Iris.GBA
                         _ => throw new Exception(string.Format("Iris.GBA.Video: Prohibited object shape {0}", shape))
                     };
 
+                    const int VirtualScreenHeight = 256;
+
                     int top = yCoordinate;
-                    int bottom = (yCoordinate + characterHeight) % 256;
+                    int bottom = (yCoordinate + characterHeight) % VirtualScreenHeight;
 
                     bool topHidden = top >= DisplayScreenHeight;
                     bool bottomHidden = bottom >= DisplayScreenHeight;
@@ -602,7 +604,7 @@ namespace Iris.GBA
 
                     if (topHidden)
                     {
-                        vBegin = 256 - top;
+                        vBegin = VirtualScreenHeight - top;
                         top = 0;
                     }
                     else if (bottomHidden)
@@ -620,8 +622,10 @@ namespace Iris.GBA
 
                     int v = _VCOUNT - top + vBegin;
 
+                    const int VirtualScreenWidth = 512;
+
                     int left = xCoordinate;
-                    int right = (xCoordinate + characterWidth) % 512;
+                    int right = (xCoordinate + characterWidth) % VirtualScreenWidth;
 
                     bool leftHidden = left >= DisplayScreenWidth;
                     bool rightHidden = right >= DisplayScreenWidth;
@@ -633,7 +637,7 @@ namespace Iris.GBA
 
                     if (leftHidden)
                     {
-                        hBegin = 512 - left;
+                        hBegin = VirtualScreenWidth - left;
                         left = 0;
                     }
                     else if (rightHidden)
