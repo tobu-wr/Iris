@@ -589,16 +589,65 @@ namespace Iris.GBA
                         _ => throw new Exception(string.Format("Iris.GBA.Video: Prohibited object shape {0}", shape))
                     };
 
-                    if (xCoordinate >= DisplayScreenWidth)
+                    int top = yCoordinate;
+                    int bottom = (yCoordinate + characterHeight) % 256;
+
+                    bool topHidden = top >= DisplayScreenHeight;
+                    bool bottomHidden = bottom >= DisplayScreenHeight;
+
+                    if (topHidden && bottomHidden)
                         continue;
 
-                    if ((yCoordinate > _VCOUNT) || ((yCoordinate + characterHeight) <= _VCOUNT))
+                    int vBegin;
+
+                    if (topHidden)
+                    {
+                        vBegin = 256 - top;
+                        top = 0;
+                    }
+                    else if (bottomHidden)
+                    {
+                        vBegin = 0;
+                        bottom = DisplayScreenHeight;
+                    }
+                    else
+                    {
+                        vBegin = 0;
+                    }
+
+                    if ((top > _VCOUNT) || (bottom <= _VCOUNT))
                         continue;
+
+                    int v = _VCOUNT - top + vBegin;
+
+                    int left = xCoordinate;
+                    int right = (xCoordinate + characterWidth) % 512;
+
+                    bool leftHidden = left >= DisplayScreenWidth;
+                    bool rightHidden = right >= DisplayScreenWidth;
+
+                    if (leftHidden && rightHidden)
+                        continue;
+
+                    int hBegin;
+
+                    if (leftHidden)
+                    {
+                        hBegin = 512 - left;
+                        left = 0;
+                    }
+                    else if (rightHidden)
+                    {
+                        hBegin = 0;
+                        right = DisplayScreenWidth;
+                    }
+                    else
+                    {
+                        hBegin = 0;
+                    }
 
                     const int BasicCharacterWidth = 8;
                     const int BasicCharacterHeight = 8;
-
-                    int v = _VCOUNT - yCoordinate;
 
                     int basicCharacterNumberBegin;
                     int basicCharacterPixelNumberBegin;
@@ -628,11 +677,11 @@ namespace Iris.GBA
                         basicCharacterPixelNumberBegin = (BasicCharacterHeight - 1 - (v % BasicCharacterHeight)) * BasicCharacterWidth;
                     }
 
-                    for (int hcount = xCoordinate; (hcount < (xCoordinate + characterWidth)) && (hcount < DisplayScreenWidth); ++hcount)
+                    for (int hcount = left; hcount < right; ++hcount)
                     {
                         int displayPixelNumber = displayPixelNumberBegin + hcount;
 
-                        int h = hcount - xCoordinate;
+                        int h = hcount - left + hBegin;
 
                         int basicCharacterNumber = basicCharacterNumberBegin;
                         int basicCharacterPixelNumber = basicCharacterPixelNumberBegin;
