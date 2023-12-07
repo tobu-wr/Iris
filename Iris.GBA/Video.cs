@@ -263,6 +263,10 @@ namespace Iris.GBA
                     RenderBackgroundMode1();
                     break;
 
+                case 0b010:
+                    RenderBackgroundMode2();
+                    break;
+
                 case 0b011:
                     RenderBackgroundMode3();
 
@@ -341,7 +345,7 @@ namespace Iris.GBA
             {
                 if (((_DISPCNT & 0x0400) == 0x0400) && ((_BG2CNT & 0b11) == priority))
                 {
-                    //RenderAffineBackground();
+                    RenderAffineBackground(_BG2CNT, _BG2HOFS, _BG2VOFS, isFirst);
                     isFirst = false;
                 }
 
@@ -354,6 +358,29 @@ namespace Iris.GBA
                 if (((_DISPCNT & 0x0100) == 0x0100) && ((_BG0CNT & 0b11) == priority))
                 {
                     RenderTextBackground(_BG0CNT, _BG0HOFS, _BG0VOFS, isFirst);
+                    isFirst = false;
+                }
+
+                if ((_DISPCNT & 0x1000) == 0x1000)
+                    RenderObjects((UInt16)priority);
+            }
+        }
+
+        private void RenderBackgroundMode2()
+        {
+            bool isFirst = true;
+
+            for (int priority = 3; priority >= 0; --priority)
+            {
+                if (((_DISPCNT & 0x0800) == 0x0800) && ((_BG3CNT & 0b11) == priority))
+                {
+                    RenderAffineBackground(_BG3CNT, _BG3HOFS, _BG3VOFS, isFirst);
+                    isFirst = false;
+                }
+
+                if (((_DISPCNT & 0x0400) == 0x0400) && ((_BG2CNT & 0b11) == priority))
+                {
+                    RenderAffineBackground(_BG2CNT, _BG2HOFS, _BG2VOFS, isFirst);
                     isFirst = false;
                 }
 
@@ -531,6 +558,11 @@ namespace Iris.GBA
                     Unsafe.Add(ref displayFrameBufferDataRef, displayPixelNumber) = color;
                 }
             }
+        }
+
+        private void RenderAffineBackground(UInt16 cnt, UInt16 hofs, UInt16 vofs, bool isFirst)
+        {
+            RenderTextBackground(cnt, hofs, vofs, isFirst);
         }
 
         private void RenderObjects(UInt16 priority)
