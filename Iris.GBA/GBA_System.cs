@@ -1,5 +1,6 @@
 ﻿using Iris.Common;
 using Iris.CPU;
+using System.Security.Cryptography;
 
 namespace Iris.GBA
 {
@@ -20,6 +21,7 @@ namespace Iris.GBA
 
         private readonly BIOS _bios = new BIOS_LLE("D:\\dev\\Iris\\ROMs\\GBA\\gba_bios.bin");
 
+        private string _romHash;
         private bool _running;
 
         public GBA_System(DrawFrame_Delegate drawFrame)
@@ -62,6 +64,29 @@ namespace Iris.GBA
         public override void LoadROM(string filename)
         {
             _memory.LoadROM(filename);
+
+            using HashAlgorithm hashAlgorithm = SHA512.Create();
+            using FileStream fileStream = File.OpenRead(filename);
+            _romHash = BitConverter.ToString(hashAlgorithm.ComputeHash(fileStream));
+        }
+
+        public override void LoadState(string filename)
+        {
+            using FileStream fileStream = File.OpenRead(filename);
+            using BinaryReader reader = new(fileStream, System.Text.Encoding.UTF8, false);
+
+            if (reader.ReadString() != _romHash)
+                throw new Exception("Wrong ROM");
+
+            // TODO
+        }
+
+        public override void SaveState(string filename)
+        {
+            using FileStream fileStream = File.OpenWrite(filename);
+            using BinaryWriter writer = new(fileStream, System.Text.Encoding.UTF8, false);
+            writer.Write(_romHash);
+            // TODO
         }
 
         public override bool IsRunning()

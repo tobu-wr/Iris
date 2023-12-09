@@ -23,6 +23,16 @@ namespace Iris.NDS
             _cpu.NIRQ = CPU_Core.Signal.High;
         }
 
+        public override void LoadState(string filename)
+        {
+            // TODO
+        }
+
+        public override void SaveState(string filename)
+        {
+            // TODO
+        }
+
         public override bool IsRunning()
         {
             return _running;

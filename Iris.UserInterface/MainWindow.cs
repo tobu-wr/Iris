@@ -155,7 +155,7 @@ namespace Iris.UserInterface
 
             OpenFileDialog dialog = new()
             {
-                Filter = "GBA ROM files (*.gba)|*.gba"
+                Filter = "GBA ROM files (*.gba)|*.gba|NDS ROM files (*.nds)|*.nds"
             };
 
             if (dialog.ShowDialog() == DialogResult.OK)
@@ -182,11 +182,22 @@ namespace Iris.UserInterface
             if (running)
                 Pause();
 
-            OpenFileDialog dialog = new();
+            OpenFileDialog dialog = new()
+            {
+                // TODO: filter according to current system
+                Filter = "GBA State Save files (*.gss)|*.gss|NDS State Save files (*.nss)|*.nss"
+            };
 
             if (dialog.ShowDialog() == DialogResult.OK)
             {
-                // TODO
+                try
+                {
+                    _system.LoadState(dialog.FileName);
+                }
+                catch
+                {
+                    MessageBox.Show("Could not load state", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
 
             if (running)
@@ -200,12 +211,14 @@ namespace Iris.UserInterface
             if (running)
                 Pause();
 
-            SaveFileDialog dialog = new();
-
-            if (dialog.ShowDialog(this) == DialogResult.OK)
+            SaveFileDialog dialog = new()
             {
-                // TODO
-            }
+                // TODO: filter according to current system
+                Filter = "GBA State Save files (*.gss)|*.gss|NDS State Save files (*.nss)|*.nss"
+            };
+
+            if (dialog.ShowDialog() == DialogResult.OK)
+                _system.SaveState(dialog.FileName);
 
             if (running)
                 Run();
@@ -259,13 +272,13 @@ namespace Iris.UserInterface
                 _system.SetKeyStatus(value, Common.System.KeyStatus.NoInput);
         }
 
-        private void XboxController_ButtonDown(object sender, XboxController.ButtonEventArgs e)
+        private void XboxController_ButtonDown(object? sender, XboxController.ButtonEventArgs e)
         {
             if (s_gameControllerMapping.TryGetValue(e.Button, out Common.System.Key value))
                 _system.SetKeyStatus(value, Common.System.KeyStatus.Input);
         }
 
-        private void XboxController_ButtonUp(object sender, XboxController.ButtonEventArgs e)
+        private void XboxController_ButtonUp(object? sender, XboxController.ButtonEventArgs e)
         {
             if (s_gameControllerMapping.TryGetValue(e.Button, out Common.System.Key value))
                 _system.SetKeyStatus(value, Common.System.KeyStatus.NoInput);
