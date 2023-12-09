@@ -65,17 +65,17 @@ namespace Iris.GBA
 
         internal override Byte Read8(UInt32 address)
         {
-            throw new Exception("Iris.GBA.BIOS_LLE: BIOS is not correctly mapped to memory");
+            return 0;
         }
 
         internal override UInt16 Read16(UInt32 address)
         {
-            throw new Exception("Iris.GBA.BIOS_LLE: BIOS is not correctly mapped to memory");
+            return 0;
         }
 
         internal override UInt32 Read32(UInt32 address)
         {
-            throw new Exception("Iris.GBA.BIOS_LLE: BIOS is not correctly mapped to memory");
+            return 0;
         }
 
         internal override UInt32 HandleSWI()

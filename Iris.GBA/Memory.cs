@@ -368,7 +368,7 @@ namespace Iris.GBA
 
                             0x300 => _systemControl._POSTFLG,
 
-                            _ => throw new Exception(string.Format("Iris.GBA.Memory: Unhandled read from address 0x{0:x8}", address)),
+                            _ => 0,
                         };
                     }
 
@@ -424,7 +424,6 @@ namespace Iris.GBA
                     break;
             }
 
-            System.Diagnostics.Debug.WriteLine("Iris.GBA.Memory: Unhandled read from address 0x{0:x8}", address);
             return 0;
         }
 
@@ -516,7 +515,7 @@ namespace Iris.GBA
                             0x202 => _interruptControl!._IF,
                             0x204 => _systemControl!._WAITCNT,
                             0x208 => _interruptControl!._IME,
-                            _ => throw new Exception(string.Format("Iris.GBA.Memory: Unhandled read from address 0x{0:x8}", address)),
+                            _ => 0,
                         };
                     }
 
@@ -572,7 +571,6 @@ namespace Iris.GBA
                     break;
             }
 
-            System.Diagnostics.Debug.WriteLine("Iris.GBA.Memory: Unhandled read from address 0x{0:x8}", address);
             return 0;
         }
 
@@ -617,7 +615,7 @@ namespace Iris.GBA
                             0x150 => (UInt32)((_communication._JOY_RECV_H << 16) | _communication._JOY_RECV_L),
                             0x200 => (UInt32)((_interruptControl!._IF << 16) | _interruptControl._IE),
                             0x208 => _interruptControl!._IME,
-                            _ => throw new Exception(string.Format("Iris.GBA.Memory: Unhandled read from address 0x{0:x8}", address)),
+                            _ => 0,
                         };
                     }
 
@@ -673,7 +671,6 @@ namespace Iris.GBA
                     break;
             }
 
-            System.Diagnostics.Debug.WriteLine("Iris.GBA.Memory: Unhandled read from address 0x{0:x8}", address);
             return 0;
         }
 
@@ -1380,7 +1377,7 @@ namespace Iris.GBA
                                 break;
 
                             default:
-                                System.Diagnostics.Debug.WriteLine("Iris.GBA.Memory: Unhandled write to address 0x{0:x8}", address);
+                                Console.WriteLine("[Iris.GBA.Memory] Unhandled write to address 0x{0:x8}", address);
                                 break;
                         }
                     }
@@ -1410,7 +1407,7 @@ namespace Iris.GBA
                     break;
 
                 default:
-                    System.Diagnostics.Debug.WriteLine("Iris.GBA.Memory: Unhandled write to address 0x{0:x8}", address);
+                    Console.WriteLine("[Iris.GBA.Memory] Unhandled write to address 0x{0:x8}", address);
                     break;
             }
         }
@@ -1782,7 +1779,7 @@ namespace Iris.GBA
                                 _interruptControl.CheckForInterrupts();
                                 break;
                             default:
-                                System.Diagnostics.Debug.WriteLine("Iris.GBA.Memory: Unhandled write to address 0x{0:x8}", address);
+                                Console.WriteLine("[Iris.GBA.Memory] Unhandled write to address 0x{0:x8}", address);
                                 break;
                         }
                     }
@@ -1798,7 +1795,7 @@ namespace Iris.GBA
                     break;
 
                 default:
-                    System.Diagnostics.Debug.WriteLine("Iris.GBA.Memory: Unhandled write to address 0x{0:x8}", address);
+                    Console.WriteLine("[Iris.GBA.Memory] Unhandled write to address 0x{0:x8}", address);
                     break;
             }
         }
@@ -2113,7 +2110,7 @@ namespace Iris.GBA
                                 // 16 upper bits are unused
                                 break;
                             default:
-                                System.Diagnostics.Debug.WriteLine("Iris.GBA.Memory: Unhandled write to address 0x{0:x8}", address);
+                                Console.WriteLine("[Iris.GBA.Memory] Unhandled write to address 0x{0:x8}", address);
                                 break;
                         }
                     }
@@ -2129,7 +2126,7 @@ namespace Iris.GBA
                     break;
 
                 default:
-                    System.Diagnostics.Debug.WriteLine("Iris.GBA.Memory: Unhandled write to address 0x{0:x8}", address);
+                    Console.WriteLine("[Iris.GBA.Memory] Unhandled write to address 0x{0:x8}", address);
                     break;
             }
         }
