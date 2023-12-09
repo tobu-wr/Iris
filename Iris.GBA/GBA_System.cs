@@ -1,5 +1,6 @@
 ﻿using Iris.Common;
 using Iris.CPU;
+using System.Reflection.PortableExecutable;
 using System.Security.Cryptography;
 
 namespace Iris.GBA
@@ -67,7 +68,7 @@ namespace Iris.GBA
 
             using HashAlgorithm hashAlgorithm = SHA512.Create();
             using FileStream fileStream = File.OpenRead(filename);
-            _romHash = BitConverter.ToString(hashAlgorithm.ComputeHash(fileStream));
+            _romHash = BitConverter.ToString(hashAlgorithm.ComputeHash(fileStream)).Replace("-", "");
         }
 
         public override void LoadState(string filename)
@@ -78,15 +79,29 @@ namespace Iris.GBA
             if (reader.ReadString() != _romHash)
                 throw new Exception("Wrong ROM");
 
-            // TODO
+            _communication.LoadState(reader);
+            _timer.LoadState(reader);
+            _sound.LoadState(reader);
+            _dma.LoadState(reader);
+            _keyInput.LoadState(reader);
+            _systemControl.LoadState(reader);
+            _interruptControl.LoadState(reader);
         }
 
         public override void SaveState(string filename)
         {
             using FileStream fileStream = File.OpenWrite(filename);
             using BinaryWriter writer = new(fileStream, System.Text.Encoding.UTF8, false);
+
             writer.Write(_romHash);
-            // TODO
+
+            _communication.SaveState(writer);
+            _timer.SaveState(writer);
+            _sound.SaveState(writer);
+            _dma.SaveState(writer);
+            _keyInput.SaveState(writer);
+            _systemControl.SaveState(writer);
+            _interruptControl.SaveState(writer);
         }
 
         public override bool IsRunning()

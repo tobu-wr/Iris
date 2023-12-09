@@ -28,5 +28,35 @@
             _TM3CNT_L = 0;
             _TM3CNT_H = 0;
         }
+
+        internal void LoadState(BinaryReader reader)
+        {
+            _TM0CNT_L = reader.ReadUInt16();
+            _TM0CNT_H = reader.ReadUInt16();
+
+            _TM1CNT_L = reader.ReadUInt16();
+            _TM1CNT_H = reader.ReadUInt16();
+
+            _TM2CNT_L = reader.ReadUInt16();
+            _TM2CNT_H = reader.ReadUInt16();
+
+            _TM3CNT_L = reader.ReadUInt16();
+            _TM3CNT_H = reader.ReadUInt16();
+        }
+
+        internal void SaveState(BinaryWriter writer)
+        {
+            writer.Write(_TM0CNT_L);
+            writer.Write(_TM0CNT_H);
+
+            writer.Write(_TM1CNT_L);
+            writer.Write(_TM1CNT_H);
+
+            writer.Write(_TM2CNT_L);
+            writer.Write(_TM2CNT_H);
+
+            writer.Write(_TM3CNT_L);
+            writer.Write(_TM3CNT_H);
+        }
     }
 }

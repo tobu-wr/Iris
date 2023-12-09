@@ -84,6 +84,84 @@
             _DMA3CNT_H = 0;
         }
 
+        internal void LoadState(BinaryReader reader)
+        {
+            _DMA0SAD_L = reader.ReadUInt16();
+            _DMA0SAD_H = reader.ReadUInt16();
+
+            _DMA0DAD_L = reader.ReadUInt16();
+            _DMA0DAD_H = reader.ReadUInt16();
+
+            _DMA0CNT_L = reader.ReadUInt16();
+            _DMA0CNT_H = reader.ReadUInt16();
+
+            _DMA1SAD_L = reader.ReadUInt16();
+            _DMA1SAD_H = reader.ReadUInt16();
+
+            _DMA1DAD_L = reader.ReadUInt16();
+            _DMA1DAD_H = reader.ReadUInt16();
+
+            _DMA1CNT_L = reader.ReadUInt16();
+            _DMA1CNT_H = reader.ReadUInt16();
+
+            _DMA2SAD_L = reader.ReadUInt16();
+            _DMA2SAD_H = reader.ReadUInt16();
+
+            _DMA2DAD_L = reader.ReadUInt16();
+            _DMA2DAD_H = reader.ReadUInt16();
+
+            _DMA2CNT_L = reader.ReadUInt16();
+            _DMA2CNT_H = reader.ReadUInt16();
+
+            _DMA3SAD_L = reader.ReadUInt16();
+            _DMA3SAD_H = reader.ReadUInt16();
+
+            _DMA3DAD_L = reader.ReadUInt16();
+            _DMA3DAD_H = reader.ReadUInt16();
+
+            _DMA3CNT_L = reader.ReadUInt16();
+            _DMA3CNT_H = reader.ReadUInt16();
+        }
+
+        internal void SaveState(BinaryWriter writer)
+        {
+            writer.Write(_DMA0SAD_L);
+            writer.Write(_DMA0SAD_H);
+
+            writer.Write(_DMA0DAD_L);
+            writer.Write(_DMA0DAD_H);
+
+            writer.Write(_DMA0CNT_L);
+            writer.Write(_DMA0CNT_H);
+
+            writer.Write(_DMA1SAD_L);
+            writer.Write(_DMA1SAD_H);
+
+            writer.Write(_DMA1DAD_L);
+            writer.Write(_DMA1DAD_H);
+
+            writer.Write(_DMA1CNT_L);
+            writer.Write(_DMA1CNT_H);
+
+            writer.Write(_DMA2SAD_L);
+            writer.Write(_DMA2SAD_H);
+
+            writer.Write(_DMA2DAD_L);
+            writer.Write(_DMA2DAD_H);
+
+            writer.Write(_DMA2CNT_L);
+            writer.Write(_DMA2CNT_H);
+
+            writer.Write(_DMA3SAD_L);
+            writer.Write(_DMA3SAD_H);
+
+            writer.Write(_DMA3DAD_L);
+            writer.Write(_DMA3DAD_H);
+
+            writer.Write(_DMA3CNT_L);
+            writer.Write(_DMA3CNT_H);
+        }
+
         internal void CheckForDMA0()
         {
             if ((_DMA0CNT_H & 0x8000) == 0x8000)

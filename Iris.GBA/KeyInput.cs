@@ -13,6 +13,18 @@ namespace Iris.GBA
             _KEYCNT = 0;
         }
 
+        internal void LoadState(BinaryReader reader)
+        {
+            _KEYINPUT = reader.ReadUInt16();
+            _KEYCNT = reader.ReadUInt16();
+        }
+
+        internal void SaveState(BinaryWriter writer)
+        {
+            writer.Write(_KEYINPUT);
+            writer.Write(_KEYCNT);
+        }
+
         internal void SetKeyStatus(Key key, KeyStatus status)
         {
             int pos;

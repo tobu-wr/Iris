@@ -41,6 +41,20 @@ namespace Iris.GBA
             _IME = 0;
         }
 
+        internal void LoadState(BinaryReader reader)
+        {
+            _IE = reader.ReadUInt16();
+            _IF = reader.ReadUInt16();
+            _IME = reader.ReadUInt16();
+        }
+
+        internal void SaveState(BinaryWriter writer)
+        {
+            writer.Write(_IE);
+            writer.Write(_IF);
+            writer.Write(_IME);
+        }
+
         internal void RequestInterrupt(Interrupt interrupt)
         {
             _IF |= (UInt16)interrupt;

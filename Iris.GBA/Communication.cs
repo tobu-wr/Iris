@@ -44,5 +44,51 @@
 
             _JOYSTAT = 0;
         }
+
+        internal void LoadState(BinaryReader reader)
+        {
+            _SIODATA0 = reader.ReadUInt16();
+            _SIODATA1 = reader.ReadUInt16();
+            _SIODATA2 = reader.ReadUInt16();
+            _SIODATA3 = reader.ReadUInt16();
+
+            _SIOCNT = reader.ReadUInt16();
+            _SIODATA_SEND = reader.ReadUInt16();
+
+            _RCNT = reader.ReadUInt16();
+
+            _JOYCNT = reader.ReadUInt16();
+
+            _JOY_RECV_L = reader.ReadUInt16();
+            _JOY_RECV_H = reader.ReadUInt16();
+
+            _JOY_TRANS_L = reader.ReadUInt16();
+            _JOY_TRANS_H = reader.ReadUInt16();
+
+            _JOYSTAT = reader.ReadUInt16();
+        }
+
+        internal void SaveState(BinaryWriter writer)
+        {
+            writer.Write(_SIODATA0);
+            writer.Write(_SIODATA1);
+            writer.Write(_SIODATA2);
+            writer.Write(_SIODATA3);
+
+            writer.Write(_SIOCNT);
+            writer.Write(_SIODATA_SEND);
+
+            writer.Write(_RCNT);
+
+            writer.Write(_JOYCNT);
+
+            writer.Write(_JOY_RECV_L);
+            writer.Write(_JOY_RECV_H);
+
+            writer.Write(_JOY_TRANS_L);
+            writer.Write(_JOY_TRANS_H);
+
+            writer.Write(_JOYSTAT);
+        }
     }
 }

@@ -80,5 +80,87 @@
             _FIFO_B_L = 0;
             _FIFO_B_H = 0;
         }
+
+        internal void LoadState(BinaryReader reader)
+        {
+            _SOUND1CNT_L = reader.ReadUInt16();
+            _SOUND1CNT_H = reader.ReadUInt16();
+            _SOUND1CNT_X = reader.ReadUInt16();
+
+            _SOUND2CNT_L = reader.ReadUInt16();
+            _SOUND2CNT_H = reader.ReadUInt16();
+
+            _SOUND3CNT_L = reader.ReadUInt16();
+            _SOUND3CNT_H = reader.ReadUInt16();
+            _SOUND3CNT_X = reader.ReadUInt16();
+
+            _SOUND4CNT_L = reader.ReadUInt16();
+            _SOUND4CNT_H = reader.ReadUInt16();
+
+            _SOUNDCNT_L = reader.ReadUInt16();
+            _SOUNDCNT_H = reader.ReadUInt16();
+            _SOUNDCNT_X = reader.ReadUInt16();
+
+            _SOUNDBIAS = reader.ReadUInt16();
+
+            _WAVE_RAM0_L = reader.ReadUInt16();
+            _WAVE_RAM0_H = reader.ReadUInt16();
+
+            _WAVE_RAM1_L = reader.ReadUInt16();
+            _WAVE_RAM1_H = reader.ReadUInt16();
+
+            _WAVE_RAM2_L = reader.ReadUInt16();
+            _WAVE_RAM2_H = reader.ReadUInt16();
+
+            _WAVE_RAM3_L = reader.ReadUInt16();
+            _WAVE_RAM3_H = reader.ReadUInt16();
+
+            _FIFO_A_L = reader.ReadUInt16();
+            _FIFO_A_H = reader.ReadUInt16();
+
+            _FIFO_B_L = reader.ReadUInt16();
+            _FIFO_B_H = reader.ReadUInt16();
+        }
+
+        internal void SaveState(BinaryWriter writer)
+        {
+            writer.Write(_SOUND1CNT_L);
+            writer.Write(_SOUND1CNT_H);
+            writer.Write(_SOUND1CNT_X);
+
+            writer.Write(_SOUND2CNT_L);
+            writer.Write(_SOUND2CNT_H);
+
+            writer.Write(_SOUND3CNT_L);
+            writer.Write(_SOUND3CNT_H);
+            writer.Write(_SOUND3CNT_X);
+
+            writer.Write(_SOUND4CNT_L);
+            writer.Write(_SOUND4CNT_H);
+
+            writer.Write(_SOUNDCNT_L);
+            writer.Write(_SOUNDCNT_H);
+            writer.Write(_SOUNDCNT_X);
+
+            writer.Write(_SOUNDBIAS);
+
+            writer.Write(_WAVE_RAM0_L);
+            writer.Write(_WAVE_RAM0_H);
+
+            writer.Write(_WAVE_RAM1_L);
+            writer.Write(_WAVE_RAM1_H);
+
+            writer.Write(_WAVE_RAM2_L);
+            writer.Write(_WAVE_RAM2_H);
+
+            writer.Write(_WAVE_RAM3_L);
+            writer.Write(_WAVE_RAM3_H);
+
+            writer.Write(_FIFO_A_L);
+            writer.Write(_FIFO_A_H);
+
+            writer.Write(_FIFO_B_L);
+            writer.Write(_FIFO_B_H);
+        }
     }
 }
