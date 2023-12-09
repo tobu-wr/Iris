@@ -2,7 +2,7 @@
 
 namespace Iris.UserInterface
 {
-    internal sealed class GameController
+    internal sealed class XboxController
     {
         private readonly Controller _controller = new(UserIndex.One);
         private Gamepad _gamepad;
@@ -42,6 +42,17 @@ namespace Iris.UserInterface
             if (!_controller.IsConnected)
                 return;
 
+            void CheckButton(GamepadButtonFlags flag, Button button)
+            {
+                if (_gamepad.Buttons.HasFlag(flag) != _controller.GetState().Gamepad.Buttons.HasFlag(flag))
+                {
+                    if (_controller.GetState().Gamepad.Buttons.HasFlag(flag))
+                        ButtonDown?.Invoke(this, new ButtonEventArgs(button));
+                    else
+                        ButtonUp?.Invoke(this, new ButtonEventArgs(button));
+                }
+            }
+
             CheckButton(GamepadButtonFlags.DPadUp, Button.DPadUp);
             CheckButton(GamepadButtonFlags.DPadDown, Button.DPadDown);
             CheckButton(GamepadButtonFlags.DPadLeft, Button.DPadLeft);
@@ -56,17 +67,6 @@ namespace Iris.UserInterface
             CheckButton(GamepadButtonFlags.Y, Button.Y);
 
             _gamepad = _controller.GetState().Gamepad;
-        }
-
-        private void CheckButton(GamepadButtonFlags flag, Button button)
-        {
-            if (_gamepad.Buttons.HasFlag(flag) != _controller.GetState().Gamepad.Buttons.HasFlag(flag))
-            {
-                if (_controller.GetState().Gamepad.Buttons.HasFlag(flag))
-                    ButtonDown?.Invoke(this, new ButtonEventArgs(button));
-                else
-                    ButtonUp?.Invoke(this, new ButtonEventArgs(button));
-            }
         }
     }
 }

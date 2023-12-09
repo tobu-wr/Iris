@@ -22,26 +22,26 @@ namespace Iris.UserInterface
             { Keys.R, Common.System.Key.Y },
         }.ToFrozenDictionary();
 
-        private static readonly FrozenDictionary<GameController.Button, Common.System.Key> s_gameControllerMapping = new Dictionary<GameController.Button, Common.System.Key>()
+        private static readonly FrozenDictionary<XboxController.Button, Common.System.Key> s_gameControllerMapping = new Dictionary<XboxController.Button, Common.System.Key>()
         {
-            { GameController.Button.A, Common.System.Key.A },
-            { GameController.Button.B, Common.System.Key.B },
-            { GameController.Button.Back, Common.System.Key.Select },
-            { GameController.Button.Start, Common.System.Key.Start },
-            { GameController.Button.DPadRight, Common.System.Key.Right },
-            { GameController.Button.DPadLeft, Common.System.Key.Left },
-            { GameController.Button.DPadUp, Common.System.Key.Up },
-            { GameController.Button.DPadDown, Common.System.Key.Down },
-            { GameController.Button.RightShoulder, Common.System.Key.R },
-            { GameController.Button.LeftShoulder, Common.System.Key.L },
-            { GameController.Button.X, Common.System.Key.X },
-            { GameController.Button.Y, Common.System.Key.Y },
+            { XboxController.Button.A, Common.System.Key.A },
+            { XboxController.Button.B, Common.System.Key.B },
+            { XboxController.Button.Back, Common.System.Key.Select },
+            { XboxController.Button.Start, Common.System.Key.Start },
+            { XboxController.Button.DPadRight, Common.System.Key.Right },
+            { XboxController.Button.DPadLeft, Common.System.Key.Left },
+            { XboxController.Button.DPadUp, Common.System.Key.Up },
+            { XboxController.Button.DPadDown, Common.System.Key.Down },
+            { XboxController.Button.RightShoulder, Common.System.Key.R },
+            { XboxController.Button.LeftShoulder, Common.System.Key.L },
+            { XboxController.Button.X, Common.System.Key.X },
+            { XboxController.Button.Y, Common.System.Key.Y },
         }.ToFrozenDictionary();
 
         private readonly Common.System _system;
         private int _frameCount = 0;
         private readonly System.Timers.Timer _performanceUpdateTimer = new(1000);
-        private readonly GameController _gameController = new();
+        private readonly XboxController _xboxController = new();
 
         public MainWindow(string[] args)
         {
@@ -49,8 +49,8 @@ namespace Iris.UserInterface
 
             _system = new GBA_System(DrawFrame);
             _performanceUpdateTimer.Elapsed += PerformanceUpdateTimer_Elapsed;
-            _gameController.ButtonDown += GameController_ButtonDown;
-            _gameController.ButtonUp += GameController_ButtonUp;
+            _xboxController.ButtonDown += XboxController_ButtonDown;
+            _xboxController.ButtonUp += XboxController_ButtonUp;
 
             if (args.Length > 0 && LoadROM(args[0]))
             {
@@ -93,7 +93,7 @@ namespace Iris.UserInterface
 #endif
 
             ++_frameCount;
-            _gameController.Update();
+            _xboxController.Update();
         }
 
         private bool LoadROM(string fileName)
@@ -259,13 +259,13 @@ namespace Iris.UserInterface
                 _system.SetKeyStatus(value, Common.System.KeyStatus.NoInput);
         }
 
-        private void GameController_ButtonDown(object sender, GameController.ButtonEventArgs e)
+        private void XboxController_ButtonDown(object sender, XboxController.ButtonEventArgs e)
         {
             if (s_gameControllerMapping.TryGetValue(e.Button, out Common.System.Key value))
                 _system.SetKeyStatus(value, Common.System.KeyStatus.Input);
         }
 
-        private void GameController_ButtonUp(object sender, GameController.ButtonEventArgs e)
+        private void XboxController_ButtonUp(object sender, XboxController.ButtonEventArgs e)
         {
             if (s_gameControllerMapping.TryGetValue(e.Button, out Common.System.Key value))
                 _system.SetKeyStatus(value, Common.System.KeyStatus.NoInput);
