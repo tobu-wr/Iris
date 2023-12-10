@@ -45,6 +45,8 @@
             pauseToolStripMenuItem = new ToolStripMenuItem();
             restartToolStripMenuItem = new ToolStripMenuItem();
             screenBox = new ScreenBox();
+            viewToolStripMenuItem = new ToolStripMenuItem();
+            fullScreenToolStripMenuItem = new ToolStripMenuItem();
             statusStrip1.SuspendLayout();
             menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)screenBox).BeginInit();
@@ -82,7 +84,7 @@
             // menuStrip1
             // 
             menuStrip1.ImageScalingSize = new Size(20, 20);
-            menuStrip1.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem, emulationToolStripMenuItem });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem, viewToolStripMenuItem, emulationToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Padding = new Padding(7, 3, 0, 3);
@@ -179,6 +181,20 @@
             screenBox.TabIndex = 2;
             screenBox.TabStop = false;
             // 
+            // viewToolStripMenuItem
+            // 
+            viewToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { fullScreenToolStripMenuItem });
+            viewToolStripMenuItem.Name = "viewToolStripMenuItem";
+            viewToolStripMenuItem.Size = new Size(55, 24);
+            viewToolStripMenuItem.Text = "&View";
+            // 
+            // fullScreenToolStripMenuItem
+            // 
+            fullScreenToolStripMenuItem.Name = "fullScreenToolStripMenuItem";
+            fullScreenToolStripMenuItem.Size = new Size(224, 26);
+            fullScreenToolStripMenuItem.Text = "&Full Screen";
+            fullScreenToolStripMenuItem.Click += FullScreenToolStripMenuItem_Click;
+            // 
             // MainWindow
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -223,5 +239,7 @@
         private ToolStripMenuItem pauseToolStripMenuItem;
         private ToolStripMenuItem restartToolStripMenuItem;
         private ScreenBox screenBox;
+        private ToolStripMenuItem viewToolStripMenuItem;
+        private ToolStripMenuItem fullScreenToolStripMenuItem;
     }
 }

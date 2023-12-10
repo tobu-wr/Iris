@@ -42,6 +42,7 @@ namespace Iris.UserInterface
         private int _frameCount = 0;
         private readonly System.Timers.Timer _performanceUpdateTimer = new(1000);
         private readonly XboxController _xboxController = new();
+        private FormWindowState _previousWindowState;
 
         public MainWindow(string[] args)
         {
@@ -282,6 +283,26 @@ namespace Iris.UserInterface
         {
             if (s_gameControllerMapping.TryGetValue(e.Button, out Common.System.Key value))
                 _system.SetKeyStatus(value, Common.System.KeyStatus.NoInput);
+        }
+
+        private void FullScreenToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (fullScreenToolStripMenuItem.Checked)
+            {
+                fullScreenToolStripMenuItem.Checked = false;
+
+                FormBorderStyle = FormBorderStyle.Sizable;
+                WindowState = _previousWindowState;
+            }
+            else
+            {
+                fullScreenToolStripMenuItem.Checked = true;
+
+                FormBorderStyle = FormBorderStyle.None;
+                _previousWindowState = WindowState;
+                WindowState = FormWindowState.Normal;
+                WindowState = FormWindowState.Maximized;
+            }
         }
     }
 }
