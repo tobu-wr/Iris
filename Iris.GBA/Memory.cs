@@ -1,6 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Iris.GBA
 {
@@ -70,9 +69,16 @@ namespace Iris.GBA
             InitPageTables();
         }
 
-        internal void Reset()
+        internal void ResetState()
         {
-            // TODO
+            for (int i = 0; i < SRAMSize; ++i)
+                Marshal.WriteByte(_SRAM, i, 0);
+
+            for (int i = 0; i < EWRAMSize; ++i)
+                Marshal.WriteByte(_eWRAM, i, 0);
+
+            for (int i = 0; i < IWRAMSize; ++i)
+                Marshal.WriteByte(_iWRAM, i, 0);
         }
 
         internal void LoadState(BinaryReader reader)

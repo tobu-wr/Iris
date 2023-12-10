@@ -34,7 +34,7 @@ namespace Iris.GBA
             _cpu = cpu;
         }
 
-        internal void Reset()
+        internal void ResetState()
         {
             _IE = 0;
             _IF = 0;

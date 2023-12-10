@@ -39,35 +39,26 @@ namespace Iris.GBA
             _bios.Initialize(_cpu, _memory);
         }
 
-        public override void Reset()
+        public override void ResetState()
         {
-            _scheduler.Reset();
+            _scheduler.ResetState();
 
-            _cpu.Reset();
-            _communication.Reset();
-            _timer.Reset();
-            _sound.Reset();
-            _dma.Reset();
-            _keyInput.Reset();
-            _systemControl.Reset();
-            _interruptControl.Reset();
-            _memory.Reset();
-            _video.Reset();
+            _cpu.ResetState();
+            _communication.ResetState();
+            _timer.ResetState();
+            _sound.ResetState();
+            _dma.ResetState();
+            _keyInput.ResetState();
+            _systemControl.ResetState();
+            _interruptControl.ResetState();
+            _memory.ResetState();
+            _video.ResetState();
 
             _bios.Reset();
 
             BIOS_HLE biosHLE = new();
             biosHLE.Initialize(_cpu, _memory);
             biosHLE.Reset();
-        }
-
-        public override void LoadROM(string filename)
-        {
-            _memory.LoadROM(filename);
-
-            using HashAlgorithm hashAlgorithm = SHA512.Create();
-            using FileStream fileStream = File.OpenRead(filename);
-            _romHash = BitConverter.ToString(hashAlgorithm.ComputeHash(fileStream)).Replace("-", "");
         }
 
         public override void LoadState(string filename)
@@ -111,6 +102,15 @@ namespace Iris.GBA
             _interruptControl.SaveState(writer);
             _memory.SaveState(writer);
             _video.SaveState(writer);
+        }
+
+        public override void LoadROM(string filename)
+        {
+            _memory.LoadROM(filename);
+
+            using HashAlgorithm hashAlgorithm = SHA512.Create();
+            using FileStream fileStream = File.OpenRead(filename);
+            _romHash = BitConverter.ToString(hashAlgorithm.ComputeHash(fileStream)).Replace("-", "");
         }
 
         public override bool IsRunning()

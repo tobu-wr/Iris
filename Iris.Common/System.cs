@@ -26,10 +26,10 @@
             NoInput = 1
         }
 
-        public abstract void Reset();
-        public abstract void LoadROM(string filename);
+        public abstract void ResetState();
         public abstract void LoadState(string filename);
         public abstract void SaveState(string filename);
+        public abstract void LoadROM(string filename);
         public abstract bool IsRunning();
         public abstract void Run();
         public abstract void Pause();

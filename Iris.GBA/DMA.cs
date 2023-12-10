@@ -45,7 +45,7 @@
             _memory = memory;
         }
 
-        internal void Reset()
+        internal void ResetState()
         {
             _DMA0SAD_L = 0;
             _DMA0SAD_H = 0;

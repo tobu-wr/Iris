@@ -22,7 +22,7 @@
 
         internal UInt16 _JOYSTAT;
 
-        internal void Reset()
+        internal void ResetState()
         {
             _SIODATA0 = 0;
             _SIODATA1 = 0;

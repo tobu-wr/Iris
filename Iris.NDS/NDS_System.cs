@@ -16,7 +16,7 @@ namespace Iris.NDS
             _ppu = new(drawFrameCallback);
         }
 
-        public override void Reset()
+        public override void ResetState()
         {
             BIOS_Reset();
 

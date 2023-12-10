@@ -6,7 +6,7 @@
         internal Byte _POSTFLG;
         internal Byte _HALTCNT;
 
-        internal void Reset()
+        internal void ResetState()
         {
             _WAITCNT = 0;
             _POSTFLG = 0;

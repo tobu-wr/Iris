@@ -1,5 +1,4 @@
 ﻿using Iris.Common;
-using System.Reflection.PortableExecutable;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -142,8 +141,17 @@ namespace Iris.GBA
             memory.Map(_oam, OAM_Size, OAM_StartAddress, OAM_EndAddress, flags);
         }
 
-        internal void Reset()
+        internal void ResetState()
         {
+            for (int i = 0; i < PaletteRAM_Size; ++i)
+                Marshal.WriteByte(_paletteRAM, i, 0);
+
+            for (int i = 0; i < VRAM_Size; ++i)
+                Marshal.WriteByte(_vram, i, 0);
+
+            for (int i = 0; i < OAM_Size; ++i)
+                Marshal.WriteByte(_oam, i, 0);
+
             _DISPSTAT = 0;
             _DISPCNT = 0;
             _VCOUNT = 0;

@@ -14,7 +14,7 @@
         internal UInt16 _TM3CNT_L;
         internal UInt16 _TM3CNT_H;
 
-        internal void Reset()
+        internal void ResetState()
         {
             _TM0CNT_L = 0;
             _TM0CNT_H = 0;

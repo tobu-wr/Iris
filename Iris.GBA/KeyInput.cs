@@ -7,7 +7,7 @@ namespace Iris.GBA
         internal UInt16 _KEYINPUT;
         internal UInt16 _KEYCNT;
 
-        internal void Reset()
+        internal void ResetState()
         {
             _KEYINPUT = 0x03ff;
             _KEYCNT = 0;

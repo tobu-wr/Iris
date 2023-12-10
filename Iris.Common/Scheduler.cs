@@ -16,7 +16,7 @@ namespace Iris.Common
 
         private UInt32 _cycleCounter;
 
-        public void Reset()
+        public void ResetState()
         {
             _scheduledTaskCount = 0;
             _cycleCounter = 0;
@@ -24,26 +24,26 @@ namespace Iris.Common
 
         public void LoadState(BinaryReader reader)
         {
-            _scheduledTaskCount = reader.ReadInt32();
-            _cycleCounter = reader.ReadUInt32();
-
             foreach (ref ScheduledTaskListEntry entry in _scheduledTaskList.AsSpan())
             {
                 entry.CycleCount = reader.ReadUInt32();
                 entry.Id = reader.ReadInt32();
             }
+
+            _scheduledTaskCount = reader.ReadInt32();
+            _cycleCounter = reader.ReadUInt32();
         }
 
         public void SaveState(BinaryWriter writer)
         {
-            writer.Write(_scheduledTaskCount);
-            writer.Write(_cycleCounter);
-
             foreach (ScheduledTaskListEntry entry in _scheduledTaskList)
             {
                 writer.Write(entry.CycleCount);
                 writer.Write(entry.Id);
             }
+
+            writer.Write(_scheduledTaskCount);
+            writer.Write(_cycleCounter);
         }
 
         public int RegisterTask(Task_Delegate task)

@@ -115,7 +115,7 @@ namespace Iris.CPU
             _thumbInterpreter = new(this);
         }
 
-        public void Reset()
+        public void ResetState()
         {
             Array.Clear(Reg);
 

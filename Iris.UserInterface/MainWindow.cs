@@ -101,7 +101,7 @@ namespace Iris.UserInterface
             try
             {
                 _system.LoadROM(fileName);
-                _system.Reset();
+                _system.ResetState();
                 return true;
             }
             catch
@@ -126,7 +126,7 @@ namespace Iris.UserInterface
                 catch (Exception ex)
                 {
                     Pause();
-                    _system.Reset();
+                    _system.ResetState();
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             });
@@ -246,7 +246,7 @@ namespace Iris.UserInterface
             if (running)
                 Pause();
 
-            _system.Reset();
+            _system.ResetState();
 
             if (running)
                 Run();

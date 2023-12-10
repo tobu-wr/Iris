@@ -40,7 +40,7 @@
         internal UInt16 _FIFO_B_L;
         internal UInt16 _FIFO_B_H;
 
-        internal void Reset()
+        internal void ResetState()
         {
             _SOUND1CNT_L = 0;
             _SOUND1CNT_H = 0;
