@@ -3,32 +3,65 @@ using System.Runtime.InteropServices;
 
 namespace Iris.Common
 {
-    public sealed class Scheduler(int taskListSize)
+    public sealed class Scheduler(int taskListSize, int scheduledTaskListSize)
     {
         public delegate void Task_Delegate(UInt32 cycleCountDelay);
 
-        private record struct TaskListEntry(UInt32 CycleCount, Task_Delegate Task);
+        private readonly Task_Delegate[] _taskList = new Task_Delegate[taskListSize];
+        private int _taskCount;
+
+        private record struct ScheduledTaskListEntry(UInt32 CycleCount, int Id);
+        private readonly ScheduledTaskListEntry[] _scheduledTaskList = new ScheduledTaskListEntry[scheduledTaskListSize]; // sorted by CycleCount from smallest to largest
+        private int _scheduledTaskCount;
 
         private UInt32 _cycleCounter;
-        private readonly TaskListEntry[] _taskList = new TaskListEntry[taskListSize]; // sorted by CycleCount from smallest to largest
-        private int _taskCount;
 
         public void Reset()
         {
+            _scheduledTaskCount = 0;
             _cycleCounter = 0;
-            _taskCount = 0;
+        }
+
+        public void LoadState(BinaryReader reader)
+        {
+            _scheduledTaskCount = reader.ReadInt32();
+            _cycleCounter = reader.ReadUInt32();
+
+            foreach (ref ScheduledTaskListEntry entry in _scheduledTaskList.AsSpan())
+            {
+                entry.CycleCount = reader.ReadUInt32();
+                entry.Id = reader.ReadInt32();
+            }
+        }
+
+        public void SaveState(BinaryWriter writer)
+        {
+            writer.Write(_scheduledTaskCount);
+            writer.Write(_cycleCounter);
+
+            foreach (ScheduledTaskListEntry entry in _scheduledTaskList)
+            {
+                writer.Write(entry.CycleCount);
+                writer.Write(entry.Id);
+            }
+        }
+
+        public int RegisterTask(Task_Delegate task)
+        {
+            _taskList[_taskCount] = task;
+            return _taskCount++;
         }
 
         // cycleCount must be greater than 0
-        public void AddTask(UInt32 cycleCount, Task_Delegate task)
+        public void ScheduleTask(UInt32 cycleCount, int id)
         {
             cycleCount += _cycleCounter;
 
             // get the position and reference of the new task by finding the last task whose cycle count
             // is smaller or equal to the new one, the new task is next to it
             // (searching is done backward because the new task is more likely to be inserted towards the end)
-            int i = _taskCount;
-            ref TaskListEntry entry = ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_taskList), i - 1);
+            int i = _scheduledTaskCount;
+            ref ScheduledTaskListEntry entry = ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_scheduledTaskList), i - 1);
 
             while ((i > 0) && (entry.CycleCount > cycleCount))
             {
@@ -39,19 +72,19 @@ namespace Iris.Common
             entry = ref Unsafe.Add(ref entry, 1);
 
             // insert the new task
-            if (i < _taskCount)
-                Array.Copy(_taskList, i, _taskList, i + 1, _taskCount - i);
+            if (i < _scheduledTaskCount)
+                Array.Copy(_scheduledTaskList, i, _scheduledTaskList, i + 1, _scheduledTaskCount - i);
 
             entry.CycleCount = cycleCount;
-            entry.Task = task;
+            entry.Id = id;
 
-            ++_taskCount;
+            ++_scheduledTaskCount;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool HasTaskReady()
         {
-            return (_taskCount > 0) && (MemoryMarshal.GetArrayDataReference(_taskList).CycleCount <= _cycleCounter);
+            return (_scheduledTaskCount > 0) && (MemoryMarshal.GetArrayDataReference(_scheduledTaskList).CycleCount <= _cycleCounter);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -62,34 +95,35 @@ namespace Iris.Common
 
         public void ProcessTasks()
         {
-            ref TaskListEntry taskListDataRef = ref MemoryMarshal.GetArrayDataReference(_taskList);
+            ref Task_Delegate taskListDataRef = ref MemoryMarshal.GetArrayDataReference(_taskList);
+            ref ScheduledTaskListEntry scheduledTaskListDataRef = ref MemoryMarshal.GetArrayDataReference(_scheduledTaskList);
 
             // execute the tasks whose cycle count is lower or equal to the cycle counter of the scheduler
             int i = 0;
-            ref TaskListEntry entry = ref taskListDataRef;
+            ref ScheduledTaskListEntry entry = ref scheduledTaskListDataRef;
 
-            while ((i < _taskCount) && (entry.CycleCount <= _cycleCounter))
+            while ((i < _scheduledTaskCount) && (entry.CycleCount <= _cycleCounter))
             {
-                entry.Task(_cycleCounter - entry.CycleCount);
+                Unsafe.Add(ref taskListDataRef, entry.Id)(_cycleCounter - entry.CycleCount);
 
                 ++i;
                 entry = ref Unsafe.Add(ref entry, 1);
             }
 
             // move the remaining tasks at the begin and update their cycle count
-            int remainingTaskCount = _taskCount - i;
+            int remainingScheduledTaskCount = _scheduledTaskCount - i;
 
-            if (remainingTaskCount > 0)
+            if (remainingScheduledTaskCount > 0)
             {
-                Array.Copy(_taskList, i, _taskList, 0, remainingTaskCount);
+                Array.Copy(_scheduledTaskList, i, _scheduledTaskList, 0, remainingScheduledTaskCount);
 
-                for (i = 0; i < remainingTaskCount; ++i)
-                    Unsafe.Add(ref taskListDataRef, i).CycleCount -= _cycleCounter;
+                for (i = 0; i < remainingScheduledTaskCount; ++i)
+                    Unsafe.Add(ref scheduledTaskListDataRef, i).CycleCount -= _cycleCounter;
             }
 
-            // reset the cycle counter and update the task count
+            // reset the cycle counter and update the scheduled task count
+            _scheduledTaskCount = remainingScheduledTaskCount;
             _cycleCounter = 0;
-            _taskCount = remainingTaskCount;
         }
     }
 }
