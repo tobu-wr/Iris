@@ -160,6 +160,98 @@ namespace Iris.CPU
             NIRQ = Signal.High;
         }
 
+        public void LoadState(BinaryReader reader)
+        {
+            foreach (ref UInt32 reg in Reg.AsSpan())
+                reg = reader.ReadUInt32();
+
+            CPSR = reader.ReadUInt32();
+            SPSR = reader.ReadUInt32();
+
+            Reg8_usr = reader.ReadUInt32();
+            Reg9_usr = reader.ReadUInt32();
+            Reg10_usr = reader.ReadUInt32();
+            Reg11_usr = reader.ReadUInt32();
+            Reg12_usr = reader.ReadUInt32();
+            Reg13_usr = reader.ReadUInt32();
+            Reg14_usr = reader.ReadUInt32();
+
+            Reg13_svc = reader.ReadUInt32();
+            Reg14_svc = reader.ReadUInt32();
+
+            Reg13_abt = reader.ReadUInt32();
+            Reg14_abt = reader.ReadUInt32();
+
+            Reg13_und = reader.ReadUInt32();
+            Reg14_und = reader.ReadUInt32();
+
+            Reg13_irq = reader.ReadUInt32();
+            Reg14_irq = reader.ReadUInt32();
+
+            Reg8_fiq = reader.ReadUInt32();
+            Reg9_fiq = reader.ReadUInt32();
+            Reg10_fiq = reader.ReadUInt32();
+            Reg11_fiq = reader.ReadUInt32();
+            Reg12_fiq = reader.ReadUInt32();
+            Reg13_fiq = reader.ReadUInt32();
+            Reg14_fiq = reader.ReadUInt32();
+
+            SPSR_svc = reader.ReadUInt32();
+            SPSR_abt = reader.ReadUInt32();
+            SPSR_und = reader.ReadUInt32();
+            SPSR_irq = reader.ReadUInt32();
+            SPSR_fiq = reader.ReadUInt32();
+
+            NextInstructionAddress = reader.ReadUInt32();
+            NIRQ = (Signal)reader.ReadInt32();
+        }
+
+        public void SaveState(BinaryWriter writer)
+        {
+            foreach (UInt32 reg in Reg)
+                writer.Write(reg);
+
+            writer.Write(CPSR);
+            writer.Write(SPSR);
+
+            writer.Write(Reg8_usr);
+            writer.Write(Reg9_usr);
+            writer.Write(Reg10_usr);
+            writer.Write(Reg11_usr);
+            writer.Write(Reg12_usr);
+            writer.Write(Reg13_usr);
+            writer.Write(Reg14_usr);
+
+            writer.Write(Reg13_svc);
+            writer.Write(Reg14_svc);
+
+            writer.Write(Reg13_abt);
+            writer.Write(Reg14_abt);
+
+            writer.Write(Reg13_und);
+            writer.Write(Reg14_und);
+
+            writer.Write(Reg13_irq);
+            writer.Write(Reg14_irq);
+
+            writer.Write(Reg8_fiq);
+            writer.Write(Reg9_fiq);
+            writer.Write(Reg10_fiq);
+            writer.Write(Reg11_fiq);
+            writer.Write(Reg12_fiq);
+            writer.Write(Reg13_fiq);
+            writer.Write(Reg14_fiq);
+
+            writer.Write(SPSR_svc);
+            writer.Write(SPSR_abt);
+            writer.Write(SPSR_und);
+            writer.Write(SPSR_irq);
+            writer.Write(SPSR_fiq);
+
+            writer.Write(NextInstructionAddress);
+            writer.Write((int)NIRQ);
+        }
+
         public UInt32 Step()
         {
             UInt32 i = (CPSR >> 7) & 1;

@@ -80,6 +80,7 @@ namespace Iris.GBA
 
             _scheduler.LoadState(reader);
 
+            _cpu.LoadState(reader);
             _communication.LoadState(reader);
             _timer.LoadState(reader);
             _sound.LoadState(reader);
@@ -87,6 +88,8 @@ namespace Iris.GBA
             _keyInput.LoadState(reader);
             _systemControl.LoadState(reader);
             _interruptControl.LoadState(reader);
+            _memory.LoadState(reader);
+            _video.LoadState(reader);
         }
 
         public override void SaveState(string filename)
@@ -98,6 +101,7 @@ namespace Iris.GBA
 
             _scheduler.SaveState(writer);
 
+            _cpu.SaveState(writer);
             _communication.SaveState(writer);
             _timer.SaveState(writer);
             _sound.SaveState(writer);
@@ -105,6 +109,8 @@ namespace Iris.GBA
             _keyInput.SaveState(writer);
             _systemControl.SaveState(writer);
             _interruptControl.SaveState(writer);
+            _memory.SaveState(writer);
+            _video.SaveState(writer);
         }
 
         public override bool IsRunning()

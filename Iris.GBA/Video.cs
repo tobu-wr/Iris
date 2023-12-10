@@ -1,4 +1,5 @@
 ﻿using Iris.Common;
+using System.Reflection.PortableExecutable;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -196,6 +197,138 @@ namespace Iris.GBA
             Array.Clear(_displayFrameBuffer);
 
             _scheduler.ScheduleTask(ScanlineCycleCount, _startScanlineTaskId);
+        }
+
+        internal void LoadState(BinaryReader reader)
+        {
+            byte[] paletteRamData = reader.ReadBytes(PaletteRAM_Size);
+            byte[] vramData = reader.ReadBytes(VRAM_Size);
+            byte[] oamData = reader.ReadBytes(OAM_Size);
+
+            Marshal.Copy(paletteRamData, 0, _paletteRAM, PaletteRAM_Size);
+            Marshal.Copy(vramData, 0, _vram, VRAM_Size);
+            Marshal.Copy(oamData, 0, _oam, OAM_Size);
+
+            _DISPSTAT = reader.ReadUInt16();
+            _DISPCNT = reader.ReadUInt16();
+            _VCOUNT = reader.ReadUInt16();
+
+            _BG0CNT = reader.ReadUInt16();
+            _BG1CNT = reader.ReadUInt16();
+            _BG2CNT = reader.ReadUInt16();
+            _BG3CNT = reader.ReadUInt16();
+
+            _BG0HOFS = reader.ReadUInt16();
+            _BG0VOFS = reader.ReadUInt16();
+
+            _BG1HOFS = reader.ReadUInt16();
+            _BG1VOFS = reader.ReadUInt16();
+
+            _BG2HOFS = reader.ReadUInt16();
+            _BG2VOFS = reader.ReadUInt16();
+
+            _BG3HOFS = reader.ReadUInt16();
+            _BG3VOFS = reader.ReadUInt16();
+
+            _BG2PA = reader.ReadUInt16();
+            _BG2PB = reader.ReadUInt16();
+            _BG2PC = reader.ReadUInt16();
+            _BG2PD = reader.ReadUInt16();
+            _BG2X = reader.ReadUInt16();
+            _BG2Y = reader.ReadUInt16();
+
+            _BG3PA = reader.ReadUInt16();
+            _BG3PB = reader.ReadUInt16();
+            _BG3PC = reader.ReadUInt16();
+            _BG3PD = reader.ReadUInt16();
+            _BG3X = reader.ReadUInt16();
+            _BG3Y = reader.ReadUInt16();
+
+            _WIN0H = reader.ReadUInt16();
+            _WIN1H = reader.ReadUInt16();
+
+            _WIN0V = reader.ReadUInt16();
+            _WIN1V = reader.ReadUInt16();
+
+            _WININ = reader.ReadUInt16();
+            _WINOUT = reader.ReadUInt16();
+
+            _MOSAIC = reader.ReadUInt16();
+
+            _BLDCNT = reader.ReadUInt16();
+            _BLDALPHA = reader.ReadUInt16();
+            _BLDY = reader.ReadUInt16();
+
+            foreach (ref UInt16 color in _displayFrameBuffer.AsSpan())
+                color = reader.ReadUInt16();
+        }
+
+        internal void SaveState(BinaryWriter writer)
+        {
+            byte[] paletteRamData = new byte[PaletteRAM_Size];
+            byte[] vramData = new byte[VRAM_Size];
+            byte[] oamData = new byte[OAM_Size];
+
+            Marshal.Copy(_paletteRAM, paletteRamData, 0, PaletteRAM_Size);
+            Marshal.Copy(_vram, vramData, 0, VRAM_Size);
+            Marshal.Copy(_oam, oamData, 0, OAM_Size);
+
+            writer.Write(paletteRamData);
+            writer.Write(vramData);
+            writer.Write(oamData);
+
+            writer.Write(_DISPSTAT);
+            writer.Write(_DISPCNT);
+            writer.Write(_VCOUNT);
+
+            writer.Write(_BG0CNT);
+            writer.Write(_BG1CNT);
+            writer.Write(_BG2CNT);
+            writer.Write(_BG3CNT);
+
+            writer.Write(_BG0HOFS);
+            writer.Write(_BG0VOFS);
+
+            writer.Write(_BG1HOFS);
+            writer.Write(_BG1VOFS);
+
+            writer.Write(_BG2HOFS);
+            writer.Write(_BG2VOFS);
+
+            writer.Write(_BG3HOFS);
+            writer.Write(_BG3VOFS);
+
+            writer.Write(_BG2PA);
+            writer.Write(_BG2PB);
+            writer.Write(_BG2PC);
+            writer.Write(_BG2PD);
+            writer.Write(_BG2X);
+            writer.Write(_BG2Y);
+
+            writer.Write(_BG3PA);
+            writer.Write(_BG3PB);
+            writer.Write(_BG3PC);
+            writer.Write(_BG3PD);
+            writer.Write(_BG3X);
+            writer.Write(_BG3Y);
+
+            writer.Write(_WIN0H);
+            writer.Write(_WIN1H);
+
+            writer.Write(_WIN0V);
+            writer.Write(_WIN1V);
+
+            writer.Write(_WININ);
+            writer.Write(_WINOUT);
+
+            writer.Write(_MOSAIC);
+
+            writer.Write(_BLDCNT);
+            writer.Write(_BLDALPHA);
+            writer.Write(_BLDY);
+
+            foreach (UInt16 color in _displayFrameBuffer)
+                writer.Write(color);
         }
 
         internal void Write8_PaletteRAM(UInt32 address, Byte value)

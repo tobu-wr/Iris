@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Iris.GBA
 {
@@ -72,6 +73,32 @@ namespace Iris.GBA
         internal void Reset()
         {
             // TODO
+        }
+
+        internal void LoadState(BinaryReader reader)
+        {
+            byte[] sramData = reader.ReadBytes(SRAMSize);
+            byte[] ewramData = reader.ReadBytes(EWRAMSize);
+            byte[] iwramData = reader.ReadBytes(IWRAMSize);
+
+            Marshal.Copy(sramData, 0, _SRAM, SRAMSize);
+            Marshal.Copy(ewramData, 0, _eWRAM, EWRAMSize);
+            Marshal.Copy(iwramData, 0, _iWRAM, IWRAMSize);
+        }
+
+        internal void SaveState(BinaryWriter writer)
+        {
+            byte[] sramData = new byte[SRAMSize];
+            byte[] ewramData = new byte[EWRAMSize];
+            byte[] iwramData = new byte[IWRAMSize];
+
+            Marshal.Copy(_SRAM, sramData, 0, SRAMSize);
+            Marshal.Copy(_eWRAM, ewramData, 0, EWRAMSize);
+            Marshal.Copy(_iWRAM, iwramData, 0, IWRAMSize);
+
+            writer.Write(sramData);
+            writer.Write(ewramData);
+            writer.Write(iwramData);
         }
 
         internal void Map(IntPtr data, int size, UInt32 startAddress, UInt32 endAddress, Flag flags)
