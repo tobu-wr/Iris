@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace Iris.GBA
 {
-    internal sealed class Video(Scheduler scheduler, Video.CallbackInterface callbackInterface) : IDisposable
+    internal sealed class Video : IDisposable
     {
         private const int KB = 1024;
 
@@ -93,13 +93,23 @@ namespace Iris.GBA
         private const UInt32 PixelCycleCount = 4;
         private const UInt32 ScanlineCycleCount = ScanlineLength * PixelCycleCount;
 
-        private readonly Scheduler _scheduler = scheduler;
-        private readonly CallbackInterface _callbackInterface = callbackInterface;
+        private readonly Scheduler _scheduler;
+        private readonly CallbackInterface _callbackInterface;
+
+        private readonly int _startScanlineTaskId;
 
         private InterruptControl _interruptControl;
         private bool _disposed;
 
         private readonly UInt16[] _displayFrameBuffer = new UInt16[DisplayScreenSize];
+
+        internal Video(Scheduler scheduler, Video.CallbackInterface callbackInterface)
+        {
+            _scheduler = scheduler;
+            _callbackInterface = callbackInterface;
+
+            _startScanlineTaskId = _scheduler.RegisterTask(StartScanline);
+        }
 
         ~Video()
         {
@@ -185,7 +195,7 @@ namespace Iris.GBA
 
             Array.Clear(_displayFrameBuffer);
 
-            _scheduler.AddTask(ScanlineCycleCount, StartScanline);
+            _scheduler.ScheduleTask(ScanlineCycleCount, _startScanlineTaskId);
         }
 
         internal void Write8_PaletteRAM(UInt32 address, Byte value)
@@ -246,7 +256,7 @@ namespace Iris.GBA
                     break;
             }
 
-            _scheduler.AddTask(ScanlineCycleCount - cycleCountDelay, StartScanline);
+            _scheduler.ScheduleTask(ScanlineCycleCount - cycleCountDelay, _startScanlineTaskId);
         }
 
         private void Render()

@@ -1,13 +1,12 @@
 ﻿using Iris.Common;
 using Iris.CPU;
-using System.Reflection.PortableExecutable;
 using System.Security.Cryptography;
 
 namespace Iris.GBA
 {
     public sealed class GBA_System : Common.System
     {
-        private readonly Scheduler _scheduler = new(2);
+        private readonly Scheduler _scheduler = new(1, 2);
 
         private readonly CPU_Core _cpu;
         private readonly Communication _communication = new();
@@ -77,7 +76,9 @@ namespace Iris.GBA
             using BinaryReader reader = new(fileStream, System.Text.Encoding.UTF8, false);
 
             if (reader.ReadString() != _romHash)
-                throw new Exception("Wrong ROM");
+                throw new Exception();
+
+            _scheduler.LoadState(reader);
 
             _communication.LoadState(reader);
             _timer.LoadState(reader);
@@ -94,6 +95,8 @@ namespace Iris.GBA
             using BinaryWriter writer = new(fileStream, System.Text.Encoding.UTF8, false);
 
             writer.Write(_romHash);
+
+            _scheduler.SaveState(writer);
 
             _communication.SaveState(writer);
             _timer.SaveState(writer);
