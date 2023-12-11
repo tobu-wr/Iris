@@ -2,6 +2,7 @@ using Iris.GBA;
 using System.Collections.Frozen;
 using System.Diagnostics;
 using System.Drawing.Imaging;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Iris.UserInterface
@@ -43,7 +44,8 @@ namespace Iris.UserInterface
         private readonly Common.System _system;
         private int _frameCount = 0;
         private bool _limitFps = true;
-        private readonly Stopwatch _fpsLimiterStopwatch = new();
+        private Stopwatch _lastFrameInstant = Stopwatch.StartNew();
+        private long _lastFrameExtraSleepTime;
         private readonly System.Timers.Timer _performanceUpdateTimer = new(1000);
         private readonly XboxController _xboxController = new();
         private FormWindowState _previousWindowState;
@@ -100,14 +102,28 @@ namespace Iris.UserInterface
 
             if (_limitFps)
             {
-                _fpsLimiterStopwatch.Stop();
+                const int TargetFrameRate = 60;
+                const int TargetFrameDuration = 1000 / TargetFrameRate;
 
-                if (_fpsLimiterStopwatch.ElapsedMilliseconds < 17)
+                long lastFrameDuration = _lastFrameInstant.ElapsedMilliseconds;
+
+                if (lastFrameDuration < TargetFrameDuration)
                 {
-                    Thread.Sleep((int)(17 - _fpsLimiterStopwatch.ElapsedMilliseconds));
+                    long sleepTime = TargetFrameDuration - lastFrameDuration;
+
+                    if (sleepTime > _lastFrameExtraSleepTime)
+                    {
+                        sleepTime -= _lastFrameExtraSleepTime;
+                        Thread.Sleep((int)sleepTime);
+                        _lastFrameExtraSleepTime = _lastFrameInstant.ElapsedMilliseconds - lastFrameDuration - sleepTime;
+                    }
+                    else
+                    {
+                        _lastFrameExtraSleepTime -= sleepTime;
+                    }
                 }
 
-                _fpsLimiterStopwatch.Restart();
+                _lastFrameInstant = Stopwatch.StartNew();
             }
         }
 
