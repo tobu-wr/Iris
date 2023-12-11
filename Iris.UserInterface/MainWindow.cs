@@ -61,7 +61,7 @@ namespace Iris.UserInterface
             _xboxController.ButtonDown += XboxController_ButtonDown;
             _xboxController.ButtonUp += XboxController_ButtonUp;
 
-            _frameCounterTimer.Elapsed += PerformanceUpdateTimer_Elapsed;
+            _frameCounterTimer.Elapsed += FrameCounterTimer_Elapsed;
 
             if (args.Length > 0 && LoadROM(args[0]))
             {
@@ -291,7 +291,7 @@ namespace Iris.UserInterface
                 Run();
         }
 
-        private void PerformanceUpdateTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+        private void FrameCounterTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
         {
             int fps = (int)(_frameCounter * 1000 / _frameCounterTimer.Interval);
             menuStrip1.Invoke(() => fpsToolStripStatusLabel.Text = "FPS: " + fps);
