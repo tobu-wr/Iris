@@ -71,14 +71,13 @@ namespace Iris.GBA
 
         internal void ResetState()
         {
-            for (int i = 0; i < SRAMSize; ++i)
-                Marshal.WriteByte(_SRAM, i, 0);
+            byte[] sramData = new byte[SRAMSize];
+            byte[] ewramData = new byte[EWRAMSize];
+            byte[] iwramData = new byte[IWRAMSize];
 
-            for (int i = 0; i < EWRAMSize; ++i)
-                Marshal.WriteByte(_eWRAM, i, 0);
-
-            for (int i = 0; i < IWRAMSize; ++i)
-                Marshal.WriteByte(_iWRAM, i, 0);
+            Marshal.Copy(sramData, 0, _SRAM, SRAMSize);
+            Marshal.Copy(ewramData, 0, _eWRAM, EWRAMSize);
+            Marshal.Copy(iwramData, 0, _iWRAM, IWRAMSize);
         }
 
         internal void LoadState(BinaryReader reader)

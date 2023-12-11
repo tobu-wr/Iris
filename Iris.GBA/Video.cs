@@ -143,14 +143,13 @@ namespace Iris.GBA
 
         internal void ResetState()
         {
-            for (int i = 0; i < PaletteRAM_Size; ++i)
-                Marshal.WriteByte(_paletteRAM, i, 0);
+            byte[] paletteRamData = new byte[PaletteRAM_Size];
+            byte[] vramData = new byte[VRAM_Size];
+            byte[] oamData = new byte[OAM_Size];
 
-            for (int i = 0; i < VRAM_Size; ++i)
-                Marshal.WriteByte(_vram, i, 0);
-
-            for (int i = 0; i < OAM_Size; ++i)
-                Marshal.WriteByte(_oam, i, 0);
+            Marshal.Copy(paletteRamData, 0, _paletteRAM, PaletteRAM_Size);
+            Marshal.Copy(vramData, 0, _vram, VRAM_Size);
+            Marshal.Copy(oamData, 0, _oam, OAM_Size);
 
             _DISPSTAT = 0;
             _DISPCNT = 0;
