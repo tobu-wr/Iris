@@ -4,7 +4,7 @@ namespace Iris.UserInterface
 {
     internal sealed class XboxController
     {
-        private readonly Controller _xinputController = new(UserIndex.Any);
+        private readonly Controller _xinputController = new(UserIndex.One);
         private GamepadButtonFlags _previousButtonStates;
 
         internal enum Button
