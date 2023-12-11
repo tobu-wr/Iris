@@ -42,12 +42,15 @@ namespace Iris.UserInterface
         }.ToFrozenDictionary();
 
         private readonly Common.System _system;
-        private int _frameCount = 0;
-        private bool _limitFps = true;
-        private Stopwatch _lastFrameInstant = Stopwatch.StartNew();
-        private long _lastFrameExtraSleepTime;
-        private readonly System.Timers.Timer _performanceUpdateTimer = new(1000);
         private readonly XboxController _xboxController = new();
+
+        private int _frameCount = 0;
+        private readonly System.Timers.Timer _performanceUpdateTimer = new(1000);
+
+        private bool _limitFps = true;
+        private Stopwatch _lastFrameStopwatch = Stopwatch.StartNew();
+        private long _lastFrameExtraSleepTime;
+
         private FormWindowState _previousWindowState;
 
         public MainWindow(string[] args)
@@ -98,14 +101,18 @@ namespace Iris.UserInterface
             screenBox.Invalidate();
 
             ++_frameCount;
+
             _xboxController.Update();
 
             if (_limitFps)
             {
-                const int TargetFrameRate = 60;
-                const int TargetFrameDuration = 1000 / TargetFrameRate;
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                long GetElapsedUs() => 1_000_000 * _lastFrameStopwatch.ElapsedTicks / Stopwatch.Frequency;
 
-                long lastFrameDuration = _lastFrameInstant.ElapsedMilliseconds;
+                const float TargetFrameRate = 59.727f;
+                const long TargetFrameDuration = (long)(1_000_000 / TargetFrameRate);
+
+                long lastFrameDuration = GetElapsedUs();
 
                 if (lastFrameDuration < TargetFrameDuration)
                 {
@@ -114,8 +121,8 @@ namespace Iris.UserInterface
                     if (sleepTime > _lastFrameExtraSleepTime)
                     {
                         sleepTime -= _lastFrameExtraSleepTime;
-                        Thread.Sleep((int)sleepTime);
-                        _lastFrameExtraSleepTime = _lastFrameInstant.ElapsedMilliseconds - lastFrameDuration - sleepTime;
+                        Thread.Sleep((int)(sleepTime / 1000));
+                        _lastFrameExtraSleepTime = GetElapsedUs() - lastFrameDuration - sleepTime;
                     }
                     else
                     {
@@ -123,7 +130,7 @@ namespace Iris.UserInterface
                     }
                 }
 
-                _lastFrameInstant = Stopwatch.StartNew();
+                _lastFrameStopwatch.Restart();
             }
         }
 
