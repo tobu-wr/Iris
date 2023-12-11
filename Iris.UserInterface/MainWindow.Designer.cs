@@ -47,7 +47,7 @@
             pauseToolStripMenuItem = new ToolStripMenuItem();
             restartToolStripMenuItem = new ToolStripMenuItem();
             toolStripSeparator3 = new ToolStripSeparator();
-            limitFPSToolStripMenuItem = new ToolStripMenuItem();
+            limitFramerateToolStripMenuItem = new ToolStripMenuItem();
             screenBox = new ScreenBox();
             statusStrip1.SuspendLayout();
             menuStrip1.SuspendLayout();
@@ -150,13 +150,13 @@
             // 
             fullScreenToolStripMenuItem.CheckOnClick = true;
             fullScreenToolStripMenuItem.Name = "fullScreenToolStripMenuItem";
-            fullScreenToolStripMenuItem.Size = new Size(180, 22);
+            fullScreenToolStripMenuItem.Size = new Size(131, 22);
             fullScreenToolStripMenuItem.Text = "&Full Screen";
             fullScreenToolStripMenuItem.Click += FullScreenToolStripMenuItem_Click;
             // 
             // emulationToolStripMenuItem
             // 
-            emulationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { runToolStripMenuItem, pauseToolStripMenuItem, restartToolStripMenuItem, toolStripSeparator3, limitFPSToolStripMenuItem });
+            emulationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { runToolStripMenuItem, pauseToolStripMenuItem, restartToolStripMenuItem, toolStripSeparator3, limitFramerateToolStripMenuItem });
             emulationToolStripMenuItem.Name = "emulationToolStripMenuItem";
             emulationToolStripMenuItem.Size = new Size(73, 20);
             emulationToolStripMenuItem.Text = "&Emulation";
@@ -190,15 +190,15 @@
             toolStripSeparator3.Name = "toolStripSeparator3";
             toolStripSeparator3.Size = new Size(177, 6);
             // 
-            // limitFPSToolStripMenuItem
+            // limitFramerateToolStripMenuItem
             // 
-            limitFPSToolStripMenuItem.Checked = true;
-            limitFPSToolStripMenuItem.CheckOnClick = true;
-            limitFPSToolStripMenuItem.CheckState = CheckState.Checked;
-            limitFPSToolStripMenuItem.Name = "limitFPSToolStripMenuItem";
-            limitFPSToolStripMenuItem.Size = new Size(180, 22);
-            limitFPSToolStripMenuItem.Text = "Limit FPS";
-            limitFPSToolStripMenuItem.Click += LimitFPSToolStripMenuItem_Click;
+            limitFramerateToolStripMenuItem.Checked = true;
+            limitFramerateToolStripMenuItem.CheckOnClick = true;
+            limitFramerateToolStripMenuItem.CheckState = CheckState.Checked;
+            limitFramerateToolStripMenuItem.Name = "limitFramerateToolStripMenuItem";
+            limitFramerateToolStripMenuItem.Size = new Size(180, 22);
+            limitFramerateToolStripMenuItem.Text = "Limit Framerate";
+            limitFramerateToolStripMenuItem.Click += LimitFramerateToolStripMenuItem_Click;
             // 
             // screenBox
             // 
@@ -256,6 +256,6 @@
         private ToolStripMenuItem viewToolStripMenuItem;
         private ToolStripMenuItem fullScreenToolStripMenuItem;
         private ToolStripSeparator toolStripSeparator3;
-        private ToolStripMenuItem limitFPSToolStripMenuItem;
+        private ToolStripMenuItem limitFramerateToolStripMenuItem;
     }
 }

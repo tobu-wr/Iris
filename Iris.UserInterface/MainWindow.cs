@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace Iris.UserInterface
 {
-    public partial class MainWindow : Form
+    internal partial class MainWindow : Form
     {
         private static readonly FrozenDictionary<Keys, Common.System.Key> s_keyboardMapping = new Dictionary<Keys, Common.System.Key>()
         {
@@ -25,7 +25,7 @@ namespace Iris.UserInterface
             { Keys.R, Common.System.Key.Y },
         }.ToFrozenDictionary();
 
-        private static readonly FrozenDictionary<XboxController.Button, Common.System.Key> s_gameControllerMapping = new Dictionary<XboxController.Button, Common.System.Key>()
+        private static readonly FrozenDictionary<XboxController.Button, Common.System.Key> s_xboxControllerMapping = new Dictionary<XboxController.Button, Common.System.Key>()
         {
             { XboxController.Button.A, Common.System.Key.A },
             { XboxController.Button.B, Common.System.Key.B },
@@ -41,26 +41,27 @@ namespace Iris.UserInterface
             { XboxController.Button.Y, Common.System.Key.Y },
         }.ToFrozenDictionary();
 
-        private readonly Common.System _system;
+        private Common.System _system;
         private readonly XboxController _xboxController = new();
-
-        private int _frameCount = 0;
-        private readonly System.Timers.Timer _performanceUpdateTimer = new(1000);
-
-        private bool _limitFps = true;
-        private Stopwatch _lastFrameStopwatch = Stopwatch.StartNew();
-        private long _lastFrameExtraSleepTime;
-
         private FormWindowState _previousWindowState;
 
-        public MainWindow(string[] args)
+        private int _frameCounter;
+        private readonly System.Timers.Timer _frameCounterTimer = new(1000);
+
+        private bool _framerateLimiterEnabled = true;
+        private readonly Stopwatch _framerateLimiterStopwatch = Stopwatch.StartNew();
+        private long _framerateLimiterExtraSleepTime;
+
+        internal MainWindow(string[] args)
         {
             InitializeComponent();
 
             _system = new GBA_System(DrawFrame);
-            _performanceUpdateTimer.Elapsed += PerformanceUpdateTimer_Elapsed;
+
             _xboxController.ButtonDown += XboxController_ButtonDown;
             _xboxController.ButtonUp += XboxController_ButtonUp;
+
+            _frameCounterTimer.Elapsed += PerformanceUpdateTimer_Elapsed;
 
             if (args.Length > 0 && LoadROM(args[0]))
             {
@@ -100,37 +101,37 @@ namespace Iris.UserInterface
             screenBox.Invoke(() => screenBox.Image = bitmap);
             screenBox.Invalidate();
 
-            ++_frameCount;
+            ++_frameCounter;
 
-            _xboxController.Update();
+            _xboxController.Poll();
 
-            if (_limitFps)
+            if (_framerateLimiterEnabled)
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                long GetElapsedUs() => 1_000_000 * _lastFrameStopwatch.ElapsedTicks / Stopwatch.Frequency;
+                long GetElapsedUs() => 1_000_000 * _framerateLimiterStopwatch.ElapsedTicks / Stopwatch.Frequency;
 
-                const float TargetFrameRate = 59.727f;
+                const double TargetFrameRate = 59.727;
                 const long TargetFrameDuration = (long)(1_000_000 / TargetFrameRate);
 
-                long lastFrameDuration = GetElapsedUs();
+                long frameDuration = GetElapsedUs();
 
-                if (lastFrameDuration < TargetFrameDuration)
+                if (frameDuration < TargetFrameDuration)
                 {
-                    long sleepTime = TargetFrameDuration - lastFrameDuration;
+                    long sleepTime = TargetFrameDuration - frameDuration;
 
-                    if (sleepTime > _lastFrameExtraSleepTime)
+                    if (sleepTime > _framerateLimiterExtraSleepTime)
                     {
-                        sleepTime -= _lastFrameExtraSleepTime;
+                        sleepTime -= _framerateLimiterExtraSleepTime;
                         Thread.Sleep((int)(sleepTime / 1000));
-                        _lastFrameExtraSleepTime = GetElapsedUs() - lastFrameDuration - sleepTime;
+                        _framerateLimiterExtraSleepTime = GetElapsedUs() - frameDuration - sleepTime;
                     }
                     else
                     {
-                        _lastFrameExtraSleepTime -= sleepTime;
+                        _framerateLimiterExtraSleepTime -= sleepTime;
                     }
                 }
 
-                _lastFrameStopwatch.Restart();
+                _framerateLimiterStopwatch.Restart();
             }
         }
 
@@ -169,7 +170,7 @@ namespace Iris.UserInterface
                 }
             });
 
-            _performanceUpdateTimer.Start();
+            _frameCounterTimer.Start();
         }
 
         private void Pause()
@@ -179,9 +180,9 @@ namespace Iris.UserInterface
             statusToolStripStatusLabel.Text = "Paused";
             _system.Pause();
 
-            _performanceUpdateTimer.Stop();
+            _frameCounterTimer.Stop();
             fpsToolStripStatusLabel.Text = "FPS: 0";
-            _frameCount = 0;
+            _frameCounter = 0;
         }
 
         private void LoadROMToolStripMenuItem_Click(object sender, EventArgs e)
@@ -292,10 +293,10 @@ namespace Iris.UserInterface
 
         private void PerformanceUpdateTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
         {
-            int fps = (int)(_frameCount * 1000 / _performanceUpdateTimer.Interval);
+            int fps = (int)(_frameCounter * 1000 / _frameCounterTimer.Interval);
             menuStrip1.Invoke(() => fpsToolStripStatusLabel.Text = "FPS: " + fps);
             Console.WriteLine("[UserInterface.MainWindow] FPS: {0}", fps);
-            _frameCount = 0;
+            _frameCounter = 0;
         }
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
@@ -312,13 +313,13 @@ namespace Iris.UserInterface
 
         private void XboxController_ButtonDown(object? sender, XboxController.ButtonEventArgs e)
         {
-            if (s_gameControllerMapping.TryGetValue(e.Button, out Common.System.Key value))
+            if (s_xboxControllerMapping.TryGetValue(e.Button, out Common.System.Key value))
                 _system.SetKeyStatus(value, Common.System.KeyStatus.Input);
         }
 
         private void XboxController_ButtonUp(object? sender, XboxController.ButtonEventArgs e)
         {
-            if (s_gameControllerMapping.TryGetValue(e.Button, out Common.System.Key value))
+            if (s_xboxControllerMapping.TryGetValue(e.Button, out Common.System.Key value))
                 _system.SetKeyStatus(value, Common.System.KeyStatus.NoInput);
         }
 
@@ -338,9 +339,9 @@ namespace Iris.UserInterface
             }
         }
 
-        private void LimitFPSToolStripMenuItem_Click(object sender, EventArgs e)
+        private void LimitFramerateToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _limitFps = limitFPSToolStripMenuItem.Checked;
+            _framerateLimiterEnabled = limitFramerateToolStripMenuItem.Checked;
         }
     }
 }

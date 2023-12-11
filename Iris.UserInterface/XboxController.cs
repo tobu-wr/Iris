@@ -4,8 +4,8 @@ namespace Iris.UserInterface
 {
     internal sealed class XboxController
     {
-        private readonly Controller _controller = new(UserIndex.One);
-        private Gamepad _gamepad;
+        private readonly Controller _xinputController = new(UserIndex.Any);
+        private GamepadButtonFlags _previousButtonStates;
 
         internal enum Button
         {
@@ -23,30 +23,30 @@ namespace Iris.UserInterface
             Y
         }
 
-        internal class ButtonEventArgs : EventArgs
+        internal class ButtonEventArgs(Button button) : EventArgs
         {
-            internal Button Button { get; private set; }
-
-            internal ButtonEventArgs(Button button)
-            {
-                Button = button;
-            }
+            internal Button Button { get; private set; } = button;
         }
 
         internal delegate void ButtonEventHandler(object? sender, ButtonEventArgs e);
         internal event ButtonEventHandler? ButtonDown;
         internal event ButtonEventHandler? ButtonUp;
 
-        internal void Update()
+        internal void Poll()
         {
-            if (!_controller.IsConnected)
+            if (!_xinputController.IsConnected)
                 return;
+
+            GamepadButtonFlags currentButtonStates = _xinputController.GetState().Gamepad.Buttons;
 
             void CheckButton(GamepadButtonFlags flag, Button button)
             {
-                if (_gamepad.Buttons.HasFlag(flag) != _controller.GetState().Gamepad.Buttons.HasFlag(flag))
+                bool previousState = _previousButtonStates.HasFlag(flag);
+                bool currentState = currentButtonStates.HasFlag(flag);
+
+                if (previousState != currentState)
                 {
-                    if (_controller.GetState().Gamepad.Buttons.HasFlag(flag))
+                    if (currentState)
                         ButtonDown?.Invoke(this, new ButtonEventArgs(button));
                     else
                         ButtonUp?.Invoke(this, new ButtonEventArgs(button));
@@ -66,7 +66,7 @@ namespace Iris.UserInterface
             CheckButton(GamepadButtonFlags.X, Button.X);
             CheckButton(GamepadButtonFlags.Y, Button.Y);
 
-            _gamepad = _controller.GetState().Gamepad;
+            _previousButtonStates = currentButtonStates;
         }
     }
 }
