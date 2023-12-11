@@ -1,6 +1,8 @@
 using Iris.GBA;
 using System.Collections.Frozen;
+using System.Diagnostics;
 using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 
 namespace Iris.UserInterface
 {
@@ -40,6 +42,8 @@ namespace Iris.UserInterface
 
         private readonly Common.System _system;
         private int _frameCount = 0;
+        private bool _limitFps = true;
+        private readonly Stopwatch _fpsLimiterStopwatch = new();
         private readonly System.Timers.Timer _performanceUpdateTimer = new(1000);
         private readonly XboxController _xboxController = new();
         private FormWindowState _previousWindowState;
@@ -66,7 +70,6 @@ namespace Iris.UserInterface
 
         private void DrawFrame(UInt16[] frameBuffer)
         {
-#if !RELEASE_NODISPLAY
             const int ScreenWidth = 240;
             const int ScreenHeight = 160;
             const int PixelCount = ScreenWidth * ScreenHeight;
@@ -86,15 +89,26 @@ namespace Iris.UserInterface
                 buffer[i] = (Int16)((red << 10) | (green << 5) | blue);
             }
 
-            System.Runtime.InteropServices.Marshal.Copy(buffer, 0, data.Scan0, PixelCount);
+            Marshal.Copy(buffer, 0, data.Scan0, PixelCount);
             bitmap.UnlockBits(data);
 
             screenBox.Invoke(() => screenBox.Image = bitmap);
             screenBox.Invalidate();
-#endif
 
             ++_frameCount;
             _xboxController.Update();
+
+            if (_limitFps)
+            {
+                _fpsLimiterStopwatch.Stop();
+
+                if (_fpsLimiterStopwatch.ElapsedMilliseconds < 17)
+                {
+                    Thread.Sleep((int)(17 - _fpsLimiterStopwatch.ElapsedMilliseconds));
+                }
+
+                _fpsLimiterStopwatch.Restart();
+            }
         }
 
         private bool LoadROM(string fileName)
@@ -289,20 +303,21 @@ namespace Iris.UserInterface
         {
             if (fullScreenToolStripMenuItem.Checked)
             {
-                fullScreenToolStripMenuItem.Checked = false;
-
-                FormBorderStyle = FormBorderStyle.Sizable;
-                WindowState = _previousWindowState;
-            }
-            else
-            {
-                fullScreenToolStripMenuItem.Checked = true;
-
                 FormBorderStyle = FormBorderStyle.None;
                 _previousWindowState = WindowState;
                 WindowState = FormWindowState.Normal;
                 WindowState = FormWindowState.Maximized;
             }
+            else
+            {
+                FormBorderStyle = FormBorderStyle.Sizable;
+                WindowState = _previousWindowState;
+            }
+        }
+
+        private void LimitFPSToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _limitFps = limitFPSToolStripMenuItem.Checked;
         }
     }
 }

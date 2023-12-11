@@ -7,7 +7,6 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <TieredPGO>true</TieredPGO>
-    <Configurations>Debug;Release;Release_NoDisplay</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
