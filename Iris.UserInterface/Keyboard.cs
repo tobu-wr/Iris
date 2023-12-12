@@ -1,5 +1,4 @@
 ﻿using SharpDX.DirectInput;
-using SharpDX.XInput;
 using System.Diagnostics;
 
 namespace Iris.UserInterface
