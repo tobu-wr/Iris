@@ -75,14 +75,6 @@ namespace Iris.GBA
         internal UInt16 _BLDALPHA;
         internal UInt16 _BLDY;
 
-        internal delegate void RequestInterrupt_Delegate();
-
-        // could have used function pointers (delegate*) for performance instead of delegates but it's less flexible (cannot use non-static function for instance)
-        internal readonly record struct CallbackInterface
-        (
-            Common.System.DrawFrame_Delegate DrawFrame
-        );
-
         private const int DisplayScreenWidth = 240;
         private const int DisplayScreenHeight = 160;
         private const int DisplayScreenSize = DisplayScreenWidth * DisplayScreenHeight;
@@ -94,7 +86,7 @@ namespace Iris.GBA
         private const UInt32 ScanlineCycleCount = ScanlineLength * PixelCycleCount;
 
         private readonly Scheduler _scheduler;
-        private readonly CallbackInterface _callbackInterface;
+        private readonly Common.System.DrawFrame_Delegate _drawFrameCallback;
 
         private readonly int _startScanlineTaskId;
 
@@ -103,10 +95,10 @@ namespace Iris.GBA
 
         private readonly UInt16[] _displayFrameBuffer = new UInt16[DisplayScreenSize];
 
-        internal Video(Scheduler scheduler, Video.CallbackInterface callbackInterface)
+        internal Video(Scheduler scheduler, Common.System.DrawFrame_Delegate drawFrameCallback)
         {
             _scheduler = scheduler;
-            _callbackInterface = callbackInterface;
+            _drawFrameCallback = drawFrameCallback;
 
             _startScanlineTaskId = _scheduler.RegisterTask(StartScanline);
         }
@@ -378,7 +370,7 @@ namespace Iris.GBA
                     if ((_DISPSTAT & 0x0008) == 0x0008)
                         _interruptControl.RequestInterrupt(InterruptControl.Interrupt.VBlank);
 
-                    _callbackInterface.DrawFrame(_displayFrameBuffer);
+                    _drawFrameCallback(_displayFrameBuffer);
                     break;
 
                 // VBlank end

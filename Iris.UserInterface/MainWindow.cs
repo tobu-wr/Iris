@@ -2,7 +2,6 @@ using Iris.GBA;
 using System.Collections.Frozen;
 using System.Diagnostics;
 using System.Drawing.Imaging;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Iris.UserInterface
@@ -57,7 +56,7 @@ namespace Iris.UserInterface
         {
             InitializeComponent();
 
-            _system = new GBA_System(DrawFrame);
+            _system = new GBA_System(PollInput, DrawFrame);
 
             _xboxController.ButtonDown += XboxController_ButtonDown;
             _xboxController.ButtonUp += XboxController_ButtonUp;
@@ -74,6 +73,11 @@ namespace Iris.UserInterface
                 restartToolStripMenuItem.Enabled = true;
                 statusToolStripStatusLabel.Text = "Paused";
             }
+        }
+
+        private void PollInput()
+        {
+            _xboxController.Poll();
         }
 
         private void DrawFrame(UInt16[] frameBuffer)
@@ -104,8 +108,6 @@ namespace Iris.UserInterface
             screenBox.Invalidate();
 
             ++_framerateCounter;
-
-            _xboxController.Poll();
 
             if (_framerateLimiterEnabled)
             {

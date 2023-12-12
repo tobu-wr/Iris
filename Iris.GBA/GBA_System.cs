@@ -13,7 +13,7 @@ namespace Iris.GBA
         private readonly Timer _timer = new();
         private readonly Sound _sound = new();
         private readonly DMA _dma = new();
-        private readonly KeyInput _keyInput = new();
+        private readonly KeyInput _keyInput;
         private readonly SystemControl _systemControl = new();
         private readonly InterruptControl _interruptControl = new();
         private readonly Memory _memory = new();
@@ -24,13 +24,13 @@ namespace Iris.GBA
         private string _romHash;
         private bool _running;
 
-        public GBA_System(DrawFrame_Delegate drawFrame)
+        public GBA_System(PollInput_Delegate pollInputCallback, DrawFrame_Delegate drawFrameCallback)
         {
             CPU_Core.CallbackInterface cpuCallbackInterface = new(_memory.Read8, _memory.Read16, _memory.Read32, _memory.Write8, _memory.Write16, _memory.Write32, _bios.HandleSWI, _bios.HandleIRQ);
             _cpu = new(CPU_Core.Model.ARM7TDMI, cpuCallbackInterface);
 
-            Video.CallbackInterface videoCallbackInterface = new(drawFrame);
-            _video = new(_scheduler, videoCallbackInterface);
+            _keyInput = new(pollInputCallback);
+            _video = new(_scheduler, drawFrameCallback);
 
             _dma.Initialize(_memory);
             _interruptControl.Initialize(_cpu);

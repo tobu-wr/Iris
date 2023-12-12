@@ -3,6 +3,7 @@
     public abstract class System
     {
         public delegate void DrawFrame_Delegate(UInt16[] frameBuffer);
+        public delegate void PollInput_Delegate();
 
         public enum Key
         {

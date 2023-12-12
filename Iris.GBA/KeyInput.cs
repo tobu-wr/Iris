@@ -1,11 +1,11 @@
-﻿using static Iris.Common.System;
-
-namespace Iris.GBA
+﻿namespace Iris.GBA
 {
-    internal sealed class KeyInput
+    internal sealed class KeyInput(Common.System.PollInput_Delegate pollInputCallback)
     {
         internal UInt16 _KEYINPUT;
         internal UInt16 _KEYCNT;
+
+        private readonly Common.System.PollInput_Delegate _pollInputCallback = pollInputCallback;
 
         internal void ResetState()
         {
@@ -25,40 +25,40 @@ namespace Iris.GBA
             writer.Write(_KEYCNT);
         }
 
-        internal void SetKeyStatus(Key key, KeyStatus status)
+        internal void SetKeyStatus(Common.System.Key key, Common.System.KeyStatus status)
         {
             int pos;
 
             switch (key)
             {
-                case Key.A:
+                case Common.System.Key.A:
                     pos = 0;
                     break;
-                case Key.B:
+                case Common.System.Key.B:
                     pos = 1;
                     break;
-                case Key.Select:
+                case Common.System.Key.Select:
                     pos = 2;
                     break;
-                case Key.Start:
+                case Common.System.Key.Start:
                     pos = 3;
                     break;
-                case Key.Right:
+                case Common.System.Key.Right:
                     pos = 4;
                     break;
-                case Key.Left:
+                case Common.System.Key.Left:
                     pos = 5;
                     break;
-                case Key.Up:
+                case Common.System.Key.Up:
                     pos = 6;
                     break;
-                case Key.Down:
+                case Common.System.Key.Down:
                     pos = 7;
                     break;
-                case Key.R:
+                case Common.System.Key.R:
                     pos = 8;
                     break;
-                case Key.L:
+                case Common.System.Key.L:
                     pos = 9;
                     break;
                 default:
