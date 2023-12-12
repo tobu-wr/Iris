@@ -8,20 +8,20 @@ namespace Iris.UserInterface
 {
     internal partial class MainWindow : Form
     {
-        private static readonly FrozenDictionary<Keys, Common.System.Key> s_keyboardMapping = new Dictionary<Keys, Common.System.Key>()
+        private static readonly FrozenDictionary<Keyboard.Key, Common.System.Key> s_keyboardMapping = new Dictionary<Keyboard.Key, Common.System.Key>()
         {
-            { Keys.A, Common.System.Key.A },
-            { Keys.Z, Common.System.Key.B },
-            { Keys.Space, Common.System.Key.Select },
-            { Keys.Enter, Common.System.Key.Start },
-            { Keys.Right, Common.System.Key.Right },
-            { Keys.Left, Common.System.Key.Left },
-            { Keys.Up, Common.System.Key.Up },
-            { Keys.Down, Common.System.Key.Down },
-            { Keys.S, Common.System.Key.R },
-            { Keys.Q, Common.System.Key.L },
-            { Keys.E, Common.System.Key.X },
-            { Keys.R, Common.System.Key.Y },
+            { Keyboard.Key.A, Common.System.Key.A },
+            { Keyboard.Key.Z, Common.System.Key.B },
+            { Keyboard.Key.Space, Common.System.Key.Select },
+            { Keyboard.Key.Enter, Common.System.Key.Start },
+            { Keyboard.Key.Right, Common.System.Key.Right },
+            { Keyboard.Key.Left, Common.System.Key.Left },
+            { Keyboard.Key.Up, Common.System.Key.Up },
+            { Keyboard.Key.Down, Common.System.Key.Down },
+            { Keyboard.Key.S, Common.System.Key.R },
+            { Keyboard.Key.Q, Common.System.Key.L },
+            { Keyboard.Key.E, Common.System.Key.X },
+            { Keyboard.Key.R, Common.System.Key.Y },
         }.ToFrozenDictionary();
 
         private static readonly FrozenDictionary<XboxController.Button, Common.System.Key> s_xboxControllerMapping = new Dictionary<XboxController.Button, Common.System.Key>()
@@ -41,7 +41,8 @@ namespace Iris.UserInterface
         }.ToFrozenDictionary();
 
         private Common.System _system;
-        private readonly XboxController _xboxController = new();
+        private readonly Keyboard _keyboard;
+        private readonly XboxController _xboxController;
         private FormWindowState _previousWindowState;
 
         private int _framerateCounter;
@@ -57,9 +58,8 @@ namespace Iris.UserInterface
             InitializeComponent();
 
             _system = new GBA_System(PollInput, DrawFrame);
-
-            _xboxController.ButtonDown += XboxController_ButtonDown;
-            _xboxController.ButtonUp += XboxController_ButtonUp;
+            _keyboard = new(Keyboard_KeyDown, Keyboard_KeyUp);
+            _xboxController = new(XboxController_ButtonDown, XboxController_ButtonUp);
 
             _framerateCounterTimer.Interval = 1000;
             _framerateCounterTimer.Tick += FramerateCounterTimer_Tick;
@@ -77,7 +77,8 @@ namespace Iris.UserInterface
 
         private void PollInput()
         {
-            _xboxController.Poll();
+            _keyboard.PollInput();
+            _xboxController.PollInput();
         }
 
         private void DrawFrame(UInt16[] frameBuffer)
@@ -113,12 +114,12 @@ namespace Iris.UserInterface
             {
                 const double TargetFrameRate = 59.737411711095921;
 
-                long TargetFrameDuration = (long)Math.Round(Stopwatch.Frequency / TargetFrameRate, MidpointRounding.AwayFromZero);
+                long targetFrameDuration = (long)Math.Round(Stopwatch.Frequency / TargetFrameRate, MidpointRounding.AwayFromZero);
                 long frameDuration = _framerateLimiterStopwatch.ElapsedTicks;
 
-                if (frameDuration < TargetFrameDuration)
+                if (frameDuration < targetFrameDuration)
                 {
-                    long sleepTime = TargetFrameDuration - frameDuration;
+                    long sleepTime = targetFrameDuration - frameDuration;
 
                     if (sleepTime > _framerateLimiterExtraSleepTime)
                     {
@@ -306,27 +307,27 @@ namespace Iris.UserInterface
             _framerateCounterStopwatch.Restart();
         }
 
-        private void MainWindow_KeyDown(object sender, KeyEventArgs e)
+        private void Keyboard_KeyDown(Keyboard.Key key)
         {
-            if (s_keyboardMapping.TryGetValue(e.KeyCode, out Common.System.Key value))
+            if (s_keyboardMapping.TryGetValue(key, out Common.System.Key value))
                 _system.SetKeyStatus(value, Common.System.KeyStatus.Input);
         }
 
-        private void MainWindow_KeyUp(object sender, KeyEventArgs e)
+        private void Keyboard_KeyUp(Keyboard.Key key)
         {
-            if (s_keyboardMapping.TryGetValue(e.KeyCode, out Common.System.Key value))
+            if (s_keyboardMapping.TryGetValue(key, out Common.System.Key value))
                 _system.SetKeyStatus(value, Common.System.KeyStatus.NoInput);
         }
 
-        private void XboxController_ButtonDown(object? sender, XboxController.ButtonEventArgs e)
+        private void XboxController_ButtonDown(XboxController.Button button)
         {
-            if (s_xboxControllerMapping.TryGetValue(e.Button, out Common.System.Key value))
+            if (s_xboxControllerMapping.TryGetValue(button, out Common.System.Key value))
                 _system.SetKeyStatus(value, Common.System.KeyStatus.Input);
         }
 
-        private void XboxController_ButtonUp(object? sender, XboxController.ButtonEventArgs e)
+        private void XboxController_ButtonUp(XboxController.Button button)
         {
-            if (s_xboxControllerMapping.TryGetValue(e.Button, out Common.System.Key value))
+            if (s_xboxControllerMapping.TryGetValue(button, out Common.System.Key value))
                 _system.SetKeyStatus(value, Common.System.KeyStatus.NoInput);
         }
 

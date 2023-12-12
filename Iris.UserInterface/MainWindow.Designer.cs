@@ -223,8 +223,6 @@
             ShowIcon = false;
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Iris v1";
-            KeyDown += MainWindow_KeyDown;
-            KeyUp += MainWindow_KeyUp;
             statusStrip1.ResumeLayout(false);
             statusStrip1.PerformLayout();
             menuStrip1.ResumeLayout(false);

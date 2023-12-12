@@ -1,72 +1,84 @@
 ﻿using SharpDX.XInput;
+using System.Diagnostics;
+using static Iris.UserInterface.XboxController;
 
 namespace Iris.UserInterface
 {
-    internal sealed class XboxController
+    internal sealed class XboxController(ButtonEvent_Delegate buttonDownCallback, ButtonEvent_Delegate buttonUpCallback)
     {
+        internal enum Button : ushort
+        {
+            None = 0,
+            DPadUp = 1,
+            DPadDown = 2,
+            DPadLeft = 4,
+            DPadRight = 8,
+            Start = 0x10,
+            Back = 0x20,
+            LeftThumb = 0x40,
+            RightThumb = 0x80,
+            LeftShoulder = 0x100,
+            RightShoulder = 0x200,
+            A = 0x1000,
+            B = 0x2000,
+            X = 0x4000,
+            Y = 0x8000
+        }
+
+        internal delegate void ButtonEvent_Delegate(Button Button);
+
+        private readonly ButtonEvent_Delegate _buttonDownCallback = buttonDownCallback;
+        private readonly ButtonEvent_Delegate _buttonUpCallback = buttonUpCallback;
+
+        private readonly Stopwatch _pollingStopwatch = Stopwatch.StartNew();
+
         private readonly Controller _xinputController = new(UserIndex.One);
-        private GamepadButtonFlags _previousButtonStates;
+        private State _previousState;
 
-        internal enum Button
+        internal void PollInput()
         {
-            DPadUp,
-            DPadDown,
-            DPadLeft,
-            DPadRight,
-            Start,
-            Back,
-            LeftShoulder,
-            RightShoulder,
-            A,
-            B,
-            X,
-            Y
-        }
+            const long PollingRate = 125;
+            long pollingPeriod = Stopwatch.Frequency / PollingRate;
 
-        internal class ButtonEventArgs(Button button) : EventArgs
-        {
-            internal Button Button { get; private set; } = button;
-        }
-
-        internal delegate void ButtonEventHandler(object? sender, ButtonEventArgs e);
-        internal event ButtonEventHandler? ButtonDown;
-        internal event ButtonEventHandler? ButtonUp;
-
-        internal void Poll()
-        {
-            if (!_xinputController.IsConnected)
+            if (_pollingStopwatch.ElapsedTicks < pollingPeriod)
                 return;
 
-            GamepadButtonFlags currentButtonStates = _xinputController.GetState().Gamepad.Buttons;
+            _pollingStopwatch.Restart();
 
-            void CheckButton(GamepadButtonFlags flag, Button button)
+            if (!_xinputController.GetState(out State currentState))
+                return;
+
+            if (currentState.PacketNumber == _previousState.PacketNumber)
+                return;
+
+            void CheckButtonState(GamepadButtonFlags flag)
             {
-                bool previousState = _previousButtonStates.HasFlag(flag);
-                bool currentState = currentButtonStates.HasFlag(flag);
+                bool currentButtonState = currentState.Gamepad.Buttons.HasFlag(flag);
+                bool previousButtonState = _previousState.Gamepad.Buttons.HasFlag(flag);
 
-                if (previousState != currentState)
+                if (currentButtonState != previousButtonState)
                 {
-                    if (currentState)
-                        ButtonDown?.Invoke(this, new ButtonEventArgs(button));
+                    if (currentButtonState)
+                        _buttonDownCallback((Button)flag);
                     else
-                        ButtonUp?.Invoke(this, new ButtonEventArgs(button));
+                        _buttonUpCallback((Button)flag);
                 }
             }
 
-            CheckButton(GamepadButtonFlags.DPadUp, Button.DPadUp);
-            CheckButton(GamepadButtonFlags.DPadDown, Button.DPadDown);
-            CheckButton(GamepadButtonFlags.DPadLeft, Button.DPadLeft);
-            CheckButton(GamepadButtonFlags.DPadRight, Button.DPadRight);
-            CheckButton(GamepadButtonFlags.Start, Button.Start);
-            CheckButton(GamepadButtonFlags.Back, Button.Back);
-            CheckButton(GamepadButtonFlags.LeftShoulder, Button.LeftShoulder);
-            CheckButton(GamepadButtonFlags.RightShoulder, Button.RightShoulder);
-            CheckButton(GamepadButtonFlags.A, Button.A);
-            CheckButton(GamepadButtonFlags.B, Button.B);
-            CheckButton(GamepadButtonFlags.X, Button.X);
-            CheckButton(GamepadButtonFlags.Y, Button.Y);
+            CheckButtonState(GamepadButtonFlags.DPadUp);
+            CheckButtonState(GamepadButtonFlags.DPadDown);
+            CheckButtonState(GamepadButtonFlags.DPadLeft);
+            CheckButtonState(GamepadButtonFlags.DPadRight);
+            CheckButtonState(GamepadButtonFlags.Start);
+            CheckButtonState(GamepadButtonFlags.Back);
+            CheckButtonState(GamepadButtonFlags.LeftShoulder);
+            CheckButtonState(GamepadButtonFlags.RightShoulder);
+            CheckButtonState(GamepadButtonFlags.A);
+            CheckButtonState(GamepadButtonFlags.B);
+            CheckButtonState(GamepadButtonFlags.X);
+            CheckButtonState(GamepadButtonFlags.Y);
 
-            _previousButtonStates = currentButtonStates;
+            _previousState = currentState;
         }
     }
 }
