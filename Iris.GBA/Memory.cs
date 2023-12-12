@@ -220,6 +220,20 @@ namespace Iris.GBA
                         [MethodImpl(MethodImplOptions.AggressiveInlining)]
                         static Byte GetHighByte(UInt16 value) => (Byte)(value >> 8);
 
+                        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                        Byte GetLowByte_KEYINPUT()
+                        {
+                            _keyInput.PollInput();
+                            return GetLowByte(_keyInput._KEYINPUT);
+                        }
+
+                        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                        Byte GetHighByte_KEYINPUT()
+                        {
+                            _keyInput.PollInput();
+                            return GetHighByte(_keyInput._KEYINPUT);
+                        }
+
                         UInt32 offset = address - 0x400_0000;
 
                         return offset switch
@@ -377,8 +391,8 @@ namespace Iris.GBA
                             0x12a => GetLowByte(_communication!._SIODATA_SEND),
                             0x12b => GetHighByte(_communication!._SIODATA_SEND),
 
-                            0x130 => GetLowByte(_keyInput!._KEYINPUT),
-                            0x131 => GetHighByte(_keyInput!._KEYINPUT),
+                            0x130 => GetLowByte_KEYINPUT(),
+                            0x131 => GetHighByte_KEYINPUT(),
 
                             0x132 => GetLowByte(_keyInput!._KEYCNT),
                             0x133 => GetHighByte(_keyInput!._KEYCNT),
@@ -485,6 +499,13 @@ namespace Iris.GBA
                 // IO and registers
                 case 0x4:
                     {
+                        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                        UInt16 GetKEYINPUT()
+                        {
+                            _keyInput.PollInput();
+                            return _keyInput._KEYINPUT;
+                        }
+
                         UInt32 offset = address - 0x400_0000;
 
                         return offset switch
@@ -540,7 +561,7 @@ namespace Iris.GBA
                             0x126 => _communication!._SIODATA3,
                             0x128 => _communication!._SIOCNT,
                             0x12a => _communication!._SIODATA_SEND,
-                            0x130 => _keyInput!._KEYINPUT,
+                            0x130 => GetKEYINPUT(),
                             0x132 => _keyInput!._KEYCNT,
                             0x134 => _communication!._RCNT,
                             0x200 => _interruptControl!._IE,

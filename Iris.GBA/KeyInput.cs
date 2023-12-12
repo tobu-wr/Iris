@@ -25,6 +25,11 @@
             writer.Write(_KEYCNT);
         }
 
+        internal void PollInput()
+        {
+            _pollInputCallback();
+        }
+
         internal void SetKeyStatus(Common.System.Key key, Common.System.KeyStatus status)
         {
             int pos;
