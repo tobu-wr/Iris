@@ -500,7 +500,7 @@ namespace Iris.GBA
                 case 0x4:
                     {
                         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                        UInt16 GetKEYINPUT()
+                        UInt16 Get_KEYINPUT()
                         {
                             _keyInput.PollInput();
                             return _keyInput._KEYINPUT;
@@ -561,7 +561,7 @@ namespace Iris.GBA
                             0x126 => _communication!._SIODATA3,
                             0x128 => _communication!._SIOCNT,
                             0x12a => _communication!._SIODATA_SEND,
-                            0x130 => GetKEYINPUT(),
+                            0x130 => Get_KEYINPUT(),
                             0x132 => _keyInput!._KEYCNT,
                             0x134 => _communication!._RCNT,
                             0x200 => _interruptControl!._IE,
