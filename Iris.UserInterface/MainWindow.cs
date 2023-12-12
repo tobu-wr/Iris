@@ -169,8 +169,8 @@ namespace Iris.UserInterface
                 }
             });
 
-            _framerateCounter = 0;
             _framerateCounterTimer.Start();
+            _framerateCounter = 0;
             _framerateCounterStopwatch.Restart();
         }
 
@@ -179,9 +179,13 @@ namespace Iris.UserInterface
             runToolStripMenuItem.Enabled = true;
             pauseToolStripMenuItem.Enabled = false;
             statusToolStripStatusLabel.Text = "Paused";
+
             _system.Pause();
 
             _framerateCounterTimer.Stop();
+            _framerateCounter = 0;
+            _framerateCounterStopwatch.Stop();
+
             fpsToolStripStatusLabel.Text = "FPS: 0";
         }
 
