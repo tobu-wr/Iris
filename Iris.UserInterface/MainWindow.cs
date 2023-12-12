@@ -45,8 +45,9 @@ namespace Iris.UserInterface
         private readonly XboxController _xboxController = new();
         private FormWindowState _previousWindowState;
 
-        private int _frameCounter;
-        private readonly System.Timers.Timer _frameCounterTimer = new(1000);
+        private int _framerateCounter;
+        private readonly System.Windows.Forms.Timer _framerateCounterTimer = new();
+        private readonly Stopwatch _framerateCounterStopwatch = new();
 
         private bool _framerateLimiterEnabled = true;
         private readonly Stopwatch _framerateLimiterStopwatch = Stopwatch.StartNew();
@@ -61,7 +62,8 @@ namespace Iris.UserInterface
             _xboxController.ButtonDown += XboxController_ButtonDown;
             _xboxController.ButtonUp += XboxController_ButtonUp;
 
-            _frameCounterTimer.Elapsed += FrameCounterTimer_Elapsed;
+            _framerateCounterTimer.Interval = 1000;
+            _framerateCounterTimer.Tick += FramerateCounterTimer_Tick;
 
             if (args.Length > 0 && LoadROM(args[0]))
             {
@@ -101,7 +103,7 @@ namespace Iris.UserInterface
             screenBox.Invoke(() => screenBox.Image = bitmap);
             screenBox.Invalidate();
 
-            ++_frameCounter;
+            ++_framerateCounter;
 
             _xboxController.Poll();
 
@@ -167,7 +169,9 @@ namespace Iris.UserInterface
                 }
             });
 
-            _frameCounterTimer.Start();
+            _framerateCounter = 0;
+            _framerateCounterTimer.Start();
+            _framerateCounterStopwatch.Restart();
         }
 
         private void Pause()
@@ -177,9 +181,8 @@ namespace Iris.UserInterface
             statusToolStripStatusLabel.Text = "Paused";
             _system.Pause();
 
-            _frameCounterTimer.Stop();
+            _framerateCounterTimer.Stop();
             fpsToolStripStatusLabel.Text = "FPS: 0";
-            _frameCounter = 0;
         }
 
         private void LoadROMToolStripMenuItem_Click(object sender, EventArgs e)
@@ -288,12 +291,13 @@ namespace Iris.UserInterface
                 Run();
         }
 
-        private void FrameCounterTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+        private void FramerateCounterTimer_Tick(object? sender, EventArgs e)
         {
-            int fps = (int)(_frameCounter * 1000 / _frameCounterTimer.Interval);
-            menuStrip1.Invoke(() => fpsToolStripStatusLabel.Text = "FPS: " + fps);
+            long fps = _framerateCounter * Stopwatch.Frequency / _framerateCounterStopwatch.ElapsedTicks;
+            fpsToolStripStatusLabel.Text = "FPS: " + fps;
             Console.WriteLine("[UserInterface.MainWindow] FPS: {0}", fps);
-            _frameCounter = 0;
+            _framerateCounter = 0;
+            _framerateCounterStopwatch.Restart();
         }
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
