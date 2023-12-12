@@ -107,13 +107,10 @@ namespace Iris.UserInterface
 
             if (_framerateLimiterEnabled)
             {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                long GetElapsedUs() => 1_000_000 * _framerateLimiterStopwatch.ElapsedTicks / Stopwatch.Frequency;
+                const double TargetFrameRate = 59.737411711095921;
 
-                const double TargetFrameRate = 59.727;
-                const long TargetFrameDuration = (long)(1_000_000 / TargetFrameRate);
-
-                long frameDuration = GetElapsedUs();
+                long TargetFrameDuration = (long)Math.Round(Stopwatch.Frequency / TargetFrameRate, MidpointRounding.AwayFromZero);
+                long frameDuration = _framerateLimiterStopwatch.ElapsedTicks;
 
                 if (frameDuration < TargetFrameDuration)
                 {
@@ -122,8 +119,8 @@ namespace Iris.UserInterface
                     if (sleepTime > _framerateLimiterExtraSleepTime)
                     {
                         sleepTime -= _framerateLimiterExtraSleepTime;
-                        Thread.Sleep((int)(sleepTime / 1000));
-                        _framerateLimiterExtraSleepTime = GetElapsedUs() - frameDuration - sleepTime;
+                        Thread.Sleep((int)(1000 * sleepTime / Stopwatch.Frequency));
+                        _framerateLimiterExtraSleepTime = _framerateLimiterStopwatch.ElapsedTicks - frameDuration - sleepTime;
                     }
                     else
                     {
