@@ -13,7 +13,7 @@ namespace Iris.UserInterface
             { Keyboard.Key.A, Common.System.Key.A },
             { Keyboard.Key.Z, Common.System.Key.B },
             { Keyboard.Key.Space, Common.System.Key.Select },
-            { Keyboard.Key.Enter, Common.System.Key.Start },
+            { Keyboard.Key.Return, Common.System.Key.Start },
             { Keyboard.Key.Right, Common.System.Key.Right },
             { Keyboard.Key.Left, Common.System.Key.Left },
             { Keyboard.Key.Up, Common.System.Key.Up },

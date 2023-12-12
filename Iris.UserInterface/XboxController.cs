@@ -8,15 +8,12 @@ namespace Iris.UserInterface
     {
         internal enum Button : ushort
         {
-            None = 0,
-            DPadUp = 1,
-            DPadDown = 2,
-            DPadLeft = 4,
-            DPadRight = 8,
+            DPadUp = 0x1,
+            DPadDown = 0x2,
+            DPadLeft = 0x4,
+            DPadRight = 0x8,
             Start = 0x10,
             Back = 0x20,
-            LeftThumb = 0x40,
-            RightThumb = 0x80,
             LeftShoulder = 0x100,
             RightShoulder = 0x200,
             A = 0x1000,
@@ -51,17 +48,17 @@ namespace Iris.UserInterface
             if (currentState.PacketNumber == _previousState.PacketNumber)
                 return;
 
-            void CheckButtonState(GamepadButtonFlags flag)
+            void CheckButtonState(GamepadButtonFlags button)
             {
-                bool currentButtonState = currentState.Gamepad.Buttons.HasFlag(flag);
-                bool previousButtonState = _previousState.Gamepad.Buttons.HasFlag(flag);
+                bool currentButtonState = currentState.Gamepad.Buttons.HasFlag(button);
+                bool previousButtonState = _previousState.Gamepad.Buttons.HasFlag(button);
 
                 if (currentButtonState != previousButtonState)
                 {
                     if (currentButtonState)
-                        _buttonDownCallback((Button)flag);
+                        _buttonDownCallback((Button)button);
                     else
-                        _buttonUpCallback((Button)flag);
+                        _buttonUpCallback((Button)button);
                 }
             }
 
