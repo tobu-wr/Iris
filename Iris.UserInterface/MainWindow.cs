@@ -61,7 +61,7 @@ namespace Iris.UserInterface
             _keyboard = new(Keyboard_KeyDown, Keyboard_KeyUp);
             _xboxController = new(XboxController_ButtonDown, XboxController_ButtonUp);
 
-            _framerateCounterTimer.Interval = 1000;
+            _framerateCounterTimer.Interval = 2000;
             _framerateCounterTimer.Tick += FramerateCounterTimer_Tick;
 
             if (args.Length > 0 && LoadROM(args[0]))
@@ -300,7 +300,7 @@ namespace Iris.UserInterface
 
         private void FramerateCounterTimer_Tick(object? sender, EventArgs e)
         {
-            long fps = _framerateCounter * Stopwatch.Frequency / _framerateCounterStopwatch.ElapsedTicks;
+            long fps = (long)Math.Round((double)_framerateCounter * Stopwatch.Frequency / _framerateCounterStopwatch.ElapsedTicks, MidpointRounding.AwayFromZero);
             fpsToolStripStatusLabel.Text = "FPS: " + fps;
             Console.WriteLine("[UserInterface.MainWindow] FPS: {0}", fps);
             _framerateCounter = 0;
