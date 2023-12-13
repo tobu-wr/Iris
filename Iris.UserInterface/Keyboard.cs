@@ -7,18 +7,18 @@ namespace Iris.UserInterface
     {
         internal enum Key
         {
-            A = 16,
-            Z = 17,
-            E = 18,
-            R = 19,
-            Q = 30,
-            S = 31,
-            Return = 28,
-            Space = 57,
-            Up = 200,
-            Left = 203,
-            Right = 205,
-            Down = 208
+            A = SharpDX.DirectInput.Key.Q,
+            Z = SharpDX.DirectInput.Key.W,
+            E = SharpDX.DirectInput.Key.E,
+            R = SharpDX.DirectInput.Key.R,
+            Q = SharpDX.DirectInput.Key.A,
+            S = SharpDX.DirectInput.Key.S,
+            Return = SharpDX.DirectInput.Key.Return,
+            Space = SharpDX.DirectInput.Key.Space,
+            Up = SharpDX.DirectInput.Key.Up,
+            Left = SharpDX.DirectInput.Key.Left,
+            Right = SharpDX.DirectInput.Key.Right,
+            Down = SharpDX.DirectInput.Key.Down
         }
 
         internal delegate void KeyEvent_Delegate(Key key);
@@ -38,7 +38,6 @@ namespace Iris.UserInterface
             _keyUpCallback = keyUpCallback;
 
             _keyboard = new(_directInput);
-            _keyboard.Properties.BufferSize = 128;
             _keyboard.Acquire();
         }
 
@@ -59,9 +58,9 @@ namespace Iris.UserInterface
             void CheckKeyState(SharpDX.DirectInput.Key key)
             {
                 bool currentKeyState = currentState.IsPressed(key);
-                bool previousButtonState = _previousState.IsPressed(key);
+                bool previousKeyState = _previousState.IsPressed(key);
 
-                if (currentKeyState != previousButtonState)
+                if (currentKeyState != previousKeyState)
                 {
                     if (currentKeyState)
                         _keyDownCallback((Key)key);
@@ -70,18 +69,18 @@ namespace Iris.UserInterface
                 }
             }
 
-            CheckKeyState(SharpDX.DirectInput.Key.Up);
-            CheckKeyState(SharpDX.DirectInput.Key.Down);
-            CheckKeyState(SharpDX.DirectInput.Key.Left);
-            CheckKeyState(SharpDX.DirectInput.Key.Right);
-            CheckKeyState(SharpDX.DirectInput.Key.Return);
-            CheckKeyState(SharpDX.DirectInput.Key.Space);
-            CheckKeyState(SharpDX.DirectInput.Key.A);
-            CheckKeyState(SharpDX.DirectInput.Key.S);
             CheckKeyState(SharpDX.DirectInput.Key.Q);
             CheckKeyState(SharpDX.DirectInput.Key.W);
             CheckKeyState(SharpDX.DirectInput.Key.E);
             CheckKeyState(SharpDX.DirectInput.Key.R);
+            CheckKeyState(SharpDX.DirectInput.Key.A);
+            CheckKeyState(SharpDX.DirectInput.Key.S);
+            CheckKeyState(SharpDX.DirectInput.Key.Return);
+            CheckKeyState(SharpDX.DirectInput.Key.Space);
+            CheckKeyState(SharpDX.DirectInput.Key.Up);
+            CheckKeyState(SharpDX.DirectInput.Key.Left);
+            CheckKeyState(SharpDX.DirectInput.Key.Right);
+            CheckKeyState(SharpDX.DirectInput.Key.Down);
 
             _previousState = currentState;
         }

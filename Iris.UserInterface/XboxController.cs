@@ -8,18 +8,18 @@ namespace Iris.UserInterface
     {
         internal enum Button : ushort
         {
-            DPadUp = 0x1,
-            DPadDown = 0x2,
-            DPadLeft = 0x4,
-            DPadRight = 0x8,
-            Start = 0x10,
-            Back = 0x20,
-            LeftShoulder = 0x100,
-            RightShoulder = 0x200,
-            A = 0x1000,
-            B = 0x2000,
-            X = 0x4000,
-            Y = 0x8000
+            DPadUp = GamepadButtonFlags.DPadUp,
+            DPadDown = GamepadButtonFlags.DPadDown,
+            DPadLeft = GamepadButtonFlags.DPadLeft,
+            DPadRight = GamepadButtonFlags.DPadRight,
+            Start = GamepadButtonFlags.Start,
+            Back = GamepadButtonFlags.Back,
+            LeftShoulder = GamepadButtonFlags.LeftShoulder,
+            RightShoulder = GamepadButtonFlags.RightShoulder,
+            A = GamepadButtonFlags.A,
+            B = GamepadButtonFlags.B,
+            X = GamepadButtonFlags.X,
+            Y = GamepadButtonFlags.Y
         }
 
         internal delegate void ButtonEvent_Delegate(Button Button);
