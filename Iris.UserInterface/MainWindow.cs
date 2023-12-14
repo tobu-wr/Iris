@@ -45,6 +45,7 @@ namespace Iris.UserInterface
 
         private readonly Keyboard _keyboard;
         private readonly XboxController _xboxController;
+
         private FormWindowState _previousWindowState;
 
         private int _framerateCounter;
@@ -60,23 +61,15 @@ namespace Iris.UserInterface
             InitializeComponent();
 
             _system = new GBA_System(PollInput, DrawFrame);
+
             _keyboard = new(Keyboard_KeyDown, Keyboard_KeyUp);
             _xboxController = new(XboxController_ButtonDown, XboxController_ButtonUp);
 
             _framerateCounterTimer.Interval = 2000;
             _framerateCounterTimer.Tick += FramerateCounterTimer_Tick;
 
-            if (args.Length > 0 && LoadROM(args[0]))
-            {
-                loadStateToolStripMenuItem.Enabled = true;
-                saveStateToolStripMenuItem.Enabled = true;
-
-                runToolStripMenuItem.Enabled = true;
-                pauseToolStripMenuItem.Enabled = false;
-                restartToolStripMenuItem.Enabled = true;
-
-                statusToolStripStatusLabel.Text = "Paused";
-            }
+            if (args.Length > 0)
+                LoadROM(args[0]);
         }
 
         private void PollInput()
@@ -141,25 +134,38 @@ namespace Iris.UserInterface
             }
         }
 
-        private bool LoadROM(string fileName)
+        private void LoadROM(string fileName)
         {
             try
             {
                 _system.LoadROM(fileName);
                 _system.ResetState();
-                return true;
             }
-            catch
+            catch (Exception ex)
             {
-                MessageBox.Show("Could not load ROM", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
+
+            loadStateToolStripMenuItem.Enabled = true;
+            saveStateToolStripMenuItem.Enabled = true;
+
+            runToolStripMenuItem.Enabled = true;
+            pauseToolStripMenuItem.Enabled = false;
+            restartToolStripMenuItem.Enabled = true;
+
+            statusToolStripStatusLabel.Text = "Paused";
         }
 
         private void Run()
         {
+            _framerateCounter = 0;
+            _framerateCounterTimer.Start();
+            _framerateCounterStopwatch.Restart();
+
             runToolStripMenuItem.Enabled = false;
             pauseToolStripMenuItem.Enabled = true;
+
             statusToolStripStatusLabel.Text = "Running";
 
             _systemTask = Task.Run(() =>
@@ -170,29 +176,35 @@ namespace Iris.UserInterface
                 }
                 catch (Exception ex)
                 {
-                    Pause();
+                    _system.Pause();
                     _system.ResetState();
+
+                    _framerateCounterTimer.Stop();
+
+                    runToolStripMenuItem.Enabled = true;
+                    pauseToolStripMenuItem.Enabled = false;
+
+                    statusToolStripStatusLabel.Text = "Paused";
+                    fpsToolStripStatusLabel.Text = "FPS: 0";
+
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             });
-
-            _framerateCounterTimer.Start();
-            _framerateCounter = 0;
-            _framerateCounterStopwatch.Restart();
         }
 
         private void Pause()
         {
-            runToolStripMenuItem.Enabled = true;
-            pauseToolStripMenuItem.Enabled = false;
-            statusToolStripStatusLabel.Text = "Paused";
-
             _system.Pause();
 
-            _framerateCounterTimer.Stop();
-            _framerateCounter = 0;
-            _framerateCounterStopwatch.Stop();
+            while (!_systemTask!.IsCompleted)
+                Application.DoEvents();
 
+            _framerateCounterTimer.Stop();
+
+            runToolStripMenuItem.Enabled = true;
+            pauseToolStripMenuItem.Enabled = false;
+
+            statusToolStripStatusLabel.Text = "Paused";
             fpsToolStripStatusLabel.Text = "FPS: 0";
         }
 
@@ -209,19 +221,7 @@ namespace Iris.UserInterface
             };
 
             if (dialog.ShowDialog() == DialogResult.OK)
-            {
-                if (LoadROM(dialog.FileName) && !running)
-                {
-                    loadStateToolStripMenuItem.Enabled = true;
-                    saveStateToolStripMenuItem.Enabled = true;
-
-                    runToolStripMenuItem.Enabled = true;
-                    pauseToolStripMenuItem.Enabled = false;
-                    restartToolStripMenuItem.Enabled = true;
-
-                    statusToolStripStatusLabel.Text = "Paused";
-                }
-            }
+                LoadROM(dialog.FileName);
 
             if (running)
                 Run();
@@ -246,9 +246,9 @@ namespace Iris.UserInterface
                 {
                     _system.LoadState(dialog.FileName);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    MessageBox.Show("Could not load state", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
 
@@ -281,6 +281,22 @@ namespace Iris.UserInterface
             Application.Exit();
         }
 
+        private void FullScreenToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (fullScreenToolStripMenuItem.Checked)
+            {
+                FormBorderStyle = FormBorderStyle.None;
+                _previousWindowState = WindowState;
+                WindowState = FormWindowState.Normal; // mandatory
+                WindowState = FormWindowState.Maximized;
+            }
+            else
+            {
+                FormBorderStyle = FormBorderStyle.Sizable;
+                WindowState = _previousWindowState;
+            }
+        }
+
         private void RunToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Run();
@@ -296,12 +312,7 @@ namespace Iris.UserInterface
             bool running = _system.IsRunning();
 
             if (running)
-            {
                 Pause();
-
-                while (!_systemTask!.IsCompleted)
-                    Application.DoEvents();
-            }
 
             _system.ResetState();
 
@@ -309,13 +320,9 @@ namespace Iris.UserInterface
                 Run();
         }
 
-        private void FramerateCounterTimer_Tick(object? sender, EventArgs e)
+        private void LimitFramerateToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            long fps = (long)Math.Round((double)_framerateCounter * Stopwatch.Frequency / _framerateCounterStopwatch.ElapsedTicks, MidpointRounding.AwayFromZero);
-            fpsToolStripStatusLabel.Text = "FPS: " + fps;
-            Console.WriteLine("[UserInterface.MainWindow] FPS: {0}", fps);
-            _framerateCounter = 0;
-            _framerateCounterStopwatch.Restart();
+            _framerateLimiterEnabled = limitFramerateToolStripMenuItem.Checked;
         }
 
         private void Keyboard_KeyDown(Keyboard.Key key)
@@ -342,25 +349,13 @@ namespace Iris.UserInterface
                 _system.SetKeyStatus(value, Common.System.KeyStatus.NoInput);
         }
 
-        private void FullScreenToolStripMenuItem_Click(object sender, EventArgs e)
+        private void FramerateCounterTimer_Tick(object? sender, EventArgs e)
         {
-            if (fullScreenToolStripMenuItem.Checked)
-            {
-                FormBorderStyle = FormBorderStyle.None;
-                _previousWindowState = WindowState;
-                WindowState = FormWindowState.Normal;
-                WindowState = FormWindowState.Maximized;
-            }
-            else
-            {
-                FormBorderStyle = FormBorderStyle.Sizable;
-                WindowState = _previousWindowState;
-            }
-        }
+            long fps = (long)Math.Round((double)_framerateCounter * Stopwatch.Frequency / _framerateCounterStopwatch.ElapsedTicks, MidpointRounding.AwayFromZero);
+            fpsToolStripStatusLabel.Text = "FPS: " + fps;
 
-        private void LimitFramerateToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            _framerateLimiterEnabled = limitFramerateToolStripMenuItem.Checked;
+            _framerateCounter = 0;
+            _framerateCounterStopwatch.Restart();
         }
     }
 }
