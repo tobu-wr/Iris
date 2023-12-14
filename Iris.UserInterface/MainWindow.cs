@@ -41,6 +41,8 @@ namespace Iris.UserInterface
         }.ToFrozenDictionary();
 
         private Common.System _system;
+        private Task? _systemTask;
+
         private readonly Keyboard _keyboard;
         private readonly XboxController _xboxController;
         private FormWindowState _previousWindowState;
@@ -68,9 +70,11 @@ namespace Iris.UserInterface
             {
                 loadStateToolStripMenuItem.Enabled = true;
                 saveStateToolStripMenuItem.Enabled = true;
+
                 runToolStripMenuItem.Enabled = true;
                 pauseToolStripMenuItem.Enabled = false;
                 restartToolStripMenuItem.Enabled = true;
+
                 statusToolStripStatusLabel.Text = "Paused";
             }
         }
@@ -158,7 +162,7 @@ namespace Iris.UserInterface
             pauseToolStripMenuItem.Enabled = true;
             statusToolStripStatusLabel.Text = "Running";
 
-            Task.Run(() =>
+            _systemTask = Task.Run(() =>
             {
                 try
                 {
@@ -210,9 +214,11 @@ namespace Iris.UserInterface
                 {
                     loadStateToolStripMenuItem.Enabled = true;
                     saveStateToolStripMenuItem.Enabled = true;
+
                     runToolStripMenuItem.Enabled = true;
                     pauseToolStripMenuItem.Enabled = false;
                     restartToolStripMenuItem.Enabled = true;
+
                     statusToolStripStatusLabel.Text = "Paused";
                 }
             }
@@ -290,7 +296,12 @@ namespace Iris.UserInterface
             bool running = _system.IsRunning();
 
             if (running)
+            {
                 Pause();
+
+                while (!_systemTask!.IsCompleted)
+                    Application.DoEvents();
+            }
 
             _system.ResetState();
 
