@@ -1,4 +1,3 @@
-using Iris.Common;
 using Iris.GBA;
 using Iris.NDS;
 using System.Collections.Frozen;
@@ -149,7 +148,8 @@ namespace Iris.UserInterface
                 return;
             }
 
-            // TODO: dispose previous system if not null
+            if (_system != null)
+                _system.Dispose();
 
             _system = system;
 

@@ -1,6 +1,6 @@
 ﻿namespace Iris.Common
 {
-    public abstract class System
+    public abstract class System : IDisposable
     {
         public delegate void DrawFrame_Delegate(UInt16[] frameBuffer);
         public delegate void PollInput_Delegate();
@@ -27,6 +27,7 @@
             NoInput = 1
         }
 
+        public abstract void Dispose();
         public abstract void ResetState();
         public abstract void LoadState(string filename);
         public abstract void SaveState(string filename);

@@ -39,6 +39,11 @@ namespace Iris.GBA
             _bios.Initialize(_cpu, _memory);
         }
 
+        public override void Dispose()
+        {
+            // TODO
+        }
+
         public override void ResetState()
         {
             _scheduler.ResetState();
