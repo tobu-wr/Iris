@@ -9,7 +9,7 @@ namespace Iris.NDS
 
         private bool _running = false;
 
-        public NDS_System(DrawFrame_Delegate drawFrameCallback)
+        public NDS_System(PollInput_Delegate pollInputCallback, DrawFrame_Delegate drawFrameCallback)
         {
             CPU_Core.CallbackInterface cpuCallbackInterface = new(ReadMemory8, ReadMemory16, ReadMemory32, WriteMemory8, WriteMemory16, WriteMemory32, HandleSWI, HandleIRQ);
             _cpu = new(CPU_Core.Model.ARM946ES, cpuCallbackInterface);

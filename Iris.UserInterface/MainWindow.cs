@@ -1,4 +1,5 @@
 using Iris.GBA;
+using Iris.NDS;
 using System.Collections.Frozen;
 using System.Diagnostics;
 using System.Drawing.Imaging;
@@ -40,7 +41,7 @@ namespace Iris.UserInterface
             { XboxController.Button.Y, Common.System.Key.Y },
         }.ToFrozenDictionary();
 
-        private Common.System _system;
+        private Common.System? _system;
         private Task? _systemTask;
 
         private readonly Keyboard _keyboard;
@@ -59,8 +60,6 @@ namespace Iris.UserInterface
         internal MainWindow(string[] args)
         {
             InitializeComponent();
-
-            _system = new GBA_System(PollInput, DrawFrame);
 
             _keyboard = new(Keyboard_KeyDown, Keyboard_KeyUp);
             _xboxController = new(XboxController_ButtonDown, XboxController_ButtonUp);
@@ -136,6 +135,8 @@ namespace Iris.UserInterface
 
         private void LoadROM(string fileName)
         {
+            _system = fileName.EndsWith(".gba") ? new GBA_System(PollInput, DrawFrame) : new NDS_System(PollInput, DrawFrame);
+
             try
             {
                 _system.LoadROM(fileName);
@@ -172,11 +173,11 @@ namespace Iris.UserInterface
             {
                 try
                 {
-                    _system.Run();
+                    _system!.Run();
                 }
                 catch (Exception ex)
                 {
-                    _system.Pause();
+                    _system!.Pause();
                     _system.ResetState();
 
                     _framerateCounterTimer.Stop();
@@ -194,7 +195,7 @@ namespace Iris.UserInterface
 
         private void Pause()
         {
-            _system.Pause();
+            _system!.Pause();
 
             while (!_systemTask!.IsCompleted)
                 Application.DoEvents();
@@ -210,7 +211,7 @@ namespace Iris.UserInterface
 
         private void LoadROMToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            bool running = _system.IsRunning();
+            bool running = _system!.IsRunning();
 
             if (running)
                 Pause();
@@ -229,15 +230,14 @@ namespace Iris.UserInterface
 
         private void LoadStateToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            bool running = _system.IsRunning();
+            bool running = _system!.IsRunning();
 
             if (running)
                 Pause();
 
             OpenFileDialog dialog = new()
             {
-                // TODO: filter according to current system
-                Filter = "GBA State Save files (*.gss)|*.gss|NDS State Save files (*.nss)|*.nss"
+                Filter = _system.GetType().Equals(typeof(GBA_System)) ? "GBA State Save files (*.gss)|*.gss" : "NDS State Save files (*.nss)|*.nss"
             };
 
             if (dialog.ShowDialog() == DialogResult.OK)
@@ -258,15 +258,14 @@ namespace Iris.UserInterface
 
         private void SaveStateToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            bool running = _system.IsRunning();
+            bool running = _system!.IsRunning();
 
             if (running)
                 Pause();
 
             SaveFileDialog dialog = new()
             {
-                // TODO: filter according to current system
-                Filter = "GBA State Save files (*.gss)|*.gss|NDS State Save files (*.nss)|*.nss"
+                Filter = _system.GetType().Equals(typeof(GBA_System)) ? "GBA State Save files (*.gss)|*.gss" : "NDS State Save files (*.nss)|*.nss"
             };
 
             if (dialog.ShowDialog() == DialogResult.OK)
@@ -309,7 +308,7 @@ namespace Iris.UserInterface
 
         private void RestartToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            bool running = _system.IsRunning();
+            bool running = _system!.IsRunning();
 
             if (running)
                 Pause();
@@ -328,25 +327,25 @@ namespace Iris.UserInterface
         private void Keyboard_KeyDown(Keyboard.Key key)
         {
             if (s_keyboardMapping.TryGetValue(key, out Common.System.Key value))
-                _system.SetKeyStatus(value, Common.System.KeyStatus.Input);
+                _system!.SetKeyStatus(value, Common.System.KeyStatus.Input);
         }
 
         private void Keyboard_KeyUp(Keyboard.Key key)
         {
             if (s_keyboardMapping.TryGetValue(key, out Common.System.Key value))
-                _system.SetKeyStatus(value, Common.System.KeyStatus.NoInput);
+                _system!.SetKeyStatus(value, Common.System.KeyStatus.NoInput);
         }
 
         private void XboxController_ButtonDown(XboxController.Button button)
         {
             if (s_xboxControllerMapping.TryGetValue(button, out Common.System.Key value))
-                _system.SetKeyStatus(value, Common.System.KeyStatus.Input);
+                _system!.SetKeyStatus(value, Common.System.KeyStatus.Input);
         }
 
         private void XboxController_ButtonUp(XboxController.Button button)
         {
             if (s_xboxControllerMapping.TryGetValue(button, out Common.System.Key value))
-                _system.SetKeyStatus(value, Common.System.KeyStatus.NoInput);
+                _system!.SetKeyStatus(value, Common.System.KeyStatus.NoInput);
         }
 
         private void FramerateCounterTimer_Tick(object? sender, EventArgs e)
