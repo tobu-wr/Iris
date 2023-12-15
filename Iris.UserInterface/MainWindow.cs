@@ -191,7 +191,7 @@ namespace Iris.UserInterface
                     pauseToolStripMenuItem.Enabled = false;
 
                     statusToolStripStatusLabel.Text = "Paused";
-                    fpsToolStripStatusLabel.Text = "FPS: 0";
+                    fpsToolStripStatusLabel.Text = "FPS: 0,0";
 
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
@@ -211,7 +211,7 @@ namespace Iris.UserInterface
             pauseToolStripMenuItem.Enabled = false;
 
             statusToolStripStatusLabel.Text = "Paused";
-            fpsToolStripStatusLabel.Text = "FPS: 0";
+            fpsToolStripStatusLabel.Text = "FPS: 0,0";
         }
 
         private void LoadROMToolStripMenuItem_Click(object sender, EventArgs e)
@@ -355,8 +355,8 @@ namespace Iris.UserInterface
 
         private void FramerateCounterTimer_Tick(object? sender, EventArgs e)
         {
-            long fps = (long)Math.Round((double)_framerateCounter * Stopwatch.Frequency / _framerateCounterStopwatch.ElapsedTicks, MidpointRounding.AwayFromZero);
-            fpsToolStripStatusLabel.Text = "FPS: " + fps;
+            double fps = Math.Round((double)_framerateCounter * Stopwatch.Frequency / _framerateCounterStopwatch.ElapsedTicks, 1, MidpointRounding.AwayFromZero);
+            fpsToolStripStatusLabel.Text = "FPS: " + fps.ToString("F1");
 
             _framerateCounter = 0;
             _framerateCounterStopwatch.Restart();
