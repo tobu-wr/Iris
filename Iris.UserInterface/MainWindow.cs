@@ -222,7 +222,7 @@ namespace Iris.UserInterface
 
             OpenFileDialog dialog = new()
             {
-                Filter = "GBA ROM files (*.gba)|*.gba|NDS ROM files (*.nds)|*.nds"
+                Filter = "GBA files (*.gba)|*.gba|NDS files (*.nds)|*.nds|All ROM files (*.gba;*.nds)|*.gba;*.nds"
             };
 
             if (dialog.ShowDialog() == DialogResult.OK)
