@@ -140,7 +140,6 @@ namespace Iris.UserInterface
             try
             {
                 system.LoadROM(fileName);
-                system.ResetState();
             }
             catch (Exception ex)
             {
@@ -148,10 +147,10 @@ namespace Iris.UserInterface
                 return;
             }
 
-            if (_system != null)
-                _system.Dispose();
+            _system?.Dispose();
 
             _system = system;
+            _system.ResetState();
 
             loadStateToolStripMenuItem.Enabled = true;
             saveStateToolStripMenuItem.Enabled = true;
