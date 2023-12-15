@@ -1,3 +1,4 @@
+using Iris.Common;
 using Iris.GBA;
 using Iris.NDS;
 using System.Collections.Frozen;
@@ -135,18 +136,22 @@ namespace Iris.UserInterface
 
         private void LoadROM(string fileName)
         {
-            _system = fileName.EndsWith(".gba") ? new GBA_System(PollInput, DrawFrame) : new NDS_System(PollInput, DrawFrame);
+            Common.System system = fileName.EndsWith(".gba") ? new GBA_System(PollInput, DrawFrame) : new NDS_System(PollInput, DrawFrame);
 
             try
             {
-                _system.LoadROM(fileName);
-                _system.ResetState();
+                system.LoadROM(fileName);
+                system.ResetState();
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
+
+            // TODO: dispose previous system if not null
+
+            _system = system;
 
             loadStateToolStripMenuItem.Enabled = true;
             saveStateToolStripMenuItem.Enabled = true;
@@ -211,7 +216,7 @@ namespace Iris.UserInterface
 
         private void LoadROMToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            bool running = _system!.IsRunning();
+            bool running = (_system != null) && _system.IsRunning();
 
             if (running)
                 Pause();
