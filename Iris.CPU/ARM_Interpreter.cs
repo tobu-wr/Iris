@@ -677,9 +677,9 @@ namespace Iris.CPU
             bool shiftRs = (i == 0) && (r == 1);
 
             UInt32 leftOperand = ((rn == PC) && shiftRs) ? (regPC + 4) : regRn;
-            UInt64 rightOperand = (UInt64)shifterOperand + (UInt64)cpu.GetFlag(Flag.C);
+            UInt32 rightOperand = shifterOperand;
 
-            UInt64 result = (UInt64)leftOperand + rightOperand;
+            UInt64 result = (UInt64)leftOperand + (UInt64)rightOperand + (UInt64)cpu.GetFlag(Flag.C);
             SetReg(cpu, rd, (UInt32)result);
 
             if (s == 1)
@@ -697,7 +697,7 @@ namespace Iris.CPU
                     cpu.SetFlag(Flag.N, regRd >> 31);
                     cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
                     cpu.SetFlag(Flag.C, CarryFrom(result));
-                    cpu.SetFlag(Flag.V, OverflowFrom_Addition(leftOperand, (UInt32)rightOperand, regRd));
+                    cpu.SetFlag(Flag.V, OverflowFrom_Addition(leftOperand, rightOperand, regRd));
 
                     return shiftRs ? 2u : 1u;
                 }
