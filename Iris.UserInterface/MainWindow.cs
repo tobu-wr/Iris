@@ -120,7 +120,7 @@ namespace Iris.UserInterface
                     if (sleepTime > _framerateLimiterExtraSleepTime)
                     {
                         sleepTime -= _framerateLimiterExtraSleepTime;
-                        Thread.Sleep((int)(1000 * sleepTime / Stopwatch.Frequency));
+                        Thread.Sleep((int)Math.Round(1000.0 * sleepTime / Stopwatch.Frequency, MidpointRounding.AwayFromZero));
                         _framerateLimiterExtraSleepTime = _framerateLimiterStopwatch.ElapsedTicks - frameDuration - sleepTime;
                     }
                     else
