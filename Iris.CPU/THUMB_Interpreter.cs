@@ -246,15 +246,15 @@ namespace Iris.CPU
             ref UInt32 regRd = ref Unsafe.Add(ref regDataRef, rd);
 
             UInt32 leftOperand = regRd;
-            UInt64 rightOperand = (UInt64)regRm + (UInt64)cpu.GetFlag(Flag.C);
+            UInt32 rightOperand = regRm;
 
-            UInt64 result = (UInt64)leftOperand + rightOperand;
+            UInt64 result = (UInt64)leftOperand + (UInt64)rightOperand + (UInt64)cpu.GetFlag(Flag.C);
             regRd = (UInt32)result;
 
             cpu.SetFlag(Flag.N, regRd >> 31);
             cpu.SetFlag(Flag.Z, (regRd == 0) ? 1u : 0u);
             cpu.SetFlag(Flag.C, CarryFrom(result));
-            cpu.SetFlag(Flag.V, OverflowFrom_Addition(leftOperand, (UInt32)rightOperand, regRd));
+            cpu.SetFlag(Flag.V, OverflowFrom_Addition(leftOperand, rightOperand, regRd));
 
             return 1;
         }
