@@ -483,9 +483,9 @@ namespace Iris.CPU
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static UInt32 BorrowFrom(UInt32 leftOperand, UInt64 rightOperand)
+        internal static UInt32 BorrowFrom(UInt64 result)
         {
-            return (leftOperand < rightOperand) ? 1u : 0u;
+            return (result >= 0x8000_0000_0000_0000) ? 1u : 0u;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
