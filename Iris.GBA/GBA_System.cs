@@ -1,5 +1,6 @@
 ﻿using Iris.Common;
 using Iris.CPU;
+using System.IO.Compression;
 using System.Security.Cryptography;
 
 namespace Iris.GBA
@@ -68,8 +69,9 @@ namespace Iris.GBA
 
         public override void LoadState(string filename)
         {
-            using FileStream fileStream = File.OpenRead(filename);
-            using BinaryReader reader = new(fileStream, System.Text.Encoding.UTF8, false);
+            using FileStream fileStream = File.Open(filename, FileMode.Open, FileAccess.Read);
+            using DeflateStream deflateStream = new(fileStream, CompressionMode.Decompress);
+            using BinaryReader reader = new(deflateStream, System.Text.Encoding.UTF8, false);
 
             if (reader.ReadString() != _romHash)
                 throw new Exception();
@@ -90,8 +92,9 @@ namespace Iris.GBA
 
         public override void SaveState(string filename)
         {
-            using FileStream fileStream = File.OpenWrite(filename);
-            using BinaryWriter writer = new(fileStream, System.Text.Encoding.UTF8, false);
+            using FileStream fileStream = File.Open(filename, FileMode.Create, FileAccess.Write);
+            using DeflateStream deflateStream = new(fileStream, CompressionMode.Compress);
+            using BinaryWriter writer = new(deflateStream, System.Text.Encoding.UTF8, false);
 
             writer.Write(_romHash);
 
