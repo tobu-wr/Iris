@@ -83,6 +83,7 @@ namespace Iris.GBA
         private const int ScanlineCount = 228;
 
         private const UInt32 PixelCycleCount = 4;
+
         private const UInt32 DisplayLineCycleCount = DisplayScreenWidth * PixelCycleCount;
         private const UInt32 ScanlineCycleCount = ScanlineLength * PixelCycleCount;
 
@@ -92,6 +93,7 @@ namespace Iris.GBA
         private readonly int _startHBlankTaskId;
         private readonly int _startScanlineTaskId;
 
+        private DMA _dma;
         private InterruptControl _interruptControl;
         private bool _disposed;
 
@@ -126,8 +128,9 @@ namespace Iris.GBA
             _disposed = true;
         }
 
-        internal void Initialize(InterruptControl interruptControl, Memory memory)
+        internal void Initialize(DMA dma, InterruptControl interruptControl, Memory memory)
         {
+            _dma = dma;
             _interruptControl = interruptControl;
 
             const Memory.Flag flags = Memory.Flag.All & ~Memory.Flag.Write8;
@@ -358,7 +361,7 @@ namespace Iris.GBA
 
         private void StartHBlank(UInt32 cycleCountDelay)
         {
-            // TODO
+            _dma.PerformAllDMA(DMA.Timing.HBlank);
         }
 
         private void StartScanline(UInt32 cycleCountDelay)

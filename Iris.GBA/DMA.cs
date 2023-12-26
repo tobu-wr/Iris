@@ -2,7 +2,7 @@
 {
     internal sealed class DMA
     {
-        internal enum StartTiming
+        internal enum Timing
         {
             Immediate = 0b00,
             //VBlank = 0b01,
@@ -170,7 +170,7 @@
             writer.Write(_DMA3CNT_H);
         }
 
-        internal void PerformAllDMA(StartTiming timing)
+        internal void PerformAllDMA(Timing timing)
         {
             PerformDMA0(timing);
             PerformDMA1(timing);
@@ -178,7 +178,7 @@
             PerformDMA3(timing);
         }
 
-        internal void PerformDMA0(StartTiming timing)
+        internal void PerformDMA0(Timing timing)
         {
             UInt32 source = (UInt32)(((_DMA0SAD_H & 0x07ff) << 16) | _DMA0SAD_L);
             UInt32 destination = (UInt32)(((_DMA0DAD_H & 0x07ff) << 16) | _DMA0DAD_L);
@@ -187,7 +187,7 @@
             PerformDMA(ref _DMA0CNT_H, source, destination, length, timing);
         }
 
-        internal void PerformDMA1(StartTiming timing)
+        internal void PerformDMA1(Timing timing)
         {
             UInt32 source = (UInt32)(((_DMA1SAD_H & 0x0fff) << 16) | _DMA1SAD_L);
             UInt32 destination = (UInt32)(((_DMA1DAD_H & 0x07ff) << 16) | _DMA1DAD_L);
@@ -196,7 +196,7 @@
             PerformDMA(ref _DMA1CNT_H, source, destination, length, timing);
         }
 
-        internal void PerformDMA2(StartTiming timing)
+        internal void PerformDMA2(Timing timing)
         {
             UInt32 source = (UInt32)(((_DMA2SAD_H & 0x0fff) << 16) | _DMA2SAD_L);
             UInt32 destination = (UInt32)(((_DMA2DAD_H & 0x07ff) << 16) | _DMA2DAD_L);
@@ -205,7 +205,7 @@
             PerformDMA(ref _DMA2CNT_H, source, destination, length, timing);
         }
 
-        internal void PerformDMA3(StartTiming timing)
+        internal void PerformDMA3(Timing timing)
         {
             UInt32 source = (UInt32)(((_DMA3SAD_H & 0x0fff) << 16) | _DMA3SAD_L);
             UInt32 destination = (UInt32)(((_DMA3DAD_H & 0x0fff) << 16) | _DMA3DAD_L);
@@ -214,7 +214,7 @@
             PerformDMA(ref _DMA3CNT_H, source, destination, length, timing);
         }
 
-        private void PerformDMA(ref UInt16 cnt_h, UInt32 source, UInt32 destination, UInt32 length, StartTiming timing)
+        private void PerformDMA(ref UInt16 cnt_h, UInt32 source, UInt32 destination, UInt32 length, Timing timing)
         {
             if ((cnt_h & 0x8000) == 0)
                 return;
