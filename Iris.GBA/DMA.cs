@@ -223,6 +223,7 @@
                 return;
 
             UInt16 sourceAddressControlFlag = (UInt16)((cnt_h >> 7) & 0b11);
+            UInt16 destinationAddressControlFlag = (UInt16)((cnt_h >> 5) & 0b11);
 
             int GetSourceIncrement(int dataUnitSize)
             {
@@ -240,8 +241,6 @@
                     _ => throw new Exception("Iris.GBA.DMA: Wrong source address control flag"),
                 };
             }
-
-            UInt16 destinationAddressControlFlag = (UInt16)((cnt_h >> 5) & 0b11);
 
             int GetDestinationIncrement(int dataUnitSize)
             {
