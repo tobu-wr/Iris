@@ -2,7 +2,7 @@
 {
     internal sealed class DMA
     {
-        internal enum Timing
+        internal enum StartTiming
         {
             Immediate = 0b00,
             //VBlank = 0b01,
@@ -170,85 +170,103 @@
             writer.Write(_DMA3CNT_H);
         }
 
-        internal void PerformAllDMA(Timing timing)
+        internal void PerformAllDMA(StartTiming startTiming)
         {
-            PerformDMA0(timing);
-            PerformDMA1(timing);
-            PerformDMA2(timing);
-            PerformDMA3(timing);
+            PerformDMA0(startTiming);
+            PerformDMA1(startTiming);
+            PerformDMA2(startTiming);
+            PerformDMA3(startTiming);
         }
 
-        internal void PerformDMA0(Timing timing)
+        internal void PerformDMA0(StartTiming startTiming)
         {
             UInt32 source = (UInt32)(((_DMA0SAD_H & 0x07ff) << 16) | _DMA0SAD_L);
             UInt32 destination = (UInt32)(((_DMA0DAD_H & 0x07ff) << 16) | _DMA0DAD_L);
             UInt32 length = ((_DMA0CNT_L & 0x3fff) == 0) ? 0x4000u : (UInt32)(_DMA0CNT_L & 0x3fff);
 
-            PerformDMA(ref _DMA0CNT_H, source, destination, length, timing);
+            PerformDMA(ref _DMA0CNT_H, source, destination, length, startTiming);
         }
 
-        internal void PerformDMA1(Timing timing)
+        internal void PerformDMA1(StartTiming startTiming)
         {
             UInt32 source = (UInt32)(((_DMA1SAD_H & 0x0fff) << 16) | _DMA1SAD_L);
             UInt32 destination = (UInt32)(((_DMA1DAD_H & 0x07ff) << 16) | _DMA1DAD_L);
             UInt32 length = ((_DMA1CNT_L & 0x3fff) == 0) ? 0x4000u : (UInt32)(_DMA1CNT_L & 0x3fff);
 
-            PerformDMA(ref _DMA1CNT_H, source, destination, length, timing);
+            PerformDMA(ref _DMA1CNT_H, source, destination, length, startTiming);
         }
 
-        internal void PerformDMA2(Timing timing)
+        internal void PerformDMA2(StartTiming startTiming)
         {
             UInt32 source = (UInt32)(((_DMA2SAD_H & 0x0fff) << 16) | _DMA2SAD_L);
             UInt32 destination = (UInt32)(((_DMA2DAD_H & 0x07ff) << 16) | _DMA2DAD_L);
             UInt32 length = ((_DMA2CNT_L & 0x3fff) == 0) ? 0x4000u : (UInt32)(_DMA2CNT_L & 0x3fff);
 
-            PerformDMA(ref _DMA2CNT_H, source, destination, length, timing);
+            PerformDMA(ref _DMA2CNT_H, source, destination, length, startTiming);
         }
 
-        internal void PerformDMA3(Timing timing)
+        internal void PerformDMA3(StartTiming startTiming)
         {
             UInt32 source = (UInt32)(((_DMA3SAD_H & 0x0fff) << 16) | _DMA3SAD_L);
             UInt32 destination = (UInt32)(((_DMA3DAD_H & 0x0fff) << 16) | _DMA3DAD_L);
             UInt32 length = (_DMA3CNT_L == 0) ? 0x1_0000u : _DMA3CNT_L;
 
-            PerformDMA(ref _DMA3CNT_H, source, destination, length, timing);
+            PerformDMA(ref _DMA3CNT_H, source, destination, length, startTiming);
         }
 
-        private void PerformDMA(ref UInt16 cnt_h, UInt32 source, UInt32 destination, UInt32 length, Timing timing)
+        private void PerformDMA(ref UInt16 cnt_h, UInt32 source, UInt32 destination, UInt32 length, StartTiming startTiming)
         {
             if ((cnt_h & 0x8000) == 0)
                 return;
 
-            if (((cnt_h >> 12) & 0b11) != (int)timing)
+            if (((cnt_h >> 12) & 0b11) != (int)startTiming)
                 return;
 
-            static int GetIncrement(UInt16 addressControlFlag, int dataSize)
+            UInt16 sourceAddressControlFlag = (UInt16)((cnt_h >> 7) & 0b11);
+
+            int GetSourceIncrement(int dataUnitSize)
             {
-                return addressControlFlag switch
+                return sourceAddressControlFlag switch
                 {
                     // increment
-                    0b00 => dataSize,
+                    0b00 => dataUnitSize,
                     // decrement
-                    0b01 => -dataSize,
+                    0b01 => -dataUnitSize,
                     // fixed
                     0b10 => 0,
-                    // increment/reload
-                    0b11 => dataSize,
+                    // prohibited
+                    0b11 => 0,
                     // should never happen
-                    _ => throw new Exception("Iris.GBA.DMA: Wrong address control flag"),
+                    _ => throw new Exception("Iris.GBA.DMA: Wrong source address control flag"),
                 };
             }
 
-            UInt16 sourceAddressControlFlag = (UInt16)((cnt_h >> 7) & 0b11);
             UInt16 destinationAddressControlFlag = (UInt16)((cnt_h >> 5) & 0b11);
+
+            int GetDestinationIncrement(int dataUnitSize)
+            {
+                return destinationAddressControlFlag switch
+                {
+                    // increment
+                    0b00 => dataUnitSize,
+                    // decrement
+                    0b01 => -dataUnitSize,
+                    // fixed
+                    0b10 => 0,
+                    // increment/reload
+                    0b11 => dataUnitSize,
+                    // should never happen
+                    _ => throw new Exception("Iris.GBA.DMA: Wrong destination address control flag"),
+                };
+            }
 
             // 16 bits
             if ((cnt_h & 0x0400) == 0)
             {
-                const int DataSize = 2;
+                const int DataUnitSize = 2;
 
-                int sourceIncrement = GetIncrement(sourceAddressControlFlag, DataSize);
-                int destinationIncrement = GetIncrement(destinationAddressControlFlag, DataSize);
+                int sourceIncrement = GetSourceIncrement(DataUnitSize);
+                int destinationIncrement = GetDestinationIncrement(DataUnitSize);
 
                 for (; length > 0; --length)
                 {
@@ -261,10 +279,10 @@
             // 32 bits
             else
             {
-                const int DataSize = 4;
+                const int DataUnitSize = 4;
 
-                int sourceIncrement = GetIncrement(sourceAddressControlFlag, DataSize);
-                int destinationIncrement = GetIncrement(destinationAddressControlFlag, DataSize);
+                int sourceIncrement = GetSourceIncrement(DataUnitSize);
+                int destinationIncrement = GetDestinationIncrement(DataUnitSize);
 
                 for (; length > 0; --length)
                 {

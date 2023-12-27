@@ -361,7 +361,7 @@ namespace Iris.GBA
 
         private void StartHBlank(UInt32 cycleCountDelay)
         {
-            _dma.PerformAllDMA(DMA.Timing.HBlank);
+            _dma.PerformAllDMA(DMA.StartTiming.HBlank);
         }
 
         private void StartScanline(UInt32 cycleCountDelay)
@@ -427,8 +427,8 @@ namespace Iris.GBA
 
                     if ((_DISPCNT & 0x1000) == 0x1000)
                     {
-                        for (int priority = 3; priority >= 0; --priority)
-                            RenderObjects((UInt16)priority);
+                        for (int bgPriority = 3; bgPriority >= 0; --bgPriority)
+                            RenderObjects((UInt16)bgPriority);
                     }
                     break;
 
@@ -437,8 +437,8 @@ namespace Iris.GBA
 
                     if ((_DISPCNT & 0x1000) == 0x1000)
                     {
-                        for (int priority = 3; priority >= 0; --priority)
-                            RenderObjects((UInt16)priority);
+                        for (int bgPriority = 3; bgPriority >= 0; --bgPriority)
+                            RenderObjects((UInt16)bgPriority);
                     }
                     break;
 
@@ -447,8 +447,8 @@ namespace Iris.GBA
 
                     if ((_DISPCNT & 0x1000) == 0x1000)
                     {
-                        for (int priority = 3; priority >= 0; --priority)
-                            RenderObjects((UInt16)priority);
+                        for (int bgPriority = 3; bgPriority >= 0; --bgPriority)
+                            RenderObjects((UInt16)bgPriority);
                     }
                     break;
 
@@ -461,34 +461,34 @@ namespace Iris.GBA
         {
             bool isFirst = true;
 
-            for (int priority = 3; priority >= 0; --priority)
+            for (int bgPriority = 3; bgPriority >= 0; --bgPriority)
             {
-                if (((_DISPCNT & 0x0800) == 0x0800) && ((_BG3CNT & 0b11) == priority))
+                if (((_DISPCNT & 0x0800) == 0x0800) && ((_BG3CNT & 0b11) == bgPriority))
                 {
                     RenderTextBackground(_BG3CNT, _BG3HOFS, _BG3VOFS, isFirst);
                     isFirst = false;
                 }
 
-                if (((_DISPCNT & 0x0400) == 0x0400) && ((_BG2CNT & 0b11) == priority))
+                if (((_DISPCNT & 0x0400) == 0x0400) && ((_BG2CNT & 0b11) == bgPriority))
                 {
                     RenderTextBackground(_BG2CNT, _BG2HOFS, _BG2VOFS, isFirst);
                     isFirst = false;
                 }
 
-                if (((_DISPCNT & 0x0200) == 0x0200) && ((_BG1CNT & 0b11) == priority))
+                if (((_DISPCNT & 0x0200) == 0x0200) && ((_BG1CNT & 0b11) == bgPriority))
                 {
                     RenderTextBackground(_BG1CNT, _BG1HOFS, _BG1VOFS, isFirst);
                     isFirst = false;
                 }
 
-                if (((_DISPCNT & 0x0100) == 0x0100) && ((_BG0CNT & 0b11) == priority))
+                if (((_DISPCNT & 0x0100) == 0x0100) && ((_BG0CNT & 0b11) == bgPriority))
                 {
                     RenderTextBackground(_BG0CNT, _BG0HOFS, _BG0VOFS, isFirst);
                     isFirst = false;
                 }
 
                 if ((_DISPCNT & 0x1000) == 0x1000)
-                    RenderObjects((UInt16)priority);
+                    RenderObjects((UInt16)bgPriority);
             }
         }
 
@@ -496,28 +496,28 @@ namespace Iris.GBA
         {
             bool isFirst = true;
 
-            for (int priority = 3; priority >= 0; --priority)
+            for (int bgPriority = 3; bgPriority >= 0; --bgPriority)
             {
-                if (((_DISPCNT & 0x0400) == 0x0400) && ((_BG2CNT & 0b11) == priority))
+                if (((_DISPCNT & 0x0400) == 0x0400) && ((_BG2CNT & 0b11) == bgPriority))
                 {
                     RenderAffineBackground(_BG2CNT, _BG2HOFS, _BG2VOFS, isFirst);
                     isFirst = false;
                 }
 
-                if (((_DISPCNT & 0x0200) == 0x0200) && ((_BG1CNT & 0b11) == priority))
+                if (((_DISPCNT & 0x0200) == 0x0200) && ((_BG1CNT & 0b11) == bgPriority))
                 {
                     RenderTextBackground(_BG1CNT, _BG1HOFS, _BG1VOFS, isFirst);
                     isFirst = false;
                 }
 
-                if (((_DISPCNT & 0x0100) == 0x0100) && ((_BG0CNT & 0b11) == priority))
+                if (((_DISPCNT & 0x0100) == 0x0100) && ((_BG0CNT & 0b11) == bgPriority))
                 {
                     RenderTextBackground(_BG0CNT, _BG0HOFS, _BG0VOFS, isFirst);
                     isFirst = false;
                 }
 
                 if ((_DISPCNT & 0x1000) == 0x1000)
-                    RenderObjects((UInt16)priority);
+                    RenderObjects((UInt16)bgPriority);
             }
         }
 
@@ -525,22 +525,22 @@ namespace Iris.GBA
         {
             bool isFirst = true;
 
-            for (int priority = 3; priority >= 0; --priority)
+            for (int bgPriority = 3; bgPriority >= 0; --bgPriority)
             {
-                if (((_DISPCNT & 0x0800) == 0x0800) && ((_BG3CNT & 0b11) == priority))
+                if (((_DISPCNT & 0x0800) == 0x0800) && ((_BG3CNT & 0b11) == bgPriority))
                 {
                     RenderAffineBackground(_BG3CNT, _BG3HOFS, _BG3VOFS, isFirst);
                     isFirst = false;
                 }
 
-                if (((_DISPCNT & 0x0400) == 0x0400) && ((_BG2CNT & 0b11) == priority))
+                if (((_DISPCNT & 0x0400) == 0x0400) && ((_BG2CNT & 0b11) == bgPriority))
                 {
                     RenderAffineBackground(_BG2CNT, _BG2HOFS, _BG2VOFS, isFirst);
                     isFirst = false;
                 }
 
                 if ((_DISPCNT & 0x1000) == 0x1000)
-                    RenderObjects((UInt16)priority);
+                    RenderObjects((UInt16)bgPriority);
             }
         }
 
@@ -720,7 +720,7 @@ namespace Iris.GBA
             RenderTextBackground(cnt, hofs, vofs, isFirst);
         }
 
-        private void RenderObjects(UInt16 priority)
+        private void RenderObjects(UInt16 bgPriority)
         {
             ref UInt16 displayFrameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_displayFrameBuffer);
 
@@ -749,7 +749,7 @@ namespace Iris.GBA
                     UInt16 objPriority = (UInt16)((attribute2 >> 10) & 0b11);
                     UInt16 characterName = (UInt16)(attribute2 & 0x3ff);
 
-                    if (objPriority != priority)
+                    if (objPriority != bgPriority)
                         continue;
 
                     (int characterWidth, int characterHeight) = (shape, objSize) switch
