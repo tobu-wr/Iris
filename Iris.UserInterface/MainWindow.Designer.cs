@@ -45,7 +45,7 @@
             emulationToolStripMenuItem = new ToolStripMenuItem();
             runToolStripMenuItem = new ToolStripMenuItem();
             pauseToolStripMenuItem = new ToolStripMenuItem();
-            restartToolStripMenuItem = new ToolStripMenuItem();
+            resetToolStripMenuItem = new ToolStripMenuItem();
             toolStripSeparator3 = new ToolStripSeparator();
             limitFramerateToolStripMenuItem = new ToolStripMenuItem();
             screenBox = new ScreenBox();
@@ -156,7 +156,7 @@
             // 
             // emulationToolStripMenuItem
             // 
-            emulationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { runToolStripMenuItem, pauseToolStripMenuItem, restartToolStripMenuItem, toolStripSeparator3, limitFramerateToolStripMenuItem });
+            emulationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { runToolStripMenuItem, pauseToolStripMenuItem, resetToolStripMenuItem, toolStripSeparator3, limitFramerateToolStripMenuItem });
             emulationToolStripMenuItem.Name = "emulationToolStripMenuItem";
             emulationToolStripMenuItem.Size = new Size(73, 20);
             emulationToolStripMenuItem.Text = "&Emulation";
@@ -165,7 +165,7 @@
             // 
             runToolStripMenuItem.Enabled = false;
             runToolStripMenuItem.Name = "runToolStripMenuItem";
-            runToolStripMenuItem.Size = new Size(157, 22);
+            runToolStripMenuItem.Size = new Size(180, 22);
             runToolStripMenuItem.Text = "R&un";
             runToolStripMenuItem.Click += RunToolStripMenuItem_Click;
             // 
@@ -173,22 +173,22 @@
             // 
             pauseToolStripMenuItem.Enabled = false;
             pauseToolStripMenuItem.Name = "pauseToolStripMenuItem";
-            pauseToolStripMenuItem.Size = new Size(157, 22);
+            pauseToolStripMenuItem.Size = new Size(180, 22);
             pauseToolStripMenuItem.Text = "&Pause";
             pauseToolStripMenuItem.Click += PauseToolStripMenuItem_Click;
             // 
-            // restartToolStripMenuItem
+            // resetToolStripMenuItem
             // 
-            restartToolStripMenuItem.Enabled = false;
-            restartToolStripMenuItem.Name = "restartToolStripMenuItem";
-            restartToolStripMenuItem.Size = new Size(157, 22);
-            restartToolStripMenuItem.Text = "R&estart";
-            restartToolStripMenuItem.Click += RestartToolStripMenuItem_Click;
+            resetToolStripMenuItem.Enabled = false;
+            resetToolStripMenuItem.Name = "resetToolStripMenuItem";
+            resetToolStripMenuItem.Size = new Size(180, 22);
+            resetToolStripMenuItem.Text = "R&eset";
+            resetToolStripMenuItem.Click += ResetToolStripMenuItem_Click;
             // 
             // toolStripSeparator3
             // 
             toolStripSeparator3.Name = "toolStripSeparator3";
-            toolStripSeparator3.Size = new Size(154, 6);
+            toolStripSeparator3.Size = new Size(177, 6);
             // 
             // limitFramerateToolStripMenuItem
             // 
@@ -196,7 +196,7 @@
             limitFramerateToolStripMenuItem.CheckOnClick = true;
             limitFramerateToolStripMenuItem.CheckState = CheckState.Checked;
             limitFramerateToolStripMenuItem.Name = "limitFramerateToolStripMenuItem";
-            limitFramerateToolStripMenuItem.Size = new Size(157, 22);
+            limitFramerateToolStripMenuItem.Size = new Size(180, 22);
             limitFramerateToolStripMenuItem.Text = "Limit Framerate";
             limitFramerateToolStripMenuItem.Click += LimitFramerateToolStripMenuItem_Click;
             // 
@@ -249,7 +249,7 @@
         private ToolStripMenuItem emulationToolStripMenuItem;
         private ToolStripMenuItem runToolStripMenuItem;
         private ToolStripMenuItem pauseToolStripMenuItem;
-        private ToolStripMenuItem restartToolStripMenuItem;
+        private ToolStripMenuItem resetToolStripMenuItem;
         private ScreenBox screenBox;
         private ToolStripMenuItem viewToolStripMenuItem;
         private ToolStripMenuItem fullScreenToolStripMenuItem;

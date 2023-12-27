@@ -157,7 +157,7 @@ namespace Iris.UserInterface
 
             runToolStripMenuItem.Enabled = true;
             pauseToolStripMenuItem.Enabled = false;
-            restartToolStripMenuItem.Enabled = true;
+            resetToolStripMenuItem.Enabled = true;
 
             statusToolStripStatusLabel.Text = "Paused";
         }
@@ -310,7 +310,7 @@ namespace Iris.UserInterface
             Pause();
         }
 
-        private void RestartToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ResetToolStripMenuItem_Click(object sender, EventArgs e)
         {
             bool running = _system!.IsRunning();
 
