@@ -361,7 +361,8 @@ namespace Iris.GBA
 
         private void StartHBlank(UInt32 cycleCountDelay)
         {
-            _dma.PerformAllDMA(DMA.StartTiming.HBlank);
+            if (_VCOUNT < DisplayScreenHeight)
+                _dma.PerformAllTransfers(DMA.StartTiming.HBlank);
         }
 
         private void StartScanline(UInt32 cycleCountDelay)

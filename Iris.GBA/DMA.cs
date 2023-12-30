@@ -48,6 +48,16 @@
 
         private Memory _memory;
 
+        private record struct Channel
+        (
+            bool Enabled,
+            UInt32 Source,
+            UInt32 Destination,
+            UInt32 Length
+        );
+
+        private Channel _channel0, _channel1, _channel2, _channel3;
+
         internal void Initialize(Memory memory)
         {
             _memory = memory;
@@ -90,6 +100,11 @@
 
             _DMA3CNT_L = 0;
             _DMA3CNT_H = 0;
+
+            _channel0 = default;
+            _channel1 = default;
+            _channel2 = default;
+            _channel3 = default;
         }
 
         internal void LoadState(BinaryReader reader)
@@ -129,6 +144,26 @@
 
             _DMA3CNT_L = reader.ReadUInt16();
             _DMA3CNT_H = reader.ReadUInt16();
+
+            _channel0.Enabled = reader.ReadBoolean();
+            _channel0.Source = reader.ReadUInt32();
+            _channel0.Destination = reader.ReadUInt32();
+            _channel0.Length = reader.ReadUInt32();
+
+            _channel1.Enabled = reader.ReadBoolean();
+            _channel1.Source = reader.ReadUInt32();
+            _channel1.Destination = reader.ReadUInt32();
+            _channel1.Length = reader.ReadUInt32();
+
+            _channel2.Enabled = reader.ReadBoolean();
+            _channel2.Source = reader.ReadUInt32();
+            _channel2.Destination = reader.ReadUInt32();
+            _channel2.Length = reader.ReadUInt32();
+
+            _channel3.Enabled = reader.ReadBoolean();
+            _channel3.Source = reader.ReadUInt32();
+            _channel3.Destination = reader.ReadUInt32();
+            _channel3.Length = reader.ReadUInt32();
         }
 
         internal void SaveState(BinaryWriter writer)
@@ -168,57 +203,133 @@
 
             writer.Write(_DMA3CNT_L);
             writer.Write(_DMA3CNT_H);
+
+            writer.Write(_channel0.Enabled);
+            writer.Write(_channel0.Source);
+            writer.Write(_channel0.Destination);
+            writer.Write(_channel0.Length);
+
+            writer.Write(_channel1.Enabled);
+            writer.Write(_channel1.Source);
+            writer.Write(_channel1.Destination);
+            writer.Write(_channel1.Length);
+
+            writer.Write(_channel2.Enabled);
+            writer.Write(_channel2.Source);
+            writer.Write(_channel2.Destination);
+            writer.Write(_channel2.Length);
+
+            writer.Write(_channel3.Enabled);
+            writer.Write(_channel3.Source);
+            writer.Write(_channel3.Destination);
+            writer.Write(_channel3.Length);
         }
 
-        internal void PerformAllDMA(StartTiming startTiming)
+        internal void UpdateChannel0()
         {
-            PerformDMA0(startTiming);
-            PerformDMA1(startTiming);
-            PerformDMA2(startTiming);
-            PerformDMA3(startTiming);
+            if ((_DMA0CNT_H & 0x8000) == 0)
+            {
+                _channel0.Enabled = false;
+            }
+            else if (!_channel0.Enabled)
+            {
+                _channel0.Enabled = true;
+                _channel0.Source = (UInt32)(((_DMA0SAD_H & 0x07ff) << 16) | _DMA0SAD_L);
+                _channel0.Destination = (UInt32)(((_DMA0DAD_H & 0x07ff) << 16) | _DMA0DAD_L);
+                _channel0.Length = ((_DMA0CNT_L & 0x3fff) == 0) ? 0x4000u : (UInt32)(_DMA0CNT_L & 0x3fff);
+
+                PerformTransfer(ref _DMA0CNT_H, ref _channel0, StartTiming.Immediate, _channel0.Destination, _channel0.Length);
+            }
         }
 
-        internal void PerformDMA0(StartTiming startTiming)
+        internal void UpdateChannel1()
         {
-            UInt32 source = (UInt32)(((_DMA0SAD_H & 0x07ff) << 16) | _DMA0SAD_L);
-            UInt32 destination = (UInt32)(((_DMA0DAD_H & 0x07ff) << 16) | _DMA0DAD_L);
-            UInt32 length = ((_DMA0CNT_L & 0x3fff) == 0) ? 0x4000u : (UInt32)(_DMA0CNT_L & 0x3fff);
+            if ((_DMA1CNT_H & 0x8000) == 0)
+            {
+                _channel1.Enabled = false;
+            }
+            else if (!_channel1.Enabled)
+            {
+                _channel1.Enabled = true;
+                _channel1.Source = (UInt32)(((_DMA1SAD_H & 0x0fff) << 16) | _DMA1SAD_L);
+                _channel1.Destination = (UInt32)(((_DMA1DAD_H & 0x07ff) << 16) | _DMA1DAD_L);
+                _channel1.Length = ((_DMA1CNT_L & 0x3fff) == 0) ? 0x4000u : (UInt32)(_DMA1CNT_L & 0x3fff);
 
-            PerformDMA(ref _DMA0CNT_H, source, destination, length, startTiming);
+                PerformTransfer(ref _DMA1CNT_H, ref _channel1, StartTiming.Immediate, _channel1.Destination, _channel1.Length);
+            }
         }
 
-        internal void PerformDMA1(StartTiming startTiming)
+        internal void UpdateChannel2()
         {
-            UInt32 source = (UInt32)(((_DMA1SAD_H & 0x0fff) << 16) | _DMA1SAD_L);
-            UInt32 destination = (UInt32)(((_DMA1DAD_H & 0x07ff) << 16) | _DMA1DAD_L);
-            UInt32 length = ((_DMA1CNT_L & 0x3fff) == 0) ? 0x4000u : (UInt32)(_DMA1CNT_L & 0x3fff);
+            if ((_DMA2CNT_H & 0x8000) == 0)
+            {
+                _channel2.Enabled = false;
+            }
+            else if (!_channel2.Enabled)
+            {
+                _channel2.Enabled = true;
+                _channel2.Source = (UInt32)(((_DMA2SAD_H & 0x0fff) << 16) | _DMA2SAD_L);
+                _channel2.Destination = (UInt32)(((_DMA2DAD_H & 0x07ff) << 16) | _DMA2DAD_L);
+                _channel2.Length = ((_DMA2CNT_L & 0x3fff) == 0) ? 0x4000u : (UInt32)(_DMA2CNT_L & 0x3fff);
 
-            PerformDMA(ref _DMA1CNT_H, source, destination, length, startTiming);
+                PerformTransfer(ref _DMA2CNT_H, ref _channel2, StartTiming.Immediate, _channel2.Destination, _channel2.Length);
+            }
         }
 
-        internal void PerformDMA2(StartTiming startTiming)
+        internal void UpdateChannel3()
         {
-            UInt32 source = (UInt32)(((_DMA2SAD_H & 0x0fff) << 16) | _DMA2SAD_L);
-            UInt32 destination = (UInt32)(((_DMA2DAD_H & 0x07ff) << 16) | _DMA2DAD_L);
-            UInt32 length = ((_DMA2CNT_L & 0x3fff) == 0) ? 0x4000u : (UInt32)(_DMA2CNT_L & 0x3fff);
+            if ((_DMA3CNT_H & 0x8000) == 0)
+            {
+                _channel3.Enabled = false;
+            }
+            else if (!_channel3.Enabled)
+            {
+                _channel3.Enabled = true;
+                _channel3.Source = (UInt32)(((_DMA3SAD_H & 0x0fff) << 16) | _DMA3SAD_L);
+                _channel3.Destination = (UInt32)(((_DMA3DAD_H & 0x0fff) << 16) | _DMA3DAD_L);
+                _channel3.Length = (_DMA3CNT_L == 0) ? 0x1_0000u : _DMA3CNT_L;
 
-            PerformDMA(ref _DMA2CNT_H, source, destination, length, startTiming);
+                PerformTransfer(ref _DMA3CNT_H, ref _channel3, StartTiming.Immediate, _channel3.Destination, _channel3.Length);
+            }
         }
 
-        internal void PerformDMA3(StartTiming startTiming)
+        internal void PerformAllTransfers(StartTiming startTiming)
         {
-            UInt32 source = (UInt32)(((_DMA3SAD_H & 0x0fff) << 16) | _DMA3SAD_L);
-            UInt32 destination = (UInt32)(((_DMA3DAD_H & 0x0fff) << 16) | _DMA3DAD_L);
-            UInt32 length = (_DMA3CNT_L == 0) ? 0x1_0000u : _DMA3CNT_L;
+            if (_channel0.Enabled)
+            {
+                UInt32 destinationReloadValue = (UInt32)(((_DMA0DAD_H & 0x07ff) << 16) | _DMA0DAD_L);
+                UInt32 lengthReloadValue = ((_DMA0CNT_L & 0x3fff) == 0) ? 0x4000u : (UInt32)(_DMA0CNT_L & 0x3fff);
 
-            PerformDMA(ref _DMA3CNT_H, source, destination, length, startTiming);
+                PerformTransfer(ref _DMA0CNT_H, ref _channel0, startTiming, destinationReloadValue, lengthReloadValue);
+            }
+
+            if (_channel1.Enabled)
+            {
+                UInt32 destinationReloadValue = (UInt32)(((_DMA1DAD_H & 0x07ff) << 16) | _DMA1DAD_L);
+                UInt32 lengthReloadValue = ((_DMA1CNT_L & 0x3fff) == 0) ? 0x4000u : (UInt32)(_DMA1CNT_L & 0x3fff);
+
+                PerformTransfer(ref _DMA1CNT_H, ref _channel1, startTiming, destinationReloadValue, lengthReloadValue);
+            }
+
+            if (_channel2.Enabled)
+            {
+                UInt32 destinationReloadValue = (UInt32)(((_DMA2DAD_H & 0x07ff) << 16) | _DMA2DAD_L);
+                UInt32 lengthReloadValue = ((_DMA2CNT_L & 0x3fff) == 0) ? 0x4000u : (UInt32)(_DMA2CNT_L & 0x3fff);
+
+                PerformTransfer(ref _DMA2CNT_H, ref _channel2, startTiming, destinationReloadValue, lengthReloadValue);
+            }
+
+            if (_channel3.Enabled)
+            {
+                UInt32 destinationReloadValue = (UInt32)(((_DMA3DAD_H & 0x0fff) << 16) | _DMA3DAD_L);
+                UInt32 lengthReloadValue = (_DMA3CNT_L == 0) ? 0x1_0000u : _DMA3CNT_L;
+
+                PerformTransfer(ref _DMA3CNT_H, ref _channel3, startTiming, destinationReloadValue, lengthReloadValue);
+            }
         }
 
-        private void PerformDMA(ref UInt16 cnt_h, UInt32 source, UInt32 destination, UInt32 length, StartTiming startTiming)
+        private void PerformTransfer(ref UInt16 cnt_h, ref Channel channel, StartTiming startTiming, UInt32 destinationReloadValue, UInt32 lengthReloadValue)
         {
-            if ((cnt_h & 0x8000) == 0)
-                return;
-
             if (((cnt_h >> 12) & 0b11) != (int)startTiming)
                 return;
 
@@ -242,22 +353,24 @@
                 };
             }
 
-            int GetDestinationIncrement(int dataUnitSize)
+            (int destinationIncrement, bool reloadDestination) GetDestinationIncrement(int dataUnitSize)
             {
                 return destinationAddressControlFlag switch
                 {
                     // increment
-                    0b00 => dataUnitSize,
+                    0b00 => (dataUnitSize, false),
                     // decrement
-                    0b01 => -dataUnitSize,
+                    0b01 => (-dataUnitSize, false),
                     // fixed
-                    0b10 => 0,
-                    // increment/reload
-                    0b11 => dataUnitSize,
+                    0b10 => (0, false),
+                    // increment+reload
+                    0b11 => (dataUnitSize, true),
                     // should never happen
                     _ => throw new Exception("Iris.GBA.DMA: Wrong destination address control flag"),
                 };
             }
+
+            bool reloadDestination;
 
             // 16 bits
             if ((cnt_h & 0x0400) == 0)
@@ -265,13 +378,13 @@
                 const int DataUnitSize = 2;
 
                 int sourceIncrement = GetSourceIncrement(DataUnitSize);
-                int destinationIncrement = GetDestinationIncrement(DataUnitSize);
+                (int destinationIncrement, reloadDestination) = GetDestinationIncrement(DataUnitSize);
 
-                for (; length > 0; --length)
+                for (; channel.Length > 0; --channel.Length)
                 {
-                    _memory.Write16(destination, _memory.Read16(source));
-                    destination = (UInt32)(destination + destinationIncrement);
-                    source = (UInt32)(source + sourceIncrement);
+                    _memory.Write16(channel.Destination, _memory.Read16(channel.Source));
+                    channel.Destination = (UInt32)(channel.Destination + destinationIncrement);
+                    channel.Source = (UInt32)(channel.Source + sourceIncrement);
                 }
             }
 
@@ -281,17 +394,31 @@
                 const int DataUnitSize = 4;
 
                 int sourceIncrement = GetSourceIncrement(DataUnitSize);
-                int destinationIncrement = GetDestinationIncrement(DataUnitSize);
+                (int destinationIncrement, reloadDestination) = GetDestinationIncrement(DataUnitSize);
 
-                for (; length > 0; --length)
+                for (; channel.Length > 0; --channel.Length)
                 {
-                    _memory.Write32(destination, _memory.Read32(source));
-                    destination = (UInt32)(destination + destinationIncrement);
-                    source = (UInt32)(source + sourceIncrement);
+                    _memory.Write32(channel.Destination, _memory.Read32(channel.Source));
+                    channel.Destination = (UInt32)(channel.Destination + destinationIncrement);
+                    channel.Source = (UInt32)(channel.Source + sourceIncrement);
                 }
             }
 
-            cnt_h = (UInt16)(cnt_h & ~0x8000);
+            // Repeat OFF
+            if ((cnt_h & 0x0200) == 0)
+            {
+                cnt_h = (UInt16)(cnt_h & ~0x8000);
+                channel.Enabled = false;
+            }
+
+            // Repeat ON
+            else
+            {
+                if (reloadDestination)
+                    channel.Destination = destinationReloadValue;
+
+                channel.Length = lengthReloadValue;
+            }
         }
     }
 }
