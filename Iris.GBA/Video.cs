@@ -637,6 +637,8 @@ namespace Iris.GBA
 
             int v = (_VCOUNT + vofs) % virtualScreenHeight;
 
+            const UInt32 ObjectCharacterDataOffset = 0x1_0000;
+
             const int CharacterWidth = 8;
             const int CharacterHeight = 8;
 
@@ -686,7 +688,12 @@ namespace Iris.GBA
                     if (colorMode == 0)
                     {
                         const int CharacterSize = 32;
-                        Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + characterBaseBlockOffset + (characterName * CharacterSize) + (characterPixelNumber / 2));
+                        UInt32 characterOffset = (UInt32)(characterBaseBlockOffset + (characterName * CharacterSize));
+
+                        if (characterOffset >= ObjectCharacterDataOffset)
+                            continue;
+
+                        Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + characterOffset + (characterPixelNumber / 2));
 
                         if ((characterPixelNumber % 2) == 0)
                             colorNumber &= 0b1111;
@@ -703,7 +710,12 @@ namespace Iris.GBA
                     else
                     {
                         const int CharacterSize = 64;
-                        Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + characterBaseBlockOffset + (characterName * CharacterSize) + characterPixelNumber);
+                        UInt32 characterOffset = (UInt32)(characterBaseBlockOffset + (characterName * CharacterSize));
+
+                        if (characterOffset >= ObjectCharacterDataOffset)
+                            continue;
+
+                        Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + characterOffset + characterPixelNumber);
 
                         if (!isFirst && (colorNumber == 0))
                             continue;
@@ -774,7 +786,8 @@ namespace Iris.GBA
                         (0b10, 0b11) => (32, 64),
 
                         // prohibited
-                        _ => throw new Exception(string.Format("Iris.GBA.Video: Prohibited object shape {0}", shape))
+                        // TODO: verify
+                        _ => (0, 0)
                     };
 
                     const int VirtualScreenHeight = 256;
