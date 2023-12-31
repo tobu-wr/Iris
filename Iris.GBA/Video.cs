@@ -361,12 +361,19 @@ namespace Iris.GBA
 
         private void StartHBlank(UInt32 cycleCountDelay)
         {
+            _DISPSTAT |= 0x0002;
+
+            if ((_DISPSTAT & 0x0010) == 0x0010)
+                _interruptControl.RequestInterrupt(InterruptControl.Interrupt.HBlank);
+
             if (_VCOUNT < DisplayScreenHeight)
                 _dma.PerformAllTransfers(DMA.StartTiming.HBlank);
         }
 
         private void StartScanline(UInt32 cycleCountDelay)
         {
+            _DISPSTAT = (UInt16)(_DISPSTAT & ~0x0002);
+
             switch (_VCOUNT)
             {
                 case < DisplayScreenHeight - 1:
@@ -399,6 +406,18 @@ namespace Iris.GBA
                 default:
                     ++_VCOUNT;
                     break;
+            }
+
+            if (_VCOUNT == ((_DISPSTAT >> 8) & 0xff))
+            {
+                _DISPSTAT |= 0x0004;
+
+                if ((_DISPSTAT & 0x0020) == 0x0020)
+                    _interruptControl.RequestInterrupt(InterruptControl.Interrupt.VCountMatch);
+            }
+            else
+            {
+                _DISPSTAT = (UInt16)(_DISPSTAT & ~0x0004);
             }
 
             _scheduler.ScheduleTask(DisplayLineCycleCount - cycleCountDelay, _startHBlankTaskId);
