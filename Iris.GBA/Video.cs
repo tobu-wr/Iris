@@ -637,8 +637,6 @@ namespace Iris.GBA
 
             int v = (_VCOUNT + vofs) % virtualScreenHeight;
 
-            const UInt32 ObjectCharacterDataOffset = 0x1_0000;
-
             const int CharacterWidth = 8;
             const int CharacterHeight = 8;
 
@@ -681,6 +679,8 @@ namespace Iris.GBA
                         characterPixelNumber += h % CharacterWidth;
                     else
                         characterPixelNumber += CharacterWidth - 1 - (h % CharacterWidth);
+
+                    const UInt32 ObjectCharacterDataOffset = 0x1_0000;
 
                     UInt16 color;
 
@@ -790,18 +790,41 @@ namespace Iris.GBA
                         _ => (0, 0)
                     };
 
+                    const int VirtualScreenWidth = 512;
                     const int VirtualScreenHeight = 256;
+
+                    int left = xCoordinate;
+                    int right = (xCoordinate + characterWidth) % VirtualScreenWidth;
 
                     int top = yCoordinate;
                     int bottom = (yCoordinate + characterHeight) % VirtualScreenHeight;
 
+                    bool leftHidden = left >= DisplayScreenWidth;
+                    bool rightHidden = right >= DisplayScreenWidth;
+
                     bool topHidden = top >= DisplayScreenHeight;
                     bool bottomHidden = bottom >= DisplayScreenHeight;
 
-                    if (topHidden && bottomHidden)
+                    if ((leftHidden && rightHidden) || (topHidden && bottomHidden))
                         continue;
 
+                    int hBegin;
                     int vBegin;
+
+                    if (leftHidden)
+                    {
+                        hBegin = VirtualScreenWidth - left;
+                        left = 0;
+                    }
+                    else if (rightHidden)
+                    {
+                        hBegin = 0;
+                        right = DisplayScreenWidth;
+                    }
+                    else
+                    {
+                        hBegin = 0;
+                    }
 
                     if (topHidden)
                     {
@@ -822,34 +845,6 @@ namespace Iris.GBA
                         continue;
 
                     int v = _VCOUNT - top + vBegin;
-
-                    const int VirtualScreenWidth = 512;
-
-                    int left = xCoordinate;
-                    int right = (xCoordinate + characterWidth) % VirtualScreenWidth;
-
-                    bool leftHidden = left >= DisplayScreenWidth;
-                    bool rightHidden = right >= DisplayScreenWidth;
-
-                    if (leftHidden && rightHidden)
-                        continue;
-
-                    int hBegin;
-
-                    if (leftHidden)
-                    {
-                        hBegin = VirtualScreenWidth - left;
-                        left = 0;
-                    }
-                    else if (rightHidden)
-                    {
-                        hBegin = 0;
-                        right = DisplayScreenWidth;
-                    }
-                    else
-                    {
-                        hBegin = 0;
-                    }
 
                     const int BasicCharacterWidth = 8;
                     const int BasicCharacterHeight = 8;
@@ -911,7 +906,7 @@ namespace Iris.GBA
                         if (colorMode == 0)
                         {
                             const int BasicCharacterSize = 32;
-                            Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + CharacterDataOffset + ((characterName + basicCharacterNumber) * BasicCharacterSize) + (basicCharacterPixelNumber / 2));
+                            Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + CharacterDataOffset + (characterName * 32) + (basicCharacterNumber * BasicCharacterSize) + (basicCharacterPixelNumber / 2));
 
                             if ((basicCharacterPixelNumber % 2) == 0)
                                 colorNumber &= 0b1111;
@@ -928,7 +923,7 @@ namespace Iris.GBA
                         else
                         {
                             const int BasicCharacterSize = 64;
-                            Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + CharacterDataOffset + ((characterName + basicCharacterNumber) * BasicCharacterSize) + basicCharacterPixelNumber);
+                            Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + CharacterDataOffset + (characterName * 32) + (basicCharacterNumber * BasicCharacterSize) + basicCharacterPixelNumber);
 
                             if (colorNumber == 0)
                                 continue;

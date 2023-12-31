@@ -56,7 +56,10 @@
             UInt32 Length
         );
 
-        private Channel _channel0, _channel1, _channel2, _channel3;
+        private Channel _channel0;
+        private Channel _channel1;
+        private Channel _channel2;
+        private Channel _channel3;
 
         internal void Initialize(Memory memory)
         {
