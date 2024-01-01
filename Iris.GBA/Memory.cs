@@ -349,8 +349,8 @@ namespace Iris.GBA
                             0x0de => GetLowByte(_dma!._DMA3CNT_H),
                             0x0df => GetHighByte(_dma!._DMA3CNT_H),
 
-                            0x100 => GetLowByte(_timer!._TM0CNT_L),
-                            0x101 => GetHighByte(_timer!._TM0CNT_L),
+                            0x100 => GetLowByte(_timer!.ReadRegister(Timer.Register.TM0CNT_L)),
+                            0x101 => GetHighByte(_timer!.ReadRegister(Timer.Register.TM0CNT_L)),
 
                             0x102 => GetLowByte(_timer!._TM0CNT_H),
                             0x103 => GetHighByte(_timer!._TM0CNT_H),
@@ -547,7 +547,7 @@ namespace Iris.GBA
                             0x0c6 => _dma!._DMA1CNT_H,
                             0x0d2 => _dma!._DMA2CNT_H,
                             0x0de => _dma!._DMA3CNT_H,
-                            0x100 => _timer!._TM0CNT_L,
+                            0x100 => _timer!.ReadRegister(Timer.Register.TM0CNT_L),
                             0x102 => _timer!._TM0CNT_H,
                             0x104 => _timer!._TM1CNT_L,
                             0x106 => _timer!._TM1CNT_H,
@@ -1268,6 +1268,7 @@ namespace Iris.GBA
 
                             case 0x102:
                                 SetLowByte(ref _timer!._TM0CNT_H, value);
+                                _timer.UpdateTimer0();
                                 break;
                             case 0x103:
                                 SetHighByte(ref _timer!._TM0CNT_H, value);
@@ -1760,10 +1761,11 @@ namespace Iris.GBA
                                 _dma.UpdateChannel3();
                                 break;
                             case 0x100:
-                                _timer!._TM0CNT_L = value;
+                                _timer!.WriteRegister(Timer.Register.TM0CNT_L, value);
                                 break;
                             case 0x102:
                                 _timer!._TM0CNT_H = value;
+                                _timer.UpdateTimer0();
                                 break;
                             case 0x104:
                                 _timer!._TM1CNT_L = value;
@@ -2073,8 +2075,9 @@ namespace Iris.GBA
                                 // unused
                                 break;
                             case 0x100:
-                                _timer!._TM0CNT_L = GetLowHalfword(value);
+                                _timer!.WriteRegister(Timer.Register.TM0CNT_L, GetLowHalfword(value));
                                 _timer._TM0CNT_H = GetHighHalfword(value);
+                                _timer.UpdateTimer0();
                                 break;
                             case 0x104:
                                 _timer!._TM1CNT_L = GetLowHalfword(value);

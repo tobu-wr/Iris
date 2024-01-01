@@ -9,7 +9,7 @@ namespace Iris.GBA
             VBlank = 1 << 0,
             HBlank = 1 << 1,
             VCountMatch = 1 << 2,
-            //Timer0 = 1 << 3,
+            Timer0 = 1 << 3,
             //Timer1 = 1 << 4,
             //Timer2 = 1 << 5,
             //Timer3 = 1 << 6,

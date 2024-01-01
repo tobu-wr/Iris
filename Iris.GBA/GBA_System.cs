@@ -7,11 +7,11 @@ namespace Iris.GBA
 {
     public sealed class GBA_System : Common.System
     {
-        private readonly Scheduler _scheduler = new(2, 3);
+        private readonly Scheduler _scheduler = new(3, 5);
 
         private readonly CPU_Core _cpu;
         private readonly Communication _communication = new();
-        private readonly Timer _timer = new();
+        private readonly Timer _timer;
         private readonly Sound _sound = new();
         private readonly DMA _dma = new();
         private readonly KeyInput _keyInput;
@@ -30,6 +30,7 @@ namespace Iris.GBA
             CPU_Core.CallbackInterface cpuCallbackInterface = new(_memory.Read8, _memory.Read16, _memory.Read32, _memory.Write8, _memory.Write16, _memory.Write32, _bios.HandleSWI, _bios.HandleIRQ);
             _cpu = new(CPU_Core.Model.ARM7TDMI, cpuCallbackInterface);
 
+            _timer = new(_scheduler);
             _keyInput = new(pollInputCallback);
             _video = new(_scheduler, drawFrameCallback);
 
