@@ -6,6 +6,63 @@ namespace Iris.GBA
 {
     internal sealed class Video : IDisposable
     {
+        internal enum Register
+        {
+            DISPCNT,
+            DISPSTAT,
+            VCOUNT,
+
+            BG0CNT,
+            BG1CNT,
+            BG2CNT,
+            BG3CNT,
+
+            BG0HOFS,
+            BG0VOFS,
+
+            BG1HOFS,
+            BG1VOFS,
+
+            BG2HOFS,
+            BG2VOFS,
+
+            BG3HOFS,
+            BG3VOFS,
+
+            BG2PA,
+            BG2PB,
+            BG2PC,
+            BG2PD,
+            BG2X_L,
+            BG2X_H,
+            BG2Y_L,
+            BG2Y_H,
+
+            BG3PA,
+            BG3PB,
+            BG3PC,
+            BG3PD,
+            BG3X_L,
+            BG3X_H,
+            BG3Y_L,
+            BG3Y_H,
+
+            WIN0H,
+            WIN1H,
+
+            WIN0V,
+            WIN1V,
+
+            WININ,
+            WINOUT,
+
+            MOSAIC,
+
+            BLDCNT,
+            BLDALPHA,
+            BLDY
+        }
+
         private const int KB = 1024;
 
         private const int PaletteRAM_Size = 1 * KB;
@@ -25,55 +82,59 @@ namespace Iris.GBA
         private const UInt32 OAM_StartAddress = 0x0700_0000;
         private const UInt32 OAM_EndAddress = 0x0800_0000;
 
-        internal UInt16 _DISPSTAT;
-        internal UInt16 _DISPCNT;
-        internal UInt16 _VCOUNT;
+        private UInt16 _DISPCNT;
+        private UInt16 _DISPSTAT;
+        private UInt16 _VCOUNT;
 
-        internal UInt16 _BG0CNT;
-        internal UInt16 _BG1CNT;
-        internal UInt16 _BG2CNT;
-        internal UInt16 _BG3CNT;
+        private UInt16 _BG0CNT;
+        private UInt16 _BG1CNT;
+        private UInt16 _BG2CNT;
+        private UInt16 _BG3CNT;
 
-        internal UInt16 _BG0HOFS;
-        internal UInt16 _BG0VOFS;
+        private UInt16 _BG0HOFS;
+        private UInt16 _BG0VOFS;
 
-        internal UInt16 _BG1HOFS;
-        internal UInt16 _BG1VOFS;
+        private UInt16 _BG1HOFS;
+        private UInt16 _BG1VOFS;
 
-        internal UInt16 _BG2HOFS;
-        internal UInt16 _BG2VOFS;
+        private UInt16 _BG2HOFS;
+        private UInt16 _BG2VOFS;
 
-        internal UInt16 _BG3HOFS;
-        internal UInt16 _BG3VOFS;
+        private UInt16 _BG3HOFS;
+        private UInt16 _BG3VOFS;
 
-        internal UInt16 _BG2PA;
-        internal UInt16 _BG2PB;
-        internal UInt16 _BG2PC;
-        internal UInt16 _BG2PD;
-        internal UInt32 _BG2X;
-        internal UInt32 _BG2Y;
+        private UInt16 _BG2PA;
+        private UInt16 _BG2PB;
+        private UInt16 _BG2PC;
+        private UInt16 _BG2PD;
+        private UInt16 _BG2X_L;
+        private UInt16 _BG2X_H;
+        private UInt16 _BG2Y_L;
+        private UInt16 _BG2Y_H;
 
-        internal UInt16 _BG3PA;
-        internal UInt16 _BG3PB;
-        internal UInt16 _BG3PC;
-        internal UInt16 _BG3PD;
-        internal UInt32 _BG3X;
-        internal UInt32 _BG3Y;
+        private UInt16 _BG3PA;
+        private UInt16 _BG3PB;
+        private UInt16 _BG3PC;
+        private UInt16 _BG3PD;
+        private UInt16 _BG3X_L;
+        private UInt16 _BG3X_H;
+        private UInt16 _BG3Y_L;
+        private UInt16 _BG3Y_H;
 
-        internal UInt16 _WIN0H;
-        internal UInt16 _WIN1H;
+        private UInt16 _WIN0H;
+        private UInt16 _WIN1H;
 
-        internal UInt16 _WIN0V;
-        internal UInt16 _WIN1V;
+        private UInt16 _WIN0V;
+        private UInt16 _WIN1V;
 
-        internal UInt16 _WININ;
-        internal UInt16 _WINOUT;
+        private UInt16 _WININ;
+        private UInt16 _WINOUT;
 
-        internal UInt16 _MOSAIC;
+        private UInt16 _MOSAIC;
 
-        internal UInt16 _BLDCNT;
-        internal UInt16 _BLDALPHA;
-        internal UInt16 _BLDY;
+        private UInt16 _BLDCNT;
+        private UInt16 _BLDALPHA;
+        private UInt16 _BLDY;
 
         private const int DisplayScreenWidth = 240;
         private const int DisplayScreenHeight = 160;
@@ -148,8 +209,8 @@ namespace Iris.GBA
             Marshal.Copy(vramData, 0, _vram, VRAM_Size);
             Marshal.Copy(oamData, 0, _oam, OAM_Size);
 
-            _DISPSTAT = 0;
             _DISPCNT = 0;
+            _DISPSTAT = 0;
             _VCOUNT = 0;
 
             _BG0CNT = 0;
@@ -173,15 +234,19 @@ namespace Iris.GBA
             _BG2PB = 0;
             _BG2PC = 0;
             _BG2PD = 0;
-            _BG2X = 0;
-            _BG2Y = 0;
+            _BG2X_L = 0;
+            _BG2X_H = 0;
+            _BG2Y_L = 0;
+            _BG2Y_H = 0;
 
             _BG3PA = 0;
             _BG3PB = 0;
             _BG3PC = 0;
             _BG3PD = 0;
-            _BG3X = 0;
-            _BG3Y = 0;
+            _BG3X_L = 0;
+            _BG3X_H = 0;
+            _BG3Y_L = 0;
+            _BG3Y_H = 0;
 
             _WIN0H = 0;
             _WIN1H = 0;
@@ -214,8 +279,8 @@ namespace Iris.GBA
             Marshal.Copy(vramData, 0, _vram, VRAM_Size);
             Marshal.Copy(oamData, 0, _oam, OAM_Size);
 
-            _DISPSTAT = reader.ReadUInt16();
             _DISPCNT = reader.ReadUInt16();
+            _DISPSTAT = reader.ReadUInt16();
             _VCOUNT = reader.ReadUInt16();
 
             _BG0CNT = reader.ReadUInt16();
@@ -239,15 +304,19 @@ namespace Iris.GBA
             _BG2PB = reader.ReadUInt16();
             _BG2PC = reader.ReadUInt16();
             _BG2PD = reader.ReadUInt16();
-            _BG2X = reader.ReadUInt16();
-            _BG2Y = reader.ReadUInt16();
+            _BG2X_L = reader.ReadUInt16();
+            _BG2X_H = reader.ReadUInt16();
+            _BG2Y_L = reader.ReadUInt16();
+            _BG2Y_H = reader.ReadUInt16();
 
             _BG3PA = reader.ReadUInt16();
             _BG3PB = reader.ReadUInt16();
             _BG3PC = reader.ReadUInt16();
             _BG3PD = reader.ReadUInt16();
-            _BG3X = reader.ReadUInt16();
-            _BG3Y = reader.ReadUInt16();
+            _BG3X_L = reader.ReadUInt16();
+            _BG3X_H = reader.ReadUInt16();
+            _BG3Y_L = reader.ReadUInt16();
+            _BG3Y_H = reader.ReadUInt16();
 
             _WIN0H = reader.ReadUInt16();
             _WIN1H = reader.ReadUInt16();
@@ -282,8 +351,8 @@ namespace Iris.GBA
             writer.Write(vramData);
             writer.Write(oamData);
 
-            writer.Write(_DISPSTAT);
             writer.Write(_DISPCNT);
+            writer.Write(_DISPSTAT);
             writer.Write(_VCOUNT);
 
             writer.Write(_BG0CNT);
@@ -307,15 +376,19 @@ namespace Iris.GBA
             writer.Write(_BG2PB);
             writer.Write(_BG2PC);
             writer.Write(_BG2PD);
-            writer.Write(_BG2X);
-            writer.Write(_BG2Y);
+            writer.Write(_BG2X_L);
+            writer.Write(_BG2X_H);
+            writer.Write(_BG2Y_L);
+            writer.Write(_BG2Y_H);
 
             writer.Write(_BG3PA);
             writer.Write(_BG3PB);
             writer.Write(_BG3PC);
             writer.Write(_BG3PD);
-            writer.Write(_BG3X);
-            writer.Write(_BG3Y);
+            writer.Write(_BG3X_L);
+            writer.Write(_BG3X_H);
+            writer.Write(_BG3Y_L);
+            writer.Write(_BG3Y_H);
 
             writer.Write(_WIN0H);
             writer.Write(_WIN1H);
@@ -334,6 +407,173 @@ namespace Iris.GBA
 
             foreach (UInt16 color in _displayFrameBuffer)
                 writer.Write(color);
+        }
+
+        internal UInt16 ReadRegister(Register register)
+        {
+            return register switch
+            {
+                Register.DISPCNT => _DISPCNT,
+                Register.DISPSTAT => _DISPSTAT,
+                Register.VCOUNT => _VCOUNT,
+
+                Register.BG0CNT => _BG0CNT,
+                Register.BG1CNT => _BG1CNT,
+                Register.BG2CNT => _BG2CNT,
+                Register.BG3CNT => _BG3CNT,
+
+                Register.WININ => _WININ,
+                Register.WINOUT => _WINOUT,
+
+                Register.BLDCNT => _BLDCNT,
+                Register.BLDALPHA => _BLDALPHA,
+
+                // should never happen
+                _ => throw new Exception("Iris.GBA.Video: Register read error"),
+            };
+        }
+
+        internal void WriteRegister(Register register, UInt16 value)
+        {
+            switch (register)
+            {
+                case Register.DISPCNT:
+                    _DISPCNT = value;
+                    break;
+                case Register.DISPSTAT:
+                    _DISPSTAT = value;
+                    break;
+
+                case Register.BG0CNT:
+                    _BG0CNT = value;
+                    break;
+                case Register.BG1CNT:
+                    _BG1CNT = value;
+                    break;
+                case Register.BG2CNT:
+                    _BG2CNT = value;
+                    break;
+                case Register.BG3CNT:
+                    _BG3CNT = value;
+                    break;
+
+                case Register.BG0HOFS:
+                    _BG0HOFS = value;
+                    break;
+                case Register.BG0VOFS:
+                    _BG0VOFS = value;
+                    break;
+
+                case Register.BG1HOFS:
+                    _BG1HOFS = value;
+                    break;
+                case Register.BG1VOFS:
+                    _BG1VOFS = value;
+                    break;
+
+                case Register.BG2HOFS:
+                    _BG2HOFS = value;
+                    break;
+                case Register.BG2VOFS:
+                    _BG2VOFS = value;
+                    break;
+
+                case Register.BG3HOFS:
+                    _BG3HOFS = value;
+                    break;
+                case Register.BG3VOFS:
+                    _BG3VOFS = value;
+                    break;
+
+                case Register.BG2PA:
+                    _BG2PA = value;
+                    break;
+                case Register.BG2PB:
+                    _BG2PB = value;
+                    break;
+                case Register.BG2PC:
+                    _BG2PC = value;
+                    break;
+                case Register.BG2PD:
+                    _BG2PD = value;
+                    break;
+                case Register.BG2X_L:
+                    _BG2X_L = value;
+                    break;
+                case Register.BG2X_H:
+                    _BG2X_H = value;
+                    break;
+                case Register.BG2Y_L:
+                    _BG2Y_L = value;
+                    break;
+                case Register.BG2Y_H:
+                    _BG2Y_H = value;
+                    break;
+
+                case Register.BG3PA:
+                    _BG3PA = value;
+                    break;
+                case Register.BG3PB:
+                    _BG3PB = value;
+                    break;
+                case Register.BG3PC:
+                    _BG3PC = value;
+                    break;
+                case Register.BG3PD:
+                    _BG3PD = value;
+                    break;
+                case Register.BG3X_L:
+                    _BG3X_L = value;
+                    break;
+                case Register.BG3X_H:
+                    _BG3X_H = value;
+                    break;
+                case Register.BG3Y_L:
+                    _BG3Y_L = value;
+                    break;
+                case Register.BG3Y_H:
+                    _BG3Y_H = value;
+                    break;
+
+                case Register.WIN0H:
+                    _WIN0H = value;
+                    break;
+                case Register.WIN1H:
+                    _WIN1H = value;
+                    break;
+
+                case Register.WIN0V:
+                    _WIN0V = value;
+                    break;
+                case Register.WIN1V:
+                    _WIN1V = value;
+                    break;
+
+                case Register.WININ:
+                    _WININ = value;
+                    break;
+                case Register.WINOUT:
+                    _WINOUT = value;
+                    break;
+
+                case Register.MOSAIC:
+                    _MOSAIC = value;
+                    break;
+
+                case Register.BLDCNT:
+                    _BLDCNT = value;
+                    break;
+                case Register.BLDALPHA:
+                    _BLDALPHA = value;
+                    break;
+                case Register.BLDY:
+                    _BLDY = value;
+                    break;
+
+                // should never happen
+                default:
+                    throw new Exception("Iris.GBA.Video: Register write error");
+            }
         }
 
         internal void Write8_PaletteRAM(UInt32 address, Byte value)
@@ -474,8 +714,10 @@ namespace Iris.GBA
                     }
                     break;
 
-                default:
-                    throw new Exception(string.Format("Iris.GBA.Video: Wrong background mode {0}", bgMode));
+                // TODO: verify
+                case 0b110:
+                case 0b111:
+                    throw new Exception(string.Format("Iris.GBA.Video: Unknown background mode {0}", bgMode));
             }
         }
 
