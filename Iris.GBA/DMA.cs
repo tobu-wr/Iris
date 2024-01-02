@@ -48,7 +48,7 @@
 
         private Memory _memory;
 
-        private record struct Channel
+        private record struct ChannelState
         (
             bool Enabled,
             UInt32 Source,
@@ -56,10 +56,10 @@
             UInt32 Length
         );
 
-        private Channel _channel0;
-        private Channel _channel1;
-        private Channel _channel2;
-        private Channel _channel3;
+        private ChannelState _channel0;
+        private ChannelState _channel1;
+        private ChannelState _channel2;
+        private ChannelState _channel3;
 
         internal void Initialize(Memory memory)
         {
@@ -331,7 +331,7 @@
             }
         }
 
-        private void PerformTransfer(ref UInt16 cnt_h, ref Channel channel, StartTiming startTiming, UInt32 destinationReloadValue, UInt32 lengthReloadValue)
+        private void PerformTransfer(ref UInt16 cnt_h, ref ChannelState channel, StartTiming startTiming, UInt32 destinationReloadValue, UInt32 lengthReloadValue)
         {
             if (((cnt_h >> 12) & 0b11) != (int)startTiming)
                 return;
