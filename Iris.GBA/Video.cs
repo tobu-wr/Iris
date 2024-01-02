@@ -1,5 +1,4 @@
-﻿using Iris.Common;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Iris.GBA
@@ -147,7 +146,7 @@ namespace Iris.GBA
         private const UInt32 PixelCycleCount = 4;
         private const UInt32 ScanlineCycleCount = ScanlineLength * PixelCycleCount;
 
-        private readonly Scheduler _scheduler;
+        private readonly Common.Scheduler _scheduler;
         private readonly Common.System.DrawFrame_Delegate _drawFrameCallback;
 
         private readonly int _startScanlineTaskId;
@@ -159,7 +158,7 @@ namespace Iris.GBA
 
         private readonly UInt16[] _displayFrameBuffer = new UInt16[DisplayScreenSize];
 
-        internal Video(Scheduler scheduler, Common.System.DrawFrame_Delegate drawFrameCallback)
+        internal Video(Common.Scheduler scheduler, Common.System.DrawFrame_Delegate drawFrameCallback)
         {
             _scheduler = scheduler;
             _drawFrameCallback = drawFrameCallback;
@@ -263,10 +262,10 @@ namespace Iris.GBA
             _BLDALPHA = 0;
             _BLDY = 0;
 
-            Array.Clear(_displayFrameBuffer);
-
             _scheduler.ScheduleTask(ScanlineCycleCount, _startScanlineTaskId);
             _scheduler.ScheduleTask(DisplayLineCycleCount, _startHBlankTaskId);
+
+            Array.Clear(_displayFrameBuffer);
         }
 
         internal void LoadState(BinaryReader reader)
