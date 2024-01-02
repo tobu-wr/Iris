@@ -238,38 +238,38 @@ namespace Iris.GBA
 
                         return offset switch
                         {
-                            0x000 => GetLowByte(_video!._DISPCNT),
-                            0x001 => GetHighByte(_video!._DISPCNT),
+                            0x000 => GetLowByte(_video!.ReadRegister(Video.Register.DISPCNT)),
+                            0x001 => GetHighByte(_video!.ReadRegister(Video.Register.DISPCNT)),
 
-                            0x004 => GetLowByte(_video!._DISPSTAT),
-                            0x005 => GetHighByte(_video!._DISPSTAT),
+                            0x004 => GetLowByte(_video!.ReadRegister(Video.Register.DISPSTAT)),
+                            0x005 => GetHighByte(_video!.ReadRegister(Video.Register.DISPSTAT)),
 
-                            0x006 => GetLowByte(_video!._VCOUNT),
-                            0x007 => GetHighByte(_video!._VCOUNT),
+                            0x006 => GetLowByte(_video!.ReadRegister(Video.Register.VCOUNT)),
+                            0x007 => GetHighByte(_video!.ReadRegister(Video.Register.VCOUNT)),
 
-                            0x008 => GetLowByte(_video!._BG0CNT),
-                            0x009 => GetHighByte(_video!._BG0CNT),
+                            0x008 => GetLowByte(_video!.ReadRegister(Video.Register.BG0CNT)),
+                            0x009 => GetHighByte(_video!.ReadRegister(Video.Register.BG0CNT)),
 
-                            0x00a => GetLowByte(_video!._BG1CNT),
-                            0x00b => GetHighByte(_video!._BG1CNT),
+                            0x00a => GetLowByte(_video!.ReadRegister(Video.Register.BG1CNT)),
+                            0x00b => GetHighByte(_video!.ReadRegister(Video.Register.BG1CNT)),
 
-                            0x00c => GetLowByte(_video!._BG2CNT),
-                            0x00d => GetHighByte(_video!._BG2CNT),
+                            0x00c => GetLowByte(_video!.ReadRegister(Video.Register.BG2CNT)),
+                            0x00d => GetHighByte(_video!.ReadRegister(Video.Register.BG2CNT)),
 
-                            0x00e => GetLowByte(_video!._BG3CNT),
-                            0x00f => GetHighByte(_video!._BG3CNT),
+                            0x00e => GetLowByte(_video!.ReadRegister(Video.Register.BG3CNT)),
+                            0x00f => GetHighByte(_video!.ReadRegister(Video.Register.BG3CNT)),
 
-                            0x048 => GetLowByte(_video!._WININ),
-                            0x049 => GetHighByte(_video!._WININ),
+                            0x048 => GetLowByte(_video!.ReadRegister(Video.Register.WININ)),
+                            0x049 => GetHighByte(_video!.ReadRegister(Video.Register.WININ)),
 
-                            0x04a => GetLowByte(_video!._WINOUT),
-                            0x04b => GetHighByte(_video!._WINOUT),
+                            0x04a => GetLowByte(_video!.ReadRegister(Video.Register.WINOUT)),
+                            0x04b => GetHighByte(_video!.ReadRegister(Video.Register.WINOUT)),
 
-                            0x050 => GetLowByte(_video!._BLDCNT),
-                            0x051 => GetHighByte(_video!._BLDCNT),
+                            0x050 => GetLowByte(_video!.ReadRegister(Video.Register.BLDCNT)),
+                            0x051 => GetHighByte(_video!.ReadRegister(Video.Register.BLDCNT)),
 
-                            0x052 => GetLowByte(_video!._BLDALPHA),
-                            0x053 => GetHighByte(_video!._BLDALPHA),
+                            0x052 => GetLowByte(_video!.ReadRegister(Video.Register.BLDALPHA)),
+                            0x053 => GetHighByte(_video!.ReadRegister(Video.Register.BLDALPHA)),
 
                             0x060 => GetLowByte(_sound!._SOUND1CNT_L),
                             0x061 => GetHighByte(_sound!._SOUND1CNT_L),
@@ -510,17 +510,17 @@ namespace Iris.GBA
 
                         return offset switch
                         {
-                            0x000 => _video!._DISPCNT,
-                            0x004 => _video!._DISPSTAT,
-                            0x006 => _video!._VCOUNT,
-                            0x008 => _video!._BG0CNT,
-                            0x00a => _video!._BG1CNT,
-                            0x00c => _video!._BG2CNT,
-                            0x00e => _video!._BG3CNT,
-                            0x048 => _video!._WININ,
-                            0x04a => _video!._WINOUT,
-                            0x050 => _video!._BLDCNT,
-                            0x052 => _video!._BLDALPHA,
+                            0x000 => _video!.ReadRegister(Video.Register.DISPCNT),
+                            0x004 => _video!.ReadRegister(Video.Register.DISPSTAT),
+                            0x006 => _video!.ReadRegister(Video.Register.VCOUNT),
+                            0x008 => _video!.ReadRegister(Video.Register.BG0CNT),
+                            0x00a => _video!.ReadRegister(Video.Register.BG1CNT),
+                            0x00c => _video!.ReadRegister(Video.Register.BG2CNT),
+                            0x00e => _video!.ReadRegister(Video.Register.BG3CNT),
+                            0x048 => _video!.ReadRegister(Video.Register.WININ),
+                            0x04a => _video!.ReadRegister(Video.Register.WINOUT),
+                            0x050 => _video!.ReadRegister(Video.Register.BLDCNT),
+                            0x052 => _video!.ReadRegister(Video.Register.BLDALPHA),
                             0x060 => _sound!._SOUND1CNT_L,
                             0x062 => _sound!._SOUND1CNT_H,
                             0x064 => _sound!._SOUND1CNT_X,
@@ -657,10 +657,10 @@ namespace Iris.GBA
 
                         return offset switch
                         {
-                            0x000 => _video!._DISPCNT,
-                            0x004 => (UInt32)((_video!._VCOUNT << 16) | _video._DISPSTAT),
-                            0x008 => (UInt32)((_video!._BG1CNT << 16) | _video._BG0CNT),
-                            0x00c => (UInt32)((_video!._BG3CNT << 16) | _video._BG2CNT),
+                            0x000 => _video!.ReadRegister(Video.Register.DISPCNT),
+                            0x004 => (UInt32)((_video!.ReadRegister(Video.Register.VCOUNT) << 16) | _video.ReadRegister(Video.Register.DISPSTAT)),
+                            0x008 => (UInt32)((_video!.ReadRegister(Video.Register.BG1CNT) << 16) | _video.ReadRegister(Video.Register.BG0CNT)),
+                            0x00c => (UInt32)((_video!.ReadRegister(Video.Register.BG3CNT) << 16) | _video.ReadRegister(Video.Register.BG2CNT)),
                             0x0b8 => (UInt32)(_dma!._DMA0CNT_H << 16),
                             0x0c4 => (UInt32)(_dma!._DMA1CNT_H << 16),
                             0x0d0 => (UInt32)(_dma!._DMA2CNT_H << 16),
@@ -727,6 +727,29 @@ namespace Iris.GBA
             return 0;
         }
 
+        internal enum RegisterWriteMode
+        {
+            LowByte,
+            HighByte,
+            HalfWord
+        }
+
+        internal static void WriteRegisterHelper(ref UInt16 register, UInt16 value, RegisterWriteMode mode)
+        {
+            switch (mode)
+            {
+                case RegisterWriteMode.LowByte:
+                    register = (UInt16)((register & 0xff00) | value);
+                    break;
+                case RegisterWriteMode.HighByte:
+                    register = (UInt16)((register & 0x00ff) | (value << 8));
+                    break;
+                case RegisterWriteMode.HalfWord:
+                    register = value;
+                    break;
+            }
+        }
+
         internal void Write8(UInt32 address, Byte value)
         {
             address &= 0x0fff_ffff;
@@ -766,171 +789,171 @@ namespace Iris.GBA
                         switch (offset)
                         {
                             case 0x000:
-                                SetLowByte(ref _video!._DISPCNT, value);
+                                _video!.WriteRegister(Video.Register.DISPCNT, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x001:
-                                SetHighByte(ref _video!._DISPCNT, value);
+                                _video!.WriteRegister(Video.Register.DISPCNT, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x004:
-                                SetLowByte(ref _video!._DISPSTAT, value);
+                                _video!.WriteRegister(Video.Register.DISPSTAT, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x005:
-                                SetHighByte(ref _video!._DISPSTAT, value);
+                                _video!.WriteRegister(Video.Register.DISPSTAT, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x008:
-                                SetLowByte(ref _video!._BG0CNT, value);
+                                _video!.WriteRegister(Video.Register.BG0CNT, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x009:
-                                SetHighByte(ref _video!._BG0CNT, value);
+                                _video!.WriteRegister(Video.Register.BG0CNT, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x00a:
-                                SetLowByte(ref _video!._BG1CNT, value);
+                                _video!.WriteRegister(Video.Register.BG1CNT, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x00b:
-                                SetHighByte(ref _video!._BG1CNT, value);
+                                _video!.WriteRegister(Video.Register.BG1CNT, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x00c:
-                                SetLowByte(ref _video!._BG2CNT, value);
+                                _video!.WriteRegister(Video.Register.BG2CNT, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x00d:
-                                SetHighByte(ref _video!._BG2CNT, value);
+                                _video!.WriteRegister(Video.Register.BG2CNT, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x00e:
-                                SetLowByte(ref _video!._BG3CNT, value);
+                                _video!.WriteRegister(Video.Register.BG3CNT, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x00f:
-                                SetHighByte(ref _video!._BG3CNT, value);
+                                _video!.WriteRegister(Video.Register.BG3CNT, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x010:
-                                SetLowByte(ref _video!._BG0HOFS, value);
+                                _video!.WriteRegister(Video.Register.BG0HOFS, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x011:
-                                SetHighByte(ref _video!._BG0HOFS, value);
+                                _video!.WriteRegister(Video.Register.BG0HOFS, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x012:
-                                SetLowByte(ref _video!._BG0VOFS, value);
+                                _video!.WriteRegister(Video.Register.BG0VOFS, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x013:
-                                SetHighByte(ref _video!._BG0VOFS, value);
+                                _video!.WriteRegister(Video.Register.BG0VOFS, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x014:
-                                SetLowByte(ref _video!._BG1HOFS, value);
+                                _video!.WriteRegister(Video.Register.BG1HOFS, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x015:
-                                SetHighByte(ref _video!._BG1HOFS, value);
+                                _video!.WriteRegister(Video.Register.BG1HOFS, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x016:
-                                SetLowByte(ref _video!._BG1VOFS, value);
+                                _video!.WriteRegister(Video.Register.BG1VOFS, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x017:
-                                SetHighByte(ref _video!._BG1VOFS, value);
+                                _video!.WriteRegister(Video.Register.BG1VOFS, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x018:
-                                SetLowByte(ref _video!._BG2HOFS, value);
+                                _video!.WriteRegister(Video.Register.BG2HOFS, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x019:
-                                SetHighByte(ref _video!._BG2HOFS, value);
+                                _video!.WriteRegister(Video.Register.BG2HOFS, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x01a:
-                                SetLowByte(ref _video!._BG2VOFS, value);
+                                _video!.WriteRegister(Video.Register.BG2VOFS, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x01b:
-                                SetHighByte(ref _video!._BG2VOFS, value);
+                                _video!.WriteRegister(Video.Register.BG2VOFS, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x01c:
-                                SetLowByte(ref _video!._BG3HOFS, value);
+                                _video!.WriteRegister(Video.Register.BG3HOFS, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x01d:
-                                SetHighByte(ref _video!._BG3HOFS, value);
+                                _video!.WriteRegister(Video.Register.BG3HOFS, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x01e:
-                                SetLowByte(ref _video!._BG3VOFS, value);
+                                _video!.WriteRegister(Video.Register.BG3VOFS, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x01f:
-                                SetHighByte(ref _video!._BG3VOFS, value);
+                                _video!.WriteRegister(Video.Register.BG3VOFS, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x040:
-                                SetLowByte(ref _video!._WIN0H, value);
+                                _video!.WriteRegister(Video.Register.WIN0H, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x041:
-                                SetHighByte(ref _video!._WIN0H, value);
+                                _video!.WriteRegister(Video.Register.WIN0H, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x042:
-                                SetLowByte(ref _video!._WIN1H, value);
+                                _video!.WriteRegister(Video.Register.WIN1H, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x043:
-                                SetHighByte(ref _video!._WIN1H, value);
+                                _video!.WriteRegister(Video.Register.WIN1H, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x044:
-                                SetLowByte(ref _video!._WIN0V, value);
+                                _video!.WriteRegister(Video.Register.WIN0V, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x045:
-                                SetHighByte(ref _video!._WIN0V, value);
+                                _video!.WriteRegister(Video.Register.WIN0V, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x046:
-                                SetLowByte(ref _video!._WIN1V, value);
+                                _video!.WriteRegister(Video.Register.WIN1V, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x047:
-                                SetHighByte(ref _video!._WIN1V, value);
+                                _video!.WriteRegister(Video.Register.WIN1V, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x048:
-                                SetLowByte(ref _video!._WININ, value);
+                                _video!.WriteRegister(Video.Register.WININ, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x049:
-                                SetHighByte(ref _video!._WININ, value);
+                                _video!.WriteRegister(Video.Register.WININ, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x04a:
-                                SetLowByte(ref _video!._WINOUT, value);
+                                _video!.WriteRegister(Video.Register.WINOUT, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x04b:
-                                SetHighByte(ref _video!._WINOUT, value);
+                                _video!.WriteRegister(Video.Register.WINOUT, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x04c:
-                                SetLowByte(ref _video!._MOSAIC, value);
+                                _video!.WriteRegister(Video.Register.MOSAIC, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x04d:
-                                SetHighByte(ref _video!._MOSAIC, value);
+                                _video!.WriteRegister(Video.Register.MOSAIC, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x050:
-                                SetLowByte(ref _video!._BLDCNT, value);
+                                _video!.WriteRegister(Video.Register.BLDCNT, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x051:
-                                SetHighByte(ref _video!._BLDCNT, value);
+                                _video!.WriteRegister(Video.Register.BLDCNT, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x052:
-                                SetLowByte(ref _video!._BLDALPHA, value);
+                                _video!.WriteRegister(Video.Register.BLDALPHA, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x053:
-                                SetHighByte(ref _video!._BLDALPHA, value);
+                                _video!.WriteRegister(Video.Register.BLDALPHA, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x054:
-                                SetLowByte(ref _video!._BLDY, value);
+                                _video!.WriteRegister(Video.Register.BLDY, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x055:
-                                SetHighByte(ref _video!._BLDY, value);
+                                _video!.WriteRegister(Video.Register.BLDY, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x060:
@@ -1499,124 +1522,124 @@ namespace Iris.GBA
                         switch (offset)
                         {
                             case 0x000:
-                                _video!._DISPCNT = value;
+                                _video!.WriteRegister(Video.Register.DISPCNT, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x004:
-                                _video!._DISPSTAT = value;
+                                _video!.WriteRegister(Video.Register.DISPSTAT, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x008:
-                                _video!._BG0CNT = value;
+                                _video!.WriteRegister(Video.Register.BG0CNT, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x00a:
-                                _video!._BG1CNT = value;
+                                _video!.WriteRegister(Video.Register.BG1CNT, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x00c:
-                                _video!._BG2CNT = value;
+                                _video!.WriteRegister(Video.Register.BG2CNT, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x00e:
-                                _video!._BG3CNT = value;
+                                _video!.WriteRegister(Video.Register.BG3CNT, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x010:
-                                _video!._BG0HOFS = value;
+                                _video!.WriteRegister(Video.Register.BG0HOFS, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x012:
-                                _video!._BG0VOFS = value;
+                                _video!.WriteRegister(Video.Register.BG0VOFS, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x014:
-                                _video!._BG1HOFS = value;
+                                _video!.WriteRegister(Video.Register.BG1HOFS, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x016:
-                                _video!._BG1VOFS = value;
+                                _video!.WriteRegister(Video.Register.BG1VOFS, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x018:
-                                _video!._BG2HOFS = value;
+                                _video!.WriteRegister(Video.Register.BG2HOFS, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x01a:
-                                _video!._BG2VOFS = value;
+                                _video!.WriteRegister(Video.Register.BG2VOFS, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x01c:
-                                _video!._BG3HOFS = value;
+                                _video!.WriteRegister(Video.Register.BG3HOFS, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x01e:
-                                _video!._BG3VOFS = value;
+                                _video!.WriteRegister(Video.Register.BG3VOFS, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x020:
-                                _video!._BG2PA = value;
+                                _video!.WriteRegister(Video.Register.BG2PA, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x022:
-                                _video!._BG2PB = value;
+                                _video!.WriteRegister(Video.Register.BG2PB, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x024:
-                                _video!._BG2PC = value;
+                                _video!.WriteRegister(Video.Register.BG2PC, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x026:
-                                _video!._BG2PD = value;
+                                _video!.WriteRegister(Video.Register.BG2PD, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x028:
-                                _video!._BG2X = (_video._BG2X & 0xffff_0000) | value;
+                                _video!.WriteRegister(Video.Register.BG2X_L, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x02a:
-                                _video!._BG2X = (_video._BG2X & 0x0000_ffff) | ((UInt32)value << 16);
+                                _video!.WriteRegister(Video.Register.BG2X_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x02c:
-                                _video!._BG2Y = (_video._BG2Y & 0xffff_0000) | value;
+                                _video!.WriteRegister(Video.Register.BG2Y_L, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x02e:
-                                _video!._BG2Y = (_video._BG2Y & 0x0000_ffff) | ((UInt32)value << 16);
+                                _video!.WriteRegister(Video.Register.BG2Y_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x030:
-                                _video!._BG3PA = value;
+                                _video!.WriteRegister(Video.Register.BG3PA, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x032:
-                                _video!._BG3PB = value;
+                                _video!.WriteRegister(Video.Register.BG3PB, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x034:
-                                _video!._BG3PC = value;
+                                _video!.WriteRegister(Video.Register.BG3PC, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x036:
-                                _video!._BG3PD = value;
+                                _video!.WriteRegister(Video.Register.BG3PD, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x038:
-                                _video!._BG3X = (_video._BG3X & 0xffff_0000) | value;
+                                _video!.WriteRegister(Video.Register.BG3X_L, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x03a:
-                                _video!._BG3X = (_video._BG3X & 0x0000_ffff) | ((UInt32)value << 16);
+                                _video!.WriteRegister(Video.Register.BG3X_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x03c:
-                                _video!._BG3Y = (_video._BG3Y & 0xffff_0000) | value;
+                                _video!.WriteRegister(Video.Register.BG3Y_L, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x03e:
-                                _video!._BG3Y = (_video._BG3Y & 0x0000_ffff) | ((UInt32)value << 16);
+                                _video!.WriteRegister(Video.Register.BG3Y_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x040:
-                                _video!._WIN0H = value;
+                                _video!.WriteRegister(Video.Register.WIN0H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x042:
-                                _video!._WIN1H = value;
+                                _video!.WriteRegister(Video.Register.WIN1H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x044:
-                                _video!._WIN0V = value;
+                                _video!.WriteRegister(Video.Register.WIN0V, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x046:
-                                _video!._WIN1V = value;
+                                _video!.WriteRegister(Video.Register.WIN1V, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x048:
-                                _video!._WININ = value;
+                                _video!.WriteRegister(Video.Register.WININ, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x04a:
-                                _video!._WINOUT = value;
+                                _video!.WriteRegister(Video.Register.WINOUT, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x04c:
-                                _video!._MOSAIC = value;
+                                _video!.WriteRegister(Video.Register.MOSAIC, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x050:
-                                _video!._BLDCNT = value;
+                                _video!.WriteRegister(Video.Register.BLDCNT, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x052:
-                                _video!._BLDALPHA = value;
+                                _video!.WriteRegister(Video.Register.BLDALPHA, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x054:
-                                _video!._BLDY = value;
+                                _video!.WriteRegister(Video.Register.BLDY, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x060:
                                 _sound!._SOUND1CNT_L = value;
@@ -1894,86 +1917,90 @@ namespace Iris.GBA
                         switch (offset)
                         {
                             case 0x000:
-                                _video!._DISPCNT = GetLowHalfword(value);
+                                _video!.WriteRegister(Video.Register.DISPCNT, GetLowHalfword(value), RegisterWriteMode.HalfWord);
                                 // 16 upper bits are undocumented (green swap register)
                                 break;
                             case 0x004:
-                                _video!._DISPSTAT = GetLowHalfword(value);
+                                _video!.WriteRegister(Video.Register.DISPSTAT, GetLowHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x008:
-                                _video!._BG0CNT = GetLowHalfword(value);
-                                _video._BG1CNT = GetHighHalfword(value);
+                                _video!.WriteRegister(Video.Register.BG0CNT, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _video!.WriteRegister(Video.Register.BG1CNT, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x00c:
-                                _video!._BG2CNT = GetLowHalfword(value);
-                                _video._BG3CNT = GetHighHalfword(value);
+                                _video!.WriteRegister(Video.Register.BG2CNT, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _video!.WriteRegister(Video.Register.BG3CNT, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x010:
-                                _video!._BG0HOFS = GetLowHalfword(value);
-                                _video._BG0VOFS = GetHighHalfword(value);
+                                _video!.WriteRegister(Video.Register.BG0HOFS, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _video!.WriteRegister(Video.Register.BG0VOFS, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x014:
-                                _video!._BG1HOFS = GetLowHalfword(value);
-                                _video._BG1VOFS = GetHighHalfword(value);
+                                _video!.WriteRegister(Video.Register.BG1HOFS, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _video!.WriteRegister(Video.Register.BG1VOFS, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x018:
-                                _video!._BG2HOFS = GetLowHalfword(value);
-                                _video._BG2VOFS = GetHighHalfword(value);
+                                _video!.WriteRegister(Video.Register.BG2HOFS, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _video!.WriteRegister(Video.Register.BG2VOFS, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x01c:
-                                _video!._BG3HOFS = GetLowHalfword(value);
-                                _video._BG3VOFS = GetHighHalfword(value);
+                                _video!.WriteRegister(Video.Register.BG3HOFS, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _video!.WriteRegister(Video.Register.BG3VOFS, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x020:
-                                _video!._BG2PA = GetLowHalfword(value);
-                                _video._BG2PB = GetHighHalfword(value);
+                                _video!.WriteRegister(Video.Register.BG2PA, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _video!.WriteRegister(Video.Register.BG2PB, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x024:
-                                _video!._BG2PC = GetLowHalfword(value);
-                                _video._BG2PD = GetHighHalfword(value);
+                                _video!.WriteRegister(Video.Register.BG2PC, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _video!.WriteRegister(Video.Register.BG2PD, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x028:
-                                _video!._BG2X = value;
+                                _video!.WriteRegister(Video.Register.BG2X_L, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _video!.WriteRegister(Video.Register.BG2X_H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x02c:
-                                _video!._BG2Y = value;
+                                _video!.WriteRegister(Video.Register.BG2Y_L, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _video!.WriteRegister(Video.Register.BG2Y_H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x030:
-                                _video!._BG3PA = GetLowHalfword(value);
-                                _video._BG3PB = GetHighHalfword(value);
+                                _video!.WriteRegister(Video.Register.BG3PA, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _video!.WriteRegister(Video.Register.BG3PB, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x034:
-                                _video!._BG3PC = GetLowHalfword(value);
-                                _video._BG3PD = GetHighHalfword(value);
+                                _video!.WriteRegister(Video.Register.BG3PC, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _video!.WriteRegister(Video.Register.BG3PD, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x038:
-                                _video!._BG3X = value;
+                                _video!.WriteRegister(Video.Register.BG3X_L, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _video!.WriteRegister(Video.Register.BG3X_H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x03c:
-                                _video!._BG3Y = value;
+                                _video!.WriteRegister(Video.Register.BG3Y_L, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _video!.WriteRegister(Video.Register.BG3Y_H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x040:
-                                _video!._WIN0H = GetLowHalfword(value);
-                                _video._WIN1H = GetHighHalfword(value);
+                                _video!.WriteRegister(Video.Register.WIN0H, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _video!.WriteRegister(Video.Register.WIN1H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x044:
-                                _video!._WIN0V = GetLowHalfword(value);
-                                _video._WIN1V = GetHighHalfword(value);
+                                _video!.WriteRegister(Video.Register.WIN0V, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _video!.WriteRegister(Video.Register.WIN1V, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x048:
-                                _video!._WININ = GetLowHalfword(value);
-                                _video._WINOUT = GetHighHalfword(value);
+                                _video!.WriteRegister(Video.Register.WININ, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _video!.WriteRegister(Video.Register.WINOUT, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x04c:
-                                _video!._MOSAIC = GetLowHalfword(value);
+                                _video!.WriteRegister(Video.Register.MOSAIC, GetLowHalfword(value), RegisterWriteMode.HalfWord);
                                 // 16 upper bits are unused
                                 break;
                             case 0x050:
-                                _video!._BLDCNT = GetLowHalfword(value);
-                                _video._BLDALPHA = GetHighHalfword(value);
+                                _video!.WriteRegister(Video.Register.BLDCNT, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _video!.WriteRegister(Video.Register.BLDALPHA, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x054:
-                                _video!._BLDY = GetLowHalfword(value);
+                                _video!.WriteRegister(Video.Register.BLDY, GetLowHalfword(value), RegisterWriteMode.HalfWord);
                                 // 16 upper bits are unused
                                 break;
                             case 0x58:

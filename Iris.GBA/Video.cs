@@ -433,141 +433,141 @@ namespace Iris.GBA
             };
         }
 
-        internal void WriteRegister(Register register, UInt16 value)
+        internal void WriteRegister(Register register, UInt16 value, Memory.RegisterWriteMode mode)
         {
             switch (register)
             {
                 case Register.DISPCNT:
-                    _DISPCNT = value;
+                    Memory.WriteRegisterHelper(ref _DISPCNT, value, mode);
                     break;
                 case Register.DISPSTAT:
-                    _DISPSTAT = value;
+                    Memory.WriteRegisterHelper(ref _DISPSTAT, value, mode);
                     break;
 
                 case Register.BG0CNT:
-                    _BG0CNT = value;
+                    Memory.WriteRegisterHelper(ref _BG0CNT, value, mode);
                     break;
                 case Register.BG1CNT:
-                    _BG1CNT = value;
+                    Memory.WriteRegisterHelper(ref _BG1CNT, value, mode);
                     break;
                 case Register.BG2CNT:
-                    _BG2CNT = value;
+                    Memory.WriteRegisterHelper(ref _BG2CNT, value, mode);
                     break;
                 case Register.BG3CNT:
-                    _BG3CNT = value;
+                    Memory.WriteRegisterHelper(ref _BG3CNT, value, mode);
                     break;
 
                 case Register.BG0HOFS:
-                    _BG0HOFS = value;
+                    Memory.WriteRegisterHelper(ref _BG0HOFS, value, mode);
                     break;
                 case Register.BG0VOFS:
-                    _BG0VOFS = value;
+                    Memory.WriteRegisterHelper(ref _BG0VOFS, value, mode);
                     break;
 
                 case Register.BG1HOFS:
-                    _BG1HOFS = value;
+                    Memory.WriteRegisterHelper(ref _BG1HOFS, value, mode);
                     break;
                 case Register.BG1VOFS:
-                    _BG1VOFS = value;
+                    Memory.WriteRegisterHelper(ref _BG1VOFS, value, mode);
                     break;
 
                 case Register.BG2HOFS:
-                    _BG2HOFS = value;
+                    Memory.WriteRegisterHelper(ref _BG2HOFS, value, mode);
                     break;
                 case Register.BG2VOFS:
-                    _BG2VOFS = value;
+                    Memory.WriteRegisterHelper(ref _BG2VOFS, value, mode);
                     break;
 
                 case Register.BG3HOFS:
-                    _BG3HOFS = value;
+                    Memory.WriteRegisterHelper(ref _BG3HOFS, value, mode);
                     break;
                 case Register.BG3VOFS:
-                    _BG3VOFS = value;
+                    Memory.WriteRegisterHelper(ref _BG3VOFS, value, mode);
                     break;
 
                 case Register.BG2PA:
-                    _BG2PA = value;
+                    Memory.WriteRegisterHelper(ref _BG2PA, value, mode);
                     break;
                 case Register.BG2PB:
-                    _BG2PB = value;
+                    Memory.WriteRegisterHelper(ref _BG2PB, value, mode);
                     break;
                 case Register.BG2PC:
-                    _BG2PC = value;
+                    Memory.WriteRegisterHelper(ref _BG2PC, value, mode);
                     break;
                 case Register.BG2PD:
-                    _BG2PD = value;
+                    Memory.WriteRegisterHelper(ref _BG2PD, value, mode);
                     break;
                 case Register.BG2X_L:
-                    _BG2X_L = value;
+                    Memory.WriteRegisterHelper(ref _BG2X_L, value, mode);
                     break;
                 case Register.BG2X_H:
-                    _BG2X_H = value;
+                    Memory.WriteRegisterHelper(ref _BG2X_H, value, mode);
                     break;
                 case Register.BG2Y_L:
-                    _BG2Y_L = value;
+                    Memory.WriteRegisterHelper(ref _BG2Y_L, value, mode);
                     break;
                 case Register.BG2Y_H:
-                    _BG2Y_H = value;
+                    Memory.WriteRegisterHelper(ref _BG2Y_H, value, mode);
                     break;
 
                 case Register.BG3PA:
-                    _BG3PA = value;
+                    Memory.WriteRegisterHelper(ref _BG3PA, value, mode);
                     break;
                 case Register.BG3PB:
-                    _BG3PB = value;
+                    Memory.WriteRegisterHelper(ref _BG3PB, value, mode);
                     break;
                 case Register.BG3PC:
-                    _BG3PC = value;
+                    Memory.WriteRegisterHelper(ref _BG3PC, value, mode);
                     break;
                 case Register.BG3PD:
-                    _BG3PD = value;
+                    Memory.WriteRegisterHelper(ref _BG3PD, value, mode);
                     break;
                 case Register.BG3X_L:
-                    _BG3X_L = value;
+                    Memory.WriteRegisterHelper(ref _BG3X_L, value, mode);
                     break;
                 case Register.BG3X_H:
-                    _BG3X_H = value;
+                    Memory.WriteRegisterHelper(ref _BG3X_H, value, mode);
                     break;
                 case Register.BG3Y_L:
-                    _BG3Y_L = value;
+                    Memory.WriteRegisterHelper(ref _BG3Y_L, value, mode);
                     break;
                 case Register.BG3Y_H:
-                    _BG3Y_H = value;
+                    Memory.WriteRegisterHelper(ref _BG3Y_H, value, mode);
                     break;
 
                 case Register.WIN0H:
-                    _WIN0H = value;
+                    Memory.WriteRegisterHelper(ref _WIN0H, value, mode);
                     break;
                 case Register.WIN1H:
-                    _WIN1H = value;
+                    Memory.WriteRegisterHelper(ref _WIN1H, value, mode);
                     break;
 
                 case Register.WIN0V:
-                    _WIN0V = value;
+                    Memory.WriteRegisterHelper(ref _WIN0V, value, mode);
                     break;
                 case Register.WIN1V:
-                    _WIN1V = value;
+                    Memory.WriteRegisterHelper(ref _WIN1V, value, mode);
                     break;
 
                 case Register.WININ:
-                    _WININ = value;
+                    Memory.WriteRegisterHelper(ref _WININ, value, mode);
                     break;
                 case Register.WINOUT:
-                    _WINOUT = value;
+                    Memory.WriteRegisterHelper(ref _WINOUT, value, mode);
                     break;
 
                 case Register.MOSAIC:
-                    _MOSAIC = value;
+                    Memory.WriteRegisterHelper(ref _MOSAIC, value, mode);
                     break;
 
                 case Register.BLDCNT:
-                    _BLDCNT = value;
+                    Memory.WriteRegisterHelper(ref _BLDCNT, value, mode);
                     break;
                 case Register.BLDALPHA:
-                    _BLDALPHA = value;
+                    Memory.WriteRegisterHelper(ref _BLDALPHA, value, mode);
                     break;
                 case Register.BLDY:
-                    _BLDY = value;
+                    Memory.WriteRegisterHelper(ref _BLDY, value, mode);
                     break;
 
                 // should never happen
