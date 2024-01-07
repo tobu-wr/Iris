@@ -352,26 +352,26 @@ namespace Iris.GBA
                             0x100 => GetLowByte(_timer!.ReadRegister(Timer.Register.TM0CNT_L)),
                             0x101 => GetHighByte(_timer!.ReadRegister(Timer.Register.TM0CNT_L)),
 
-                            0x102 => GetLowByte(_timer!._TM0CNT_H),
-                            0x103 => GetHighByte(_timer!._TM0CNT_H),
+                            0x102 => GetLowByte(_timer!.ReadRegister(Timer.Register.TM0CNT_H)),
+                            0x103 => GetHighByte(_timer!.ReadRegister(Timer.Register.TM0CNT_H)),
 
-                            0x104 => GetLowByte(_timer!._TM1CNT_L),
-                            0x105 => GetHighByte(_timer!._TM1CNT_L),
+                            0x104 => GetLowByte(_timer!.ReadRegister(Timer.Register.TM1CNT_L)),
+                            0x105 => GetHighByte(_timer!.ReadRegister(Timer.Register.TM1CNT_L)),
 
-                            0x106 => GetLowByte(_timer!._TM1CNT_H),
-                            0x107 => GetHighByte(_timer!._TM1CNT_H),
+                            0x106 => GetLowByte(_timer!.ReadRegister(Timer.Register.TM1CNT_H)),
+                            0x107 => GetHighByte(_timer!.ReadRegister(Timer.Register.TM1CNT_H)),
 
-                            0x108 => GetLowByte(_timer!._TM2CNT_L),
-                            0x109 => GetHighByte(_timer!._TM2CNT_L),
+                            0x108 => GetLowByte(_timer!.ReadRegister(Timer.Register.TM2CNT_L)),
+                            0x109 => GetHighByte(_timer!.ReadRegister(Timer.Register.TM2CNT_L)),
 
-                            0x10a => GetLowByte(_timer!._TM2CNT_H),
-                            0x10b => GetHighByte(_timer!._TM2CNT_H),
+                            0x10a => GetLowByte(_timer!.ReadRegister(Timer.Register.TM2CNT_H)),
+                            0x10b => GetHighByte(_timer!.ReadRegister(Timer.Register.TM2CNT_H)),
 
-                            0x10c => GetLowByte(_timer!._TM3CNT_L),
-                            0x10d => GetHighByte(_timer!._TM3CNT_L),
+                            0x10c => GetLowByte(_timer!.ReadRegister(Timer.Register.TM3CNT_L)),
+                            0x10d => GetHighByte(_timer!.ReadRegister(Timer.Register.TM3CNT_L)),
 
-                            0x10e => GetLowByte(_timer!._TM3CNT_H),
-                            0x10f => GetHighByte(_timer!._TM3CNT_H),
+                            0x10e => GetLowByte(_timer!.ReadRegister(Timer.Register.TM3CNT_H)),
+                            0x10f => GetHighByte(_timer!.ReadRegister(Timer.Register.TM3CNT_H)),
 
                             0x120 => GetLowByte(_communication!._SIODATA0),
                             0x121 => GetHighByte(_communication!._SIODATA0),
@@ -548,13 +548,13 @@ namespace Iris.GBA
                             0x0d2 => _dma!._DMA2CNT_H,
                             0x0de => _dma!._DMA3CNT_H,
                             0x100 => _timer!.ReadRegister(Timer.Register.TM0CNT_L),
-                            0x102 => _timer!._TM0CNT_H,
-                            0x104 => _timer!._TM1CNT_L,
-                            0x106 => _timer!._TM1CNT_H,
-                            0x108 => _timer!._TM2CNT_L,
-                            0x10a => _timer!._TM2CNT_H,
-                            0x10c => _timer!._TM3CNT_L,
-                            0x10e => _timer!._TM3CNT_H,
+                            0x102 => _timer!.ReadRegister(Timer.Register.TM0CNT_H),
+                            0x104 => _timer!.ReadRegister(Timer.Register.TM1CNT_L),
+                            0x106 => _timer!.ReadRegister(Timer.Register.TM1CNT_H),
+                            0x108 => _timer!.ReadRegister(Timer.Register.TM2CNT_L),
+                            0x10a => _timer!.ReadRegister(Timer.Register.TM2CNT_H),
+                            0x10c => _timer!.ReadRegister(Timer.Register.TM3CNT_L),
+                            0x10e => _timer!.ReadRegister(Timer.Register.TM3CNT_H),
                             0x120 => _communication!._SIODATA0,
                             0x122 => _communication!._SIODATA1,
                             0x124 => _communication!._SIODATA2,
@@ -734,18 +734,18 @@ namespace Iris.GBA
             HalfWord
         }
 
-        internal static void WriteRegisterHelper(ref UInt16 register, UInt16 value, RegisterWriteMode mode)
+        internal static void WriteRegisterHelper(ref UInt16 registerValue, UInt16 value, RegisterWriteMode mode)
         {
             switch (mode)
             {
                 case RegisterWriteMode.LowByte:
-                    register = (UInt16)((register & 0xff00) | value);
+                    registerValue = (UInt16)((registerValue & 0xff00) | value);
                     break;
                 case RegisterWriteMode.HighByte:
-                    register = (UInt16)((register & 0x00ff) | (value << 8));
+                    registerValue = (UInt16)((registerValue & 0x00ff) | (value << 8));
                     break;
                 case RegisterWriteMode.HalfWord:
-                    register = value;
+                    registerValue = value;
                     break;
             }
         }
@@ -1283,60 +1283,59 @@ namespace Iris.GBA
                                 break;
 
                             case 0x100:
-                                SetLowByte(ref _timer!._TM0CNT_L, value);
+                                _timer!.WriteRegister(Timer.Register.TM0CNT_L, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x101:
-                                SetHighByte(ref _timer!._TM0CNT_L, value);
+                                _timer!.WriteRegister(Timer.Register.TM0CNT_L, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x102:
-                                SetLowByte(ref _timer!._TM0CNT_H, value);
-                                _timer.UpdateTimer0();
+                                _timer!.WriteRegister(Timer.Register.TM0CNT_H, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x103:
-                                SetHighByte(ref _timer!._TM0CNT_H, value);
+                                _timer!.WriteRegister(Timer.Register.TM0CNT_H, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x104:
-                                SetLowByte(ref _timer!._TM1CNT_L, value);
+                                _timer!.WriteRegister(Timer.Register.TM1CNT_L, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x105:
-                                SetHighByte(ref _timer!._TM1CNT_L, value);
+                                _timer!.WriteRegister(Timer.Register.TM1CNT_L, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x106:
-                                SetLowByte(ref _timer!._TM1CNT_H, value);
+                                _timer!.WriteRegister(Timer.Register.TM1CNT_H, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x107:
-                                SetHighByte(ref _timer!._TM1CNT_H, value);
+                                _timer!.WriteRegister(Timer.Register.TM1CNT_H, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x108:
-                                SetLowByte(ref _timer!._TM2CNT_L, value);
+                                _timer!.WriteRegister(Timer.Register.TM2CNT_L, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x109:
-                                SetHighByte(ref _timer!._TM2CNT_L, value);
+                                _timer!.WriteRegister(Timer.Register.TM2CNT_L, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x10a:
-                                SetLowByte(ref _timer!._TM2CNT_H, value);
+                                _timer!.WriteRegister(Timer.Register.TM2CNT_H, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x10b:
-                                SetHighByte(ref _timer!._TM2CNT_H, value);
+                                _timer!.WriteRegister(Timer.Register.TM2CNT_H, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x10c:
-                                SetLowByte(ref _timer!._TM3CNT_L, value);
+                                _timer!.WriteRegister(Timer.Register.TM3CNT_L, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x10d:
-                                SetHighByte(ref _timer!._TM3CNT_L, value);
+                                _timer!.WriteRegister(Timer.Register.TM3CNT_L, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x10e:
-                                SetLowByte(ref _timer!._TM3CNT_H, value);
+                                _timer!.WriteRegister(Timer.Register.TM3CNT_H, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x10f:
-                                SetHighByte(ref _timer!._TM3CNT_H, value);
+                                _timer!.WriteRegister(Timer.Register.TM3CNT_H, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x120:
@@ -1784,29 +1783,28 @@ namespace Iris.GBA
                                 _dma.UpdateChannel3();
                                 break;
                             case 0x100:
-                                _timer!.WriteRegister(Timer.Register.TM0CNT_L, value);
+                                _timer!.WriteRegister(Timer.Register.TM0CNT_L, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x102:
-                                _timer!._TM0CNT_H = value;
-                                _timer.UpdateTimer0();
+                                _timer!.WriteRegister(Timer.Register.TM0CNT_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x104:
-                                _timer!._TM1CNT_L = value;
+                                _timer!.WriteRegister(Timer.Register.TM1CNT_L, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x106:
-                                _timer!._TM1CNT_H = value;
+                                _timer!.WriteRegister(Timer.Register.TM1CNT_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x108:
-                                _timer!._TM2CNT_L = value;
+                                _timer!.WriteRegister(Timer.Register.TM2CNT_L, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x10a:
-                                _timer!._TM2CNT_H = value;
+                                _timer!.WriteRegister(Timer.Register.TM2CNT_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x10c:
-                                _timer!._TM3CNT_L = value;
+                                _timer!.WriteRegister(Timer.Register.TM3CNT_L, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x10e:
-                                _timer!._TM3CNT_H = value;
+                                _timer!.WriteRegister(Timer.Register.TM3CNT_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x120:
                                 _communication!._SIODATA0 = value;
@@ -2102,21 +2100,20 @@ namespace Iris.GBA
                                 // unused
                                 break;
                             case 0x100:
-                                _timer!.WriteRegister(Timer.Register.TM0CNT_L, GetLowHalfword(value));
-                                _timer._TM0CNT_H = GetHighHalfword(value);
-                                _timer.UpdateTimer0();
+                                _timer!.WriteRegister(Timer.Register.TM0CNT_L, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _timer!.WriteRegister(Timer.Register.TM0CNT_H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x104:
-                                _timer!._TM1CNT_L = GetLowHalfword(value);
-                                _timer._TM1CNT_H = GetHighHalfword(value);
+                                _timer!.WriteRegister(Timer.Register.TM1CNT_L, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _timer!.WriteRegister(Timer.Register.TM1CNT_H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x108:
-                                _timer!._TM2CNT_L = GetLowHalfword(value);
-                                _timer._TM2CNT_H = GetHighHalfword(value);
+                                _timer!.WriteRegister(Timer.Register.TM2CNT_L, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _timer!.WriteRegister(Timer.Register.TM2CNT_H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x10c:
-                                _timer!._TM3CNT_L = GetLowHalfword(value);
-                                _timer._TM3CNT_H = GetHighHalfword(value);
+                                _timer!.WriteRegister(Timer.Register.TM3CNT_L, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _timer!.WriteRegister(Timer.Register.TM3CNT_H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x110:
                             case 0x114:

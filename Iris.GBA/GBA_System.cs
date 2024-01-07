@@ -7,7 +7,10 @@ namespace Iris.GBA
 {
     public sealed class GBA_System : Common.System
     {
-        private readonly Scheduler _scheduler = new(3, 5);
+        // Task list:
+        // - 2 Video tasks
+        // - 4 Timer tasks
+        private readonly Scheduler _scheduler = new(6, 11);
 
         private readonly CPU_Core _cpu;
         private readonly Communication _communication = new();
@@ -34,6 +37,7 @@ namespace Iris.GBA
             _keyInput = new(pollInputCallback);
             _video = new(_scheduler, drawFrameCallback);
 
+            _timer.Initialize(_interruptControl);
             _dma.Initialize(_memory);
             _interruptControl.Initialize(_cpu);
             _memory.Initialize(_communication, _timer, _sound, _dma, _keyInput, _systemControl, _interruptControl, _video, _bios);
@@ -136,6 +140,7 @@ namespace Iris.GBA
                 while (!_scheduler.HasTaskReady())
                 {
                     UInt32 cycleCount = _cpu.Step();
+                    _timer.UpdateAllChannels(cycleCount);
                     _scheduler.AdvanceCycleCounter(cycleCount);
                 }
 

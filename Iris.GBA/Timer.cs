@@ -1,168 +1,237 @@
-﻿using Iris.Common;
-
-namespace Iris.GBA
+﻿namespace Iris.GBA
 {
     internal sealed class Timer
     {
         internal enum Register
         {
-            TM0CNT_L
+            TM0CNT_L,
+            TM0CNT_H,
+
+            TM1CNT_L,
+            TM1CNT_H,
+
+            TM2CNT_L,
+            TM2CNT_H,
+
+            TM3CNT_L,
+            TM3CNT_H
         }
 
-        internal UInt16 _TM0CNT_L;
-        internal UInt16 _TM0CNT_H;
+        private readonly Common.Scheduler _scheduler;
 
-        internal UInt16 _TM1CNT_L;
-        internal UInt16 _TM1CNT_H;
+        private readonly int _startChannel0TaskId;
+        private readonly int _startChannel1TaskId;
+        private readonly int _startChannel2TaskId;
+        private readonly int _startChannel3TaskId;
 
-        internal UInt16 _TM2CNT_L;
-        internal UInt16 _TM2CNT_H;
+        private InterruptControl _interruptControl;
 
-        internal UInt16 _TM3CNT_L;
-        internal UInt16 _TM3CNT_H;
-
-        private readonly Scheduler _scheduler;
-
-        private readonly int _performTimer0TaskId;
-
-        private record struct TimerState
+        private record struct Channel
         (
-            bool Enabled,
             UInt16 Counter,
-            UInt16 Reload
+            UInt16 Reload,
+            UInt16 Control,
+            UInt32 CycleCount,
+            bool Running
         );
 
-        private TimerState _timer0;
+        private Channel _channel0;
+        private Channel _channel1;
+        private Channel _channel2;
+        private Channel _channel3;
 
-        internal Timer(Scheduler scheduler)
+        internal Timer(Common.Scheduler scheduler)
         {
             _scheduler = scheduler;
 
-            _performTimer0TaskId = _scheduler.RegisterTask(PerformTimer0);
+            static void StartChannel(ref Channel channel, UInt32 cycleCountDelay)
+            {
+                if ((channel.Control & 0x0080) == 0)
+                    return;
+
+                channel.CycleCount = cycleCountDelay;
+                channel.Running = true;
+            }
+
+            _startChannel0TaskId = _scheduler.RegisterTask((UInt32 cycleCountDelay) => StartChannel(ref _channel0, cycleCountDelay));
+            _startChannel1TaskId = _scheduler.RegisterTask((UInt32 cycleCountDelay) => StartChannel(ref _channel1, cycleCountDelay));
+            _startChannel2TaskId = _scheduler.RegisterTask((UInt32 cycleCountDelay) => StartChannel(ref _channel2, cycleCountDelay));
+            _startChannel3TaskId = _scheduler.RegisterTask((UInt32 cycleCountDelay) => StartChannel(ref _channel3, cycleCountDelay));
+        }
+
+        internal void Initialize(InterruptControl interruptControl)
+        {
+            _interruptControl = interruptControl;
         }
 
         internal void ResetState()
         {
-            _TM0CNT_L = 0;
-            _TM0CNT_H = 0;
-
-            _TM1CNT_L = 0;
-            _TM1CNT_H = 0;
-
-            _TM2CNT_L = 0;
-            _TM2CNT_H = 0;
-
-            _TM3CNT_L = 0;
-            _TM3CNT_H = 0;
+            _channel0 = default;
+            _channel1 = default;
+            _channel2 = default;
+            _channel3 = default;
         }
 
         internal void LoadState(BinaryReader reader)
         {
-            _TM0CNT_L = reader.ReadUInt16();
-            _TM0CNT_H = reader.ReadUInt16();
+            void LoadChannel(ref Channel channel)
+            {
+                channel.Counter = reader.ReadUInt16();
+                channel.Reload = reader.ReadUInt16();
+                channel.Control = reader.ReadUInt16();
+                channel.CycleCount = reader.ReadUInt32();
+                channel.Running = reader.ReadBoolean();
+            }
 
-            _TM1CNT_L = reader.ReadUInt16();
-            _TM1CNT_H = reader.ReadUInt16();
-
-            _TM2CNT_L = reader.ReadUInt16();
-            _TM2CNT_H = reader.ReadUInt16();
-
-            _TM3CNT_L = reader.ReadUInt16();
-            _TM3CNT_H = reader.ReadUInt16();
+            LoadChannel(ref _channel0);
+            LoadChannel(ref _channel1);
+            LoadChannel(ref _channel2);
+            LoadChannel(ref _channel3);
         }
 
         internal void SaveState(BinaryWriter writer)
         {
-            writer.Write(_TM0CNT_L);
-            writer.Write(_TM0CNT_H);
+            void SaveChannel(Channel channel)
+            {
+                writer.Write(channel.Counter);
+                writer.Write(channel.Reload);
+                writer.Write(channel.Control);
+                writer.Write(channel.CycleCount);
+                writer.Write(channel.Running);
+            }
 
-            writer.Write(_TM1CNT_L);
-            writer.Write(_TM1CNT_H);
-
-            writer.Write(_TM2CNT_L);
-            writer.Write(_TM2CNT_H);
-
-            writer.Write(_TM3CNT_L);
-            writer.Write(_TM3CNT_H);
+            SaveChannel(_channel0);
+            SaveChannel(_channel1);
+            SaveChannel(_channel2);
+            SaveChannel(_channel3);
         }
 
         internal UInt16 ReadRegister(Register register)
         {
             return register switch
             {
-                Register.TM0CNT_L => _timer0.Counter,
-                _ => 0,
+                Register.TM0CNT_L => _channel0.Counter,
+                Register.TM0CNT_H => _channel0.Control,
+
+                Register.TM1CNT_L => _channel1.Counter,
+                Register.TM1CNT_H => _channel1.Control,
+
+                Register.TM2CNT_L => _channel2.Counter,
+                Register.TM2CNT_H => _channel2.Control,
+
+                Register.TM3CNT_L => _channel3.Counter,
+                Register.TM3CNT_H => _channel3.Control,
+
+                // should never happen
+                _ => throw new Exception("Iris.GBA.Timer: Register read error"),
             };
         }
 
-        internal void WriteRegister(Register register, UInt16 value)
+        internal void WriteRegister(Register register, UInt16 value, Memory.RegisterWriteMode mode)
         {
+            void WriteReload(ref Channel channel)
+            {
+                UInt16 reload = channel.Reload;
+                Memory.WriteRegisterHelper(ref reload, value, mode);
+                channel.Reload = reload;
+            }
+
+            void WriteControl(ref Channel channel, int startChannelTaskId)
+            {
+                UInt16 previousControl = channel.Control;
+
+                UInt16 newControl = channel.Control;
+                Memory.WriteRegisterHelper(ref newControl, value, mode);
+                channel.Control = newControl;
+
+                if (((previousControl & 0x0080) == 0) && ((newControl & 0x0080) == 0x0080))
+                {
+                    channel.Counter = channel.Reload;
+
+                    _scheduler.ScheduleTask(2, startChannelTaskId);
+                }
+                else if (((previousControl & 0x0080) == 0x0080) && ((newControl & 0x0080) == 0))
+                {
+                    channel.Running = false;
+                }
+            }
+
             switch (register)
             {
                 case Register.TM0CNT_L:
-                    _timer0.Reload = value;
+                    WriteReload(ref _channel0);
                     break;
-            }
-        }
+                case Register.TM0CNT_H:
+                    WriteControl(ref _channel0, _startChannel0TaskId);
+                    break;
 
-        internal void UpdateTimer0()
-        {
-            if ((_TM0CNT_H & 0x0080) == 0)
-            {
-                _timer0.Enabled = false;
-            }
-            else if (!_timer0.Enabled)
-            {
-                _timer0.Enabled = true;
-                _timer0.Counter = _timer0.Reload;
+                case Register.TM1CNT_L:
+                    WriteReload(ref _channel1);
+                    break;
+                case Register.TM1CNT_H:
+                    WriteControl(ref _channel1, _startChannel1TaskId);
+                    break;
 
-                _scheduler.ScheduleTask(GetPrescalar(_TM0CNT_H), _performTimer0TaskId);
-            }
-        }
+                case Register.TM2CNT_L:
+                    WriteReload(ref _channel2);
+                    break;
+                case Register.TM2CNT_H:
+                    WriteControl(ref _channel2, _startChannel2TaskId);
+                    break;
 
-        private void PerformTimer0(UInt32 cycleCountDelay)
-        {
-            if (!_timer0.Enabled)
-                return;
+                case Register.TM3CNT_L:
+                    WriteReload(ref _channel3);
+                    break;
+                case Register.TM3CNT_H:
+                    WriteControl(ref _channel3, _startChannel3TaskId);
+                    break;
 
-            UInt32 prescalar = GetPrescalar(_TM0CNT_H);
-
-            void IncrementCounter()
-            {
-                if (_timer0.Counter == 0xffff)
-                {
-                    _timer0.Counter = _timer0.Reload;
-
-                    if ((_TM0CNT_H & 0x0040) == 0x0040)
-                    {
-                        // TODO: IRQ
-                    }
-                }
-                else
-                {
-                    ++_timer0.Counter;
-                }
-            }
-
-            IncrementCounter();
-
-            for (; cycleCountDelay >= prescalar; cycleCountDelay -= prescalar)
-                IncrementCounter();
-
-            _scheduler.ScheduleTask(prescalar - cycleCountDelay, _performTimer0TaskId);
-        }
-
-        private static UInt32 GetPrescalar(UInt16 cnt_h)
-        {
-            return (cnt_h & 0b11) switch
-            {
-                0b00 => 1,
-                0b01 => 64,
-                0b10 => 256,
-                0b11 => 1024,
                 // should never happen
-                _ => throw new Exception("Iris.GBA.Timer: Wrong prescalar selection"),
-            };
+                default:
+                    throw new Exception("Iris.GBA.Timer: Register write error");
+            }
+        }
+
+        internal void UpdateAllChannels(UInt32 cycleCount)
+        {
+            void UpdateChannel(ref Channel channel, InterruptControl.Interrupt interrupt)
+            {
+                if (!channel.Running)
+                    return;
+
+                channel.CycleCount += cycleCount;
+
+                UInt32 prescaler = (channel.Control & 0b11) switch
+                {
+                    0b00 => 1,
+                    0b01 => 64,
+                    0b10 => 256,
+                    0b11 => 1024,
+
+                    // should never happen
+                    _ => 0,
+                };
+
+                UInt32 increment = channel.CycleCount / prescaler;
+                channel.CycleCount -= increment * prescaler;
+
+                UInt32 counter = channel.Counter + increment;
+
+                if (counter >= 0x1_0000)
+                {
+                    counter = channel.Reload + ((counter - 0x1_0000u) % (0x1_0000u - channel.Reload));
+
+                    if ((channel.Control & 0x0040) == 0x0040)
+                        _interruptControl.RequestInterrupt(interrupt);
+                }
+
+                channel.Counter = (UInt16)counter;
+            }
+
+            UpdateChannel(ref _channel0, InterruptControl.Interrupt.Timer0);
+            UpdateChannel(ref _channel1, InterruptControl.Interrupt.Timer1);
+            UpdateChannel(ref _channel2, InterruptControl.Interrupt.Timer2);
+            UpdateChannel(ref _channel3, InterruptControl.Interrupt.Timer3);
         }
     }
 }
