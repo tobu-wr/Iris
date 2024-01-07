@@ -44,15 +44,6 @@
         {
             _scheduler = scheduler;
 
-            static void StartChannel(ref Channel channel, UInt32 cycleCountDelay)
-            {
-                if ((channel.Control & 0x0080) == 0)
-                    return;
-
-                channel.CycleCount = cycleCountDelay;
-                channel.Running = true;
-            }
-
             _startChannel0TaskId = _scheduler.RegisterTask((UInt32 cycleCountDelay) => StartChannel(ref _channel0, cycleCountDelay));
             _startChannel1TaskId = _scheduler.RegisterTask((UInt32 cycleCountDelay) => StartChannel(ref _channel1, cycleCountDelay));
             _startChannel2TaskId = _scheduler.RegisterTask((UInt32 cycleCountDelay) => StartChannel(ref _channel2, cycleCountDelay));
@@ -194,44 +185,53 @@
 
         internal void UpdateAllChannels(UInt32 cycleCount)
         {
-            void UpdateChannel(ref Channel channel, InterruptControl.Interrupt interrupt)
+            UpdateChannel(ref _channel0, cycleCount, InterruptControl.Interrupt.Timer0);
+            UpdateChannel(ref _channel1, cycleCount, InterruptControl.Interrupt.Timer1);
+            UpdateChannel(ref _channel2, cycleCount, InterruptControl.Interrupt.Timer2);
+            UpdateChannel(ref _channel3, cycleCount, InterruptControl.Interrupt.Timer3);
+        }
+
+        static void StartChannel(ref Channel channel, UInt32 cycleCountDelay)
+        {
+            if ((channel.Control & 0x0080) == 0)
+                return;
+
+            channel.CycleCount = cycleCountDelay;
+            channel.Running = true;
+        }
+
+        void UpdateChannel(ref Channel channel, UInt32 cycleCount, InterruptControl.Interrupt interrupt)
+        {
+            if (!channel.Running)
+                return;
+
+            channel.CycleCount += cycleCount;
+
+            UInt32 prescaler = (channel.Control & 0b11) switch
             {
-                if (!channel.Running)
-                    return;
+                0b00 => 1,
+                0b01 => 64,
+                0b10 => 256,
+                0b11 => 1024,
 
-                channel.CycleCount += cycleCount;
+                // should never happen
+                _ => 0,
+            };
 
-                UInt32 prescaler = (channel.Control & 0b11) switch
-                {
-                    0b00 => 1,
-                    0b01 => 64,
-                    0b10 => 256,
-                    0b11 => 1024,
+            UInt32 increment = channel.CycleCount / prescaler;
+            channel.CycleCount -= increment * prescaler;
 
-                    // should never happen
-                    _ => 0,
-                };
+            UInt32 counter = channel.Counter + increment;
 
-                UInt32 increment = channel.CycleCount / prescaler;
-                channel.CycleCount -= increment * prescaler;
+            if (counter >= 0x1_0000)
+            {
+                counter = channel.Reload + ((counter - 0x1_0000u) % (0x1_0000u - channel.Reload));
 
-                UInt32 counter = channel.Counter + increment;
-
-                if (counter >= 0x1_0000)
-                {
-                    counter = channel.Reload + ((counter - 0x1_0000u) % (0x1_0000u - channel.Reload));
-
-                    if ((channel.Control & 0x0040) == 0x0040)
-                        _interruptControl.RequestInterrupt(interrupt);
-                }
-
-                channel.Counter = (UInt16)counter;
+                if ((channel.Control & 0x0040) == 0x0040)
+                    _interruptControl.RequestInterrupt(interrupt);
             }
 
-            UpdateChannel(ref _channel0, InterruptControl.Interrupt.Timer0);
-            UpdateChannel(ref _channel1, InterruptControl.Interrupt.Timer1);
-            UpdateChannel(ref _channel2, InterruptControl.Interrupt.Timer2);
-            UpdateChannel(ref _channel3, InterruptControl.Interrupt.Timer3);
+            channel.Counter = (UInt16)counter;
         }
     }
 }
