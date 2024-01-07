@@ -31,7 +31,7 @@
             UInt16 Counter,
             UInt16 Reload,
             UInt16 Control,
-            UInt32 CycleCount,
+            UInt32 CycleCounter,
             bool Running
         );
 
@@ -70,7 +70,7 @@
                 channel.Counter = reader.ReadUInt16();
                 channel.Reload = reader.ReadUInt16();
                 channel.Control = reader.ReadUInt16();
-                channel.CycleCount = reader.ReadUInt32();
+                channel.CycleCounter = reader.ReadUInt32();
                 channel.Running = reader.ReadBoolean();
             }
 
@@ -87,7 +87,7 @@
                 writer.Write(channel.Counter);
                 writer.Write(channel.Reload);
                 writer.Write(channel.Control);
-                writer.Write(channel.CycleCount);
+                writer.Write(channel.CycleCounter);
                 writer.Write(channel.Running);
             }
 
@@ -197,7 +197,7 @@
             if ((channel.Control & 0x0080) == 0)
                 return;
 
-            channel.CycleCount = cycleCountDelay;
+            channel.CycleCounter = cycleCountDelay;
             channel.Running = true;
         }
 
@@ -206,11 +206,11 @@
             if (!channel.Running)
                 return;
 
-            UInt32 increment;
+            UInt32 counterIncrement;
 
             if (((channel.Control & 0x0004) == 0) || isFirstChannel)
             {
-                channel.CycleCount += cycleCount;
+                channel.CycleCounter += cycleCount;
 
                 UInt32 prescaler = (channel.Control & 0b11) switch
                 {
@@ -223,20 +223,21 @@
                     _ => 0,
                 };
 
-                increment = channel.CycleCount / prescaler;
-                channel.CycleCount %= prescaler;
+                (counterIncrement, channel.CycleCounter) = Math.DivRem(channel.CycleCounter, prescaler);
             }
             else
             {
-                increment = overflowCount;
+                counterIncrement = overflowCount;
             }
 
-            UInt32 counter = channel.Counter + increment;
+            UInt32 counter = channel.Counter + counterIncrement;
 
             if (counter >= 0x1_0000)
             {
-                channel.Counter = (UInt16)(channel.Reload + ((counter - 0x1_0000u) % (0x1_0000u - channel.Reload)));
-                overflowCount = 1 + ((counter - 0x1_0000u) / (0x1_0000u - channel.Reload));
+                (overflowCount, counterIncrement) = Math.DivRem(counter - 0x1_0000u, 0x1_0000u - channel.Reload);
+
+                channel.Counter = (UInt16)(channel.Reload + counterIncrement);
+                ++overflowCount;
 
                 if ((channel.Control & 0x0040) == 0x0040)
                     _interruptControl.RequestInterrupt(interrupt);
