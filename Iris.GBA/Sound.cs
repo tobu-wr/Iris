@@ -241,7 +241,7 @@
                 Register.WAVE_RAM3_H => _WAVE_RAM3_H,
 
                 // should never happen
-                _ => throw new Exception("Iris.GBA.SystemControl: Register read error"),
+                _ => throw new Exception("Iris.GBA.Sound: Register read error"),
             };
         }
 
@@ -341,7 +341,7 @@
 
                 // should never happen
                 default:
-                    throw new Exception("Iris.GBA.SystemControl: Register write error");
+                    throw new Exception("Iris.GBA.Sound: Register write error");
             }
         }
     }
