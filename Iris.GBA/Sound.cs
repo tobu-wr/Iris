@@ -2,43 +2,84 @@
 {
     internal sealed class Sound
     {
-        internal UInt16 _SOUND1CNT_L;
-        internal UInt16 _SOUND1CNT_H;
-        internal UInt16 _SOUND1CNT_X;
+        internal enum Register
+        {
+            SOUND1CNT_L,
+            SOUND1CNT_H,
+            SOUND1CNT_X,
 
-        internal UInt16 _SOUND2CNT_L;
-        internal UInt16 _SOUND2CNT_H;
+            SOUND2CNT_L,
+            SOUND2CNT_H,
 
-        internal UInt16 _SOUND3CNT_L;
-        internal UInt16 _SOUND3CNT_H;
-        internal UInt16 _SOUND3CNT_X;
+            SOUND3CNT_L,
+            SOUND3CNT_H,
+            SOUND3CNT_X,
 
-        internal UInt16 _SOUND4CNT_L;
-        internal UInt16 _SOUND4CNT_H;
+            SOUND4CNT_L,
+            SOUND4CNT_H,
 
-        internal UInt16 _SOUNDCNT_L;
-        internal UInt16 _SOUNDCNT_H;
-        internal UInt16 _SOUNDCNT_X;
+            SOUNDCNT_L,
+            SOUNDCNT_H,
+            SOUNDCNT_X,
 
-        internal UInt16 _SOUNDBIAS;
+            SOUNDBIAS,
 
-        internal UInt16 _WAVE_RAM0_L;
-        internal UInt16 _WAVE_RAM0_H;
+            WAVE_RAM0_L,
+            WAVE_RAM0_H,
 
-        internal UInt16 _WAVE_RAM1_L;
-        internal UInt16 _WAVE_RAM1_H;
+            WAVE_RAM1_L,
+            WAVE_RAM1_H,
 
-        internal UInt16 _WAVE_RAM2_L;
-        internal UInt16 _WAVE_RAM2_H;
+            WAVE_RAM2_L,
+            WAVE_RAM2_H,
 
-        internal UInt16 _WAVE_RAM3_L;
-        internal UInt16 _WAVE_RAM3_H;
+            WAVE_RAM3_L,
+            WAVE_RAM3_H,
 
-        internal UInt16 _FIFO_A_L;
-        internal UInt16 _FIFO_A_H;
+            FIFO_A_L,
+            FIFO_A_H,
 
-        internal UInt16 _FIFO_B_L;
-        internal UInt16 _FIFO_B_H;
+            FIFO_B_L,
+            FIFO_B_H
+        }
+
+        private UInt16 _SOUND1CNT_L;
+        private UInt16 _SOUND1CNT_H;
+        private UInt16 _SOUND1CNT_X;
+
+        private UInt16 _SOUND2CNT_L;
+        private UInt16 _SOUND2CNT_H;
+
+        private UInt16 _SOUND3CNT_L;
+        private UInt16 _SOUND3CNT_H;
+        private UInt16 _SOUND3CNT_X;
+
+        private UInt16 _SOUND4CNT_L;
+        private UInt16 _SOUND4CNT_H;
+
+        private UInt16 _SOUNDCNT_L;
+        private UInt16 _SOUNDCNT_H;
+        private UInt16 _SOUNDCNT_X;
+
+        private UInt16 _SOUNDBIAS;
+
+        private UInt16 _WAVE_RAM0_L;
+        private UInt16 _WAVE_RAM0_H;
+
+        private UInt16 _WAVE_RAM1_L;
+        private UInt16 _WAVE_RAM1_H;
+
+        private UInt16 _WAVE_RAM2_L;
+        private UInt16 _WAVE_RAM2_H;
+
+        private UInt16 _WAVE_RAM3_L;
+        private UInt16 _WAVE_RAM3_H;
+
+        private UInt16 _FIFO_A_L;
+        private UInt16 _FIFO_A_H;
+
+        private UInt16 _FIFO_B_L;
+        private UInt16 _FIFO_B_H;
 
         internal void ResetState()
         {
@@ -161,6 +202,147 @@
 
             writer.Write(_FIFO_B_L);
             writer.Write(_FIFO_B_H);
+        }
+
+        internal UInt16 ReadRegister(Register register)
+        {
+            return register switch
+            {
+                Register.SOUND1CNT_L => _SOUND1CNT_L,
+                Register.SOUND1CNT_H => _SOUND1CNT_H,
+                Register.SOUND1CNT_X => _SOUND1CNT_X,
+
+                Register.SOUND2CNT_L => _SOUND2CNT_L,
+                Register.SOUND2CNT_H => _SOUND2CNT_H,
+
+                Register.SOUND3CNT_L => _SOUND3CNT_L,
+                Register.SOUND3CNT_H => _SOUND3CNT_H,
+                Register.SOUND3CNT_X => _SOUND3CNT_X,
+
+                Register.SOUND4CNT_L => _SOUND4CNT_L,
+                Register.SOUND4CNT_H => _SOUND4CNT_H,
+
+                Register.SOUNDCNT_L => _SOUNDCNT_L,
+                Register.SOUNDCNT_H => _SOUNDCNT_H,
+                Register.SOUNDCNT_X => _SOUNDCNT_X,
+
+                Register.SOUNDBIAS => _SOUNDBIAS,
+
+                Register.WAVE_RAM0_L => _WAVE_RAM0_L,
+                Register.WAVE_RAM0_H => _WAVE_RAM0_H,
+
+                Register.WAVE_RAM1_L => _WAVE_RAM1_L,
+                Register.WAVE_RAM1_H => _WAVE_RAM1_H,
+
+                Register.WAVE_RAM2_L => _WAVE_RAM2_L,
+                Register.WAVE_RAM2_H => _WAVE_RAM2_H,
+
+                Register.WAVE_RAM3_L => _WAVE_RAM3_L,
+                Register.WAVE_RAM3_H => _WAVE_RAM3_H,
+
+                // should never happen
+                _ => throw new Exception("Iris.GBA.SystemControl: Register read error"),
+            };
+        }
+
+        internal void WriteRegister(Register register, UInt16 value, Memory.RegisterWriteMode mode)
+        {
+            switch (register)
+            {
+                case Register.SOUND1CNT_L:
+                    Memory.WriteRegisterHelper(ref _SOUND1CNT_L, value, mode);
+                    break;
+                case Register.SOUND1CNT_H:
+                    Memory.WriteRegisterHelper(ref _SOUND1CNT_H, value, mode);
+                    break;
+                case Register.SOUND1CNT_X:
+                    Memory.WriteRegisterHelper(ref _SOUND1CNT_X, value, mode);
+                    break;
+
+                case Register.SOUND2CNT_L:
+                    Memory.WriteRegisterHelper(ref _SOUND2CNT_L, value, mode);
+                    break;
+                case Register.SOUND2CNT_H:
+                    Memory.WriteRegisterHelper(ref _SOUND2CNT_H, value, mode);
+                    break;
+
+                case Register.SOUND3CNT_L:
+                    Memory.WriteRegisterHelper(ref _SOUND3CNT_L, value, mode);
+                    break;
+                case Register.SOUND3CNT_H:
+                    Memory.WriteRegisterHelper(ref _SOUND3CNT_H, value, mode);
+                    break;
+                case Register.SOUND3CNT_X:
+                    Memory.WriteRegisterHelper(ref _SOUND3CNT_X, value, mode);
+                    break;
+
+                case Register.SOUND4CNT_L:
+                    Memory.WriteRegisterHelper(ref _SOUND4CNT_L, value, mode);
+                    break;
+                case Register.SOUND4CNT_H:
+                    Memory.WriteRegisterHelper(ref _SOUND4CNT_H, value, mode);
+                    break;
+
+                case Register.SOUNDCNT_L:
+                    Memory.WriteRegisterHelper(ref _SOUNDCNT_L, value, mode);
+                    break;
+                case Register.SOUNDCNT_H:
+                    Memory.WriteRegisterHelper(ref _SOUNDCNT_H, value, mode);
+                    break;
+                case Register.SOUNDCNT_X:
+                    Memory.WriteRegisterHelper(ref _SOUNDCNT_X, value, mode);
+                    break;
+
+                case Register.SOUNDBIAS:
+                    Memory.WriteRegisterHelper(ref _SOUNDBIAS, value, mode);
+                    break;
+
+                case Register.WAVE_RAM0_L:
+                    Memory.WriteRegisterHelper(ref _WAVE_RAM0_L, value, mode);
+                    break;
+                case Register.WAVE_RAM0_H:
+                    Memory.WriteRegisterHelper(ref _WAVE_RAM0_H, value, mode);
+                    break;
+
+                case Register.WAVE_RAM1_L:
+                    Memory.WriteRegisterHelper(ref _WAVE_RAM1_L, value, mode);
+                    break;
+                case Register.WAVE_RAM1_H:
+                    Memory.WriteRegisterHelper(ref _WAVE_RAM1_H, value, mode);
+                    break;
+
+                case Register.WAVE_RAM2_L:
+                    Memory.WriteRegisterHelper(ref _WAVE_RAM2_L, value, mode);
+                    break;
+                case Register.WAVE_RAM2_H:
+                    Memory.WriteRegisterHelper(ref _WAVE_RAM2_H, value, mode);
+                    break;
+
+                case Register.WAVE_RAM3_L:
+                    Memory.WriteRegisterHelper(ref _WAVE_RAM3_L, value, mode);
+                    break;
+                case Register.WAVE_RAM3_H:
+                    Memory.WriteRegisterHelper(ref _WAVE_RAM3_H, value, mode);
+                    break;
+
+                case Register.FIFO_A_L:
+                    Memory.WriteRegisterHelper(ref _FIFO_A_L, value, mode);
+                    break;
+                case Register.FIFO_A_H:
+                    Memory.WriteRegisterHelper(ref _FIFO_A_H, value, mode);
+                    break;
+
+                case Register.FIFO_B_L:
+                    Memory.WriteRegisterHelper(ref _FIFO_B_L, value, mode);
+                    break;
+                case Register.FIFO_B_H:
+                    Memory.WriteRegisterHelper(ref _FIFO_B_H, value, mode);
+                    break;
+
+                // should never happen
+                default:
+                    throw new Exception("Iris.GBA.SystemControl: Register write error");
+            }
         }
     }
 }

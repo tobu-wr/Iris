@@ -271,71 +271,71 @@ namespace Iris.GBA
                             0x052 => GetLowByte(_video!.ReadRegister(Video.Register.BLDALPHA)),
                             0x053 => GetHighByte(_video!.ReadRegister(Video.Register.BLDALPHA)),
 
-                            0x060 => GetLowByte(_sound!._SOUND1CNT_L),
-                            0x061 => GetHighByte(_sound!._SOUND1CNT_L),
+                            0x060 => GetLowByte(_sound!.ReadRegister(Sound.Register.SOUND1CNT_L)),
+                            0x061 => GetHighByte(_sound!.ReadRegister(Sound.Register.SOUND1CNT_L)),
 
-                            0x062 => GetLowByte(_sound!._SOUND1CNT_H),
-                            0x063 => GetHighByte(_sound!._SOUND1CNT_H),
+                            0x062 => GetLowByte(_sound!.ReadRegister(Sound.Register.SOUND1CNT_H)),
+                            0x063 => GetHighByte(_sound!.ReadRegister(Sound.Register.SOUND1CNT_H)),
 
-                            0x064 => GetLowByte(_sound!._SOUND1CNT_X),
-                            0x065 => GetHighByte(_sound!._SOUND1CNT_X),
+                            0x064 => GetLowByte(_sound!.ReadRegister(Sound.Register.SOUND1CNT_X)),
+                            0x065 => GetHighByte(_sound!.ReadRegister(Sound.Register.SOUND1CNT_X)),
 
-                            0x068 => GetLowByte(_sound!._SOUND2CNT_L),
-                            0x069 => GetHighByte(_sound!._SOUND2CNT_L),
+                            0x068 => GetLowByte(_sound!.ReadRegister(Sound.Register.SOUND2CNT_L)),
+                            0x069 => GetHighByte(_sound!.ReadRegister(Sound.Register.SOUND2CNT_L)),
 
-                            0x06c => GetLowByte(_sound!._SOUND2CNT_H),
-                            0x06d => GetHighByte(_sound!._SOUND2CNT_H),
+                            0x06c => GetLowByte(_sound!.ReadRegister(Sound.Register.SOUND2CNT_H)),
+                            0x06d => GetHighByte(_sound!.ReadRegister(Sound.Register.SOUND2CNT_H)),
 
-                            0x070 => GetLowByte(_sound!._SOUND3CNT_L),
-                            0x071 => GetHighByte(_sound!._SOUND3CNT_L),
+                            0x070 => GetLowByte(_sound!.ReadRegister(Sound.Register.SOUND3CNT_L)),
+                            0x071 => GetHighByte(_sound!.ReadRegister(Sound.Register.SOUND3CNT_L)),
 
-                            0x072 => GetLowByte(_sound!._SOUND3CNT_H),
-                            0x073 => GetHighByte(_sound!._SOUND3CNT_H),
+                            0x072 => GetLowByte(_sound!.ReadRegister(Sound.Register.SOUND3CNT_H)),
+                            0x073 => GetHighByte(_sound!.ReadRegister(Sound.Register.SOUND3CNT_H)),
 
-                            0x074 => GetLowByte(_sound!._SOUND3CNT_X),
-                            0x075 => GetHighByte(_sound!._SOUND3CNT_X),
+                            0x074 => GetLowByte(_sound!.ReadRegister(Sound.Register.SOUND3CNT_X)),
+                            0x075 => GetHighByte(_sound!.ReadRegister(Sound.Register.SOUND3CNT_X)),
 
-                            0x078 => GetLowByte(_sound!._SOUND4CNT_L),
-                            0x079 => GetHighByte(_sound!._SOUND4CNT_L),
+                            0x078 => GetLowByte(_sound!.ReadRegister(Sound.Register.SOUND4CNT_L)),
+                            0x079 => GetHighByte(_sound!.ReadRegister(Sound.Register.SOUND4CNT_L)),
 
-                            0x07c => GetLowByte(_sound!._SOUND4CNT_H),
-                            0x07d => GetHighByte(_sound!._SOUND4CNT_H),
+                            0x07c => GetLowByte(_sound!.ReadRegister(Sound.Register.SOUND4CNT_H)),
+                            0x07d => GetHighByte(_sound!.ReadRegister(Sound.Register.SOUND4CNT_H)),
 
-                            0x080 => GetLowByte(_sound!._SOUNDCNT_L),
-                            0x081 => GetHighByte(_sound!._SOUNDCNT_L),
+                            0x080 => GetLowByte(_sound!.ReadRegister(Sound.Register.SOUNDCNT_L)),
+                            0x081 => GetHighByte(_sound!.ReadRegister(Sound.Register.SOUNDCNT_L)),
 
-                            0x082 => GetLowByte(_sound!._SOUNDCNT_H),
-                            0x083 => GetHighByte(_sound!._SOUNDCNT_H),
+                            0x082 => GetLowByte(_sound!.ReadRegister(Sound.Register.SOUNDCNT_H)),
+                            0x083 => GetHighByte(_sound!.ReadRegister(Sound.Register.SOUNDCNT_H)),
 
-                            0x084 => GetLowByte(_sound!._SOUNDCNT_X),
-                            0x085 => GetHighByte(_sound!._SOUNDCNT_X),
+                            0x084 => GetLowByte(_sound!.ReadRegister(Sound.Register.SOUNDCNT_X)),
+                            0x085 => GetHighByte(_sound!.ReadRegister(Sound.Register.SOUNDCNT_X)),
 
-                            0x088 => GetLowByte(_sound!._SOUNDBIAS),
-                            0x089 => GetHighByte(_sound!._SOUNDBIAS),
+                            0x088 => GetLowByte(_sound!.ReadRegister(Sound.Register.SOUNDBIAS)),
+                            0x089 => GetHighByte(_sound!.ReadRegister(Sound.Register.SOUNDBIAS)),
 
-                            0x090 => GetLowByte(_sound!._WAVE_RAM0_L),
-                            0x091 => GetHighByte(_sound!._WAVE_RAM0_L),
+                            0x090 => GetLowByte(_sound!.ReadRegister(Sound.Register.WAVE_RAM0_L)),
+                            0x091 => GetHighByte(_sound!.ReadRegister(Sound.Register.WAVE_RAM0_L)),
 
-                            0x092 => GetLowByte(_sound!._WAVE_RAM0_H),
-                            0x093 => GetHighByte(_sound!._WAVE_RAM0_H),
+                            0x092 => GetLowByte(_sound!.ReadRegister(Sound.Register.WAVE_RAM0_H)),
+                            0x093 => GetHighByte(_sound!.ReadRegister(Sound.Register.WAVE_RAM0_H)),
 
-                            0x094 => GetLowByte(_sound!._WAVE_RAM1_L),
-                            0x095 => GetHighByte(_sound!._WAVE_RAM1_L),
+                            0x094 => GetLowByte(_sound!.ReadRegister(Sound.Register.WAVE_RAM1_L)),
+                            0x095 => GetHighByte(_sound!.ReadRegister(Sound.Register.WAVE_RAM1_L)),
 
-                            0x096 => GetLowByte(_sound!._WAVE_RAM1_H),
-                            0x097 => GetHighByte(_sound!._WAVE_RAM1_H),
+                            0x096 => GetLowByte(_sound!.ReadRegister(Sound.Register.WAVE_RAM1_H)),
+                            0x097 => GetHighByte(_sound!.ReadRegister(Sound.Register.WAVE_RAM1_H)),
 
-                            0x098 => GetLowByte(_sound!._WAVE_RAM2_L),
-                            0x099 => GetHighByte(_sound!._WAVE_RAM2_L),
+                            0x098 => GetLowByte(_sound!.ReadRegister(Sound.Register.WAVE_RAM2_L)),
+                            0x099 => GetHighByte(_sound!.ReadRegister(Sound.Register.WAVE_RAM2_L)),
 
-                            0x09a => GetLowByte(_sound!._WAVE_RAM2_H),
-                            0x09b => GetHighByte(_sound!._WAVE_RAM2_H),
+                            0x09a => GetLowByte(_sound!.ReadRegister(Sound.Register.WAVE_RAM2_H)),
+                            0x09b => GetHighByte(_sound!.ReadRegister(Sound.Register.WAVE_RAM2_H)),
 
-                            0x09c => GetLowByte(_sound!._WAVE_RAM3_L),
-                            0x09d => GetHighByte(_sound!._WAVE_RAM3_L),
+                            0x09c => GetLowByte(_sound!.ReadRegister(Sound.Register.WAVE_RAM3_L)),
+                            0x09d => GetHighByte(_sound!.ReadRegister(Sound.Register.WAVE_RAM3_L)),
 
-                            0x09e => GetLowByte(_sound!._WAVE_RAM3_H),
-                            0x09f => GetHighByte(_sound!._WAVE_RAM3_H),
+                            0x09e => GetLowByte(_sound!.ReadRegister(Sound.Register.WAVE_RAM3_H)),
+                            0x09f => GetHighByte(_sound!.ReadRegister(Sound.Register.WAVE_RAM3_H)),
 
                             0x0ba => GetLowByte(_dma!._DMA0CNT_H),
                             0x0bb => GetHighByte(_dma!._DMA0CNT_H),
@@ -522,28 +522,28 @@ namespace Iris.GBA
                             0x04a => _video!.ReadRegister(Video.Register.WINOUT),
                             0x050 => _video!.ReadRegister(Video.Register.BLDCNT),
                             0x052 => _video!.ReadRegister(Video.Register.BLDALPHA),
-                            0x060 => _sound!._SOUND1CNT_L,
-                            0x062 => _sound!._SOUND1CNT_H,
-                            0x064 => _sound!._SOUND1CNT_X,
-                            0x068 => _sound!._SOUND2CNT_L,
-                            0x06c => _sound!._SOUND2CNT_H,
-                            0x070 => _sound!._SOUND3CNT_L,
-                            0x072 => _sound!._SOUND3CNT_H,
-                            0x074 => _sound!._SOUND3CNT_X,
-                            0x078 => _sound!._SOUND4CNT_L,
-                            0x07c => _sound!._SOUND4CNT_H,
-                            0x080 => _sound!._SOUNDCNT_L,
-                            0x082 => _sound!._SOUNDCNT_H,
-                            0x084 => _sound!._SOUNDCNT_X,
-                            0x088 => _sound!._SOUNDBIAS,
-                            0x090 => _sound!._WAVE_RAM0_L,
-                            0x092 => _sound!._WAVE_RAM0_H,
-                            0x094 => _sound!._WAVE_RAM1_L,
-                            0x096 => _sound!._WAVE_RAM1_H,
-                            0x098 => _sound!._WAVE_RAM2_L,
-                            0x09a => _sound!._WAVE_RAM2_H,
-                            0x09c => _sound!._WAVE_RAM3_L,
-                            0x09e => _sound!._WAVE_RAM3_H,
+                            0x060 => _sound!.ReadRegister(Sound.Register.SOUND1CNT_L),
+                            0x062 => _sound!.ReadRegister(Sound.Register.SOUND1CNT_H),
+                            0x064 => _sound!.ReadRegister(Sound.Register.SOUND1CNT_X),
+                            0x068 => _sound!.ReadRegister(Sound.Register.SOUND2CNT_L),
+                            0x06c => _sound!.ReadRegister(Sound.Register.SOUND2CNT_H),
+                            0x070 => _sound!.ReadRegister(Sound.Register.SOUND3CNT_L),
+                            0x072 => _sound!.ReadRegister(Sound.Register.SOUND3CNT_H),
+                            0x074 => _sound!.ReadRegister(Sound.Register.SOUND3CNT_X),
+                            0x078 => _sound!.ReadRegister(Sound.Register.SOUND4CNT_L),
+                            0x07c => _sound!.ReadRegister(Sound.Register.SOUND4CNT_H),
+                            0x080 => _sound!.ReadRegister(Sound.Register.SOUNDCNT_L),
+                            0x082 => _sound!.ReadRegister(Sound.Register.SOUNDCNT_H),
+                            0x084 => _sound!.ReadRegister(Sound.Register.SOUNDCNT_X),
+                            0x088 => _sound!.ReadRegister(Sound.Register.SOUNDBIAS),
+                            0x090 => _sound!.ReadRegister(Sound.Register.WAVE_RAM0_L),
+                            0x092 => _sound!.ReadRegister(Sound.Register.WAVE_RAM0_H),
+                            0x094 => _sound!.ReadRegister(Sound.Register.WAVE_RAM1_L),
+                            0x096 => _sound!.ReadRegister(Sound.Register.WAVE_RAM1_H),
+                            0x098 => _sound!.ReadRegister(Sound.Register.WAVE_RAM2_L),
+                            0x09a => _sound!.ReadRegister(Sound.Register.WAVE_RAM2_H),
+                            0x09c => _sound!.ReadRegister(Sound.Register.WAVE_RAM3_L),
+                            0x09e => _sound!.ReadRegister(Sound.Register.WAVE_RAM3_H),
                             0x0ba => _dma!._DMA0CNT_H,
                             0x0c6 => _dma!._DMA1CNT_H,
                             0x0d2 => _dma!._DMA2CNT_H,
@@ -959,157 +959,157 @@ namespace Iris.GBA
                                 break;
 
                             case 0x060:
-                                SetLowByte(ref _sound!._SOUND1CNT_L, value);
+                                _sound!.WriteRegister(Sound.Register.SOUND1CNT_L, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x061:
-                                SetHighByte(ref _sound!._SOUND1CNT_L, value);
+                                _sound!.WriteRegister(Sound.Register.SOUND1CNT_L, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x062:
-                                SetLowByte(ref _sound!._SOUND1CNT_H, value);
+                                _sound!.WriteRegister(Sound.Register.SOUND1CNT_H, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x063:
-                                SetHighByte(ref _sound!._SOUND1CNT_H, value);
+                                _sound!.WriteRegister(Sound.Register.SOUND1CNT_H, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x064:
-                                SetLowByte(ref _sound!._SOUND1CNT_X, value);
+                                _sound!.WriteRegister(Sound.Register.SOUND1CNT_X, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x065:
-                                SetHighByte(ref _sound!._SOUND1CNT_X, value);
+                                _sound!.WriteRegister(Sound.Register.SOUND1CNT_X, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x068:
-                                SetLowByte(ref _sound!._SOUND2CNT_L, value);
+                                _sound!.WriteRegister(Sound.Register.SOUND2CNT_L, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x069:
-                                SetHighByte(ref _sound!._SOUND2CNT_L, value);
+                                _sound!.WriteRegister(Sound.Register.SOUND2CNT_L, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x06c:
-                                SetLowByte(ref _sound!._SOUND2CNT_H, value);
+                                _sound!.WriteRegister(Sound.Register.SOUND2CNT_H, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x06d:
-                                SetHighByte(ref _sound!._SOUND2CNT_H, value);
+                                _sound!.WriteRegister(Sound.Register.SOUND2CNT_H, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x070:
-                                SetLowByte(ref _sound!._SOUND3CNT_L, value);
+                                _sound!.WriteRegister(Sound.Register.SOUND3CNT_L, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x071:
-                                SetHighByte(ref _sound!._SOUND3CNT_L, value);
+                                _sound!.WriteRegister(Sound.Register.SOUND3CNT_L, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x072:
-                                SetLowByte(ref _sound!._SOUND3CNT_H, value);
+                                _sound!.WriteRegister(Sound.Register.SOUND3CNT_H, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x073:
-                                SetHighByte(ref _sound!._SOUND3CNT_H, value);
+                                _sound!.WriteRegister(Sound.Register.SOUND3CNT_H, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x074:
-                                SetLowByte(ref _sound!._SOUND3CNT_X, value);
+                                _sound!.WriteRegister(Sound.Register.SOUND3CNT_X, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x075:
-                                SetHighByte(ref _sound!._SOUND3CNT_X, value);
+                                _sound!.WriteRegister(Sound.Register.SOUND3CNT_X, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x078:
-                                SetLowByte(ref _sound!._SOUND4CNT_L, value);
+                                _sound!.WriteRegister(Sound.Register.SOUND4CNT_L, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x079:
-                                SetHighByte(ref _sound!._SOUND4CNT_L, value);
+                                _sound!.WriteRegister(Sound.Register.SOUND4CNT_L, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x07c:
-                                SetLowByte(ref _sound!._SOUND4CNT_H, value);
+                                _sound!.WriteRegister(Sound.Register.SOUND4CNT_H, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x07d:
-                                SetHighByte(ref _sound!._SOUND4CNT_H, value);
+                                _sound!.WriteRegister(Sound.Register.SOUND4CNT_H, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x080:
-                                SetLowByte(ref _sound!._SOUNDCNT_L, value);
+                                _sound!.WriteRegister(Sound.Register.SOUNDCNT_L, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x081:
-                                SetHighByte(ref _sound!._SOUNDCNT_L, value);
+                                _sound!.WriteRegister(Sound.Register.SOUNDCNT_L, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x082:
-                                SetLowByte(ref _sound!._SOUNDCNT_H, value);
+                                _sound!.WriteRegister(Sound.Register.SOUNDCNT_H, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x083:
-                                SetHighByte(ref _sound!._SOUNDCNT_H, value);
+                                _sound!.WriteRegister(Sound.Register.SOUNDCNT_H, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x084:
-                                SetLowByte(ref _sound!._SOUNDCNT_X, value);
+                                _sound!.WriteRegister(Sound.Register.SOUNDCNT_X, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x085:
-                                SetHighByte(ref _sound!._SOUNDCNT_X, value);
+                                _sound!.WriteRegister(Sound.Register.SOUNDCNT_X, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x088:
-                                SetLowByte(ref _sound!._SOUNDBIAS, value);
+                                _sound!.WriteRegister(Sound.Register.SOUNDBIAS, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x089:
-                                SetHighByte(ref _sound!._SOUNDBIAS, value);
+                                _sound!.WriteRegister(Sound.Register.SOUNDBIAS, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x090:
-                                SetLowByte(ref _sound!._WAVE_RAM0_L, value);
+                                _sound!.WriteRegister(Sound.Register.WAVE_RAM0_L, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x091:
-                                SetHighByte(ref _sound!._WAVE_RAM0_L, value);
+                                _sound!.WriteRegister(Sound.Register.WAVE_RAM0_L, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x092:
-                                SetLowByte(ref _sound!._WAVE_RAM0_H, value);
+                                _sound!.WriteRegister(Sound.Register.WAVE_RAM0_H, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x093:
-                                SetHighByte(ref _sound!._WAVE_RAM0_H, value);
+                                _sound!.WriteRegister(Sound.Register.WAVE_RAM0_H, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x094:
-                                SetLowByte(ref _sound!._WAVE_RAM1_L, value);
+                                _sound!.WriteRegister(Sound.Register.WAVE_RAM1_L, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x095:
-                                SetHighByte(ref _sound!._WAVE_RAM1_L, value);
+                                _sound!.WriteRegister(Sound.Register.WAVE_RAM1_L, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x096:
-                                SetLowByte(ref _sound!._WAVE_RAM1_H, value);
+                                _sound!.WriteRegister(Sound.Register.WAVE_RAM1_H, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x097:
-                                SetHighByte(ref _sound!._WAVE_RAM1_H, value);
+                                _sound!.WriteRegister(Sound.Register.WAVE_RAM1_H, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x098:
-                                SetLowByte(ref _sound!._WAVE_RAM2_L, value);
+                                _sound!.WriteRegister(Sound.Register.WAVE_RAM2_L, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x099:
-                                SetHighByte(ref _sound!._WAVE_RAM2_L, value);
+                                _sound!.WriteRegister(Sound.Register.WAVE_RAM2_L, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x09a:
-                                SetLowByte(ref _sound!._WAVE_RAM2_H, value);
+                                _sound!.WriteRegister(Sound.Register.WAVE_RAM2_H, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x09b:
-                                SetHighByte(ref _sound!._WAVE_RAM2_H, value);
+                                _sound!.WriteRegister(Sound.Register.WAVE_RAM2_H, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x09c:
-                                SetLowByte(ref _sound!._WAVE_RAM3_L, value);
+                                _sound!.WriteRegister(Sound.Register.WAVE_RAM3_L, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x09d:
-                                SetHighByte(ref _sound!._WAVE_RAM3_L, value);
+                                _sound!.WriteRegister(Sound.Register.WAVE_RAM3_L, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x09e:
-                                SetLowByte(ref _sound!._WAVE_RAM3_H, value);
+                                _sound!.WriteRegister(Sound.Register.WAVE_RAM3_H, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x09f:
-                                SetHighByte(ref _sound!._WAVE_RAM3_H, value);
+                                _sound!.WriteRegister(Sound.Register.WAVE_RAM3_H, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x0b0:
@@ -1642,70 +1642,70 @@ namespace Iris.GBA
                                 _video!.WriteRegister(Video.Register.BLDY, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x060:
-                                _sound!._SOUND1CNT_L = value;
+                                _sound!.WriteRegister(Sound.Register.SOUND1CNT_L, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x062:
-                                _sound!._SOUND1CNT_H = value;
+                                _sound!.WriteRegister(Sound.Register.SOUND1CNT_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x064:
-                                _sound!._SOUND1CNT_X = value;
+                                _sound!.WriteRegister(Sound.Register.SOUND1CNT_X, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x068:
-                                _sound!._SOUND2CNT_L = value;
+                                _sound!.WriteRegister(Sound.Register.SOUND2CNT_L, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x06c:
-                                _sound!._SOUND2CNT_H = value;
+                                _sound!.WriteRegister(Sound.Register.SOUND2CNT_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x070:
-                                _sound!._SOUND3CNT_L = value;
+                                _sound!.WriteRegister(Sound.Register.SOUND3CNT_L, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x072:
-                                _sound!._SOUND3CNT_H = value;
+                                _sound!.WriteRegister(Sound.Register.SOUND3CNT_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x074:
-                                _sound!._SOUND3CNT_X = value;
+                                _sound!.WriteRegister(Sound.Register.SOUND3CNT_X, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x078:
-                                _sound!._SOUND4CNT_L = value;
+                                _sound!.WriteRegister(Sound.Register.SOUND4CNT_L, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x07c:
-                                _sound!._SOUND4CNT_H = value;
+                                _sound!.WriteRegister(Sound.Register.SOUND4CNT_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x080:
-                                _sound!._SOUNDCNT_L = value;
+                                _sound!.WriteRegister(Sound.Register.SOUNDCNT_L, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x082:
-                                _sound!._SOUNDCNT_H = value;
+                                _sound!.WriteRegister(Sound.Register.SOUNDCNT_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x084:
-                                _sound!._SOUNDCNT_X = value;
+                                _sound!.WriteRegister(Sound.Register.SOUNDCNT_X, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x088:
-                                _sound!._SOUNDBIAS = value;
+                                _sound!.WriteRegister(Sound.Register.SOUNDBIAS, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x090:
-                                _sound!._WAVE_RAM0_L = value;
+                                _sound!.WriteRegister(Sound.Register.WAVE_RAM0_L, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x092:
-                                _sound!._WAVE_RAM0_H = value;
+                                _sound!.WriteRegister(Sound.Register.WAVE_RAM0_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x094:
-                                _sound!._WAVE_RAM1_L = value;
+                                _sound!.WriteRegister(Sound.Register.WAVE_RAM1_L, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x096:
-                                _sound!._WAVE_RAM1_H = value;
+                                _sound!.WriteRegister(Sound.Register.WAVE_RAM1_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x098:
-                                _sound!._WAVE_RAM2_L = value;
+                                _sound!.WriteRegister(Sound.Register.WAVE_RAM2_L, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x09a:
-                                _sound!._WAVE_RAM2_H = value;
+                                _sound!.WriteRegister(Sound.Register.WAVE_RAM2_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x09c:
-                                _sound!._WAVE_RAM3_L = value;
+                                _sound!.WriteRegister(Sound.Register.WAVE_RAM3_L, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x09e:
-                                _sound!._WAVE_RAM3_H = value;
+                                _sound!.WriteRegister(Sound.Register.WAVE_RAM3_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0b0:
                                 _dma!._DMA0SAD_L = value;
@@ -2010,32 +2010,32 @@ namespace Iris.GBA
                                 // unused
                                 break;
                             case 0x080:
-                                _sound!._SOUNDCNT_L = GetLowHalfword(value);
-                                _sound._SOUNDCNT_H = GetHighHalfword(value);
+                                _sound!.WriteRegister(Sound.Register.SOUNDCNT_L, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _sound.WriteRegister(Sound.Register.SOUNDCNT_H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x090:
-                                _sound!._WAVE_RAM0_L = GetLowHalfword(value);
-                                _sound._WAVE_RAM0_H = GetHighHalfword(value);
+                                _sound!.WriteRegister(Sound.Register.WAVE_RAM0_L, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _sound.WriteRegister(Sound.Register.WAVE_RAM0_H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x094:
-                                _sound!._WAVE_RAM1_L = GetLowHalfword(value);
-                                _sound._WAVE_RAM1_H = GetHighHalfword(value);
+                                _sound!.WriteRegister(Sound.Register.WAVE_RAM1_L, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _sound.WriteRegister(Sound.Register.WAVE_RAM1_H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x098:
-                                _sound!._WAVE_RAM2_L = GetLowHalfword(value);
-                                _sound._WAVE_RAM2_H = GetHighHalfword(value);
+                                _sound!.WriteRegister(Sound.Register.WAVE_RAM2_L, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _sound.WriteRegister(Sound.Register.WAVE_RAM2_H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x09c:
-                                _sound!._WAVE_RAM3_L = GetLowHalfword(value);
-                                _sound._WAVE_RAM3_H = GetHighHalfword(value);
+                                _sound!.WriteRegister(Sound.Register.WAVE_RAM3_L, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _sound.WriteRegister(Sound.Register.WAVE_RAM3_H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0a0:
-                                _sound!._FIFO_A_L = GetLowHalfword(value);
-                                _sound._FIFO_A_H = GetHighHalfword(value);
+                                _sound!.WriteRegister(Sound.Register.FIFO_A_L, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _sound.WriteRegister(Sound.Register.FIFO_A_H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0a4:
-                                _sound!._FIFO_B_L = GetLowHalfword(value);
-                                _sound._FIFO_B_H = GetHighHalfword(value);
+                                _sound!.WriteRegister(Sound.Register.FIFO_B_L, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _sound.WriteRegister(Sound.Register.FIFO_B_H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0a8:
                             case 0x0ac:
