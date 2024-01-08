@@ -406,13 +406,14 @@ namespace Iris.GBA
                             0x202 => GetLowByte(_interruptControl!._IF),
                             0x203 => GetHighByte(_interruptControl!._IF),
 
-                            0x204 => GetLowByte(_systemControl!._WAITCNT),
-                            0x205 => GetHighByte(_systemControl!._WAITCNT),
+                            0x204 => GetLowByte(_systemControl!.ReadRegister(SystemControl.Register.WAITCNT)),
+                            0x205 => GetHighByte(_systemControl!.ReadRegister(SystemControl.Register.WAITCNT)),
 
                             0x208 => GetLowByte(_interruptControl!._IME),
                             0x209 => GetHighByte(_interruptControl!._IME),
 
-                            0x300 => _systemControl._POSTFLG,
+                            0x300 => GetLowByte(_systemControl!.ReadRegister(SystemControl.Register.UNKNOWN_0)),
+                            0x301 => GetHighByte(_systemControl!.ReadRegister(SystemControl.Register.UNKNOWN_0)),
 
                             _ => 0,
                         };
@@ -566,8 +567,9 @@ namespace Iris.GBA
                             0x134 => _communication!._RCNT,
                             0x200 => _interruptControl!._IE,
                             0x202 => _interruptControl!._IF,
-                            0x204 => _systemControl!._WAITCNT,
+                            0x204 => _systemControl!.ReadRegister(SystemControl.Register.WAITCNT),
                             0x208 => _interruptControl!._IME,
+                            0x300 => _systemControl!.ReadRegister(SystemControl.Register.UNKNOWN_0),
                             _ => 0,
                         };
                     }
@@ -1425,10 +1427,10 @@ namespace Iris.GBA
                                 break;
 
                             case 0x204:
-                                SetLowByte(ref _systemControl!._WAITCNT, value);
+                                _systemControl!.WriteRegister(SystemControl.Register.WAITCNT, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x205:
-                                SetHighByte(ref _systemControl!._WAITCNT, value);
+                                _systemControl!.WriteRegister(SystemControl.Register.WAITCNT, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x208:
@@ -1441,11 +1443,10 @@ namespace Iris.GBA
                                 break;
 
                             case 0x300:
-                                _systemControl!._POSTFLG = value;
+                                _systemControl!.WriteRegister(SystemControl.Register.UNKNOWN_0, value, RegisterWriteMode.LowByte);
                                 break;
-
                             case 0x301:
-                                _systemControl!._HALTCNT = value;
+                                _systemControl!.WriteRegister(SystemControl.Register.UNKNOWN_0, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x410:
@@ -1848,11 +1849,14 @@ namespace Iris.GBA
                                 _interruptControl.CheckForInterrupts();
                                 break;
                             case 0x204:
-                                _systemControl!._WAITCNT = value;
+                                _systemControl!.WriteRegister(SystemControl.Register.WAITCNT, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x208:
                                 _interruptControl!._IME = value;
                                 _interruptControl.CheckForInterrupts();
+                                break;
+                            case 0x300:
+                                _systemControl!.WriteRegister(SystemControl.Register.UNKNOWN_0, value, RegisterWriteMode.HalfWord);
                                 break;
                             default:
                                 Console.WriteLine("[Iris.GBA.Memory] Unhandled write to address 0x{0:x8}", address);
@@ -2170,7 +2174,7 @@ namespace Iris.GBA
                                 _interruptControl.CheckForInterrupts();
                                 break;
                             case 0x204:
-                                _systemControl!._WAITCNT = GetLowHalfword(value);
+                                _systemControl!.WriteRegister(SystemControl.Register.WAITCNT, GetLowHalfword(value), RegisterWriteMode.HalfWord);
                                 // 16 upper bits are unused
                                 break;
                             case 0x208:
@@ -2184,6 +2188,10 @@ namespace Iris.GBA
                             case 0x218:
                             case 0x21c:
                                 // unused
+                                break;
+                            case 0x300:
+                                _systemControl!.WriteRegister(SystemControl.Register.UNKNOWN_0, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                // 16 upper bits are unused
                                 break;
                             case 0x800:
                                 // 16 lower bits are undocumented (internal memory control)

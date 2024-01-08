@@ -611,7 +611,7 @@ namespace Iris.GBA
                     break;
 
                 // end rendering
-                // start vblank
+                // begin vblank
                 case 159:
                     _VCOUNT = 160;
 
@@ -638,7 +638,7 @@ namespace Iris.GBA
                     _DISPSTAT = (UInt16)(_DISPSTAT & ~0x0001); // clear VBlank status
                     break;
 
-                // start rendering
+                // begin rendering
                 case 227:
                     _VCOUNT = 0;
 
