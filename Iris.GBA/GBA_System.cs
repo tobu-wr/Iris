@@ -140,7 +140,7 @@ namespace Iris.GBA
                 while (!_scheduler.HasTaskReady())
                 {
                     UInt32 cycleCount = _cpu.Step();
-                    _timer.UpdateAllChannels(cycleCount);
+                    _timer.UpdateAllCounters(cycleCount);
                     _scheduler.AdvanceCycleCounter(cycleCount);
                 }
 
