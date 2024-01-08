@@ -34,7 +34,7 @@
             return register switch
             {
                 Register.WAITCNT => _WAITCNT,
-                Register.UNKNOWN_0 => (UInt16)(_UNKNOWN_0 & 0x00ff),
+                Register.UNKNOWN_0 => _UNKNOWN_0,
 
                 // should never happen
                 _ => throw new Exception("Iris.GBA.SystemControl: Register read error"),

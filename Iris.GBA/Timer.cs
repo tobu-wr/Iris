@@ -19,10 +19,10 @@
 
         private readonly Common.Scheduler _scheduler;
 
-        private readonly int _startChannel0TaskId;
-        private readonly int _startChannel1TaskId;
-        private readonly int _startChannel2TaskId;
-        private readonly int _startChannel3TaskId;
+        private readonly int _startCountingChannel0TaskId;
+        private readonly int _startCountingChannel1TaskId;
+        private readonly int _startCountingChannel2TaskId;
+        private readonly int _startCountingChannel3TaskId;
 
         private InterruptControl _interruptControl;
 
@@ -44,10 +44,10 @@
         {
             _scheduler = scheduler;
 
-            _startChannel0TaskId = _scheduler.RegisterTask((UInt32 cycleCountDelay) => StartChannel(ref _channel0, cycleCountDelay));
-            _startChannel1TaskId = _scheduler.RegisterTask((UInt32 cycleCountDelay) => StartChannel(ref _channel1, cycleCountDelay));
-            _startChannel2TaskId = _scheduler.RegisterTask((UInt32 cycleCountDelay) => StartChannel(ref _channel2, cycleCountDelay));
-            _startChannel3TaskId = _scheduler.RegisterTask((UInt32 cycleCountDelay) => StartChannel(ref _channel3, cycleCountDelay));
+            _startCountingChannel0TaskId = _scheduler.RegisterTask((UInt32 cycleCountDelay) => StartCounting(ref _channel0, cycleCountDelay));
+            _startCountingChannel1TaskId = _scheduler.RegisterTask((UInt32 cycleCountDelay) => StartCounting(ref _channel1, cycleCountDelay));
+            _startCountingChannel2TaskId = _scheduler.RegisterTask((UInt32 cycleCountDelay) => StartCounting(ref _channel2, cycleCountDelay));
+            _startCountingChannel3TaskId = _scheduler.RegisterTask((UInt32 cycleCountDelay) => StartCounting(ref _channel3, cycleCountDelay));
         }
 
         internal void Initialize(InterruptControl interruptControl)
@@ -127,7 +127,7 @@
                 channel.Reload = reload;
             }
 
-            void WriteControl(ref Channel channel, int startChannelTaskId)
+            void WriteControl(ref Channel channel, int startCountingTaskId)
             {
                 UInt16 previousControl = channel.Control;
 
@@ -139,7 +139,7 @@
                 {
                     channel.Counter = channel.Reload;
 
-                    _scheduler.ScheduleTask(2, startChannelTaskId);
+                    _scheduler.ScheduleTask(2, startCountingTaskId);
                 }
                 else if (((previousControl & 0x0080) == 0x0080) && ((newControl & 0x0080) == 0))
                 {
@@ -153,28 +153,28 @@
                     WriteReload(ref _channel0);
                     break;
                 case Register.TM0CNT_H:
-                    WriteControl(ref _channel0, _startChannel0TaskId);
+                    WriteControl(ref _channel0, _startCountingChannel0TaskId);
                     break;
 
                 case Register.TM1CNT_L:
                     WriteReload(ref _channel1);
                     break;
                 case Register.TM1CNT_H:
-                    WriteControl(ref _channel1, _startChannel1TaskId);
+                    WriteControl(ref _channel1, _startCountingChannel1TaskId);
                     break;
 
                 case Register.TM2CNT_L:
                     WriteReload(ref _channel2);
                     break;
                 case Register.TM2CNT_H:
-                    WriteControl(ref _channel2, _startChannel2TaskId);
+                    WriteControl(ref _channel2, _startCountingChannel2TaskId);
                     break;
 
                 case Register.TM3CNT_L:
                     WriteReload(ref _channel3);
                     break;
                 case Register.TM3CNT_H:
-                    WriteControl(ref _channel3, _startChannel3TaskId);
+                    WriteControl(ref _channel3, _startCountingChannel3TaskId);
                     break;
 
                 // should never happen
@@ -183,16 +183,16 @@
             }
         }
 
-        internal void UpdateAllChannels(UInt32 cycleCount)
+        internal void UpdateAllCounters(UInt32 cycleCount)
         {
             UInt32 overflowCount = 0;
-            UpdateChannel(ref _channel0, cycleCount, true, ref overflowCount, InterruptControl.Interrupt.Timer0);
-            UpdateChannel(ref _channel1, cycleCount, false, ref overflowCount, InterruptControl.Interrupt.Timer1);
-            UpdateChannel(ref _channel2, cycleCount, false, ref overflowCount, InterruptControl.Interrupt.Timer2);
-            UpdateChannel(ref _channel3, cycleCount, false, ref overflowCount, InterruptControl.Interrupt.Timer3);
+            UpdateCounter(ref _channel0, true, cycleCount, ref overflowCount, InterruptControl.Interrupt.Timer0);
+            UpdateCounter(ref _channel1, false, cycleCount, ref overflowCount, InterruptControl.Interrupt.Timer1);
+            UpdateCounter(ref _channel2, false, cycleCount, ref overflowCount, InterruptControl.Interrupt.Timer2);
+            UpdateCounter(ref _channel3, false, cycleCount, ref overflowCount, InterruptControl.Interrupt.Timer3);
         }
 
-        private static void StartChannel(ref Channel channel, UInt32 cycleCountDelay)
+        private static void StartCounting(ref Channel channel, UInt32 cycleCountDelay)
         {
             if ((channel.Control & 0x0080) == 0)
                 return;
@@ -201,7 +201,7 @@
             channel.Running = true;
         }
 
-        private void UpdateChannel(ref Channel channel, UInt32 cycleCount, bool isFirstChannel, ref UInt32 overflowCount, InterruptControl.Interrupt interrupt)
+        private void UpdateCounter(ref Channel channel, bool isFirstChannel, UInt32 cycleCount, ref UInt32 overflowCount, InterruptControl.Interrupt interrupt)
         {
             if (!channel.Running)
                 return;
