@@ -603,12 +603,15 @@ namespace Iris.GBA
 
             switch (_VCOUNT)
             {
+                // rendering
                 case < 159:
                     ++_VCOUNT;
 
                     Render();
                     break;
 
+                // end rendering
+                // start vblank
                 case 159:
                     _VCOUNT = 160;
 
@@ -623,16 +626,19 @@ namespace Iris.GBA
                     Array.Clear(_displayFrameBuffer);
                     break;
 
+                // vblank
                 case > 159 and < 226:
                     ++_VCOUNT;
                     break;
 
+                // end vblank
                 case 226:
                     _VCOUNT = 227;
 
                     _DISPSTAT = (UInt16)(_DISPSTAT & ~0x0001); // clear VBlank status
                     break;
 
+                // start rendering
                 case 227:
                     _VCOUNT = 0;
 
