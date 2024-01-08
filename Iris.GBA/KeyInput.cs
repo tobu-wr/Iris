@@ -2,8 +2,14 @@
 {
     internal sealed class KeyInput(Common.System.PollInput_Delegate pollInputCallback)
     {
-        internal UInt16 _KEYINPUT;
-        internal UInt16 _KEYCNT;
+        internal enum Register
+        {
+            KEYINPUT,
+            KEYCNT
+        }
+
+        private UInt16 _KEYINPUT;
+        private UInt16 _KEYCNT;
 
         private readonly Common.System.PollInput_Delegate _pollInputCallback = pollInputCallback;
 
@@ -25,9 +31,35 @@
             writer.Write(_KEYCNT);
         }
 
-        internal void PollInput()
+        internal UInt16 ReadRegister(Register register)
         {
-            _pollInputCallback();
+            switch (register)
+            {
+                case Register.KEYINPUT:
+                    _pollInputCallback();
+                    return _KEYINPUT;
+
+                case Register.KEYCNT:
+                    return _KEYCNT;
+
+                // should never happen
+                default:
+                    throw new Exception("Iris.GBA.KeyInput: Register read error");
+            }
+        }
+
+        internal void WriteRegister(Register register, UInt16 value, Memory.RegisterWriteMode mode)
+        {
+            switch (register)
+            {
+                case Register.KEYCNT:
+                    Memory.WriteRegisterHelper(ref _KEYCNT, value, mode);
+                    break;
+
+                // should never happen
+                default:
+                    throw new Exception("Iris.GBA.KeyInput: Register write error");
+            }
         }
 
         internal void SetKeyStatus(Common.System.Key key, Common.System.KeyStatus status)

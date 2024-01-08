@@ -220,20 +220,6 @@ namespace Iris.GBA
                         [MethodImpl(MethodImplOptions.AggressiveInlining)]
                         static Byte GetHighByte(UInt16 value) => (Byte)(value >> 8);
 
-                        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                        Byte GetLowByte_KEYINPUT()
-                        {
-                            _keyInput.PollInput();
-                            return GetLowByte(_keyInput._KEYINPUT);
-                        }
-
-                        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                        Byte GetHighByte_KEYINPUT()
-                        {
-                            _keyInput.PollInput();
-                            return GetHighByte(_keyInput._KEYINPUT);
-                        }
-
                         UInt32 offset = address - 0x400_0000;
 
                         return offset switch
@@ -391,11 +377,11 @@ namespace Iris.GBA
                             0x12a => GetLowByte(_communication!._SIODATA_SEND),
                             0x12b => GetHighByte(_communication!._SIODATA_SEND),
 
-                            0x130 => GetLowByte_KEYINPUT(),
-                            0x131 => GetHighByte_KEYINPUT(),
+                            0x130 => GetLowByte(_keyInput!.ReadRegister(KeyInput.Register.KEYINPUT)),
+                            0x131 => GetHighByte(_keyInput!.ReadRegister(KeyInput.Register.KEYINPUT)),
 
-                            0x132 => GetLowByte(_keyInput!._KEYCNT),
-                            0x133 => GetHighByte(_keyInput!._KEYCNT),
+                            0x132 => GetLowByte(_keyInput!.ReadRegister(KeyInput.Register.KEYCNT)),
+                            0x133 => GetHighByte(_keyInput!.ReadRegister(KeyInput.Register.KEYCNT)),
 
                             0x134 => GetLowByte(_communication!._RCNT),
                             0x135 => GetHighByte(_communication!._RCNT),
@@ -500,13 +486,6 @@ namespace Iris.GBA
                 // IO and registers
                 case 0x4:
                     {
-                        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                        UInt16 Get_KEYINPUT()
-                        {
-                            _keyInput.PollInput();
-                            return _keyInput._KEYINPUT;
-                        }
-
                         UInt32 offset = address - 0x400_0000;
 
                         return offset switch
@@ -562,8 +541,8 @@ namespace Iris.GBA
                             0x126 => _communication!._SIODATA3,
                             0x128 => _communication!._SIOCNT,
                             0x12a => _communication!._SIODATA_SEND,
-                            0x130 => Get_KEYINPUT(),
-                            0x132 => _keyInput!._KEYCNT,
+                            0x130 => _keyInput!.ReadRegister(KeyInput.Register.KEYINPUT),
+                            0x132 => _keyInput!.ReadRegister(KeyInput.Register.KEYCNT),
                             0x134 => _communication!._RCNT,
                             0x200 => _interruptControl!._IE,
                             0x202 => _interruptControl!._IF,
@@ -1388,10 +1367,10 @@ namespace Iris.GBA
                                 break;
 
                             case 0x132:
-                                SetLowByte(ref _keyInput!._KEYCNT, value);
+                                _keyInput!.WriteRegister(KeyInput.Register.KEYCNT, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x133:
-                                SetHighByte(ref _keyInput!._KEYCNT, value);
+                                _keyInput!.WriteRegister(KeyInput.Register.KEYCNT, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x134:
@@ -1829,7 +1808,7 @@ namespace Iris.GBA
                                 // KEYINPUT (read-only)
                                 break;
                             case 0x132:
-                                _keyInput!._KEYCNT = value;
+                                _keyInput!.WriteRegister(KeyInput.Register.KEYCNT, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x134:
                                 _communication!._RCNT = value;
@@ -2142,7 +2121,7 @@ namespace Iris.GBA
                                 break;
                             case 0x130:
                                 // 16 lower bits are read-only (KEYINPUT)
-                                _keyInput._KEYCNT = GetHighHalfword(value);
+                                _keyInput!.WriteRegister(KeyInput.Register.KEYCNT, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x140:
                                 _communication!._JOYCNT = GetLowHalfword(value);
