@@ -104,16 +104,16 @@
                     throw new Exception("Iris.GBA.InterruptControl: Register write error");
             }
 
-            CheckForInterrupts();
+            CheckInterrupts();
         }
 
         internal void RequestInterrupt(Interrupt interrupt)
         {
             _IF |= (UInt16)interrupt;
-            CheckForInterrupts();
+            CheckInterrupts();
         }
 
-        private void CheckForInterrupts()
+        private void CheckInterrupts()
         {
             _cpu.NIRQ = ((_IME == 0) || ((_IE & _IF) == 0)) ? CPU.CPU_Core.Signal.High : CPU.CPU_Core.Signal.Low;
         }
