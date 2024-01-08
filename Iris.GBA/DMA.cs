@@ -5,7 +5,7 @@
         internal enum StartTiming
         {
             Immediate = 0b00,
-            //VBlank = 0b01,
+            VBlank = 0b01,
             HBlank = 0b10,
             //Special = 0b11
         }

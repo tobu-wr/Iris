@@ -617,6 +617,8 @@ namespace Iris.GBA
                     if ((_DISPSTAT & 0x0008) == 0x0008)
                         _interruptControl.RequestInterrupt(InterruptControl.Interrupt.VBlank);
 
+                    _dma.PerformAllTransfers(DMA.StartTiming.VBlank);
+
                     _drawFrameCallback(_displayFrameBuffer);
                     Array.Clear(_displayFrameBuffer);
                     break;
