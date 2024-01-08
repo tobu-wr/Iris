@@ -149,8 +149,8 @@ namespace Iris.GBA
         private readonly Common.Scheduler _scheduler;
         private readonly Common.System.DrawFrame_Delegate _drawFrameCallback;
 
-        private readonly int _startScanlineTaskId;
         private readonly int _startHBlankTaskId;
+        private readonly int _startScanlineTaskId;
 
         private DMA _dma;
         private InterruptControl _interruptControl;
@@ -163,8 +163,8 @@ namespace Iris.GBA
             _scheduler = scheduler;
             _drawFrameCallback = drawFrameCallback;
 
-            _startScanlineTaskId = _scheduler.RegisterTask(StartScanline);
             _startHBlankTaskId = _scheduler.RegisterTask(StartHBlank);
+            _startScanlineTaskId = _scheduler.RegisterTask(StartScanline);
         }
 
         ~Video()
@@ -262,8 +262,8 @@ namespace Iris.GBA
             _BLDALPHA = 0;
             _BLDY = 0;
 
-            _scheduler.ScheduleTask(ScanlineCycleCount, _startScanlineTaskId);
             _scheduler.ScheduleTask(DisplayLineCycleCount, _startHBlankTaskId);
+            _scheduler.ScheduleTask(ScanlineCycleCount, _startScanlineTaskId);
 
             Array.Clear(_displayFrameBuffer);
         }
@@ -597,6 +597,17 @@ namespace Iris.GBA
             }
         }
 
+        private void StartHBlank(UInt32 cycleCountDelay)
+        {
+            _DISPSTAT |= 0x0002; // set HBlank status
+
+            if ((_DISPSTAT & 0x0010) == 0x0010)
+                _interruptControl.RequestInterrupt(InterruptControl.Interrupt.HBlank);
+
+            if (_VCOUNT < DisplayScreenHeight)
+                _dma.PerformAllTransfers(DMA.StartTiming.HBlank);
+        }
+
         private void StartScanline(UInt32 cycleCountDelay)
         {
             _DISPSTAT = (UInt16)(_DISPSTAT & ~0x0002); // clear HBlank status
@@ -658,19 +669,8 @@ namespace Iris.GBA
                 _DISPSTAT = (UInt16)(_DISPSTAT & ~0x0004); // clear VCountMatch status
             }
 
-            _scheduler.ScheduleTask(ScanlineCycleCount - cycleCountDelay, _startScanlineTaskId);
             _scheduler.ScheduleTask(DisplayLineCycleCount - cycleCountDelay, _startHBlankTaskId);
-        }
-
-        private void StartHBlank(UInt32 cycleCountDelay)
-        {
-            _DISPSTAT |= 0x0002; // set HBlank status
-
-            if ((_DISPSTAT & 0x0010) == 0x0010)
-                _interruptControl.RequestInterrupt(InterruptControl.Interrupt.HBlank);
-
-            if (_VCOUNT < DisplayScreenHeight)
-                _dma.PerformAllTransfers(DMA.StartTiming.HBlank);
+            _scheduler.ScheduleTask(ScanlineCycleCount - cycleCountDelay, _startScanlineTaskId);
         }
 
         private void Render()
