@@ -277,10 +277,10 @@
                 }
                 else if (!_channel0.Running)
                 {
-                    _channel0.Running = true;
                     _channel0.Source = (UInt32)(((_DMA0SAD_H & 0x07ff) << 16) | _DMA0SAD_L);
                     _channel0.Destination = (UInt32)(((_DMA0DAD_H & 0x07ff) << 16) | _DMA0DAD_L);
                     _channel0.Length = ((_DMA0CNT_L & 0x3fff) == 0) ? 0x4000u : (UInt32)(_DMA0CNT_L & 0x3fff);
+                    _channel0.Running = true;
 
                     PerformTransfer(ref _DMA0CNT_H, ref _channel0, StartTiming.Immediate, _channel0.Destination, _channel0.Length);
                 }
@@ -294,10 +294,10 @@
                 }
                 else if (!_channel1.Running)
                 {
-                    _channel1.Running = true;
                     _channel1.Source = (UInt32)(((_DMA1SAD_H & 0x0fff) << 16) | _DMA1SAD_L);
                     _channel1.Destination = (UInt32)(((_DMA1DAD_H & 0x07ff) << 16) | _DMA1DAD_L);
                     _channel1.Length = ((_DMA1CNT_L & 0x3fff) == 0) ? 0x4000u : (UInt32)(_DMA1CNT_L & 0x3fff);
+                    _channel1.Running = true;
 
                     PerformTransfer(ref _DMA1CNT_H, ref _channel1, StartTiming.Immediate, _channel1.Destination, _channel1.Length);
                 }
@@ -311,10 +311,10 @@
                 }
                 else if (!_channel2.Running)
                 {
-                    _channel2.Running = true;
                     _channel2.Source = (UInt32)(((_DMA2SAD_H & 0x0fff) << 16) | _DMA2SAD_L);
                     _channel2.Destination = (UInt32)(((_DMA2DAD_H & 0x07ff) << 16) | _DMA2DAD_L);
                     _channel2.Length = ((_DMA2CNT_L & 0x3fff) == 0) ? 0x4000u : (UInt32)(_DMA2CNT_L & 0x3fff);
+                    _channel2.Running = true;
 
                     PerformTransfer(ref _DMA2CNT_H, ref _channel2, StartTiming.Immediate, _channel2.Destination, _channel2.Length);
                 }
@@ -328,10 +328,10 @@
                 }
                 else if (!_channel3.Running)
                 {
-                    _channel3.Running = true;
                     _channel3.Source = (UInt32)(((_DMA3SAD_H & 0x0fff) << 16) | _DMA3SAD_L);
                     _channel3.Destination = (UInt32)(((_DMA3DAD_H & 0x0fff) << 16) | _DMA3DAD_L);
                     _channel3.Length = (_DMA3CNT_L == 0) ? 0x1_0000u : _DMA3CNT_L;
+                    _channel3.Running = true;
 
                     PerformTransfer(ref _DMA3CNT_H, ref _channel3, StartTiming.Immediate, _channel3.Destination, _channel3.Length);
                 }
