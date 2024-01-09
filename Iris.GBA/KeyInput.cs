@@ -13,6 +13,13 @@
 
         private readonly Common.System.PollInput_Delegate _pollInputCallback = pollInputCallback;
 
+        private InterruptControl _interruptControl;
+
+        internal void Initialize(InterruptControl interruptControl)
+        {
+            _interruptControl = interruptControl;
+        }
+
         internal void ResetState()
         {
             _KEYINPUT = 0x03ff;
@@ -54,6 +61,7 @@
             {
                 case Register.KEYCNT:
                     Memory.WriteRegisterHelper(ref _KEYCNT, value, mode);
+                    CheckInterrupts();
                     break;
 
                 // should never happen
@@ -103,6 +111,26 @@
             }
 
             _KEYINPUT = (UInt16)((_KEYINPUT & ~(1 << pos)) | ((int)status << pos));
+
+            if (status == Common.System.KeyStatus.Input)
+                CheckInterrupts();
+        }
+
+        private void CheckInterrupts()
+        {
+            if ((_KEYCNT & 0x4000) == 0x4000)
+            {
+                if ((_KEYCNT & 0x8000) == 0)
+                {
+                    if ((_KEYINPUT & _KEYCNT & 0x03ff) != 0)
+                        _interruptControl.RequestInterrupt(InterruptControl.Interrupt.Key);
+                }
+                else
+                {
+                    if ((_KEYINPUT & _KEYCNT & 0x03ff) == (_KEYCNT & 0x03ff))
+                        _interruptControl.RequestInterrupt(InterruptControl.Interrupt.Key);
+                }
+            }
         }
     }
 }
