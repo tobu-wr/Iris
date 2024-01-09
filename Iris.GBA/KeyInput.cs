@@ -111,9 +111,7 @@
             }
 
             _KEYINPUT = (UInt16)((_KEYINPUT & ~(1 << pos)) | ((int)status << pos));
-
-            if (status == Common.System.KeyStatus.Input)
-                CheckInterrupts();
+            CheckInterrupts();
         }
 
         private void CheckInterrupts()
