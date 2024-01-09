@@ -137,8 +137,6 @@
 
                 if (((previousControl & 0x0080) == 0) && ((newControl & 0x0080) == 0x0080))
                 {
-                    channel.Counter = channel.Reload;
-
                     _scheduler.ScheduleTask(2, startCountingTaskId);
                 }
                 else if (((previousControl & 0x0080) == 0x0080) && ((newControl & 0x0080) == 0))
@@ -205,7 +203,7 @@
                         0b10 => 256,
                         0b11 => 1024,
 
-                        // should never happen
+                        // cannot happen
                         _ => 0,
                     };
 
@@ -246,6 +244,7 @@
             if ((channel.Control & 0x0080) == 0)
                 return;
 
+            channel.Counter = channel.Reload;
             channel.CycleCounter = cycleCountDelay;
             channel.Running = true;
         }
