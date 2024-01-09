@@ -359,23 +359,23 @@ namespace Iris.GBA
                             0x10e => GetLowByte(_timer!.ReadRegister(Timer.Register.TM3CNT_H)),
                             0x10f => GetHighByte(_timer!.ReadRegister(Timer.Register.TM3CNT_H)),
 
-                            0x120 => GetLowByte(_communication!._SIODATA0),
-                            0x121 => GetHighByte(_communication!._SIODATA0),
+                            0x120 => GetLowByte(_communication!.ReadRegister(Communication.Register.SIODATA0)),
+                            0x121 => GetHighByte(_communication!.ReadRegister(Communication.Register.SIODATA0)),
 
-                            0x122 => GetLowByte(_communication!._SIODATA1),
-                            0x123 => GetHighByte(_communication!._SIODATA1),
+                            0x122 => GetLowByte(_communication!.ReadRegister(Communication.Register.SIODATA1)),
+                            0x123 => GetHighByte(_communication!.ReadRegister(Communication.Register.SIODATA1)),
 
-                            0x124 => GetLowByte(_communication!._SIODATA2),
-                            0x125 => GetHighByte(_communication!._SIODATA2),
+                            0x124 => GetLowByte(_communication!.ReadRegister(Communication.Register.SIODATA2)),
+                            0x125 => GetHighByte(_communication!.ReadRegister(Communication.Register.SIODATA2)),
 
-                            0x126 => GetLowByte(_communication!._SIODATA3),
-                            0x127 => GetHighByte(_communication!._SIODATA3),
+                            0x126 => GetLowByte(_communication!.ReadRegister(Communication.Register.SIODATA3)),
+                            0x127 => GetHighByte(_communication!.ReadRegister(Communication.Register.SIODATA3)),
 
-                            0x128 => GetLowByte(_communication!._SIOCNT),
-                            0x129 => GetHighByte(_communication!._SIOCNT),
+                            0x128 => GetLowByte(_communication!.ReadRegister(Communication.Register.SIOCNT)),
+                            0x129 => GetHighByte(_communication!.ReadRegister(Communication.Register.SIOCNT)),
 
-                            0x12a => GetLowByte(_communication!._SIODATA_SEND),
-                            0x12b => GetHighByte(_communication!._SIODATA_SEND),
+                            0x12a => GetLowByte(_communication!.ReadRegister(Communication.Register.SIODATA_SEND)),
+                            0x12b => GetHighByte(_communication!.ReadRegister(Communication.Register.SIODATA_SEND)),
 
                             0x130 => GetLowByte(_keyInput!.ReadRegister(KeyInput.Register.KEYINPUT)),
                             0x131 => GetHighByte(_keyInput!.ReadRegister(KeyInput.Register.KEYINPUT)),
@@ -383,8 +383,8 @@ namespace Iris.GBA
                             0x132 => GetLowByte(_keyInput!.ReadRegister(KeyInput.Register.KEYCNT)),
                             0x133 => GetHighByte(_keyInput!.ReadRegister(KeyInput.Register.KEYCNT)),
 
-                            0x134 => GetLowByte(_communication!._RCNT),
-                            0x135 => GetHighByte(_communication!._RCNT),
+                            0x134 => GetLowByte(_communication!.ReadRegister(Communication.Register.RCNT)),
+                            0x135 => GetHighByte(_communication!.ReadRegister(Communication.Register.RCNT)),
 
                             0x200 => GetLowByte(_interruptControl!.ReadRegister(InterruptControl.Register.IE)),
                             0x201 => GetHighByte(_interruptControl!.ReadRegister(InterruptControl.Register.IE)),
@@ -535,15 +535,15 @@ namespace Iris.GBA
                             0x10a => _timer!.ReadRegister(Timer.Register.TM2CNT_H),
                             0x10c => _timer!.ReadRegister(Timer.Register.TM3CNT_L),
                             0x10e => _timer!.ReadRegister(Timer.Register.TM3CNT_H),
-                            0x120 => _communication!._SIODATA0,
-                            0x122 => _communication!._SIODATA1,
-                            0x124 => _communication!._SIODATA2,
-                            0x126 => _communication!._SIODATA3,
-                            0x128 => _communication!._SIOCNT,
-                            0x12a => _communication!._SIODATA_SEND,
+                            0x120 => _communication!.ReadRegister(Communication.Register.SIODATA0),
+                            0x122 => _communication!.ReadRegister(Communication.Register.SIODATA1),
+                            0x124 => _communication!.ReadRegister(Communication.Register.SIODATA2),
+                            0x126 => _communication!.ReadRegister(Communication.Register.SIODATA3),
+                            0x128 => _communication!.ReadRegister(Communication.Register.SIOCNT),
+                            0x12a => _communication!.ReadRegister(Communication.Register.SIODATA_SEND),
                             0x130 => _keyInput!.ReadRegister(KeyInput.Register.KEYINPUT),
                             0x132 => _keyInput!.ReadRegister(KeyInput.Register.KEYCNT),
-                            0x134 => _communication!._RCNT,
+                            0x134 => _communication!.ReadRegister(Communication.Register.RCNT),
                             0x200 => _interruptControl!.ReadRegister(InterruptControl.Register.IE),
                             0x202 => _interruptControl!.ReadRegister(InterruptControl.Register.IF),
                             0x204 => _systemControl!.ReadRegister(SystemControl.Register.WAITCNT),
@@ -646,7 +646,7 @@ namespace Iris.GBA
                             0x0c4 => (UInt32)(_dma!._DMA1CNT_H << 16),
                             0x0d0 => (UInt32)(_dma!._DMA2CNT_H << 16),
                             0x0dc => (UInt32)(_dma!._DMA3CNT_H << 16),
-                            0x150 => (UInt32)((_communication._JOY_RECV_H << 16) | _communication._JOY_RECV_L),
+                            0x150 => (UInt32)((_communication.ReadRegister(Communication.Register.JOY_RECV_H) << 16) | _communication.ReadRegister(Communication.Register.JOY_RECV_L)),
                             0x200 => (UInt32)((_interruptControl!.ReadRegister(InterruptControl.Register.IF) << 16) | _interruptControl.ReadRegister(InterruptControl.Register.IE)),
                             0x208 => _interruptControl!.ReadRegister(InterruptControl.Register.IME),
                             _ => 0,
@@ -1320,45 +1320,45 @@ namespace Iris.GBA
                                 break;
 
                             case 0x120:
-                                SetLowByte(ref _communication!._SIODATA0, value);
+                                _communication!.WriteRegister(Communication.Register.SIODATA0, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x121:
-                                SetHighByte(ref _communication!._SIODATA0, value);
+                                _communication!.WriteRegister(Communication.Register.SIODATA0, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x122:
-                                SetLowByte(ref _communication!._SIODATA1, value);
+                                _communication!.WriteRegister(Communication.Register.SIODATA1, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x123:
-                                SetHighByte(ref _communication!._SIODATA1, value);
+                                _communication!.WriteRegister(Communication.Register.SIODATA1, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x124:
-                                SetLowByte(ref _communication!._SIODATA2, value);
+                                _communication!.WriteRegister(Communication.Register.SIODATA2, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x125:
-                                SetHighByte(ref _communication!._SIODATA2, value);
+                                _communication!.WriteRegister(Communication.Register.SIODATA2, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x126:
-                                SetLowByte(ref _communication!._SIODATA3, value);
+                                _communication!.WriteRegister(Communication.Register.SIODATA3, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x127:
-                                SetHighByte(ref _communication!._SIODATA3, value);
+                                _communication!.WriteRegister(Communication.Register.SIODATA3, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x128:
-                                SetLowByte(ref _communication!._SIOCNT, value);
+                                _communication!.WriteRegister(Communication.Register.SIOCNT, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x129:
-                                SetHighByte(ref _communication!._SIOCNT, value);
+                                _communication!.WriteRegister(Communication.Register.SIOCNT, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x12a:
-                                SetLowByte(ref _communication!._SIODATA_SEND, value);
+                                _communication!.WriteRegister(Communication.Register.SIODATA_SEND, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x12b:
-                                SetHighByte(ref _communication!._SIODATA_SEND, value);
+                                _communication!.WriteRegister(Communication.Register.SIODATA_SEND, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x130:
@@ -1374,17 +1374,17 @@ namespace Iris.GBA
                                 break;
 
                             case 0x134:
-                                SetLowByte(ref _communication!._RCNT, value);
+                                _communication!.WriteRegister(Communication.Register.RCNT, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x135:
-                                SetHighByte(ref _communication!._RCNT, value);
+                                _communication!.WriteRegister(Communication.Register.RCNT, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x140:
-                                SetLowByte(ref _communication!._JOYCNT, value);
+                                _communication!.WriteRegister(Communication.Register.JOYCNT, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x141:
-                                SetHighByte(ref _communication!._JOYCNT, value);
+                                _communication!.WriteRegister(Communication.Register.JOYCNT, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x200:
@@ -1781,22 +1781,22 @@ namespace Iris.GBA
                                 _timer!.WriteRegister(Timer.Register.TM3CNT_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x120:
-                                _communication!._SIODATA0 = value;
+                                _communication!.WriteRegister(Communication.Register.SIODATA0, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x122:
-                                _communication!._SIODATA1 = value;
+                                _communication!.WriteRegister(Communication.Register.SIODATA1, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x124:
-                                _communication!._SIODATA2 = value;
+                                _communication!.WriteRegister(Communication.Register.SIODATA2, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x126:
-                                _communication!._SIODATA3 = value;
+                                _communication!.WriteRegister(Communication.Register.SIODATA3, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x128:
-                                _communication!._SIOCNT = value;
+                                _communication!.WriteRegister(Communication.Register.SIOCNT, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x12a:
-                                _communication!._SIODATA_SEND = value;
+                                _communication!.WriteRegister(Communication.Register.SIODATA_SEND, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x130:
                                 // KEYINPUT (read-only)
@@ -1805,13 +1805,13 @@ namespace Iris.GBA
                                 _keyInput!.WriteRegister(KeyInput.Register.KEYCNT, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x134:
-                                _communication!._RCNT = value;
+                                _communication!.WriteRegister(Communication.Register.RCNT, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x140:
-                                _communication!._JOYCNT = value;
+                                _communication!.WriteRegister(Communication.Register.JOYCNT, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x158:
-                                _communication!._JOYSTAT = value;
+                                _communication!.WriteRegister(Communication.Register.JOYSTAT, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x200:
                                 _interruptControl!.WriteRegister(InterruptControl.Register.IE, value, RegisterWriteMode.HalfWord);
@@ -2096,16 +2096,16 @@ namespace Iris.GBA
                                 // unused
                                 break;
                             case 0x120:
-                                _communication!._SIODATA0 = GetLowHalfword(value);
-                                _communication._SIODATA1 = GetHighHalfword(value);
+                                _communication!.WriteRegister(Communication.Register.SIODATA0, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _communication.WriteRegister(Communication.Register.SIODATA1, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x124:
-                                _communication!._SIODATA2 = GetLowHalfword(value);
-                                _communication._SIODATA3 = GetHighHalfword(value);
+                                _communication!.WriteRegister(Communication.Register.SIODATA2, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _communication.WriteRegister(Communication.Register.SIODATA3, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x128:
-                                _communication!._SIOCNT = GetLowHalfword(value);
-                                _communication._SIODATA_SEND = GetHighHalfword(value);
+                                _communication!.WriteRegister(Communication.Register.SIOCNT, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _communication.WriteRegister(Communication.Register.SIODATA_SEND, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x12c:
                                 // unused
@@ -2115,7 +2115,7 @@ namespace Iris.GBA
                                 _keyInput!.WriteRegister(KeyInput.Register.KEYCNT, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x140:
-                                _communication!._JOYCNT = GetLowHalfword(value);
+                                _communication!.WriteRegister(Communication.Register.JOYCNT, GetLowHalfword(value), RegisterWriteMode.HalfWord);
                                 // 16 upper bits are unused
                                 break;
                             case 0x144:
@@ -2124,15 +2124,15 @@ namespace Iris.GBA
                                 // unused
                                 break;
                             case 0x150:
-                                _communication!._JOY_RECV_L = GetLowHalfword(value);
-                                _communication._JOY_RECV_H = GetHighHalfword(value);
+                                _communication!.WriteRegister(Communication.Register.JOY_RECV_L, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _communication.WriteRegister(Communication.Register.JOY_RECV_H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x154:
-                                _communication!._JOY_TRANS_L = GetLowHalfword(value);
-                                _communication._JOY_TRANS_H = GetHighHalfword(value);
+                                _communication!.WriteRegister(Communication.Register.JOY_TRANS_L, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _communication.WriteRegister(Communication.Register.JOY_TRANS_H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x158:
-                                _communication!._JOYSTAT = GetLowHalfword(value);
+                                _communication!.WriteRegister(Communication.Register.JOYSTAT, GetLowHalfword(value), RegisterWriteMode.HalfWord);
                                 // 16 upper bits are unused
                                 break;
                             case 0x15c:

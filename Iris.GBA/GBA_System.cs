@@ -37,6 +37,7 @@ namespace Iris.GBA
             _keyInput = new(pollInputCallback);
             _video = new(_scheduler, drawFrameCallback);
 
+            _communication.Initialize(_interruptControl);
             _timer.Initialize(_interruptControl);
             _dma.Initialize(_memory);
             _interruptControl.Initialize(_cpu);
