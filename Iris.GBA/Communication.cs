@@ -160,9 +160,9 @@
                     case 0b01:
                         switch ((_SIOCNT >> 12) & 0b11)
                         {
-                            case 0b00: // 8 bit normal serial communication
-                            case 0b01: // 32 bit normal serial communication
-                            case 0b10: // 16 bit multiplayer serial communication
+                            case 0b00: // 8 bits normal serial communication
+                            case 0b01: // 32 bits normal serial communication
+                            case 0b10: // 16 bits multiplayer serial communication
                                 if ((_SIOCNT & 0x0080) == 0x0080)
                                 {
                                     _SIOCNT = (UInt16)(_SIOCNT & ~0x0080);

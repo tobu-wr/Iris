@@ -323,17 +323,17 @@ namespace Iris.GBA
                             0x09e => GetLowByte(_sound!.ReadRegister(Sound.Register.WAVE_RAM3_H)),
                             0x09f => GetHighByte(_sound!.ReadRegister(Sound.Register.WAVE_RAM3_H)),
 
-                            0x0ba => GetLowByte(_dma!._DMA0CNT_H),
-                            0x0bb => GetHighByte(_dma!._DMA0CNT_H),
+                            0x0ba => GetLowByte(_dma!.ReadRegister(DMA.Register.DMA0CNT_H)),
+                            0x0bb => GetHighByte(_dma!.ReadRegister(DMA.Register.DMA0CNT_H)),
 
-                            0x0c6 => GetLowByte(_dma!._DMA1CNT_H),
-                            0x0c7 => GetHighByte(_dma!._DMA1CNT_H),
+                            0x0c6 => GetLowByte(_dma!.ReadRegister(DMA.Register.DMA1CNT_H)),
+                            0x0c7 => GetHighByte(_dma!.ReadRegister(DMA.Register.DMA1CNT_H)),
 
-                            0x0d2 => GetLowByte(_dma!._DMA2CNT_H),
-                            0x0d3 => GetHighByte(_dma!._DMA2CNT_H),
+                            0x0d2 => GetLowByte(_dma!.ReadRegister(DMA.Register.DMA2CNT_H)),
+                            0x0d3 => GetHighByte(_dma!.ReadRegister(DMA.Register.DMA2CNT_H)),
 
-                            0x0de => GetLowByte(_dma!._DMA3CNT_H),
-                            0x0df => GetHighByte(_dma!._DMA3CNT_H),
+                            0x0de => GetLowByte(_dma!.ReadRegister(DMA.Register.DMA3CNT_H)),
+                            0x0df => GetHighByte(_dma!.ReadRegister(DMA.Register.DMA3CNT_H)),
 
                             0x100 => GetLowByte(_timer!.ReadRegister(Timer.Register.TM0CNT_L)),
                             0x101 => GetHighByte(_timer!.ReadRegister(Timer.Register.TM0CNT_L)),
@@ -523,10 +523,10 @@ namespace Iris.GBA
                             0x09a => _sound!.ReadRegister(Sound.Register.WAVE_RAM2_H),
                             0x09c => _sound!.ReadRegister(Sound.Register.WAVE_RAM3_L),
                             0x09e => _sound!.ReadRegister(Sound.Register.WAVE_RAM3_H),
-                            0x0ba => _dma!._DMA0CNT_H,
-                            0x0c6 => _dma!._DMA1CNT_H,
-                            0x0d2 => _dma!._DMA2CNT_H,
-                            0x0de => _dma!._DMA3CNT_H,
+                            0x0ba => _dma!.ReadRegister(DMA.Register.DMA0CNT_H),
+                            0x0c6 => _dma!.ReadRegister(DMA.Register.DMA1CNT_H),
+                            0x0d2 => _dma!.ReadRegister(DMA.Register.DMA2CNT_H),
+                            0x0de => _dma!.ReadRegister(DMA.Register.DMA3CNT_H),
                             0x100 => _timer!.ReadRegister(Timer.Register.TM0CNT_L),
                             0x102 => _timer!.ReadRegister(Timer.Register.TM0CNT_H),
                             0x104 => _timer!.ReadRegister(Timer.Register.TM1CNT_L),
@@ -642,10 +642,10 @@ namespace Iris.GBA
                             0x004 => (UInt32)((_video!.ReadRegister(Video.Register.VCOUNT) << 16) | _video.ReadRegister(Video.Register.DISPSTAT)),
                             0x008 => (UInt32)((_video!.ReadRegister(Video.Register.BG1CNT) << 16) | _video.ReadRegister(Video.Register.BG0CNT)),
                             0x00c => (UInt32)((_video!.ReadRegister(Video.Register.BG3CNT) << 16) | _video.ReadRegister(Video.Register.BG2CNT)),
-                            0x0b8 => (UInt32)(_dma!._DMA0CNT_H << 16),
-                            0x0c4 => (UInt32)(_dma!._DMA1CNT_H << 16),
-                            0x0d0 => (UInt32)(_dma!._DMA2CNT_H << 16),
-                            0x0dc => (UInt32)(_dma!._DMA3CNT_H << 16),
+                            0x0b8 => (UInt32)(_dma!.ReadRegister(DMA.Register.DMA0CNT_H) << 16),
+                            0x0c4 => (UInt32)(_dma!.ReadRegister(DMA.Register.DMA1CNT_H) << 16),
+                            0x0d0 => (UInt32)(_dma!.ReadRegister(DMA.Register.DMA2CNT_H) << 16),
+                            0x0dc => (UInt32)(_dma!.ReadRegister(DMA.Register.DMA3CNT_H) << 16),
                             0x150 => (UInt32)((_communication.ReadRegister(Communication.Register.JOY_RECV_H) << 16) | _communication.ReadRegister(Communication.Register.JOY_RECV_L)),
                             0x200 => (UInt32)((_interruptControl!.ReadRegister(InterruptControl.Register.IF) << 16) | _interruptControl.ReadRegister(InterruptControl.Register.IE)),
                             0x208 => _interruptControl!.ReadRegister(InterruptControl.Register.IME),
@@ -1092,175 +1092,171 @@ namespace Iris.GBA
                                 break;
 
                             case 0x0b0:
-                                SetLowByte(ref _dma!._DMA0SAD_L, value);
+                                _dma!.WriteRegister(DMA.Register.DMA0SAD_L, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x0b1:
-                                SetHighByte(ref _dma!._DMA0SAD_L, value);
+                                _dma!.WriteRegister(DMA.Register.DMA0SAD_L, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x0b2:
-                                SetLowByte(ref _dma!._DMA0SAD_H, value);
+                                _dma!.WriteRegister(DMA.Register.DMA0SAD_H, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x0b3:
-                                SetHighByte(ref _dma!._DMA0SAD_H, value);
+                                _dma!.WriteRegister(DMA.Register.DMA0SAD_H, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x0b4:
-                                SetLowByte(ref _dma!._DMA0DAD_L, value);
+                                _dma!.WriteRegister(DMA.Register.DMA0DAD_L, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x0b5:
-                                SetHighByte(ref _dma!._DMA0DAD_L, value);
+                                _dma!.WriteRegister(DMA.Register.DMA0DAD_L, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x0b6:
-                                SetLowByte(ref _dma!._DMA0DAD_H, value);
+                                _dma!.WriteRegister(DMA.Register.DMA0DAD_H, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x0b7:
-                                SetHighByte(ref _dma!._DMA0DAD_H, value);
+                                _dma!.WriteRegister(DMA.Register.DMA0DAD_H, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x0b8:
-                                SetLowByte(ref _dma!._DMA0CNT_L, value);
+                                _dma!.WriteRegister(DMA.Register.DMA0CNT_L, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x0b9:
-                                SetHighByte(ref _dma!._DMA0CNT_L, value);
+                                _dma!.WriteRegister(DMA.Register.DMA0CNT_L, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x0ba:
-                                SetLowByte(ref _dma!._DMA0CNT_H, value);
+                                _dma!.WriteRegister(DMA.Register.DMA0CNT_H, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x0bb:
-                                SetHighByte(ref _dma!._DMA0CNT_H, value);
-                                _dma.UpdateChannel0();
+                                _dma!.WriteRegister(DMA.Register.DMA0CNT_H, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x0bc:
-                                SetLowByte(ref _dma!._DMA1SAD_L, value);
+                                _dma!.WriteRegister(DMA.Register.DMA1SAD_L, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x0bd:
-                                SetHighByte(ref _dma!._DMA1SAD_L, value);
+                                _dma!.WriteRegister(DMA.Register.DMA1SAD_L, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x0be:
-                                SetLowByte(ref _dma!._DMA1SAD_H, value);
+                                _dma!.WriteRegister(DMA.Register.DMA1SAD_H, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x0bf:
-                                SetHighByte(ref _dma!._DMA1SAD_H, value);
+                                _dma!.WriteRegister(DMA.Register.DMA1SAD_H, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x0c0:
-                                SetLowByte(ref _dma!._DMA1DAD_L, value);
+                                _dma!.WriteRegister(DMA.Register.DMA1DAD_L, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x0c1:
-                                SetHighByte(ref _dma!._DMA1DAD_L, value);
+                                _dma!.WriteRegister(DMA.Register.DMA1DAD_L, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x0c2:
-                                SetLowByte(ref _dma!._DMA1DAD_H, value);
+                                _dma!.WriteRegister(DMA.Register.DMA1DAD_H, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x0c3:
-                                SetHighByte(ref _dma!._DMA1DAD_H, value);
+                                _dma!.WriteRegister(DMA.Register.DMA1DAD_H, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x0c4:
-                                SetLowByte(ref _dma!._DMA1CNT_L, value);
+                                _dma!.WriteRegister(DMA.Register.DMA1CNT_L, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x0c5:
-                                SetHighByte(ref _dma!._DMA1CNT_L, value);
+                                _dma!.WriteRegister(DMA.Register.DMA1CNT_L, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x0c6:
-                                SetLowByte(ref _dma!._DMA1CNT_H, value);
+                                _dma!.WriteRegister(DMA.Register.DMA1CNT_H, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x0c7:
-                                SetHighByte(ref _dma!._DMA1CNT_H, value);
-                                _dma.UpdateChannel1();
+                                _dma!.WriteRegister(DMA.Register.DMA1CNT_H, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x0c8:
-                                SetLowByte(ref _dma!._DMA2SAD_L, value);
+                                _dma!.WriteRegister(DMA.Register.DMA2SAD_L, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x0c9:
-                                SetHighByte(ref _dma!._DMA2SAD_L, value);
+                                _dma!.WriteRegister(DMA.Register.DMA2SAD_L, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x0ca:
-                                SetLowByte(ref _dma!._DMA2SAD_H, value);
+                                _dma!.WriteRegister(DMA.Register.DMA2SAD_H, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x0cb:
-                                SetHighByte(ref _dma!._DMA2SAD_H, value);
+                                _dma!.WriteRegister(DMA.Register.DMA2SAD_H, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x0cc:
-                                SetLowByte(ref _dma!._DMA2DAD_L, value);
+                                _dma!.WriteRegister(DMA.Register.DMA2DAD_L, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x0cd:
-                                SetHighByte(ref _dma!._DMA2DAD_L, value);
+                                _dma!.WriteRegister(DMA.Register.DMA2DAD_L, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x0ce:
-                                SetLowByte(ref _dma!._DMA2DAD_H, value);
+                                _dma!.WriteRegister(DMA.Register.DMA2DAD_H, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x0cf:
-                                SetHighByte(ref _dma!._DMA2DAD_H, value);
+                                _dma!.WriteRegister(DMA.Register.DMA2DAD_H, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x0d0:
-                                SetLowByte(ref _dma!._DMA2CNT_L, value);
+                                _dma!.WriteRegister(DMA.Register.DMA2CNT_L, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x0d1:
-                                SetHighByte(ref _dma!._DMA2CNT_L, value);
+                                _dma!.WriteRegister(DMA.Register.DMA2CNT_L, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x0d2:
-                                SetLowByte(ref _dma!._DMA2CNT_H, value);
+                                _dma!.WriteRegister(DMA.Register.DMA2CNT_H, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x0d3:
-                                SetHighByte(ref _dma!._DMA2CNT_H, value);
-                                _dma.UpdateChannel2();
+                                _dma!.WriteRegister(DMA.Register.DMA2CNT_H, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x0d4:
-                                SetLowByte(ref _dma!._DMA3SAD_L, value);
+                                _dma!.WriteRegister(DMA.Register.DMA3SAD_L, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x0d5:
-                                SetHighByte(ref _dma!._DMA3SAD_L, value);
+                                _dma!.WriteRegister(DMA.Register.DMA3SAD_L, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x0d6:
-                                SetLowByte(ref _dma!._DMA3SAD_H, value);
+                                _dma!.WriteRegister(DMA.Register.DMA3SAD_H, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x0d7:
-                                SetHighByte(ref _dma!._DMA3SAD_H, value);
+                                _dma!.WriteRegister(DMA.Register.DMA3SAD_H, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x0d8:
-                                SetLowByte(ref _dma!._DMA3DAD_L, value);
+                                _dma!.WriteRegister(DMA.Register.DMA3DAD_L, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x0d9:
-                                SetHighByte(ref _dma!._DMA3DAD_L, value);
+                                _dma!.WriteRegister(DMA.Register.DMA3DAD_L, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x0da:
-                                SetLowByte(ref _dma!._DMA3DAD_H, value);
+                                _dma!.WriteRegister(DMA.Register.DMA3DAD_H, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x0db:
-                                SetHighByte(ref _dma!._DMA3DAD_H, value);
+                                _dma!.WriteRegister(DMA.Register.DMA3DAD_H, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x0dc:
-                                SetLowByte(ref _dma!._DMA3CNT_L, value);
+                                _dma!.WriteRegister(DMA.Register.DMA3CNT_L, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x0dd:
-                                SetHighByte(ref _dma!._DMA3CNT_L, value);
+                                _dma!.WriteRegister(DMA.Register.DMA3CNT_L, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x0de:
-                                SetLowByte(ref _dma!._DMA3CNT_H, value);
+                                _dma!.WriteRegister(DMA.Register.DMA3CNT_H, value, RegisterWriteMode.LowByte);
                                 break;
                             case 0x0df:
-                                SetHighByte(ref _dma!._DMA3CNT_H, value);
-                                _dma.UpdateChannel3();
+                                _dma!.WriteRegister(DMA.Register.DMA3CNT_H, value, RegisterWriteMode.HighByte);
                                 break;
 
                             case 0x100:
@@ -1681,80 +1677,76 @@ namespace Iris.GBA
                                 _sound!.WriteRegister(Sound.Register.WAVE_RAM3_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0b0:
-                                _dma!._DMA0SAD_L = value;
+                                _dma!.WriteRegister(DMA.Register.DMA0SAD_L, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0b2:
-                                _dma!._DMA0SAD_H = value;
+                                _dma!.WriteRegister(DMA.Register.DMA0SAD_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0b4:
-                                _dma!._DMA0DAD_L = value;
+                                _dma!.WriteRegister(DMA.Register.DMA0DAD_L, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0b6:
-                                _dma!._DMA0DAD_H = value;
+                                _dma!.WriteRegister(DMA.Register.DMA0DAD_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0b8:
-                                _dma!._DMA0CNT_L = value;
+                                _dma!.WriteRegister(DMA.Register.DMA0CNT_L, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0ba:
-                                _dma!._DMA0CNT_H = value;
-                                _dma.UpdateChannel0();
+                                _dma!.WriteRegister(DMA.Register.DMA0CNT_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0bc:
-                                _dma!._DMA1SAD_L = value;
+                                _dma!.WriteRegister(DMA.Register.DMA1SAD_L, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0be:
-                                _dma!._DMA1SAD_H = value;
+                                _dma!.WriteRegister(DMA.Register.DMA1SAD_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0c0:
-                                _dma!._DMA1DAD_L = value;
+                                _dma!.WriteRegister(DMA.Register.DMA1DAD_L, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0c2:
-                                _dma!._DMA1DAD_H = value;
+                                _dma!.WriteRegister(DMA.Register.DMA1DAD_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0c4:
-                                _dma!._DMA1CNT_L = value;
+                                _dma!.WriteRegister(DMA.Register.DMA1CNT_L, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0c6:
-                                _dma!._DMA1CNT_H = value;
-                                _dma.UpdateChannel1();
+                                _dma!.WriteRegister(DMA.Register.DMA1CNT_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0c8:
-                                _dma!._DMA2SAD_L = value;
+                                _dma!.WriteRegister(DMA.Register.DMA2SAD_L, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0ca:
-                                _dma!._DMA2SAD_H = value;
+                                _dma!.WriteRegister(DMA.Register.DMA2SAD_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0cc:
-                                _dma!._DMA2DAD_L = value;
+                                _dma!.WriteRegister(DMA.Register.DMA2DAD_L, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0ce:
-                                _dma!._DMA2DAD_H = value;
+                                _dma!.WriteRegister(DMA.Register.DMA2DAD_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0d0:
-                                _dma!._DMA2CNT_L = value;
+                                _dma!.WriteRegister(DMA.Register.DMA2CNT_L, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0d2:
-                                _dma!._DMA2CNT_H = value;
-                                _dma.UpdateChannel2();
+                                _dma!.WriteRegister(DMA.Register.DMA2CNT_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0d4:
-                                _dma!._DMA3SAD_L = value;
+                                _dma!.WriteRegister(DMA.Register.DMA3SAD_L, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0d6:
-                                _dma!._DMA3SAD_H = value;
+                                _dma!.WriteRegister(DMA.Register.DMA3SAD_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0d8:
-                                _dma!._DMA3DAD_L = value;
+                                _dma!.WriteRegister(DMA.Register.DMA3DAD_L, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0da:
-                                _dma!._DMA3DAD_H = value;
+                                _dma!.WriteRegister(DMA.Register.DMA3DAD_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0dc:
-                                _dma!._DMA3CNT_L = value;
+                                _dma!.WriteRegister(DMA.Register.DMA3CNT_L, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0de:
-                                _dma!._DMA3CNT_H = value;
-                                _dma.UpdateChannel3();
+                                _dma!.WriteRegister(DMA.Register.DMA3CNT_H, value, RegisterWriteMode.HalfWord);
                                 break;
                             case 0x100:
                                 _timer!.WriteRegister(Timer.Register.TM0CNT_L, value, RegisterWriteMode.HalfWord);
@@ -2012,56 +2004,52 @@ namespace Iris.GBA
                                 // unused
                                 break;
                             case 0x0b0:
-                                _dma!._DMA0SAD_L = GetLowHalfword(value);
-                                _dma._DMA0SAD_H = GetHighHalfword(value);
+                                _dma!.WriteRegister(DMA.Register.DMA0SAD_L, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _dma.WriteRegister(DMA.Register.DMA0SAD_H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0b4:
-                                _dma!._DMA0DAD_L = GetLowHalfword(value);
-                                _dma._DMA0DAD_H = GetHighHalfword(value);
+                                _dma!.WriteRegister(DMA.Register.DMA0DAD_L, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _dma.WriteRegister(DMA.Register.DMA0DAD_H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0b8:
-                                _dma!._DMA0CNT_L = GetLowHalfword(value);
-                                _dma._DMA0CNT_H = GetHighHalfword(value);
-                                _dma.UpdateChannel0();
+                                _dma!.WriteRegister(DMA.Register.DMA0CNT_L, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _dma.WriteRegister(DMA.Register.DMA0CNT_H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0bc:
-                                _dma!._DMA1SAD_L = GetLowHalfword(value);
-                                _dma._DMA1SAD_H = GetHighHalfword(value);
+                                _dma!.WriteRegister(DMA.Register.DMA1SAD_L, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _dma.WriteRegister(DMA.Register.DMA1SAD_H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0c0:
-                                _dma!._DMA1DAD_L = GetLowHalfword(value);
-                                _dma._DMA1DAD_H = GetHighHalfword(value);
+                                _dma!.WriteRegister(DMA.Register.DMA1DAD_L, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _dma.WriteRegister(DMA.Register.DMA1DAD_H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0c4:
-                                _dma!._DMA1CNT_L = GetLowHalfword(value);
-                                _dma._DMA1CNT_H = GetHighHalfword(value);
-                                _dma.UpdateChannel1();
+                                _dma!.WriteRegister(DMA.Register.DMA1CNT_L, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _dma.WriteRegister(DMA.Register.DMA1CNT_H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0c8:
-                                _dma!._DMA2SAD_L = GetLowHalfword(value);
-                                _dma._DMA2SAD_H = GetHighHalfword(value);
+                                _dma!.WriteRegister(DMA.Register.DMA2SAD_L, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _dma.WriteRegister(DMA.Register.DMA2SAD_H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0cc:
-                                _dma!._DMA2DAD_L = GetLowHalfword(value);
-                                _dma._DMA2DAD_H = GetHighHalfword(value);
+                                _dma!.WriteRegister(DMA.Register.DMA2DAD_L, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _dma.WriteRegister(DMA.Register.DMA2DAD_H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0d0:
-                                _dma!._DMA2CNT_L = GetLowHalfword(value);
-                                _dma._DMA2CNT_H = GetHighHalfword(value);
-                                _dma.UpdateChannel2();
+                                _dma!.WriteRegister(DMA.Register.DMA2CNT_L, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _dma.WriteRegister(DMA.Register.DMA2CNT_H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0d4:
-                                _dma!._DMA3SAD_L = GetLowHalfword(value);
-                                _dma._DMA3SAD_H = GetHighHalfword(value);
+                                _dma!.WriteRegister(DMA.Register.DMA3SAD_L, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _dma.WriteRegister(DMA.Register.DMA3SAD_H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0d8:
-                                _dma!._DMA3DAD_L = GetLowHalfword(value);
-                                _dma._DMA3DAD_H = GetHighHalfword(value);
+                                _dma!.WriteRegister(DMA.Register.DMA3DAD_L, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _dma.WriteRegister(DMA.Register.DMA3DAD_H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0dc:
-                                _dma!._DMA3CNT_L = GetLowHalfword(value);
-                                _dma._DMA3CNT_H = GetHighHalfword(value);
-                                _dma.UpdateChannel3();
+                                _dma!.WriteRegister(DMA.Register.DMA3CNT_L, GetLowHalfword(value), RegisterWriteMode.HalfWord);
+                                _dma.WriteRegister(DMA.Register.DMA3CNT_H, GetHighHalfword(value), RegisterWriteMode.HalfWord);
                                 break;
                             case 0x0e0:
                             case 0x0e4:
