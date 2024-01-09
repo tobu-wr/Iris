@@ -759,12 +759,6 @@ namespace Iris.GBA
                 // IO and registers
                 case 0x4:
                     {
-                        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                        static void SetLowByte(ref UInt16 input, Byte value) => input = (UInt16)((input & 0xff00) | value);
-
-                        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                        static void SetHighByte(ref UInt16 input, Byte value) => input = (UInt16)((input & 0x00ff) | (value << 8));
-
                         UInt32 offset = address - 0x400_0000;
 
                         switch (offset)
