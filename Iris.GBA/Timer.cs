@@ -188,7 +188,10 @@
             void UpdateCounter(ref Channel channel, bool isFirstChannel, InterruptControl.Interrupt interrupt)
             {
                 if (!channel.Running)
+                {
+                    overflowCount = 0;
                     return;
+                }
 
                 UInt32 counterIncrement;
 

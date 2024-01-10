@@ -210,6 +210,7 @@
 
                 case Register.RCNT:
                     Memory.WriteRegisterHelper(ref _RCNT, value, mode);
+                    CheckTransfer();
                     break;
 
                 case Register.JOYCNT:

@@ -5,28 +5,28 @@
         internal enum Register
         {
             WAITCNT,
-            UNKNOWN_0
+            SYSCNT_UND0 // undocumented - Post Boot Flag (POSTFLG) & Power Down Control (HALTCNT)
         }
 
         private UInt16 _WAITCNT;
-        private UInt16 _UNKNOWN_0;
+        private UInt16 _SYSCNT_UND0;
 
         internal void ResetState()
         {
             _WAITCNT = 0;
-            _UNKNOWN_0 = 0;
+            _SYSCNT_UND0 = 0;
         }
 
         internal void LoadState(BinaryReader reader)
         {
             _WAITCNT = reader.ReadUInt16();
-            _UNKNOWN_0 = reader.ReadUInt16();
+            _SYSCNT_UND0 = reader.ReadUInt16();
         }
 
         internal void SaveState(BinaryWriter writer)
         {
             writer.Write(_WAITCNT);
-            writer.Write(_UNKNOWN_0);
+            writer.Write(_SYSCNT_UND0);
         }
 
         internal UInt16 ReadRegister(Register register)
@@ -34,7 +34,7 @@
             return register switch
             {
                 Register.WAITCNT => _WAITCNT,
-                Register.UNKNOWN_0 => _UNKNOWN_0,
+                Register.SYSCNT_UND0 => _SYSCNT_UND0,
 
                 // should never happen
                 _ => throw new Exception("Iris.GBA.SystemControl: Register read error"),
@@ -48,8 +48,8 @@
                 case Register.WAITCNT:
                     Memory.WriteRegisterHelper(ref _WAITCNT, value, mode);
                     break;
-                case Register.UNKNOWN_0:
-                    Memory.WriteRegisterHelper(ref _UNKNOWN_0, value, mode);
+                case Register.SYSCNT_UND0:
+                    Memory.WriteRegisterHelper(ref _SYSCNT_UND0, value, mode);
                     break;
 
                 // should never happen

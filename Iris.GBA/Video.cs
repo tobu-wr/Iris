@@ -154,6 +154,7 @@ namespace Iris.GBA
 
         private DMA _dma;
         private InterruptControl _interruptControl;
+
         private bool _disposed;
 
         private readonly UInt16[] _displayFrameBuffer = new UInt16[DisplayScreenSize];
