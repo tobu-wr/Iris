@@ -136,13 +136,9 @@
                 channel.Control = newControl;
 
                 if (((previousControl & 0x0080) == 0) && ((newControl & 0x0080) == 0x0080))
-                {
                     _scheduler.ScheduleTask(2, startCountingTaskId);
-                }
                 else if (((previousControl & 0x0080) == 0x0080) && ((newControl & 0x0080) == 0))
-                {
                     channel.Running = false;
-                }
             }
 
             switch (register)
