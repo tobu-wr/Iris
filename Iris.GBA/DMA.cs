@@ -49,50 +49,21 @@
             //Special = 0b11
         }
 
-        private UInt16 _DMA0SAD_L;
-        private UInt16 _DMA0SAD_H;
-
-        private UInt16 _DMA0DAD_L;
-        private UInt16 _DMA0DAD_H;
-
         private UInt16 _DMA0CNT_L;
-        private UInt16 _DMA0CNT_H;
-
-        private UInt16 _DMA1SAD_L;
-        private UInt16 _DMA1SAD_H;
-
-        private UInt16 _DMA1DAD_L;
-        private UInt16 _DMA1DAD_H;
-
         private UInt16 _DMA1CNT_L;
-        private UInt16 _DMA1CNT_H;
-
-        private UInt16 _DMA2SAD_L;
-        private UInt16 _DMA2SAD_H;
-
-        private UInt16 _DMA2DAD_L;
-        private UInt16 _DMA2DAD_H;
-
         private UInt16 _DMA2CNT_L;
-        private UInt16 _DMA2CNT_H;
-
-        private UInt16 _DMA3SAD_L;
-        private UInt16 _DMA3SAD_H;
-
-        private UInt16 _DMA3DAD_L;
-        private UInt16 _DMA3DAD_H;
-
         private UInt16 _DMA3CNT_L;
-        private UInt16 _DMA3CNT_H;
 
         private Memory _memory;
 
         private record struct Channel
         (
             UInt32 Source,
+            UInt32 SourceReload,
             UInt32 Destination,
+            UInt32 DestinationReload,
             UInt32 Length,
-            bool Running
+            UInt16 Control
         );
 
         private Channel _channel0;
@@ -107,41 +78,10 @@
 
         internal void ResetState()
         {
-            _DMA0SAD_L = 0;
-            _DMA0SAD_H = 0;
-
-            _DMA0DAD_L = 0;
-            _DMA0DAD_H = 0;
-
             _DMA0CNT_L = 0;
-            _DMA0CNT_H = 0;
-
-            _DMA1SAD_L = 0;
-            _DMA1SAD_H = 0;
-
-            _DMA1DAD_L = 0;
-            _DMA1DAD_H = 0;
-
             _DMA1CNT_L = 0;
-            _DMA1CNT_H = 0;
-
-            _DMA2SAD_L = 0;
-            _DMA2SAD_H = 0;
-
-            _DMA2DAD_L = 0;
-            _DMA2DAD_H = 0;
-
             _DMA2CNT_L = 0;
-            _DMA2CNT_H = 0;
-
-            _DMA3SAD_L = 0;
-            _DMA3SAD_H = 0;
-
-            _DMA3DAD_L = 0;
-            _DMA3DAD_H = 0;
-
             _DMA3CNT_L = 0;
-            _DMA3CNT_H = 0;
 
             _channel0 = default;
             _channel1 = default;
@@ -151,48 +91,19 @@
 
         internal void LoadState(BinaryReader reader)
         {
-            _DMA0SAD_L = reader.ReadUInt16();
-            _DMA0SAD_H = reader.ReadUInt16();
-
-            _DMA0DAD_L = reader.ReadUInt16();
-            _DMA0DAD_H = reader.ReadUInt16();
-
             _DMA0CNT_L = reader.ReadUInt16();
-            _DMA0CNT_H = reader.ReadUInt16();
-
-            _DMA1SAD_L = reader.ReadUInt16();
-            _DMA1SAD_H = reader.ReadUInt16();
-
-            _DMA1DAD_L = reader.ReadUInt16();
-            _DMA1DAD_H = reader.ReadUInt16();
-
             _DMA1CNT_L = reader.ReadUInt16();
-            _DMA1CNT_H = reader.ReadUInt16();
-
-            _DMA2SAD_L = reader.ReadUInt16();
-            _DMA2SAD_H = reader.ReadUInt16();
-
-            _DMA2DAD_L = reader.ReadUInt16();
-            _DMA2DAD_H = reader.ReadUInt16();
-
             _DMA2CNT_L = reader.ReadUInt16();
-            _DMA2CNT_H = reader.ReadUInt16();
-
-            _DMA3SAD_L = reader.ReadUInt16();
-            _DMA3SAD_H = reader.ReadUInt16();
-
-            _DMA3DAD_L = reader.ReadUInt16();
-            _DMA3DAD_H = reader.ReadUInt16();
-
             _DMA3CNT_L = reader.ReadUInt16();
-            _DMA3CNT_H = reader.ReadUInt16();
 
             void LoadChannel(ref Channel channel)
             {
                 channel.Source = reader.ReadUInt32();
+                channel.SourceReload = reader.ReadUInt32();
                 channel.Destination = reader.ReadUInt32();
+                channel.DestinationReload = reader.ReadUInt32();
                 channel.Length = reader.ReadUInt32();
-                channel.Running = reader.ReadBoolean();
+                channel.Control = reader.ReadUInt16();
             }
 
             LoadChannel(ref _channel0);
@@ -203,48 +114,19 @@
 
         internal void SaveState(BinaryWriter writer)
         {
-            writer.Write(_DMA0SAD_L);
-            writer.Write(_DMA0SAD_H);
-
-            writer.Write(_DMA0DAD_L);
-            writer.Write(_DMA0DAD_H);
-
             writer.Write(_DMA0CNT_L);
-            writer.Write(_DMA0CNT_H);
-
-            writer.Write(_DMA1SAD_L);
-            writer.Write(_DMA1SAD_H);
-
-            writer.Write(_DMA1DAD_L);
-            writer.Write(_DMA1DAD_H);
-
             writer.Write(_DMA1CNT_L);
-            writer.Write(_DMA1CNT_H);
-
-            writer.Write(_DMA2SAD_L);
-            writer.Write(_DMA2SAD_H);
-
-            writer.Write(_DMA2DAD_L);
-            writer.Write(_DMA2DAD_H);
-
             writer.Write(_DMA2CNT_L);
-            writer.Write(_DMA2CNT_H);
-
-            writer.Write(_DMA3SAD_L);
-            writer.Write(_DMA3SAD_H);
-
-            writer.Write(_DMA3DAD_L);
-            writer.Write(_DMA3DAD_H);
-
             writer.Write(_DMA3CNT_L);
-            writer.Write(_DMA3CNT_H);
 
             void SaveChannel(Channel channel)
             {
                 writer.Write(channel.Source);
+                writer.Write(channel.SourceReload);
                 writer.Write(channel.Destination);
+                writer.Write(channel.DestinationReload);
                 writer.Write(channel.Length);
-                writer.Write(channel.Running);
+                writer.Write(channel.Control);
             }
 
             SaveChannel(_channel0);
@@ -257,10 +139,10 @@
         {
             return register switch
             {
-                Register.DMA0CNT_H => _DMA0CNT_H,
-                Register.DMA1CNT_H => _DMA1CNT_H,
-                Register.DMA2CNT_H => _DMA2CNT_H,
-                Register.DMA3CNT_H => _DMA3CNT_H,
+                Register.DMA0CNT_H => _channel0.Control,
+                Register.DMA1CNT_H => _channel1.Control,
+                Register.DMA2CNT_H => _channel2.Control,
+                Register.DMA3CNT_H => _channel3.Control,
 
                 // should never happen
                 _ => throw new Exception("Iris.GBA.DMA: Register read error"),
@@ -269,162 +151,190 @@
 
         internal void WriteRegister(Register register, UInt16 value, Memory.RegisterWriteMode mode)
         {
-            void UpdateChannel0()
+            void WriteSourceReload_LowHalfWord(ref Channel channel)
             {
-                if ((_DMA0CNT_H & 0x8000) == 0)
-                {
-                    _channel0.Running = false;
-                }
-                else if (!_channel0.Running)
-                {
-                    _channel0.Source = (UInt32)(((_DMA0SAD_H & 0x07ff) << 16) | _DMA0SAD_L);
-                    _channel0.Destination = (UInt32)(((_DMA0DAD_H & 0x07ff) << 16) | _DMA0DAD_L);
-                    _channel0.Length = ((_DMA0CNT_L & 0x3fff) == 0) ? 0x4000u : (UInt32)(_DMA0CNT_L & 0x3fff);
-                    _channel0.Running = true;
+                UInt16 low = (UInt16)channel.SourceReload;
+                Memory.WriteRegisterHelper(ref low, value, mode);
+                channel.SourceReload = (channel.SourceReload & 0xffff_0000) | low;
+            }
 
-                    PerformTransfer(ref _DMA0CNT_H, ref _channel0, StartTiming.Immediate, _channel0.Destination, _channel0.Length);
+            void WriteSourceReload_HighHalfWord(ref Channel channel, UInt16 mask)
+            {
+                UInt16 high = (UInt16)(channel.SourceReload >> 16);
+                Memory.WriteRegisterHelper(ref high, (UInt16)(value & mask), mode);
+                channel.SourceReload = (channel.SourceReload & 0x0000_ffff) | (UInt32)(high << 16);
+            }
+
+            void WriteDestinationReload_LowHalfWord(ref Channel channel)
+            {
+                UInt16 low = (UInt16)channel.DestinationReload;
+                Memory.WriteRegisterHelper(ref low, value, mode);
+                channel.DestinationReload = (channel.DestinationReload & 0xffff_0000) | low;
+            }
+
+            void WriteDestinationReload_HighHalfWord(ref Channel channel, UInt16 mask)
+            {
+                UInt16 high = (UInt16)(channel.DestinationReload >> 16);
+                Memory.WriteRegisterHelper(ref high, (UInt16)(value & mask), mode);
+                channel.DestinationReload = (channel.DestinationReload & 0x0000_ffff) | (UInt32)(high << 16);
+            }
+
+            void WriteControlChannel0()
+            {
+                UInt16 previousControl = _channel0.Control;
+
+                UInt16 newControl = _channel0.Control;
+                Memory.WriteRegisterHelper(ref newControl, value, mode);
+                _channel0.Control = newControl;
+
+                if (((previousControl & 0x8000) == 0) && ((newControl & 0x8000) == 0x8000))
+                {
+                    _channel0.Source = _channel0.SourceReload;
+                    _channel0.Destination = _channel0.DestinationReload;
+                    _channel0.Length = (_DMA0CNT_L == 0) ? 0x4000u : _DMA0CNT_L;
+
+                    PerformTransfer(ref _channel0, StartTiming.Immediate, _channel0.Length);
                 }
             }
 
-            void UpdateChannel1()
+            void WriteControlChannel1()
             {
-                if ((_DMA1CNT_H & 0x8000) == 0)
-                {
-                    _channel1.Running = false;
-                }
-                else if (!_channel1.Running)
-                {
-                    _channel1.Source = (UInt32)(((_DMA1SAD_H & 0x0fff) << 16) | _DMA1SAD_L);
-                    _channel1.Destination = (UInt32)(((_DMA1DAD_H & 0x07ff) << 16) | _DMA1DAD_L);
-                    _channel1.Length = ((_DMA1CNT_L & 0x3fff) == 0) ? 0x4000u : (UInt32)(_DMA1CNT_L & 0x3fff);
-                    _channel1.Running = true;
+                UInt16 previousControl = _channel1.Control;
 
-                    PerformTransfer(ref _DMA1CNT_H, ref _channel1, StartTiming.Immediate, _channel1.Destination, _channel1.Length);
+                UInt16 newControl = _channel1.Control;
+                Memory.WriteRegisterHelper(ref newControl, value, mode);
+                _channel1.Control = newControl;
+
+                if (((previousControl & 0x8000) == 0) && ((newControl & 0x8000) == 0x8000))
+                {
+                    _channel1.Source = _channel1.SourceReload;
+                    _channel1.Destination = _channel1.DestinationReload;
+                    _channel1.Length = (_DMA1CNT_L == 0) ? 0x4000u : _DMA1CNT_L;
+
+                    PerformTransfer(ref _channel1, StartTiming.Immediate, _channel1.Length);
                 }
             }
 
-            void UpdateChannel2()
+            void WriteControlChannel2()
             {
-                if ((_DMA2CNT_H & 0x8000) == 0)
-                {
-                    _channel2.Running = false;
-                }
-                else if (!_channel2.Running)
-                {
-                    _channel2.Source = (UInt32)(((_DMA2SAD_H & 0x0fff) << 16) | _DMA2SAD_L);
-                    _channel2.Destination = (UInt32)(((_DMA2DAD_H & 0x07ff) << 16) | _DMA2DAD_L);
-                    _channel2.Length = ((_DMA2CNT_L & 0x3fff) == 0) ? 0x4000u : (UInt32)(_DMA2CNT_L & 0x3fff);
-                    _channel2.Running = true;
+                UInt16 previousControl = _channel2.Control;
 
-                    PerformTransfer(ref _DMA2CNT_H, ref _channel2, StartTiming.Immediate, _channel2.Destination, _channel2.Length);
+                UInt16 newControl = _channel2.Control;
+                Memory.WriteRegisterHelper(ref newControl, value, mode);
+                _channel2.Control = newControl;
+
+                if (((previousControl & 0x8000) == 0) && ((newControl & 0x8000) == 0x8000))
+                {
+                    _channel2.Source = _channel2.SourceReload;
+                    _channel2.Destination = _channel2.DestinationReload;
+                    _channel2.Length = (_DMA2CNT_L == 0) ? 0x4000u : _DMA2CNT_L;
+
+                    PerformTransfer(ref _channel2, StartTiming.Immediate, _channel2.Length);
                 }
             }
 
-            void UpdateChannel3()
+            void WriteControlChannel3()
             {
-                if ((_DMA3CNT_H & 0x8000) == 0)
+                UInt16 previousControl = _channel3.Control;
+
+                UInt16 newControl = _channel3.Control;
+                Memory.WriteRegisterHelper(ref newControl, value, mode);
+                _channel3.Control = newControl;
+
+                if (((previousControl & 0x8000) == 0) && ((newControl & 0x8000) == 0x8000))
                 {
-                    _channel3.Running = false;
-                }
-                else if (!_channel3.Running)
-                {
-                    _channel3.Source = (UInt32)(((_DMA3SAD_H & 0x0fff) << 16) | _DMA3SAD_L);
-                    _channel3.Destination = (UInt32)(((_DMA3DAD_H & 0x0fff) << 16) | _DMA3DAD_L);
+                    _channel3.Source = _channel3.SourceReload;
+                    _channel3.Destination = _channel3.DestinationReload;
                     _channel3.Length = (_DMA3CNT_L == 0) ? 0x1_0000u : _DMA3CNT_L;
-                    _channel3.Running = true;
 
-                    PerformTransfer(ref _DMA3CNT_H, ref _channel3, StartTiming.Immediate, _channel3.Destination, _channel3.Length);
+                    PerformTransfer(ref _channel3, StartTiming.Immediate, _channel3.Length);
                 }
             }
 
             switch (register)
             {
                 case Register.DMA0SAD_L:
-                    Memory.WriteRegisterHelper(ref _DMA0SAD_L, value, mode);
+                    WriteSourceReload_LowHalfWord(ref _channel0);
                     break;
                 case Register.DMA0SAD_H:
-                    Memory.WriteRegisterHelper(ref _DMA0SAD_H, value, mode);
+                    WriteSourceReload_HighHalfWord(ref _channel0, 0x07ff);
                     break;
 
                 case Register.DMA0DAD_L:
-                    Memory.WriteRegisterHelper(ref _DMA0DAD_L, value, mode);
+                    WriteDestinationReload_LowHalfWord(ref _channel0);
                     break;
                 case Register.DMA0DAD_H:
-                    Memory.WriteRegisterHelper(ref _DMA0DAD_H, value, mode);
+                    WriteDestinationReload_HighHalfWord(ref _channel0, 0x07ff);
                     break;
 
                 case Register.DMA0CNT_L:
-                    Memory.WriteRegisterHelper(ref _DMA0CNT_L, value, mode);
+                    Memory.WriteRegisterHelper(ref _DMA0CNT_L, (UInt16)(value & 0x3fff), mode);
                     break;
                 case Register.DMA0CNT_H:
-                    Memory.WriteRegisterHelper(ref _DMA0CNT_H, value, mode);
-                    UpdateChannel0();
+                    WriteControlChannel0();
                     break;
 
                 case Register.DMA1SAD_L:
-                    Memory.WriteRegisterHelper(ref _DMA1SAD_L, value, mode);
+                    WriteSourceReload_LowHalfWord(ref _channel1);
                     break;
                 case Register.DMA1SAD_H:
-                    Memory.WriteRegisterHelper(ref _DMA1SAD_H, value, mode);
+                    WriteSourceReload_HighHalfWord(ref _channel1, 0x0fff);
                     break;
 
                 case Register.DMA1DAD_L:
-                    Memory.WriteRegisterHelper(ref _DMA1DAD_L, value, mode);
+                    WriteDestinationReload_LowHalfWord(ref _channel1);
                     break;
                 case Register.DMA1DAD_H:
-                    Memory.WriteRegisterHelper(ref _DMA1DAD_H, value, mode);
+                    WriteDestinationReload_HighHalfWord(ref _channel1, 0x07ff);
                     break;
 
                 case Register.DMA1CNT_L:
-                    Memory.WriteRegisterHelper(ref _DMA1CNT_L, value, mode);
+                    Memory.WriteRegisterHelper(ref _DMA1CNT_L, (UInt16)(value & 0x3fff), mode);
                     break;
                 case Register.DMA1CNT_H:
-                    Memory.WriteRegisterHelper(ref _DMA1CNT_H, value, mode);
-                    UpdateChannel1();
+                    WriteControlChannel1();
                     break;
 
                 case Register.DMA2SAD_L:
-                    Memory.WriteRegisterHelper(ref _DMA2SAD_L, value, mode);
+                    WriteSourceReload_LowHalfWord(ref _channel2);
                     break;
                 case Register.DMA2SAD_H:
-                    Memory.WriteRegisterHelper(ref _DMA2SAD_H, value, mode);
+                    WriteSourceReload_HighHalfWord(ref _channel2, 0x0fff);
                     break;
 
                 case Register.DMA2DAD_L:
-                    Memory.WriteRegisterHelper(ref _DMA2DAD_L, value, mode);
+                    WriteDestinationReload_LowHalfWord(ref _channel2);
                     break;
                 case Register.DMA2DAD_H:
-                    Memory.WriteRegisterHelper(ref _DMA2DAD_H, value, mode);
+                    WriteDestinationReload_HighHalfWord(ref _channel2, 0x07ff);
                     break;
 
                 case Register.DMA2CNT_L:
-                    Memory.WriteRegisterHelper(ref _DMA2CNT_L, value, mode);
+                    Memory.WriteRegisterHelper(ref _DMA2CNT_L, (UInt16)(value & 0x3fff), mode);
                     break;
                 case Register.DMA2CNT_H:
-                    Memory.WriteRegisterHelper(ref _DMA2CNT_H, value, mode);
-                    UpdateChannel2();
+                    WriteControlChannel2();
                     break;
 
                 case Register.DMA3SAD_L:
-                    Memory.WriteRegisterHelper(ref _DMA3SAD_L, value, mode);
+                    WriteSourceReload_LowHalfWord(ref _channel3);
                     break;
                 case Register.DMA3SAD_H:
-                    Memory.WriteRegisterHelper(ref _DMA3SAD_H, value, mode);
+                    WriteSourceReload_HighHalfWord(ref _channel3, 0x0fff);
                     break;
 
                 case Register.DMA3DAD_L:
-                    Memory.WriteRegisterHelper(ref _DMA3DAD_L, value, mode);
+                    WriteDestinationReload_LowHalfWord(ref _channel3);
                     break;
                 case Register.DMA3DAD_H:
-                    Memory.WriteRegisterHelper(ref _DMA3DAD_H, value, mode);
+                    WriteDestinationReload_HighHalfWord(ref _channel3, 0x0fff);
                     break;
 
                 case Register.DMA3CNT_L:
                     Memory.WriteRegisterHelper(ref _DMA3CNT_L, value, mode);
                     break;
                 case Register.DMA3CNT_H:
-                    Memory.WriteRegisterHelper(ref _DMA3CNT_H, value, mode);
-                    UpdateChannel3();
+                    WriteControlChannel3();
                     break;
 
                 // should never happen
@@ -435,46 +345,41 @@
 
         internal void PerformAllTransfers(StartTiming startTiming)
         {
-            if (_channel0.Running)
             {
-                UInt32 destinationReloadValue = (UInt32)(((_DMA0DAD_H & 0x07ff) << 16) | _DMA0DAD_L);
-                UInt32 lengthReloadValue = ((_DMA0CNT_L & 0x3fff) == 0) ? 0x4000u : (UInt32)(_DMA0CNT_L & 0x3fff);
+                UInt32 lengthReloadValue = (_DMA0CNT_L == 0) ? 0x4000u : _DMA0CNT_L;
 
-                PerformTransfer(ref _DMA0CNT_H, ref _channel0, startTiming, destinationReloadValue, lengthReloadValue);
+                PerformTransfer(ref _channel0, startTiming, lengthReloadValue);
             }
 
-            if (_channel1.Running)
             {
-                UInt32 destinationReloadValue = (UInt32)(((_DMA1DAD_H & 0x07ff) << 16) | _DMA1DAD_L);
-                UInt32 lengthReloadValue = ((_DMA1CNT_L & 0x3fff) == 0) ? 0x4000u : (UInt32)(_DMA1CNT_L & 0x3fff);
+                UInt32 lengthReloadValue = (_DMA1CNT_L == 0) ? 0x4000u : _DMA1CNT_L;
 
-                PerformTransfer(ref _DMA1CNT_H, ref _channel1, startTiming, destinationReloadValue, lengthReloadValue);
+                PerformTransfer(ref _channel1, startTiming, lengthReloadValue);
             }
 
-            if (_channel2.Running)
             {
-                UInt32 destinationReloadValue = (UInt32)(((_DMA2DAD_H & 0x07ff) << 16) | _DMA2DAD_L);
-                UInt32 lengthReloadValue = ((_DMA2CNT_L & 0x3fff) == 0) ? 0x4000u : (UInt32)(_DMA2CNT_L & 0x3fff);
+                UInt32 lengthReloadValue = (_DMA2CNT_L == 0) ? 0x4000u : _DMA2CNT_L;
 
-                PerformTransfer(ref _DMA2CNT_H, ref _channel2, startTiming, destinationReloadValue, lengthReloadValue);
+                PerformTransfer(ref _channel2, startTiming, lengthReloadValue);
             }
 
-            if (_channel3.Running)
             {
-                UInt32 destinationReloadValue = (UInt32)(((_DMA3DAD_H & 0x0fff) << 16) | _DMA3DAD_L);
                 UInt32 lengthReloadValue = (_DMA3CNT_L == 0) ? 0x1_0000u : _DMA3CNT_L;
 
-                PerformTransfer(ref _DMA3CNT_H, ref _channel3, startTiming, destinationReloadValue, lengthReloadValue);
+                PerformTransfer(ref _channel3, startTiming, lengthReloadValue);
             }
         }
 
-        private void PerformTransfer(ref UInt16 cnt_h, ref Channel channel, StartTiming startTiming, UInt32 destinationReloadValue, UInt32 lengthReloadValue)
+        private void PerformTransfer(ref Channel channel, StartTiming startTiming, UInt32 lengthReloadValue)
         {
-            if (((cnt_h >> 12) & 0b11) != (int)startTiming)
+            if ((channel.Control & 0x8000) == 0)
                 return;
 
-            UInt16 sourceAddressControlFlag = (UInt16)((cnt_h >> 7) & 0b11);
-            UInt16 destinationAddressControlFlag = (UInt16)((cnt_h >> 5) & 0b11);
+            if (((channel.Control >> 12) & 0b11) != (int)startTiming)
+                return;
+
+            UInt16 sourceAddressControlFlag = (UInt16)((channel.Control >> 7) & 0b11);
+            UInt16 destinationAddressControlFlag = (UInt16)((channel.Control >> 5) & 0b11);
 
             int GetSourceIncrement(int dataUnitSize)
             {
@@ -513,7 +418,7 @@
             bool reloadDestination;
 
             // 16 bits
-            if ((cnt_h & 0x0400) == 0)
+            if ((channel.Control & 0x0400) == 0)
             {
                 const int DataUnitSize = 2;
 
@@ -545,17 +450,16 @@
             }
 
             // Repeat off
-            if ((cnt_h & 0x0200) == 0)
+            if ((channel.Control & 0x0200) == 0)
             {
-                cnt_h = (UInt16)(cnt_h & ~0x8000);
-                channel.Running = false;
+                channel.Control = (UInt16)(channel.Control & ~0x8000);
             }
 
             // Repeat on
             else
             {
                 if (reloadDestination)
-                    channel.Destination = destinationReloadValue;
+                    channel.Destination = channel.DestinationReload;
 
                 channel.Length = lengthReloadValue;
             }
