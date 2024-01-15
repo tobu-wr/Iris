@@ -141,28 +141,28 @@
 
         internal void WriteRegister(Register register, UInt16 value, Memory.RegisterWriteMode mode)
         {
-            void WriteSourceReload_LowHalfWord(ref Channel channel)
+            void WriteSourceReload_Low(ref Channel channel)
             {
                 UInt16 low = (UInt16)channel.SourceReload;
                 Memory.WriteRegisterHelper(ref low, value, mode);
                 channel.SourceReload = (channel.SourceReload & 0xffff_0000) | low;
             }
 
-            void WriteSourceReload_HighHalfWord(ref Channel channel, UInt16 mask)
+            void WriteSourceReload_High(ref Channel channel, UInt16 mask)
             {
                 UInt16 high = (UInt16)(channel.SourceReload >> 16);
                 Memory.WriteRegisterHelper(ref high, (UInt16)(value & mask), mode);
                 channel.SourceReload = (channel.SourceReload & 0x0000_ffff) | (UInt32)(high << 16);
             }
 
-            void WriteDestinationReload_LowHalfWord(ref Channel channel)
+            void WriteDestinationReload_Low(ref Channel channel)
             {
                 UInt16 low = (UInt16)channel.DestinationReload;
                 Memory.WriteRegisterHelper(ref low, value, mode);
                 channel.DestinationReload = (channel.DestinationReload & 0xffff_0000) | low;
             }
 
-            void WriteDestinationReload_HighHalfWord(ref Channel channel, UInt16 mask)
+            void WriteDestinationReload_High(ref Channel channel, UInt16 mask)
             {
                 UInt16 high = (UInt16)(channel.DestinationReload >> 16);
                 Memory.WriteRegisterHelper(ref high, (UInt16)(value & mask), mode);
@@ -197,17 +197,17 @@
             switch (register)
             {
                 case Register.DMA0SAD_L:
-                    WriteSourceReload_LowHalfWord(ref _channel0);
+                    WriteSourceReload_Low(ref _channel0);
                     break;
                 case Register.DMA0SAD_H:
-                    WriteSourceReload_HighHalfWord(ref _channel0, 0x07ff);
+                    WriteSourceReload_High(ref _channel0, 0x07ff);
                     break;
 
                 case Register.DMA0DAD_L:
-                    WriteDestinationReload_LowHalfWord(ref _channel0);
+                    WriteDestinationReload_Low(ref _channel0);
                     break;
                 case Register.DMA0DAD_H:
-                    WriteDestinationReload_HighHalfWord(ref _channel0, 0x07ff);
+                    WriteDestinationReload_High(ref _channel0, 0x07ff);
                     break;
 
                 case Register.DMA0CNT_L:
@@ -218,17 +218,17 @@
                     break;
 
                 case Register.DMA1SAD_L:
-                    WriteSourceReload_LowHalfWord(ref _channel1);
+                    WriteSourceReload_Low(ref _channel1);
                     break;
                 case Register.DMA1SAD_H:
-                    WriteSourceReload_HighHalfWord(ref _channel1, 0x0fff);
+                    WriteSourceReload_High(ref _channel1, 0x0fff);
                     break;
 
                 case Register.DMA1DAD_L:
-                    WriteDestinationReload_LowHalfWord(ref _channel1);
+                    WriteDestinationReload_Low(ref _channel1);
                     break;
                 case Register.DMA1DAD_H:
-                    WriteDestinationReload_HighHalfWord(ref _channel1, 0x07ff);
+                    WriteDestinationReload_High(ref _channel1, 0x07ff);
                     break;
 
                 case Register.DMA1CNT_L:
@@ -239,17 +239,17 @@
                     break;
 
                 case Register.DMA2SAD_L:
-                    WriteSourceReload_LowHalfWord(ref _channel2);
+                    WriteSourceReload_Low(ref _channel2);
                     break;
                 case Register.DMA2SAD_H:
-                    WriteSourceReload_HighHalfWord(ref _channel2, 0x0fff);
+                    WriteSourceReload_High(ref _channel2, 0x0fff);
                     break;
 
                 case Register.DMA2DAD_L:
-                    WriteDestinationReload_LowHalfWord(ref _channel2);
+                    WriteDestinationReload_Low(ref _channel2);
                     break;
                 case Register.DMA2DAD_H:
-                    WriteDestinationReload_HighHalfWord(ref _channel2, 0x07ff);
+                    WriteDestinationReload_High(ref _channel2, 0x07ff);
                     break;
 
                 case Register.DMA2CNT_L:
@@ -260,17 +260,17 @@
                     break;
 
                 case Register.DMA3SAD_L:
-                    WriteSourceReload_LowHalfWord(ref _channel3);
+                    WriteSourceReload_Low(ref _channel3);
                     break;
                 case Register.DMA3SAD_H:
-                    WriteSourceReload_HighHalfWord(ref _channel3, 0x0fff);
+                    WriteSourceReload_High(ref _channel3, 0x0fff);
                     break;
 
                 case Register.DMA3DAD_L:
-                    WriteDestinationReload_LowHalfWord(ref _channel3);
+                    WriteDestinationReload_Low(ref _channel3);
                     break;
                 case Register.DMA3DAD_H:
-                    WriteDestinationReload_HighHalfWord(ref _channel3, 0x0fff);
+                    WriteDestinationReload_High(ref _channel3, 0x0fff);
                     break;
 
                 case Register.DMA3CNT_L:
