@@ -49,6 +49,7 @@
             //Special = 0b11
         }
 
+        private InterruptControl _interruptControl;
         private Memory _memory;
 
         private record struct Channel
@@ -72,8 +73,9 @@
         private const UInt32 MaxLengthChannel2 = 0x4000;
         private const UInt32 MaxLengthChannel3 = 0x1_0000;
 
-        internal void Initialize(Memory memory)
+        internal void Initialize(InterruptControl interruptControl, Memory memory)
         {
+            _interruptControl = interruptControl;
             _memory = memory;
         }
 
@@ -174,7 +176,7 @@
                 channel.LengthReload = reload;
             }
 
-            void WriteControl(ref Channel channel, UInt32 maxLength)
+            void WriteControl(ref Channel channel, InterruptControl.Interrupt interrupt, UInt32 maxLength)
             {
                 UInt16 previousControl = channel.Control;
 
@@ -188,7 +190,7 @@
                     channel.Destination = channel.DestinationReload;
                     channel.Length = (channel.LengthReload == 0) ? maxLength : channel.LengthReload;
 
-                    PerformTransfer(ref channel, StartTiming.Immediate, maxLength);
+                    PerformTransfer(ref channel, StartTiming.Immediate, interrupt, maxLength);
                 }
             }
 
@@ -212,7 +214,7 @@
                     WriteLengthReload(ref _channel0);
                     break;
                 case Register.DMA0CNT_H:
-                    WriteControl(ref _channel0, MaxLengthChannel0);
+                    WriteControl(ref _channel0, InterruptControl.Interrupt.DMA0, MaxLengthChannel0);
                     break;
 
                 case Register.DMA1SAD_L:
@@ -233,7 +235,7 @@
                     WriteLengthReload(ref _channel1);
                     break;
                 case Register.DMA1CNT_H:
-                    WriteControl(ref _channel1, MaxLengthChannel1);
+                    WriteControl(ref _channel1, InterruptControl.Interrupt.DMA1, MaxLengthChannel1);
                     break;
 
                 case Register.DMA2SAD_L:
@@ -254,7 +256,7 @@
                     WriteLengthReload(ref _channel2);
                     break;
                 case Register.DMA2CNT_H:
-                    WriteControl(ref _channel2, MaxLengthChannel2);
+                    WriteControl(ref _channel2, InterruptControl.Interrupt.DMA2, MaxLengthChannel2);
                     break;
 
                 case Register.DMA3SAD_L:
@@ -275,7 +277,7 @@
                     WriteLengthReload(ref _channel3);
                     break;
                 case Register.DMA3CNT_H:
-                    WriteControl(ref _channel3, MaxLengthChannel3);
+                    WriteControl(ref _channel3, InterruptControl.Interrupt.DMA3, MaxLengthChannel3);
                     break;
 
                 // should never happen
@@ -287,19 +289,19 @@
         internal void PerformAllTransfers(StartTiming startTiming)
         {
             if ((_channel0.Control & 0x8000) == 0x8000)
-                PerformTransfer(ref _channel0, startTiming, MaxLengthChannel0);
+                PerformTransfer(ref _channel0, startTiming, InterruptControl.Interrupt.DMA0, MaxLengthChannel0);
 
             if ((_channel1.Control & 0x8000) == 0x8000)
-                PerformTransfer(ref _channel1, startTiming, MaxLengthChannel1);
+                PerformTransfer(ref _channel1, startTiming, InterruptControl.Interrupt.DMA1, MaxLengthChannel1);
 
             if ((_channel2.Control & 0x8000) == 0x8000)
-                PerformTransfer(ref _channel2, startTiming, MaxLengthChannel2);
+                PerformTransfer(ref _channel2, startTiming, InterruptControl.Interrupt.DMA2, MaxLengthChannel2);
 
             if ((_channel3.Control & 0x8000) == 0x8000)
-                PerformTransfer(ref _channel3, startTiming, MaxLengthChannel3);
+                PerformTransfer(ref _channel3, startTiming, InterruptControl.Interrupt.DMA3, MaxLengthChannel3);
         }
 
-        private void PerformTransfer(ref Channel channel, StartTiming startTiming, UInt32 maxLength)
+        private void PerformTransfer(ref Channel channel, StartTiming startTiming, InterruptControl.Interrupt interrupt, UInt32 maxLength)
         {
             if (((channel.Control >> 12) & 0b11) != (int)startTiming)
                 return;
@@ -376,6 +378,9 @@
                     channel.Destination = (UInt32)(channel.Destination + destinationIncrement);
                 }
             }
+
+            if ((channel.Control & 0x4000) == 0x4000)
+                _interruptControl.RequestInterrupt(interrupt);
 
             // Repeat off
             if ((channel.Control & 0x0200) == 0)

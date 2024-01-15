@@ -39,7 +39,7 @@ namespace Iris.GBA
 
             _communication.Initialize(_interruptControl);
             _timer.Initialize(_interruptControl);
-            _dma.Initialize(_memory);
+            _dma.Initialize(_interruptControl, _memory);
             _keyInput.Initialize(_interruptControl);
             _interruptControl.Initialize(_cpu);
             _memory.Initialize(_communication, _timer, _sound, _dma, _keyInput, _systemControl, _interruptControl, _video, _bios);
