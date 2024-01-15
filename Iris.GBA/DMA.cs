@@ -49,11 +49,6 @@
             //Special = 0b11
         }
 
-        private UInt16 _DMA0CNT_L;
-        private UInt16 _DMA1CNT_L;
-        private UInt16 _DMA2CNT_L;
-        private UInt16 _DMA3CNT_L;
-
         private Memory _memory;
 
         private record struct Channel
@@ -63,6 +58,7 @@
             UInt32 Destination,
             UInt32 DestinationReload,
             UInt32 Length,
+            UInt32 LengthReload,
             UInt16 Control
         );
 
@@ -71,6 +67,11 @@
         private Channel _channel2;
         private Channel _channel3;
 
+        private const UInt32 MaxLengthChannel0 = 0x4000;
+        private const UInt32 MaxLengthChannel1 = 0x4000;
+        private const UInt32 MaxLengthChannel2 = 0x4000;
+        private const UInt32 MaxLengthChannel3 = 0x1_0000;
+
         internal void Initialize(Memory memory)
         {
             _memory = memory;
@@ -78,11 +79,6 @@
 
         internal void ResetState()
         {
-            _DMA0CNT_L = 0;
-            _DMA1CNT_L = 0;
-            _DMA2CNT_L = 0;
-            _DMA3CNT_L = 0;
-
             _channel0 = default;
             _channel1 = default;
             _channel2 = default;
@@ -91,11 +87,6 @@
 
         internal void LoadState(BinaryReader reader)
         {
-            _DMA0CNT_L = reader.ReadUInt16();
-            _DMA1CNT_L = reader.ReadUInt16();
-            _DMA2CNT_L = reader.ReadUInt16();
-            _DMA3CNT_L = reader.ReadUInt16();
-
             void LoadChannel(ref Channel channel)
             {
                 channel.Source = reader.ReadUInt32();
@@ -103,6 +94,7 @@
                 channel.Destination = reader.ReadUInt32();
                 channel.DestinationReload = reader.ReadUInt32();
                 channel.Length = reader.ReadUInt32();
+                channel.LengthReload = reader.ReadUInt32();
                 channel.Control = reader.ReadUInt16();
             }
 
@@ -114,11 +106,6 @@
 
         internal void SaveState(BinaryWriter writer)
         {
-            writer.Write(_DMA0CNT_L);
-            writer.Write(_DMA1CNT_L);
-            writer.Write(_DMA2CNT_L);
-            writer.Write(_DMA3CNT_L);
-
             void SaveChannel(Channel channel)
             {
                 writer.Write(channel.Source);
@@ -126,6 +113,7 @@
                 writer.Write(channel.Destination);
                 writer.Write(channel.DestinationReload);
                 writer.Write(channel.Length);
+                writer.Write(channel.LengthReload);
                 writer.Write(channel.Control);
             }
 
@@ -179,75 +167,28 @@
                 channel.DestinationReload = (channel.DestinationReload & 0x0000_ffff) | (UInt32)(high << 16);
             }
 
-            void WriteControlChannel0()
+            void WriteLengthReload(ref Channel channel)
             {
-                UInt16 previousControl = _channel0.Control;
-
-                UInt16 newControl = _channel0.Control;
-                Memory.WriteRegisterHelper(ref newControl, value, mode);
-                _channel0.Control = newControl;
-
-                if (((previousControl & 0x8000) == 0) && ((newControl & 0x8000) == 0x8000))
-                {
-                    _channel0.Source = _channel0.SourceReload;
-                    _channel0.Destination = _channel0.DestinationReload;
-                    _channel0.Length = (_DMA0CNT_L == 0) ? 0x4000u : _DMA0CNT_L;
-
-                    PerformTransfer(ref _channel0, StartTiming.Immediate, _channel0.Length);
-                }
+                UInt16 reload = 0;
+                Memory.WriteRegisterHelper(ref reload, value, mode);
+                channel.LengthReload = reload;
             }
 
-            void WriteControlChannel1()
+            void WriteControl(ref Channel channel, UInt32 maxLength)
             {
-                UInt16 previousControl = _channel1.Control;
+                UInt16 previousControl = channel.Control;
 
-                UInt16 newControl = _channel1.Control;
+                UInt16 newControl = channel.Control;
                 Memory.WriteRegisterHelper(ref newControl, value, mode);
-                _channel1.Control = newControl;
+                channel.Control = newControl;
 
                 if (((previousControl & 0x8000) == 0) && ((newControl & 0x8000) == 0x8000))
                 {
-                    _channel1.Source = _channel1.SourceReload;
-                    _channel1.Destination = _channel1.DestinationReload;
-                    _channel1.Length = (_DMA1CNT_L == 0) ? 0x4000u : _DMA1CNT_L;
+                    channel.Source = channel.SourceReload;
+                    channel.Destination = channel.DestinationReload;
+                    channel.Length = (channel.LengthReload == 0) ? maxLength : channel.LengthReload;
 
-                    PerformTransfer(ref _channel1, StartTiming.Immediate, _channel1.Length);
-                }
-            }
-
-            void WriteControlChannel2()
-            {
-                UInt16 previousControl = _channel2.Control;
-
-                UInt16 newControl = _channel2.Control;
-                Memory.WriteRegisterHelper(ref newControl, value, mode);
-                _channel2.Control = newControl;
-
-                if (((previousControl & 0x8000) == 0) && ((newControl & 0x8000) == 0x8000))
-                {
-                    _channel2.Source = _channel2.SourceReload;
-                    _channel2.Destination = _channel2.DestinationReload;
-                    _channel2.Length = (_DMA2CNT_L == 0) ? 0x4000u : _DMA2CNT_L;
-
-                    PerformTransfer(ref _channel2, StartTiming.Immediate, _channel2.Length);
-                }
-            }
-
-            void WriteControlChannel3()
-            {
-                UInt16 previousControl = _channel3.Control;
-
-                UInt16 newControl = _channel3.Control;
-                Memory.WriteRegisterHelper(ref newControl, value, mode);
-                _channel3.Control = newControl;
-
-                if (((previousControl & 0x8000) == 0) && ((newControl & 0x8000) == 0x8000))
-                {
-                    _channel3.Source = _channel3.SourceReload;
-                    _channel3.Destination = _channel3.DestinationReload;
-                    _channel3.Length = (_DMA3CNT_L == 0) ? 0x1_0000u : _DMA3CNT_L;
-
-                    PerformTransfer(ref _channel3, StartTiming.Immediate, _channel3.Length);
+                    PerformTransfer(ref channel, StartTiming.Immediate, maxLength);
                 }
             }
 
@@ -268,10 +209,10 @@
                     break;
 
                 case Register.DMA0CNT_L:
-                    Memory.WriteRegisterHelper(ref _DMA0CNT_L, (UInt16)(value & 0x3fff), mode);
+                    WriteLengthReload(ref _channel0);
                     break;
                 case Register.DMA0CNT_H:
-                    WriteControlChannel0();
+                    WriteControl(ref _channel0, MaxLengthChannel0);
                     break;
 
                 case Register.DMA1SAD_L:
@@ -289,10 +230,10 @@
                     break;
 
                 case Register.DMA1CNT_L:
-                    Memory.WriteRegisterHelper(ref _DMA1CNT_L, (UInt16)(value & 0x3fff), mode);
+                    WriteLengthReload(ref _channel1);
                     break;
                 case Register.DMA1CNT_H:
-                    WriteControlChannel1();
+                    WriteControl(ref _channel1, MaxLengthChannel1);
                     break;
 
                 case Register.DMA2SAD_L:
@@ -310,10 +251,10 @@
                     break;
 
                 case Register.DMA2CNT_L:
-                    Memory.WriteRegisterHelper(ref _DMA2CNT_L, (UInt16)(value & 0x3fff), mode);
+                    WriteLengthReload(ref _channel2);
                     break;
                 case Register.DMA2CNT_H:
-                    WriteControlChannel2();
+                    WriteControl(ref _channel2, MaxLengthChannel2);
                     break;
 
                 case Register.DMA3SAD_L:
@@ -331,10 +272,10 @@
                     break;
 
                 case Register.DMA3CNT_L:
-                    Memory.WriteRegisterHelper(ref _DMA3CNT_L, value, mode);
+                    WriteLengthReload(ref _channel3);
                     break;
                 case Register.DMA3CNT_H:
-                    WriteControlChannel3();
+                    WriteControl(ref _channel3, MaxLengthChannel3);
                     break;
 
                 // should never happen
@@ -345,36 +286,21 @@
 
         internal void PerformAllTransfers(StartTiming startTiming)
         {
-            {
-                UInt32 lengthReloadValue = (_DMA0CNT_L == 0) ? 0x4000u : _DMA0CNT_L;
+            if ((_channel0.Control & 0x8000) == 0x8000)
+                PerformTransfer(ref _channel0, startTiming, MaxLengthChannel0);
 
-                PerformTransfer(ref _channel0, startTiming, lengthReloadValue);
-            }
+            if ((_channel1.Control & 0x8000) == 0x8000)
+                PerformTransfer(ref _channel1, startTiming, MaxLengthChannel1);
 
-            {
-                UInt32 lengthReloadValue = (_DMA1CNT_L == 0) ? 0x4000u : _DMA1CNT_L;
+            if ((_channel2.Control & 0x8000) == 0x8000)
+                PerformTransfer(ref _channel2, startTiming, MaxLengthChannel2);
 
-                PerformTransfer(ref _channel1, startTiming, lengthReloadValue);
-            }
-
-            {
-                UInt32 lengthReloadValue = (_DMA2CNT_L == 0) ? 0x4000u : _DMA2CNT_L;
-
-                PerformTransfer(ref _channel2, startTiming, lengthReloadValue);
-            }
-
-            {
-                UInt32 lengthReloadValue = (_DMA3CNT_L == 0) ? 0x1_0000u : _DMA3CNT_L;
-
-                PerformTransfer(ref _channel3, startTiming, lengthReloadValue);
-            }
+            if ((_channel3.Control & 0x8000) == 0x8000)
+                PerformTransfer(ref _channel3, startTiming, MaxLengthChannel3);
         }
 
-        private void PerformTransfer(ref Channel channel, StartTiming startTiming, UInt32 lengthReloadValue)
+        private void PerformTransfer(ref Channel channel, StartTiming startTiming, UInt32 maxLength)
         {
-            if ((channel.Control & 0x8000) == 0)
-                return;
-
             if (((channel.Control >> 12) & 0b11) != (int)startTiming)
                 return;
 
@@ -428,8 +354,9 @@
                 for (; channel.Length > 0; --channel.Length)
                 {
                     _memory.Write16(channel.Destination, _memory.Read16(channel.Source));
-                    channel.Destination = (UInt32)(channel.Destination + destinationIncrement);
+
                     channel.Source = (UInt32)(channel.Source + sourceIncrement);
+                    channel.Destination = (UInt32)(channel.Destination + destinationIncrement);
                 }
             }
 
@@ -444,8 +371,9 @@
                 for (; channel.Length > 0; --channel.Length)
                 {
                     _memory.Write32(channel.Destination, _memory.Read32(channel.Source));
-                    channel.Destination = (UInt32)(channel.Destination + destinationIncrement);
+
                     channel.Source = (UInt32)(channel.Source + sourceIncrement);
+                    channel.Destination = (UInt32)(channel.Destination + destinationIncrement);
                 }
             }
 
@@ -461,7 +389,7 @@
                 if (reloadDestination)
                     channel.Destination = channel.DestinationReload;
 
-                channel.Length = lengthReloadValue;
+                channel.Length = (channel.LengthReload == 0) ? maxLength : channel.LengthReload;
             }
         }
     }
