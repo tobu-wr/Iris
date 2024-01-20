@@ -135,8 +135,6 @@ namespace Iris.UserInterface
                         sleepTime -= _framerateLimiterExtraSleepTime;
                         Thread.Sleep((int)Math.Round(1000.0 * sleepTime / Stopwatch.Frequency, MidpointRounding.AwayFromZero));
                         _framerateLimiterExtraSleepTime = _framerateLimiterStopwatch.ElapsedTicks - frameDuration - sleepTime;
-
-                       // Console.WriteLine("[Iris.UserInterface] {0}", (1000.0 * _framerateLimiterExtraSleepTime / Stopwatch.Frequency).ToString("F2"));
                     }
                     else
                     {
