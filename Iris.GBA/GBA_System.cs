@@ -7,10 +7,22 @@ namespace Iris.GBA
 {
     public sealed class GBA_System : Common.System
     {
-        // Task list:
-        // - 2 Video tasks
-        // - 4 Timer tasks
-        private readonly Scheduler _scheduler = new(6, 11);
+        internal enum TaskId
+        {
+            // PPU
+            StartHBlank,
+            StartScanline,
+
+            // Timer
+            StartCountingChannel0,
+            StartCountingChannel1,
+            StartCountingChannel2,
+            StartCountingChannel3
+        }
+
+        private static readonly int s_taskIdCount = Enum.GetNames(typeof(TaskId)).Length;
+
+        private readonly Scheduler _scheduler = new(s_taskIdCount, s_taskIdCount + 1);
 
         private readonly CPU_Core _cpu;
         private readonly Communication _communication = new();

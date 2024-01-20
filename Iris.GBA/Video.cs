@@ -149,9 +149,6 @@ namespace Iris.GBA
         private readonly Common.Scheduler _scheduler;
         private readonly Common.System.DrawFrame_Delegate _drawFrameCallback;
 
-        private readonly int _startHBlankTaskId;
-        private readonly int _startScanlineTaskId;
-
         private DMA _dma;
         private InterruptControl _interruptControl;
 
@@ -164,8 +161,8 @@ namespace Iris.GBA
             _scheduler = scheduler;
             _drawFrameCallback = drawFrameCallback;
 
-            _startHBlankTaskId = _scheduler.RegisterTask(StartHBlank);
-            _startScanlineTaskId = _scheduler.RegisterTask(StartScanline);
+            _scheduler.RegisterTask(StartHBlank, (int)GBA_System.TaskId.StartHBlank);
+            _scheduler.RegisterTask(StartScanline, (int)GBA_System.TaskId.StartScanline);
         }
 
         ~Video()
@@ -263,8 +260,8 @@ namespace Iris.GBA
             _BLDALPHA = 0;
             _BLDY = 0;
 
-            _scheduler.ScheduleTask(DisplayLineCycleCount, _startHBlankTaskId);
-            _scheduler.ScheduleTask(ScanlineCycleCount, _startScanlineTaskId);
+            _scheduler.ScheduleTask(DisplayLineCycleCount, (int)GBA_System.TaskId.StartHBlank);
+            _scheduler.ScheduleTask(ScanlineCycleCount, (int)GBA_System.TaskId.StartScanline);
 
             Array.Clear(_displayFrameBuffer);
         }
@@ -670,8 +667,8 @@ namespace Iris.GBA
                 _DISPSTAT = (UInt16)(_DISPSTAT & ~0x0004); // clear VCountMatch status
             }
 
-            _scheduler.ScheduleTask(DisplayLineCycleCount - cycleCountDelay, _startHBlankTaskId);
-            _scheduler.ScheduleTask(ScanlineCycleCount - cycleCountDelay, _startScanlineTaskId);
+            _scheduler.ScheduleTask(DisplayLineCycleCount - cycleCountDelay, (int)GBA_System.TaskId.StartHBlank);
+            _scheduler.ScheduleTask(ScanlineCycleCount - cycleCountDelay, (int)GBA_System.TaskId.StartScanline);
         }
 
         private void Render()

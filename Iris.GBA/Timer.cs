@@ -19,11 +19,6 @@
 
         private readonly Common.Scheduler _scheduler;
 
-        private readonly int _startCountingChannel0TaskId;
-        private readonly int _startCountingChannel1TaskId;
-        private readonly int _startCountingChannel2TaskId;
-        private readonly int _startCountingChannel3TaskId;
-
         private InterruptControl _interruptControl;
 
         private record struct Channel
@@ -44,10 +39,10 @@
         {
             _scheduler = scheduler;
 
-            _startCountingChannel0TaskId = _scheduler.RegisterTask((UInt32 cycleCountDelay) => StartCounting(ref _channel0, cycleCountDelay));
-            _startCountingChannel1TaskId = _scheduler.RegisterTask((UInt32 cycleCountDelay) => StartCounting(ref _channel1, cycleCountDelay));
-            _startCountingChannel2TaskId = _scheduler.RegisterTask((UInt32 cycleCountDelay) => StartCounting(ref _channel2, cycleCountDelay));
-            _startCountingChannel3TaskId = _scheduler.RegisterTask((UInt32 cycleCountDelay) => StartCounting(ref _channel3, cycleCountDelay));
+            _scheduler.RegisterTask((UInt32 cycleCountDelay) => StartCounting(ref _channel0, cycleCountDelay), (int)GBA_System.TaskId.StartCountingChannel0);
+            _scheduler.RegisterTask((UInt32 cycleCountDelay) => StartCounting(ref _channel1, cycleCountDelay), (int)GBA_System.TaskId.StartCountingChannel1);
+            _scheduler.RegisterTask((UInt32 cycleCountDelay) => StartCounting(ref _channel2, cycleCountDelay), (int)GBA_System.TaskId.StartCountingChannel2);
+            _scheduler.RegisterTask((UInt32 cycleCountDelay) => StartCounting(ref _channel3, cycleCountDelay), (int)GBA_System.TaskId.StartCountingChannel3);
         }
 
         internal void Initialize(InterruptControl interruptControl)
@@ -127,7 +122,7 @@
                 channel.Reload = reload;
             }
 
-            void WriteControl(ref Channel channel, int startCountingTaskId)
+            void WriteControl(ref Channel channel, GBA_System.TaskId startCountingTaskId)
             {
                 UInt16 previousControl = channel.Control;
 
@@ -136,7 +131,7 @@
                 channel.Control = newControl;
 
                 if (((previousControl & 0x0080) == 0) && ((newControl & 0x0080) == 0x0080))
-                    _scheduler.ScheduleTask(2, startCountingTaskId);
+                    _scheduler.ScheduleTask(2, (int)startCountingTaskId);
                 else if (((previousControl & 0x0080) == 0x0080) && ((newControl & 0x0080) == 0))
                     channel.Running = false;
             }
@@ -147,28 +142,28 @@
                     WriteReload(ref _channel0);
                     break;
                 case Register.TM0CNT_H:
-                    WriteControl(ref _channel0, _startCountingChannel0TaskId);
+                    WriteControl(ref _channel0, GBA_System.TaskId.StartCountingChannel0);
                     break;
 
                 case Register.TM1CNT_L:
                     WriteReload(ref _channel1);
                     break;
                 case Register.TM1CNT_H:
-                    WriteControl(ref _channel1, _startCountingChannel1TaskId);
+                    WriteControl(ref _channel1, GBA_System.TaskId.StartCountingChannel1);
                     break;
 
                 case Register.TM2CNT_L:
                     WriteReload(ref _channel2);
                     break;
                 case Register.TM2CNT_H:
-                    WriteControl(ref _channel2, _startCountingChannel2TaskId);
+                    WriteControl(ref _channel2, GBA_System.TaskId.StartCountingChannel2);
                     break;
 
                 case Register.TM3CNT_L:
                     WriteReload(ref _channel3);
                     break;
                 case Register.TM3CNT_H:
-                    WriteControl(ref _channel3, _startCountingChannel3TaskId);
+                    WriteControl(ref _channel3, GBA_System.TaskId.StartCountingChannel3);
                     break;
 
                 // should never happen

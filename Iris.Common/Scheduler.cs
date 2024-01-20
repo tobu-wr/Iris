@@ -6,9 +6,7 @@ namespace Iris.Common
     public sealed class Scheduler(int taskListSize, int scheduledTaskListSize)
     {
         public delegate void Task_Delegate(UInt32 cycleCountDelay);
-
         private readonly Task_Delegate[] _taskList = new Task_Delegate[taskListSize];
-        private int _taskCount;
 
         private record struct ScheduledTaskListEntry(UInt32 CycleCount, int Id);
         private readonly ScheduledTaskListEntry[] _scheduledTaskList = new ScheduledTaskListEntry[scheduledTaskListSize]; // sorted by CycleCount from smallest to largest
@@ -46,10 +44,9 @@ namespace Iris.Common
             writer.Write(_cycleCounter);
         }
 
-        public int RegisterTask(Task_Delegate task)
+        public void RegisterTask(Task_Delegate task, int id)
         {
-            _taskList[_taskCount] = task;
-            return _taskCount++;
+            _taskList[id] = task;
         }
 
         // cycleCount must be greater than 0
