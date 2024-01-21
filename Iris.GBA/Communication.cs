@@ -173,15 +173,18 @@
                                 break;
 
                             case 0b11:
-                                throw new Exception("Iris.GBA.Communication: UART communication not implemented");
+                                Console.WriteLine("[Iris.GBA.Communication] UART communication not implemented");
+                                break;
                         }
                         break;
 
                     case 0b10:
-                        throw new Exception("Iris.GBA.Communication: General purpose communication not implemented");
+                        Console.WriteLine("[Iris.GBA.Communication] General purpose communication not implemented");
+                        break;
 
                     case 0b11:
-                        throw new Exception("Iris.GBA.Communication: JOY Bus communication not implemented");
+                        Console.WriteLine("[Iris.GBA.Communication] JOY Bus communication not implemented");
+                        break;
                 }
             }
 
