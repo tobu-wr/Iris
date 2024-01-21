@@ -142,6 +142,11 @@ namespace Iris.GBA
             _romHash = BitConverter.ToString(hashAlgorithm.ComputeHash(fileStream)).Replace("-", "");
         }
 
+        public override void SetKeyStatus(Key key, KeyStatus status)
+        {
+            _keyInput.SetKeyStatus(key, status);
+        }
+
         public override bool IsRunning()
         {
             return _running;
@@ -167,11 +172,6 @@ namespace Iris.GBA
         public override void Pause()
         {
             _running = false;
-        }
-
-        public override void SetKeyStatus(Key key, KeyStatus status)
-        {
-            _keyInput.SetKeyStatus(key, status);
         }
     }
 }
