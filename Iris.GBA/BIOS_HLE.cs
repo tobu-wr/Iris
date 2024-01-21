@@ -5,11 +5,13 @@ namespace Iris.GBA
     internal sealed class BIOS_HLE : BIOS
     {
         private CPU_Core? _cpu;
+        private Communication _communication;
         private Memory? _memory;
 
-        internal override void Initialize(CPU_Core cpu, Memory memory)
+        internal override void Initialize(CPU_Core cpu, Communication communication, Memory memory)
         {
             _cpu = cpu;
+            _communication = communication;
             _memory = memory;
         }
 
@@ -37,6 +39,9 @@ namespace Iris.GBA
 
             for (UInt32 address = 0x300_7e00; address < 0x300_8000; address += 4)
                 _memory!.Write32(address, 0);
+
+            // TODO: check register values after bios intro
+            _communication.WriteRegister(Communication.Register.RCNT, 0x8000, Memory.RegisterWriteMode.HalfWord);
         }
 
         internal override Byte Read8(UInt32 address)

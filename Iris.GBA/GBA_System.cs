@@ -24,6 +24,7 @@ namespace Iris.GBA
 
         private readonly Scheduler _scheduler = new(s_taskIdCount, s_taskIdCount + 1);
 
+        // components
         private readonly CPU_Core _cpu;
         private readonly Communication _communication = new();
         private readonly Timer _timer;
@@ -56,7 +57,8 @@ namespace Iris.GBA
             _interruptControl.Initialize(_cpu);
             _memory.Initialize(_communication, _timer, _sound, _dma, _keyInput, _systemControl, _interruptControl, _video, _bios);
             _video.Initialize(_dma, _interruptControl, _memory);
-            _bios.Initialize(_cpu, _memory);
+
+            _bios.Initialize(_cpu, _communication, _memory);
         }
 
         public override void Dispose()
@@ -82,7 +84,7 @@ namespace Iris.GBA
             _bios.Reset();
 
             BIOS_HLE biosHLE = new();
-            biosHLE.Initialize(_cpu, _memory);
+            biosHLE.Initialize(_cpu, _communication, _memory);
             biosHLE.Reset();
         }
 
