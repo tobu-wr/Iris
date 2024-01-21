@@ -120,12 +120,12 @@
             {
                 if ((_KEYCNT & 0x8000) == 0)
                 {
-                    if ((_KEYINPUT & _KEYCNT & 0x03ff) != 0)
+                    if ((~_KEYINPUT & _KEYCNT & 0x03ff) != 0)
                         _interruptControl.RequestInterrupt(InterruptControl.Interrupt.Key);
                 }
                 else
                 {
-                    if ((_KEYINPUT & _KEYCNT & 0x03ff) == (_KEYCNT & 0x03ff))
+                    if ((~_KEYINPUT & _KEYCNT & 0x03ff) == (_KEYCNT & 0x03ff))
                         _interruptControl.RequestInterrupt(InterruptControl.Interrupt.Key);
                 }
             }
