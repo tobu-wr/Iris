@@ -3,6 +3,7 @@ using Iris.NDS;
 using System.Collections.Frozen;
 using System.Diagnostics;
 using System.Drawing.Imaging;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Iris.UserInterface
@@ -57,6 +58,18 @@ namespace Iris.UserInterface
         private readonly Stopwatch _framerateLimiterStopwatch = Stopwatch.StartNew();
         private long _framerateLimiterExtraSleepTime;
 
+        [StructLayout(LayoutKind.Sequential)]
+        private readonly struct TimeCaps
+        {
+            internal readonly uint _periodMin;
+            private readonly uint _periodMax; // not used
+        }
+
+        private readonly TimeCaps _timeCaps = new();
+
+        [LibraryImport("winmm.dll", EntryPoint = "timeGetDevCaps")]
+        private static partial uint TimeGetDevCaps(ref TimeCaps tc, uint size);
+
         [LibraryImport("winmm.dll", EntryPoint = "timeBeginPeriod")]
         private static partial uint TimeBeginPeriod(uint period);
 
@@ -65,7 +78,9 @@ namespace Iris.UserInterface
 
         internal MainWindow(string[] args)
         {
-            _ = TimeBeginPeriod(1);
+            TimeGetDevCaps(ref _timeCaps, (uint)Unsafe.SizeOf<TimeCaps>());
+
+            _ = TimeBeginPeriod(_timeCaps._periodMin);
 
             InitializeComponent();
 
@@ -81,7 +96,7 @@ namespace Iris.UserInterface
 
         ~MainWindow()
         {
-            _ = TimeEndPeriod(1);
+            _ = TimeEndPeriod(_timeCaps._periodMin);
         }
 
         private void PollInput()
