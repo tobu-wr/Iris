@@ -9,7 +9,7 @@ namespace Iris.GBA
     {
         internal enum TaskId
         {
-            // PPU
+            // Video
             StartHBlank,
             StartScanline,
 
