@@ -42,8 +42,8 @@ namespace Iris.UserInterface
             { XboxController.Button.Y, Common.System.Key.Y },
         }.ToFrozenDictionary();
 
-        private Common.System? _system;
-        private Task? _systemTask;
+        private Common.System _system;
+        private Task _systemTask;
 
         private readonly Keyboard _keyboard;
         private readonly XboxController _xboxController;
@@ -205,11 +205,11 @@ namespace Iris.UserInterface
             {
                 try
                 {
-                    _system!.Run();
+                    _system.Run();
                 }
                 catch (Exception ex)
                 {
-                    _system!.Pause();
+                    _system.Pause();
                     _system.ResetState();
 
                     _framerateCounterTimer.Stop();
@@ -227,9 +227,9 @@ namespace Iris.UserInterface
 
         private void Pause()
         {
-            _system!.Pause();
+            _system.Pause();
 
-            while (!_systemTask!.IsCompleted)
+            while (!_systemTask.IsCompleted)
                 Application.DoEvents();
 
             _framerateCounterTimer.Stop();
@@ -262,7 +262,7 @@ namespace Iris.UserInterface
 
         private void LoadStateToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            bool running = _system!.IsRunning();
+            bool running = _system.IsRunning();
 
             if (running)
                 Pause();
@@ -290,7 +290,7 @@ namespace Iris.UserInterface
 
         private void SaveStateToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            bool running = _system!.IsRunning();
+            bool running = _system.IsRunning();
 
             if (running)
                 Pause();
@@ -340,7 +340,7 @@ namespace Iris.UserInterface
 
         private void ResetToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            bool running = _system!.IsRunning();
+            bool running = _system.IsRunning();
 
             if (running)
                 Pause();
@@ -359,28 +359,28 @@ namespace Iris.UserInterface
         private void Keyboard_KeyDown(Keyboard.Key key)
         {
             if (s_keyboardMapping.TryGetValue(key, out Common.System.Key value))
-                _system!.SetKeyStatus(value, Common.System.KeyStatus.Input);
+                _system.SetKeyStatus(value, Common.System.KeyStatus.Input);
         }
 
         private void Keyboard_KeyUp(Keyboard.Key key)
         {
             if (s_keyboardMapping.TryGetValue(key, out Common.System.Key value))
-                _system!.SetKeyStatus(value, Common.System.KeyStatus.NoInput);
+                _system.SetKeyStatus(value, Common.System.KeyStatus.NoInput);
         }
 
         private void XboxController_ButtonDown(XboxController.Button button)
         {
             if (s_xboxControllerMapping.TryGetValue(button, out Common.System.Key value))
-                _system!.SetKeyStatus(value, Common.System.KeyStatus.Input);
+                _system.SetKeyStatus(value, Common.System.KeyStatus.Input);
         }
 
         private void XboxController_ButtonUp(XboxController.Button button)
         {
             if (s_xboxControllerMapping.TryGetValue(button, out Common.System.Key value))
-                _system!.SetKeyStatus(value, Common.System.KeyStatus.NoInput);
+                _system.SetKeyStatus(value, Common.System.KeyStatus.NoInput);
         }
 
-        private void FramerateCounterTimer_Tick(object? sender, EventArgs e)
+        private void FramerateCounterTimer_Tick(object sender, EventArgs e)
         {
             double fps = Math.Round((double)_framerateCounter * Stopwatch.Frequency / _framerateCounterStopwatch.ElapsedTicks, 2, MidpointRounding.AwayFromZero);
             fpsToolStripStatusLabel.Text = "FPS: " + fps.ToString("F2");
