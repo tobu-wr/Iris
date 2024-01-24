@@ -59,7 +59,7 @@
             UInt32 Destination,
             UInt32 DestinationReload,
             UInt32 Length,
-            UInt32 LengthReload,
+            UInt16 LengthReload,
             UInt16 Control
         );
 
@@ -96,7 +96,7 @@
                 channel.Destination = reader.ReadUInt32();
                 channel.DestinationReload = reader.ReadUInt32();
                 channel.Length = reader.ReadUInt32();
-                channel.LengthReload = reader.ReadUInt32();
+                channel.LengthReload = reader.ReadUInt16();
                 channel.Control = reader.ReadUInt16();
             }
 
@@ -171,7 +171,7 @@
 
             void WriteLengthReload(ref Channel channel)
             {
-                UInt16 reload = 0;
+                UInt16 reload = channel.LengthReload;
                 Memory.WriteRegisterHelper(ref reload, value, mode);
                 channel.LengthReload = reload;
             }
