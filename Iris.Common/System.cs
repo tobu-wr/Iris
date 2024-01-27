@@ -27,7 +27,18 @@
             NoInput = 1
         }
 
-        public abstract void Dispose();
+        ~System()
+        {
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected abstract void Dispose(bool disposing);
 
         public abstract void ResetState();
         public abstract void LoadState(string filename);

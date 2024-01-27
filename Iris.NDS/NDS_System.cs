@@ -7,7 +7,8 @@ namespace Iris.NDS
         private readonly CPU_Core _cpu;
         private readonly PPU _ppu;
 
-        private bool _running = false;
+        private bool _running;
+        private bool _disposed;
 
         public NDS_System(PollInput_Delegate pollInputCallback, DrawFrame_Delegate drawFrameCallback)
         {
@@ -16,9 +17,17 @@ namespace Iris.NDS
             _ppu = new(drawFrameCallback);
         }
 
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            // TODO
+            if (_disposed)
+                return;
+
+            if (disposing)
+            {
+                // TODO
+            }
+
+            _disposed = true;
         }
 
         public override void ResetState()
