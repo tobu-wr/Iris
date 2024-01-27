@@ -1,5 +1,6 @@
 ﻿namespace Iris.GBA
 {
+    // TODO: optimize transfers
     internal sealed class DMA
     {
         internal enum Register

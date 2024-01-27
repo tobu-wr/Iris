@@ -1,5 +1,8 @@
 ﻿namespace Iris.GBA
 {
+    // TODO: optimize
+    // - lazy counter update (on read and overflow)
+    // - overflow on scheduler
     internal sealed class Timer
     {
         internal enum Register
