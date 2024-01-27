@@ -132,7 +132,7 @@ namespace Iris.UserInterface
             screenBox.Invoke(() => screenBox.Image = bitmap);
             screenBox.Invalidate();
 
-            ++_framerateCounter;
+            Interlocked.Increment(ref _framerateCounter);
 
             if (_framerateLimiterEnabled)
             {
