@@ -6,9 +6,11 @@ namespace Iris.GBA
     {
         internal abstract void Initialize(CPU_Core cpu, Communication communication, Memory memory);
         internal abstract void Reset();
+
         internal abstract Byte Read8(UInt32 address);
         internal abstract UInt16 Read16(UInt32 address);
         internal abstract UInt32 Read32(UInt32 address);
+
         internal abstract UInt32 HandleSWI();
         internal abstract UInt32 HandleIRQ();
     }

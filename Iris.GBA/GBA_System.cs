@@ -40,6 +40,7 @@ namespace Iris.GBA
 
         private string _romHash;
         private bool _running;
+        private bool _disposed;
 
         public GBA_System(PollInput_Delegate pollInputCallback, DrawFrame_Delegate drawFrameCallback)
         {
@@ -61,9 +62,28 @@ namespace Iris.GBA
             _bios.Initialize(_cpu, _communication, _memory);
         }
 
+        ~GBA_System()
+        {
+            _memory.Dispose();
+            _video.Dispose();
+
+            if (_bios.GetType().Equals(typeof(BIOS_LLE)))
+                ((BIOS_LLE)_bios).Dispose();
+        }
+
         public override void Dispose()
         {
-            // TODO
+            if (_disposed)
+                return;
+
+            _memory.Dispose();
+            _video.Dispose();
+
+            if (_bios.GetType().Equals(typeof(BIOS_LLE)))
+                ((BIOS_LLE)_bios).Dispose();
+
+            GC.SuppressFinalize(this);
+            _disposed = true;
         }
 
         public override void ResetState()
@@ -82,10 +102,6 @@ namespace Iris.GBA
             _video.ResetState();
 
             _bios.Reset();
-
-            BIOS_HLE biosHLE = new();
-            biosHLE.Initialize(_cpu, _communication, _memory);
-            biosHLE.Reset();
         }
 
         public override void LoadState(string filename)

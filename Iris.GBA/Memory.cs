@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Iris.GBA
 {
-    internal sealed class Memory
+    internal sealed class Memory : IDisposable
     {
         private Communication _communication;
         private Timer _timer;
@@ -53,6 +53,16 @@ namespace Iris.GBA
         private readonly IntPtr[] _write8PageTable = new IntPtr[PageTableSize];
         private readonly IntPtr[] _write16PageTable = new IntPtr[PageTableSize];
         private readonly IntPtr[] _write32PageTable = new IntPtr[PageTableSize];
+
+        ~Memory()
+        {
+            // TODO
+        }
+
+        public void Dispose()
+        {
+            // TODO
+        }
 
         internal void Initialize(Communication communication, Timer timer, Sound sound, DMA dma, KeyInput keyInput, SystemControl systemControl, InterruptControl interruptControl, Video video, BIOS bios)
         {
