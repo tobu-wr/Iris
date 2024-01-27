@@ -44,6 +44,7 @@
             {
                 case Register.KEYINPUT:
                     _pollInputCallback();
+                    CheckInterrupts();
                     return _KEYINPUT;
 
                 case Register.KEYCNT:
@@ -111,7 +112,6 @@
             }
 
             _KEYINPUT = (UInt16)((_KEYINPUT & ~(1 << pos)) | ((int)status << pos));
-            CheckInterrupts();
         }
 
         private void CheckInterrupts()
