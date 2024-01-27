@@ -17,15 +17,12 @@ namespace Iris.NDS
             _ppu = new(drawFrameCallback);
         }
 
-        protected override void Dispose(bool disposing)
+        public override void Dispose()
         {
             if (_disposed)
                 return;
 
-            if (disposing)
-            {
-                // TODO
-            }
+            // TODO
 
             _disposed = true;
         }

@@ -62,19 +62,16 @@ namespace Iris.GBA
             _bios.Initialize(_cpu, _communication, _memory);
         }
 
-        protected override void Dispose(bool disposing)
+        public override void Dispose()
         {
             if (_disposed)
                 return;
 
-            if (disposing)
-            {
-                _memory.Dispose();
-                _video.Dispose();
+            _memory.Dispose();
+            _video.Dispose();
 
-                if (_bios.GetType().Equals(typeof(BIOS_LLE)))
-                    ((BIOS_LLE)_bios).Dispose();
-            }
+            if (_bios.GetType().Equals(typeof(BIOS_LLE)))
+                ((BIOS_LLE)_bios).Dispose();
 
             _disposed = true;
         }
