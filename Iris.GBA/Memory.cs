@@ -34,15 +34,34 @@ namespace Iris.GBA
 
         private const int KB = 1024;
 
-        private int _ROMSize;
-        private const int SRAMSize = 64 * KB;
-        private const int EWRAMSize = 256 * KB;
-        private const int IWRAMSize = 32 * KB;
+        private const int EWRAM_Size = 256 * KB;
+        private const int IWRAM_Size = 32 * KB;
+        private const int SRAM_Size = 64 * KB;
 
-        private IntPtr _ROM;
-        private readonly IntPtr _SRAM = Marshal.AllocHGlobal(SRAMSize);
-        private readonly IntPtr _eWRAM = Marshal.AllocHGlobal(EWRAMSize);
-        private readonly IntPtr _iWRAM = Marshal.AllocHGlobal(IWRAMSize);
+        private readonly IntPtr _ewram = Marshal.AllocHGlobal(EWRAM_Size);
+        private readonly IntPtr _iwram = Marshal.AllocHGlobal(IWRAM_Size);
+        private readonly IntPtr _sram = Marshal.AllocHGlobal(SRAM_Size);
+
+        private const UInt32 EWRAM_StartAddress = 0x0200_0000;
+        private const UInt32 EWRAM_EndAddress = 0x0300_0000;
+
+        private const UInt32 IWRAM_StartAddress = 0x0300_0000;
+        private const UInt32 IWRAM_EndAddress = 0x0400_0000;
+
+        private const UInt32 SRAM_StartAddress = 0x0e00_0000;
+        private const UInt32 SRAM_EndAddress = 0x1000_0000;
+
+        private int _romSize;
+        private IntPtr _rom;
+
+        private const UInt32 ROM_WaitState0_StartAddress = 0x0800_0000;
+        private const UInt32 ROM_WaitState0_EndAddress = 0x0a00_0000;
+
+        private const UInt32 ROM_WaitState1_StartAddress = 0x0a00_0000;
+        private const UInt32 ROM_WaitState1_EndAddress = 0x0c00_0000;
+
+        private const UInt32 ROM_WaitState2_StartAddress = 0x0c00_0000;
+        private const UInt32 ROM_WaitState2_EndAddress = 0x0e00_0000;
 
         private const int PageSize = 1 * KB;
         private const int PageTableSize = 1 << 18;
@@ -54,14 +73,24 @@ namespace Iris.GBA
         private readonly IntPtr[] _write16PageTable = new IntPtr[PageTableSize];
         private readonly IntPtr[] _write32PageTable = new IntPtr[PageTableSize];
 
+        private bool _disposed;
+
         ~Memory()
         {
-            // TODO
+            Dispose();
         }
 
         public void Dispose()
         {
-            // TODO
+            if (_disposed)
+                return;
+
+            Marshal.FreeHGlobal(_ewram);
+            Marshal.FreeHGlobal(_iwram);
+            Marshal.FreeHGlobal(_sram);
+
+            GC.SuppressFinalize(this);
+            _disposed = true;
         }
 
         internal void Initialize(Communication communication, Timer timer, Sound sound, DMA dma, KeyInput keyInput, SystemControl systemControl, InterruptControl interruptControl, Video video, BIOS bios)
@@ -76,44 +105,46 @@ namespace Iris.GBA
             _video = video;
             _bios = bios;
 
-            InitPageTables();
+            Map(_ewram, EWRAM_Size, EWRAM_StartAddress, EWRAM_EndAddress, Flag.All);
+            Map(_iwram, IWRAM_Size, IWRAM_StartAddress, IWRAM_EndAddress, Flag.All);
+            Map(_sram, SRAM_Size, SRAM_StartAddress, SRAM_EndAddress, Flag.Read8 | Flag.Write8 | Flag.Mirrored);
         }
 
         internal void ResetState()
         {
-            byte[] sramData = new byte[SRAMSize];
-            byte[] ewramData = new byte[EWRAMSize];
-            byte[] iwramData = new byte[IWRAMSize];
+            byte[] ewramData = new byte[EWRAM_Size];
+            byte[] iwramData = new byte[IWRAM_Size];
+            byte[] sramData = new byte[SRAM_Size];
 
-            Marshal.Copy(sramData, 0, _SRAM, SRAMSize);
-            Marshal.Copy(ewramData, 0, _eWRAM, EWRAMSize);
-            Marshal.Copy(iwramData, 0, _iWRAM, IWRAMSize);
+            Marshal.Copy(ewramData, 0, _ewram, EWRAM_Size);
+            Marshal.Copy(iwramData, 0, _iwram, IWRAM_Size);
+            Marshal.Copy(sramData, 0, _sram, SRAM_Size);
         }
 
         internal void LoadState(BinaryReader reader)
         {
-            byte[] sramData = reader.ReadBytes(SRAMSize);
-            byte[] ewramData = reader.ReadBytes(EWRAMSize);
-            byte[] iwramData = reader.ReadBytes(IWRAMSize);
+            byte[] ewramData = reader.ReadBytes(EWRAM_Size);
+            byte[] iwramData = reader.ReadBytes(IWRAM_Size);
+            byte[] sramData = reader.ReadBytes(SRAM_Size);
 
-            Marshal.Copy(sramData, 0, _SRAM, SRAMSize);
-            Marshal.Copy(ewramData, 0, _eWRAM, EWRAMSize);
-            Marshal.Copy(iwramData, 0, _iWRAM, IWRAMSize);
+            Marshal.Copy(ewramData, 0, _ewram, EWRAM_Size);
+            Marshal.Copy(iwramData, 0, _iwram, IWRAM_Size);
+            Marshal.Copy(sramData, 0, _sram, SRAM_Size);
         }
 
         internal void SaveState(BinaryWriter writer)
         {
-            byte[] sramData = new byte[SRAMSize];
-            byte[] ewramData = new byte[EWRAMSize];
-            byte[] iwramData = new byte[IWRAMSize];
+            byte[] ewramData = new byte[EWRAM_Size];
+            byte[] iwramData = new byte[IWRAM_Size];
+            byte[] sramData = new byte[SRAM_Size];
 
-            Marshal.Copy(_SRAM, sramData, 0, SRAMSize);
-            Marshal.Copy(_eWRAM, ewramData, 0, EWRAMSize);
-            Marshal.Copy(_iWRAM, iwramData, 0, IWRAMSize);
+            Marshal.Copy(_ewram, ewramData, 0, EWRAM_Size);
+            Marshal.Copy(_iwram, iwramData, 0, IWRAM_Size);
+            Marshal.Copy(_sram, sramData, 0, SRAM_Size);
 
-            writer.Write(sramData);
             writer.Write(ewramData);
             writer.Write(iwramData);
+            writer.Write(sramData);
         }
 
         internal void Map(IntPtr data, int size, UInt32 startAddress, UInt32 endAddress, Flag flags)
@@ -174,28 +205,21 @@ namespace Iris.GBA
             }
         }
 
-        internal void InitPageTables()
-        {
-            Map(_eWRAM, EWRAMSize, 0x0200_0000, 0x0300_0000, Flag.All);
-            Map(_iWRAM, IWRAMSize, 0x0300_0000, 0x0400_0000, Flag.All);
-            Map(_SRAM, SRAMSize, 0x0e00_0000, 0x1000_0000, Flag.Read8 | Flag.Write8 | Flag.Mirrored);
-        }
-
         internal void LoadROM(string filename)
         {
             Byte[] data = File.ReadAllBytes(filename);
 
-            _ROMSize = data.Length;
+            _romSize = data.Length;
 
-            if (_ROM != IntPtr.Zero)
-                Marshal.FreeHGlobal(_ROM);
+            if (_rom != IntPtr.Zero)
+                Marshal.FreeHGlobal(_rom);
 
-            _ROM = Marshal.AllocHGlobal(_ROMSize);
-            Marshal.Copy(data, 0, _ROM, _ROMSize);
+            _rom = Marshal.AllocHGlobal(_romSize);
+            Marshal.Copy(data, 0, _rom, _romSize);
 
-            Map(_ROM, _ROMSize, 0x0800_0000, 0x0a00_0000, Flag.AllRead);
-            Map(_ROM, _ROMSize, 0x0a00_0000, 0x0c00_0000, Flag.AllRead);
-            Map(_ROM, _ROMSize, 0x0c00_0000, 0x0e00_0000, Flag.AllRead);
+            Map(_rom, _romSize, ROM_WaitState0_StartAddress, ROM_WaitState0_EndAddress, Flag.AllRead);
+            Map(_rom, _romSize, ROM_WaitState1_StartAddress, ROM_WaitState1_EndAddress, Flag.AllRead);
+            Map(_rom, _romSize, ROM_WaitState2_StartAddress, ROM_WaitState2_EndAddress, Flag.AllRead);
         }
 
         internal Byte Read8(UInt32 address)
@@ -421,12 +445,12 @@ namespace Iris.GBA
                     {
                         UInt32 offset = address - 0x800_0000;
 
-                        if (offset < _ROMSize)
+                        if (offset < _romSize)
                         {
                             unsafe
                             {
                                 // much faster than Marshal.ReadByte
-                                return Unsafe.Read<Byte>((Byte*)_ROM + offset);
+                                return Unsafe.Read<Byte>((Byte*)_rom + offset);
                             }
                         }
                     }
@@ -438,12 +462,12 @@ namespace Iris.GBA
                     {
                         UInt32 offset = address - 0xa00_0000;
 
-                        if (offset < _ROMSize)
+                        if (offset < _romSize)
                         {
                             unsafe
                             {
                                 // much faster than Marshal.ReadByte
-                                return Unsafe.Read<Byte>((Byte*)_ROM + offset);
+                                return Unsafe.Read<Byte>((Byte*)_rom + offset);
                             }
                         }
                     }
@@ -455,12 +479,12 @@ namespace Iris.GBA
                     {
                         UInt32 offset = address - 0xc00_0000;
 
-                        if (offset < _ROMSize)
+                        if (offset < _romSize)
                         {
                             unsafe
                             {
                                 // much faster than Marshal.ReadByte
-                                return Unsafe.Read<Byte>((Byte*)_ROM + offset);
+                                return Unsafe.Read<Byte>((Byte*)+offset);
                             }
                         }
                     }
@@ -569,12 +593,12 @@ namespace Iris.GBA
                     {
                         UInt32 offset = address - 0x800_0000;
 
-                        if (offset < _ROMSize)
+                        if (offset < _romSize)
                         {
                             unsafe
                             {
                                 // much faster than Marshal.ReadInt16
-                                return Unsafe.Read<UInt16>((Byte*)_ROM + offset);
+                                return Unsafe.Read<UInt16>((Byte*)_rom + offset);
                             }
                         }
                     }
@@ -586,12 +610,12 @@ namespace Iris.GBA
                     {
                         UInt32 offset = address - 0xa00_0000;
 
-                        if (offset < _ROMSize)
+                        if (offset < _romSize)
                         {
                             unsafe
                             {
                                 // much faster than Marshal.ReadInt16
-                                return Unsafe.Read<UInt16>((Byte*)_ROM + offset);
+                                return Unsafe.Read<UInt16>((Byte*)_rom + offset);
                             }
                         }
                     }
@@ -603,12 +627,12 @@ namespace Iris.GBA
                     {
                         UInt32 offset = address - 0xc00_0000;
 
-                        if (offset < _ROMSize)
+                        if (offset < _romSize)
                         {
                             unsafe
                             {
                                 // much faster than Marshal.ReadInt16
-                                return Unsafe.Read<UInt16>((Byte*)_ROM + offset);
+                                return Unsafe.Read<UInt16>((Byte*)_rom + offset);
                             }
                         }
                     }
@@ -669,12 +693,12 @@ namespace Iris.GBA
                     {
                         UInt32 offset = address - 0x800_0000;
 
-                        if (offset < _ROMSize)
+                        if (offset < _romSize)
                         {
                             unsafe
                             {
                                 // much faster than Marshal.ReadInt32
-                                return Unsafe.Read<UInt32>((Byte*)_ROM + offset);
+                                return Unsafe.Read<UInt32>((Byte*)_rom + offset);
                             }
                         }
                     }
@@ -686,12 +710,12 @@ namespace Iris.GBA
                     {
                         UInt32 offset = address - 0xa00_0000;
 
-                        if (offset < _ROMSize)
+                        if (offset < _romSize)
                         {
                             unsafe
                             {
                                 // much faster than Marshal.ReadInt32
-                                return Unsafe.Read<UInt32>((Byte*)_ROM + offset);
+                                return Unsafe.Read<UInt32>((Byte*)_rom + offset);
                             }
                         }
                     }
@@ -703,12 +727,12 @@ namespace Iris.GBA
                     {
                         UInt32 offset = address - 0xc00_0000;
 
-                        if (offset < _ROMSize)
+                        if (offset < _romSize)
                         {
                             unsafe
                             {
                                 // much faster than Marshal.ReadInt32
-                                return Unsafe.Read<UInt32>((Byte*)_ROM + offset);
+                                return Unsafe.Read<UInt32>((Byte*)_rom + offset);
                             }
                         }
                     }
