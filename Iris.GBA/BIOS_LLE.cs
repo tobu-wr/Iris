@@ -36,7 +36,7 @@ namespace Iris.GBA
 
         ~BIOS_LLE()
         {
-            Marshal.FreeHGlobal(_bios);
+            Dispose();
         }
 
         public void Dispose()
