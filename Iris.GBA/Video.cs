@@ -167,9 +167,7 @@ namespace Iris.GBA
 
         ~Video()
         {
-            Marshal.FreeHGlobal(_paletteRAM);
-            Marshal.FreeHGlobal(_vram);
-            Marshal.FreeHGlobal(_oam);
+            Dispose();
         }
 
         public void Dispose()
