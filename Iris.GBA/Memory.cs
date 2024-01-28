@@ -443,7 +443,7 @@ namespace Iris.GBA
                 case 0x8:
                 case 0x9:
                     {
-                        UInt32 offset = address - 0x800_0000;
+                        UInt32 offset = address - ROM_WaitState0_StartAddress;
 
                         if (offset < _romSize)
                         {
@@ -460,7 +460,7 @@ namespace Iris.GBA
                 case 0xa:
                 case 0xb:
                     {
-                        UInt32 offset = address - 0xa00_0000;
+                        UInt32 offset = address - ROM_WaitState1_StartAddress;
 
                         if (offset < _romSize)
                         {
@@ -477,14 +477,14 @@ namespace Iris.GBA
                 case 0xc:
                 case 0xd:
                     {
-                        UInt32 offset = address - 0xc00_0000;
+                        UInt32 offset = address - ROM_WaitState2_StartAddress;
 
                         if (offset < _romSize)
                         {
                             unsafe
                             {
                                 // much faster than Marshal.ReadByte
-                                return Unsafe.Read<Byte>((Byte*)+offset);
+                                return Unsafe.Read<Byte>((Byte*)_rom + offset);
                             }
                         }
                     }
@@ -591,7 +591,7 @@ namespace Iris.GBA
                 case 0x8:
                 case 0x9:
                     {
-                        UInt32 offset = address - 0x800_0000;
+                        UInt32 offset = address - ROM_WaitState0_StartAddress;
 
                         if (offset < _romSize)
                         {
@@ -608,7 +608,7 @@ namespace Iris.GBA
                 case 0xa:
                 case 0xb:
                     {
-                        UInt32 offset = address - 0xa00_0000;
+                        UInt32 offset = address - ROM_WaitState1_StartAddress;
 
                         if (offset < _romSize)
                         {
@@ -625,7 +625,7 @@ namespace Iris.GBA
                 case 0xc:
                 case 0xd:
                     {
-                        UInt32 offset = address - 0xc00_0000;
+                        UInt32 offset = address - ROM_WaitState2_StartAddress;
 
                         if (offset < _romSize)
                         {
@@ -691,7 +691,7 @@ namespace Iris.GBA
                 case 0x8:
                 case 0x9:
                     {
-                        UInt32 offset = address - 0x800_0000;
+                        UInt32 offset = address - ROM_WaitState0_StartAddress;
 
                         if (offset < _romSize)
                         {
@@ -708,7 +708,7 @@ namespace Iris.GBA
                 case 0xa:
                 case 0xb:
                     {
-                        UInt32 offset = address - 0xa00_0000;
+                        UInt32 offset = address - ROM_WaitState1_StartAddress;
 
                         if (offset < _romSize)
                         {
@@ -725,7 +725,7 @@ namespace Iris.GBA
                 case 0xc:
                 case 0xd:
                     {
-                        UInt32 offset = address - 0xc00_0000;
+                        UInt32 offset = address - ROM_WaitState2_StartAddress;
 
                         if (offset < _romSize)
                         {
