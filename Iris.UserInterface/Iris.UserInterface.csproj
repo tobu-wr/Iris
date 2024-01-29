@@ -16,6 +16,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_final|AnyCPU'">
+    <OutputType>WinExe</OutputType>
     <Optimize>True</Optimize>
   </PropertyGroup>
 
