@@ -1,10 +1,8 @@
-﻿using Iris.CPU;
-
-namespace Iris.GBA
+﻿namespace Iris.GBA
 {
     internal abstract class BIOS
     {
-        internal abstract void Initialize(CPU_Core cpu, Communication communication, Memory memory);
+        internal abstract void Initialize(CPU.CPU_Core cpu, Communication communication, Memory memory);
         internal abstract void Reset();
 
         internal abstract Byte Read8(UInt32 address);

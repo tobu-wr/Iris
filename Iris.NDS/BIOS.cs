@@ -1,6 +1,4 @@
-﻿using Iris.CPU;
-
-namespace Iris.NDS
+﻿namespace Iris.NDS
 {
     public sealed partial class NDS_System
     {
@@ -10,7 +8,7 @@ namespace Iris.NDS
 
             // TODO
 
-            _cpu.Reg[CPU_Core.PC] = ROMAddress;
+            _cpu.Reg[CPU.CPU_Core.PC] = ROMAddress;
             _cpu.NextInstructionAddress = ROMAddress;
         }
 

@@ -1,14 +1,12 @@
-﻿using Iris.CPU;
-
-namespace Iris.GBA
+﻿namespace Iris.GBA
 {
     internal sealed class BIOS_HLE : BIOS
     {
-        private CPU_Core? _cpu;
+        private CPU.CPU_Core? _cpu;
         private Communication _communication;
         private Memory? _memory;
 
-        internal override void Initialize(CPU_Core cpu, Communication communication, Memory memory)
+        internal override void Initialize(CPU.CPU_Core cpu, Communication communication, Memory memory)
         {
             _cpu = cpu;
             _communication = communication;
@@ -22,8 +20,8 @@ namespace Iris.GBA
             for (int i = 0; i <= 12; ++i)
                 _cpu!.Reg[i] = 0;
 
-            _cpu!.Reg[CPU_Core.SP] = 0x300_7f00;
-            _cpu.Reg[CPU_Core.LR] = ROMAddress;
+            _cpu!.Reg[CPU.CPU_Core.SP] = 0x300_7f00;
+            _cpu.Reg[CPU.CPU_Core.LR] = ROMAddress;
 
             _cpu.Reg13_svc = 0x300_7fe0;
             _cpu.Reg14_svc = 0;
@@ -126,11 +124,11 @@ namespace Iris.GBA
 
             void PushToStack(UInt32 value)
             {
-                _cpu.Reg[CPU_Core.SP] -= 4;
-                _memory!.Write32(_cpu.Reg[CPU_Core.SP], value);
+                _cpu.Reg[CPU.CPU_Core.SP] -= 4;
+                _memory!.Write32(_cpu.Reg[CPU.CPU_Core.SP], value);
             }
 
-            PushToStack(_cpu.Reg[CPU_Core.LR]);
+            PushToStack(_cpu.Reg[CPU.CPU_Core.LR]);
             PushToStack(_cpu.Reg[12]);
             PushToStack(_cpu.Reg[3]);
             PushToStack(_cpu.Reg[2]);
@@ -138,7 +136,7 @@ namespace Iris.GBA
             PushToStack(_cpu.Reg[0]);
 
             _cpu.Reg[0] = 0x400_0000;
-            _cpu.Reg[CPU_Core.LR] = 0x138;
+            _cpu.Reg[CPU.CPU_Core.LR] = 0x138;
             _cpu.NextInstructionAddress = _memory!.Read32(0x300_7ffc);
 
             // TODO: fix cycle count
@@ -330,8 +328,8 @@ namespace Iris.GBA
         {
             UInt32 PopFromStack()
             {
-                UInt32 value = _memory!.Read32(_cpu.Reg[CPU_Core.SP]);
-                _cpu.Reg[CPU_Core.SP] += 4;
+                UInt32 value = _memory!.Read32(_cpu.Reg[CPU.CPU_Core.SP]);
+                _cpu.Reg[CPU.CPU_Core.SP] += 4;
                 return value;
             }
 
@@ -340,9 +338,9 @@ namespace Iris.GBA
             _cpu.Reg[2] = PopFromStack();
             _cpu.Reg[3] = PopFromStack();
             _cpu.Reg[12] = PopFromStack();
-            _cpu.Reg[CPU_Core.LR] = PopFromStack();
+            _cpu.Reg[CPU.CPU_Core.LR] = PopFromStack();
 
-            _cpu.NextInstructionAddress = _cpu.Reg[CPU_Core.LR] - 4;
+            _cpu.NextInstructionAddress = _cpu.Reg[CPU.CPU_Core.LR] - 4;
             _cpu.SetCPSR(_cpu.SPSR);
         }
     }

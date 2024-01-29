@@ -1,5 +1,3 @@
-using Iris.GBA;
-using Iris.NDS;
 using System.Collections.Frozen;
 using System.Diagnostics;
 using System.Drawing.Imaging;
@@ -163,7 +161,7 @@ namespace Iris.UserInterface
 
         private void LoadROM(string fileName)
         {
-            Common.System system = fileName.EndsWith(".gba") ? new GBA_System(PollInput, DrawFrame) : new NDS_System(PollInput, DrawFrame);
+            Common.System system = fileName.EndsWith(".gba") ? new GBA.GBA_System(PollInput, DrawFrame) : new NDS.NDS_System(PollInput, DrawFrame);
 
             try
             {
@@ -273,7 +271,7 @@ namespace Iris.UserInterface
 
             OpenFileDialog dialog = new()
             {
-                Filter = _system.GetType().Equals(typeof(GBA_System)) ? "GBA State Save files (*.gss)|*.gss" : "NDS State Save files (*.nss)|*.nss"
+                Filter = _system.GetType().Equals(typeof(GBA.GBA_System)) ? "GBA State Save files (*.gss)|*.gss" : "NDS State Save files (*.nss)|*.nss"
             };
 
             if (dialog.ShowDialog() == DialogResult.OK)
@@ -301,7 +299,7 @@ namespace Iris.UserInterface
 
             SaveFileDialog dialog = new()
             {
-                Filter = _system.GetType().Equals(typeof(GBA_System)) ? "GBA State Save files (*.gss)|*.gss" : "NDS State Save files (*.nss)|*.nss"
+                Filter = _system.GetType().Equals(typeof(GBA.GBA_System)) ? "GBA State Save files (*.gss)|*.gss" : "NDS State Save files (*.nss)|*.nss"
             };
 
             if (dialog.ShowDialog() == DialogResult.OK)

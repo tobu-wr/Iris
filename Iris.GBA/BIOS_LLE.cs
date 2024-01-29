@@ -1,5 +1,4 @@
-﻿using Iris.CPU;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace Iris.GBA
 {
@@ -12,7 +11,7 @@ namespace Iris.GBA
         private const UInt32 BIOS_StartAddress = 0x0000_0000;
         private const UInt32 BIOS_EndAddress = 0x0000_4000;
 
-        private CPU_Core _cpu;
+        private CPU.CPU_Core _cpu;
         private bool _disposed;
 
         internal BIOS_LLE(string filename)
@@ -50,7 +49,7 @@ namespace Iris.GBA
             _disposed = true;
         }
 
-        internal override void Initialize(CPU_Core cpu, Communication communication, Memory memory)
+        internal override void Initialize(CPU.CPU_Core cpu, Communication communication, Memory memory)
         {
             _cpu = cpu;
 

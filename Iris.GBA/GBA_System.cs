@@ -1,6 +1,4 @@
-﻿using Iris.Common;
-using Iris.CPU;
-using System.IO.Compression;
+﻿using System.IO.Compression;
 using System.Security.Cryptography;
 
 namespace Iris.GBA
@@ -22,10 +20,10 @@ namespace Iris.GBA
 
         private static readonly int s_taskIdCount = Enum.GetNames(typeof(TaskId)).Length;
 
-        private readonly Scheduler _scheduler = new(s_taskIdCount, s_taskIdCount + 1);
+        private readonly Common.Scheduler _scheduler = new(s_taskIdCount, s_taskIdCount + 1);
 
         // components
-        private readonly CPU_Core _cpu;
+        private readonly CPU.CPU_Core _cpu;
         private readonly Communication _communication = new();
         private readonly Timer _timer;
         private readonly Sound _sound = new();
@@ -44,8 +42,8 @@ namespace Iris.GBA
 
         public GBA_System(PollInput_Delegate pollInputCallback, DrawFrame_Delegate drawFrameCallback)
         {
-            CPU_Core.CallbackInterface cpuCallbackInterface = new(_memory.Read8, _memory.Read16, _memory.Read32, _memory.Write8, _memory.Write16, _memory.Write32, _bios.HandleSWI, _bios.HandleIRQ);
-            _cpu = new(CPU_Core.Model.ARM7TDMI, cpuCallbackInterface);
+            CPU.CPU_Core.CallbackInterface cpuCallbackInterface = new(_memory.Read8, _memory.Read16, _memory.Read32, _memory.Write8, _memory.Write16, _memory.Write32, _bios.HandleSWI, _bios.HandleIRQ);
+            _cpu = new(CPU.CPU_Core.Model.ARM7TDMI, cpuCallbackInterface);
 
             _timer = new(_scheduler);
             _keyInput = new(pollInputCallback);

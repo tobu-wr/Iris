@@ -1,14 +1,12 @@
-﻿using static Iris.Common.System;
-
-namespace Iris.NDS
+﻿namespace Iris.NDS
 {
     public sealed class PPU
     {
         private const int KB = 1024;
 
-        private readonly DrawFrame_Delegate _drawFrameCallback;
+        private readonly Common.System.DrawFrame_Delegate _drawFrameCallback;
 
-        internal PPU(DrawFrame_Delegate drawFrameCallback)
+        internal PPU(Common.System.DrawFrame_Delegate drawFrameCallback)
         {
             _drawFrameCallback = drawFrameCallback;
         }

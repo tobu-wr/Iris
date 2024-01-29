@@ -1,10 +1,8 @@
-﻿using Iris.CPU;
-
-namespace Iris.NDS
+﻿namespace Iris.NDS
 {
     public sealed partial class NDS_System : Common.System
     {
-        private readonly CPU_Core _cpu;
+        private readonly CPU.CPU_Core _cpu;
         private readonly PPU _ppu;
 
         private bool _running;
@@ -12,8 +10,8 @@ namespace Iris.NDS
 
         public NDS_System(PollInput_Delegate pollInputCallback, DrawFrame_Delegate drawFrameCallback)
         {
-            CPU_Core.CallbackInterface cpuCallbackInterface = new(ReadMemory8, ReadMemory16, ReadMemory32, WriteMemory8, WriteMemory16, WriteMemory32, HandleSWI, HandleIRQ);
-            _cpu = new(CPU_Core.Model.ARM946ES, cpuCallbackInterface);
+            CPU.CPU_Core.CallbackInterface cpuCallbackInterface = new(ReadMemory8, ReadMemory16, ReadMemory32, WriteMemory8, WriteMemory16, WriteMemory32, HandleSWI, HandleIRQ);
+            _cpu = new(CPU.CPU_Core.Model.ARM946ES, cpuCallbackInterface);
             _ppu = new(drawFrameCallback);
         }
 
@@ -31,7 +29,7 @@ namespace Iris.NDS
         {
             BIOS_Reset();
 
-            _cpu.NIRQ = CPU_Core.Signal.High;
+            _cpu.NIRQ = CPU.CPU_Core.Signal.High;
         }
 
         public override void LoadState(string filename)
