@@ -271,7 +271,7 @@ namespace Iris.UserInterface
 
             OpenFileDialog dialog = new()
             {
-                Filter = _system.GetType().Equals(typeof(GBA.GBA_System)) ? "GBA State Save files (*.gss)|*.gss" : "NDS State Save files (*.nss)|*.nss"
+                Filter = (_system is GBA.GBA_System) ? "GBA State Save files (*.gss)|*.gss" : "NDS State Save files (*.nss)|*.nss"
             };
 
             if (dialog.ShowDialog() == DialogResult.OK)
@@ -299,7 +299,7 @@ namespace Iris.UserInterface
 
             SaveFileDialog dialog = new()
             {
-                Filter = _system.GetType().Equals(typeof(GBA.GBA_System)) ? "GBA State Save files (*.gss)|*.gss" : "NDS State Save files (*.nss)|*.nss"
+                Filter = (_system is GBA.GBA_System) ? "GBA State Save files (*.gss)|*.gss" : "NDS State Save files (*.nss)|*.nss"
             };
 
             if (dialog.ShowDialog() == DialogResult.OK)
