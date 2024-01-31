@@ -82,6 +82,12 @@ namespace Iris.UserInterface
 
             InitializeComponent();
 
+#if DEBUG
+            Text += " (DEBUG)";
+#elif RELEASE_DEV
+            Text += " (DEV)";
+#endif
+
             _keyboard = new(Keyboard_KeyDown, Keyboard_KeyUp);
             _xboxController = new(XboxController_ButtonDown, XboxController_ButtonUp);
 
