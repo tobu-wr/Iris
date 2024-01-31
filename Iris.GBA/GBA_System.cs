@@ -68,8 +68,8 @@ namespace Iris.GBA
             _memory.Dispose();
             _video.Dispose();
 
-            if (_bios.GetType().Equals(typeof(BIOS_LLE)))
-                ((BIOS_LLE)_bios).Dispose();
+            if (_bios is BIOS_LLE bios)
+                bios.Dispose();
 
             _disposed = true;
         }
