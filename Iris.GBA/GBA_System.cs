@@ -143,7 +143,7 @@ namespace Iris.GBA
 
             using HashAlgorithm hashAlgorithm = SHA512.Create();
             using FileStream fileStream = File.OpenRead(filename);
-            _romHash = BitConverter.ToString(hashAlgorithm.ComputeHash(fileStream)).Replace("-", "");
+            _romHash = BitConverter.ToString(hashAlgorithm.ComputeHash(fileStream));
         }
 
         public override void SetKeyStatus(Key key, KeyStatus status)
