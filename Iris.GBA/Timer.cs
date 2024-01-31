@@ -42,10 +42,10 @@
         {
             _scheduler = scheduler;
 
-            _scheduler.RegisterTask((UInt32 cycleCountDelay) => StartCounting(ref _channel0, cycleCountDelay), (int)GBA_System.TaskId.StartCountingChannel0);
-            _scheduler.RegisterTask((UInt32 cycleCountDelay) => StartCounting(ref _channel1, cycleCountDelay), (int)GBA_System.TaskId.StartCountingChannel1);
-            _scheduler.RegisterTask((UInt32 cycleCountDelay) => StartCounting(ref _channel2, cycleCountDelay), (int)GBA_System.TaskId.StartCountingChannel2);
-            _scheduler.RegisterTask((UInt32 cycleCountDelay) => StartCounting(ref _channel3, cycleCountDelay), (int)GBA_System.TaskId.StartCountingChannel3);
+            _scheduler.RegisterTask((int)GBA_System.TaskId.StartCountingChannel0, (UInt32 cycleCountDelay) => StartCounting(ref _channel0, cycleCountDelay));
+            _scheduler.RegisterTask((int)GBA_System.TaskId.StartCountingChannel1, (UInt32 cycleCountDelay) => StartCounting(ref _channel1, cycleCountDelay));
+            _scheduler.RegisterTask((int)GBA_System.TaskId.StartCountingChannel2, (UInt32 cycleCountDelay) => StartCounting(ref _channel2, cycleCountDelay));
+            _scheduler.RegisterTask((int)GBA_System.TaskId.StartCountingChannel3, (UInt32 cycleCountDelay) => StartCounting(ref _channel3, cycleCountDelay));
         }
 
         internal void Initialize(InterruptControl interruptControl)
@@ -134,7 +134,7 @@
                 channel.Control = newControl;
 
                 if (((previousControl & 0x0080) == 0) && ((newControl & 0x0080) == 0x0080))
-                    _scheduler.ScheduleTask(2, (int)startCountingTaskId);
+                    _scheduler.ScheduleTask((int)startCountingTaskId, 2);
                 else if (((previousControl & 0x0080) == 0x0080) && ((newControl & 0x0080) == 0))
                     channel.Running = false;
             }

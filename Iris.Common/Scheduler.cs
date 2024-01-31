@@ -8,7 +8,7 @@ namespace Iris.Common
         public delegate void Task_Delegate(UInt32 cycleCountDelay);
         private readonly Task_Delegate[] _taskList = new Task_Delegate[taskListSize];
 
-        private record struct ScheduledTaskListEntry(UInt32 CycleCount, int Id);
+        private record struct ScheduledTaskListEntry(int Id, UInt32 CycleCount);
         private readonly ScheduledTaskListEntry[] _scheduledTaskList = new ScheduledTaskListEntry[scheduledTaskListSize]; // sorted by CycleCount from smallest to largest
         private int _scheduledTaskCount;
 
@@ -24,8 +24,8 @@ namespace Iris.Common
         {
             foreach (ref ScheduledTaskListEntry entry in _scheduledTaskList.AsSpan())
             {
-                entry.CycleCount = reader.ReadUInt32();
                 entry.Id = reader.ReadInt32();
+                entry.CycleCount = reader.ReadUInt32();
             }
 
             _scheduledTaskCount = reader.ReadInt32();
@@ -36,21 +36,21 @@ namespace Iris.Common
         {
             foreach (ScheduledTaskListEntry entry in _scheduledTaskList)
             {
-                writer.Write(entry.CycleCount);
                 writer.Write(entry.Id);
+                writer.Write(entry.CycleCount);
             }
 
             writer.Write(_scheduledTaskCount);
             writer.Write(_cycleCounter);
         }
 
-        public void RegisterTask(Task_Delegate task, int id)
+        public void RegisterTask(int id, Task_Delegate task)
         {
             _taskList[id] = task;
         }
 
         // cycleCount must be greater than 0
-        public void ScheduleTask(UInt32 cycleCount, int id)
+        public void ScheduleTask(int id, UInt32 cycleCount)
         {
             cycleCount += _cycleCounter;
 
@@ -72,8 +72,8 @@ namespace Iris.Common
             if (i < _scheduledTaskCount)
                 Array.Copy(_scheduledTaskList, i, _scheduledTaskList, i + 1, _scheduledTaskCount - i);
 
-            entry.CycleCount = cycleCount;
             entry.Id = id;
+            entry.CycleCount = cycleCount;
 
             ++_scheduledTaskCount;
         }
@@ -118,7 +118,7 @@ namespace Iris.Common
                     Unsafe.Add(ref scheduledTaskListDataRef, i).CycleCount -= _cycleCounter;
             }
 
-            // reset the cycle counter and update the scheduled task count
+            // update the scheduled task count and reset the cycle counter
             _scheduledTaskCount = remainingScheduledTaskCount;
             _cycleCounter = 0;
         }

@@ -161,8 +161,8 @@ namespace Iris.GBA
             _scheduler = scheduler;
             _drawFrameCallback = drawFrameCallback;
 
-            _scheduler.RegisterTask(StartHBlank, (int)GBA_System.TaskId.StartHBlank);
-            _scheduler.RegisterTask(StartScanline, (int)GBA_System.TaskId.StartScanline);
+            _scheduler.RegisterTask((int)GBA_System.TaskId.StartHBlank, StartHBlank);
+            _scheduler.RegisterTask((int)GBA_System.TaskId.StartScanline, StartScanline);
         }
 
         ~Video()
@@ -258,8 +258,8 @@ namespace Iris.GBA
             _BLDALPHA = 0;
             _BLDY = 0;
 
-            _scheduler.ScheduleTask(DisplayLineCycleCount, (int)GBA_System.TaskId.StartHBlank);
-            _scheduler.ScheduleTask(ScanlineCycleCount, (int)GBA_System.TaskId.StartScanline);
+            _scheduler.ScheduleTask((int)GBA_System.TaskId.StartHBlank, DisplayLineCycleCount);
+            _scheduler.ScheduleTask((int)GBA_System.TaskId.StartScanline, ScanlineCycleCount);
 
             Array.Clear(_displayFrameBuffer);
         }
@@ -665,8 +665,8 @@ namespace Iris.GBA
                 _DISPSTAT = (UInt16)(_DISPSTAT & ~0x0004); // clear VCountMatch status
             }
 
-            _scheduler.ScheduleTask(DisplayLineCycleCount - cycleCountDelay, (int)GBA_System.TaskId.StartHBlank);
-            _scheduler.ScheduleTask(ScanlineCycleCount - cycleCountDelay, (int)GBA_System.TaskId.StartScanline);
+            _scheduler.ScheduleTask((int)GBA_System.TaskId.StartHBlank, DisplayLineCycleCount - cycleCountDelay);
+            _scheduler.ScheduleTask((int)GBA_System.TaskId.StartScanline, ScanlineCycleCount - cycleCountDelay);
         }
 
         private void Render()
