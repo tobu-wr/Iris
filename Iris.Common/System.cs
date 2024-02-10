@@ -3,7 +3,7 @@
     public abstract class System : IDisposable
     {
         public delegate void PollInput_Delegate();
-        public delegate void DrawFrame_Delegate(UInt16[] frameBuffer);
+        public delegate void PresentFrame_Delegate(UInt16[] frameBuffer);
 
         public enum Key
         {

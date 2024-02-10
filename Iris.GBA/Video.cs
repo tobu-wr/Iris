@@ -147,7 +147,7 @@ namespace Iris.GBA
         private const UInt32 ScanlineCycleCount = ScanlineLength * PixelCycleCount;
 
         private readonly Common.Scheduler _scheduler;
-        private readonly Common.System.DrawFrame_Delegate _drawFrameCallback;
+        private readonly Common.System.PresentFrame_Delegate _presentFrameCallback;
 
         private DMA _dma;
         private InterruptControl _interruptControl;
@@ -158,10 +158,10 @@ namespace Iris.GBA
 
         private const int StateSaveVersion = 1;
 
-        internal Video(Common.Scheduler scheduler, Common.System.DrawFrame_Delegate drawFrameCallback)
+        internal Video(Common.Scheduler scheduler, Common.System.PresentFrame_Delegate presentFrameCallback)
         {
             _scheduler = scheduler;
-            _drawFrameCallback = drawFrameCallback;
+            _presentFrameCallback = presentFrameCallback;
 
             _scheduler.RegisterTask((int)GBA_System.TaskId.StartHBlank, StartHBlank);
             _scheduler.RegisterTask((int)GBA_System.TaskId.StartScanline, StartScanline);
@@ -636,7 +636,7 @@ namespace Iris.GBA
 
                     _dma.PerformAllTransfers(DMA.StartTiming.VBlank);
 
-                    _drawFrameCallback(_displayFrameBuffer);
+                    _presentFrameCallback(_displayFrameBuffer);
                     Array.Clear(_displayFrameBuffer);
                     break;
 

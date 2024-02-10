@@ -8,11 +8,11 @@
         private bool _running;
         private bool _disposed;
 
-        public NDS_System(PollInput_Delegate pollInputCallback, DrawFrame_Delegate drawFrameCallback)
+        public NDS_System(PollInput_Delegate pollInputCallback, PresentFrame_Delegate presentFrameCallback)
         {
             CPU.CPU_Core.CallbackInterface cpuCallbackInterface = new(ReadMemory8, ReadMemory16, ReadMemory32, WriteMemory8, WriteMemory16, WriteMemory32, HandleSWI, HandleIRQ);
             _cpu = new(CPU.CPU_Core.Model.ARM946ES, cpuCallbackInterface);
-            _ppu = new(drawFrameCallback);
+            _ppu = new(presentFrameCallback);
         }
 
         public override void Dispose()

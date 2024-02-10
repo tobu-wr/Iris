@@ -109,7 +109,7 @@ namespace Iris.UserInterface
             _xboxController.PollInput();
         }
 
-        private void DrawFrame(UInt16[] frameBuffer)
+        private void PresentFrame(UInt16[] frameBuffer)
         {
             const int ScreenWidth = 240;
             const int ScreenHeight = 160;
@@ -167,7 +167,7 @@ namespace Iris.UserInterface
 
         private void LoadROM(string fileName)
         {
-            Common.System system = fileName.EndsWith(".gba") ? new GBA.GBA_System(PollInput, DrawFrame) : new NDS.NDS_System(PollInput, DrawFrame);
+            Common.System system = fileName.EndsWith(".gba") ? new GBA.GBA_System(PollInput, PresentFrame) : new NDS.NDS_System(PollInput, PresentFrame);
 
             try
             {

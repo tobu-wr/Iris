@@ -42,14 +42,14 @@ namespace Iris.GBA
         private const string StateSaveMagic = "IRIS";
         private const int StateSaveVersion = 1;
 
-        public GBA_System(PollInput_Delegate pollInputCallback, DrawFrame_Delegate drawFrameCallback)
+        public GBA_System(PollInput_Delegate pollInputCallback, PresentFrame_Delegate presentFrameCallback)
         {
             CPU.CPU_Core.CallbackInterface cpuCallbackInterface = new(_memory.Read8, _memory.Read16, _memory.Read32, _memory.Write8, _memory.Write16, _memory.Write32, _bios.HandleSWI, _bios.HandleIRQ);
 
             _cpu = new(CPU.CPU_Core.Model.ARM7TDMI, cpuCallbackInterface);
             _timer = new(_scheduler);
             _keyInput = new(pollInputCallback);
-            _video = new(_scheduler, drawFrameCallback);
+            _video = new(_scheduler, presentFrameCallback);
 
             _communication.Initialize(_interruptControl);
             _timer.Initialize(_interruptControl);

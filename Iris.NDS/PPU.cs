@@ -4,11 +4,11 @@
     {
         private const int KB = 1024;
 
-        private readonly Common.System.DrawFrame_Delegate _drawFrameCallback;
+        private readonly Common.System.PresentFrame_Delegate _presentFrameCallback;
 
-        internal PPU(Common.System.DrawFrame_Delegate drawFrameCallback)
+        internal PPU(Common.System.PresentFrame_Delegate presentFrameCallback)
         {
-            _drawFrameCallback = drawFrameCallback;
+            _presentFrameCallback = presentFrameCallback;
         }
 
         internal void Step()
