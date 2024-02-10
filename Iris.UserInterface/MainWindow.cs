@@ -41,7 +41,7 @@ namespace Iris.UserInterface
         }.ToFrozenDictionary();
 
         private Common.System _system;
-        private Task _systemTask;
+        private Thread _systemThread;
 
         private readonly Keyboard _keyboard;
         private readonly XboxController _xboxController;
@@ -205,35 +205,43 @@ namespace Iris.UserInterface
 
             statusToolStripStatusLabel.Text = "Running";
 
-            _systemTask = Task.Run(() =>
+            _systemThread = new(RunSystemThread)
             {
-                try
-                {
-                    _system.Run();
-                }
-                catch (Exception ex)
-                {
-                    _system.Pause();
-                    _system.ResetState();
+                IsBackground = true,
+                Name = "Iris System"
+            };
 
-                    _framerateCounterTimer.Stop();
+            _systemThread.Start();
+        }
 
-                    runToolStripMenuItem.Enabled = true;
-                    pauseToolStripMenuItem.Enabled = false;
+        private void RunSystemThread()
+        {
+            try
+            {
+                _system.Run();
+            }
+            catch (Exception ex)
+            {
+                _system.Pause();
+                _system.ResetState();
 
-                    statusToolStripStatusLabel.Text = "Paused";
-                    fpsToolStripStatusLabel.Text = "FPS: 0,00";
+                _framerateCounterTimer.Stop();
 
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            });
+                runToolStripMenuItem.Enabled = true;
+                pauseToolStripMenuItem.Enabled = false;
+
+                statusToolStripStatusLabel.Text = "Paused";
+                fpsToolStripStatusLabel.Text = "FPS: 0,00";
+
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void Pause()
         {
             _system.Pause();
 
-            while (!_systemTask.IsCompleted)
+            while (_systemThread.IsAlive)
                 Application.DoEvents();
 
             _framerateCounterTimer.Stop();
