@@ -14,6 +14,8 @@ namespace Iris.Common
 
         private UInt32 _cycleCounter;
 
+        private const int StateSaveVersion = 1;
+
         public void ResetState()
         {
             _scheduledTaskCount = 0;
@@ -22,6 +24,9 @@ namespace Iris.Common
 
         public void LoadState(BinaryReader reader)
         {
+            if (reader.ReadInt32() != StateSaveVersion)
+                throw new Exception();
+
             foreach (ref ScheduledTaskListEntry entry in _scheduledTaskList.AsSpan())
             {
                 entry.Id = reader.ReadInt32();
@@ -34,6 +39,8 @@ namespace Iris.Common
 
         public void SaveState(BinaryWriter writer)
         {
+            writer.Write(StateSaveVersion);
+
             foreach (ScheduledTaskListEntry entry in _scheduledTaskList)
             {
                 writer.Write(entry.Id);

@@ -75,6 +75,8 @@ namespace Iris.GBA
 
         private bool _disposed;
 
+        private const int StateSaveVersion = 1;
+
         ~Memory()
         {
             Dispose();
@@ -123,6 +125,9 @@ namespace Iris.GBA
 
         internal void LoadState(BinaryReader reader)
         {
+            if (reader.ReadInt32() != StateSaveVersion)
+                throw new Exception();
+
             byte[] ewramData = reader.ReadBytes(EWRAM_Size);
             byte[] iwramData = reader.ReadBytes(IWRAM_Size);
             byte[] sramData = reader.ReadBytes(SRAM_Size);
@@ -134,6 +139,8 @@ namespace Iris.GBA
 
         internal void SaveState(BinaryWriter writer)
         {
+            writer.Write(StateSaveVersion);
+
             byte[] ewramData = new byte[EWRAM_Size];
             byte[] iwramData = new byte[IWRAM_Size];
             byte[] sramData = new byte[SRAM_Size];

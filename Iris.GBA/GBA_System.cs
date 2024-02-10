@@ -39,6 +39,9 @@ namespace Iris.GBA
         private bool _running;
         private bool _disposed;
 
+        private const string StateSaveMagic = "IRIS";
+        private const int StateSaveVersion = 1;
+
         public GBA_System(PollInput_Delegate pollInputCallback, DrawFrame_Delegate drawFrameCallback)
         {
             CPU.CPU_Core.CallbackInterface cpuCallbackInterface = new(_memory.Read8, _memory.Read16, _memory.Read32, _memory.Write8, _memory.Write16, _memory.Write32, _bios.HandleSWI, _bios.HandleIRQ);
@@ -97,6 +100,12 @@ namespace Iris.GBA
             using DeflateStream deflateStream = new(fileStream, CompressionMode.Decompress);
             using BinaryReader reader = new(deflateStream, System.Text.Encoding.UTF8, false);
 
+            if (reader.ReadString() != StateSaveMagic)
+                throw new Exception();
+
+            if (reader.ReadInt32() != StateSaveVersion)
+                throw new Exception();
+
             if (reader.ReadString() != _romHash)
                 throw new Exception();
 
@@ -120,6 +129,8 @@ namespace Iris.GBA
             using DeflateStream deflateStream = new(fileStream, CompressionMode.Compress);
             using BinaryWriter writer = new(deflateStream, System.Text.Encoding.UTF8, false);
 
+            writer.Write(StateSaveMagic);
+            writer.Write(StateSaveVersion);
             writer.Write(_romHash);
 
             _scheduler.SaveState(writer);

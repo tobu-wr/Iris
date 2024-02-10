@@ -107,6 +107,8 @@ namespace Iris.CPU
         public UInt32 NextInstructionAddress;
         public Signal NIRQ;
 
+        private const int StateSaveVersion = 1;
+
         public CPU_Core(Model model, CallbackInterface callbackInterface)
         {
             _model = model;
@@ -162,6 +164,9 @@ namespace Iris.CPU
 
         public void LoadState(BinaryReader reader)
         {
+            if (reader.ReadInt32() != StateSaveVersion)
+                throw new Exception();
+
             foreach (ref UInt32 reg in Reg.AsSpan())
                 reg = reader.ReadUInt32();
 
@@ -208,6 +213,8 @@ namespace Iris.CPU
 
         public void SaveState(BinaryWriter writer)
         {
+            writer.Write(StateSaveVersion);
+
             foreach (UInt32 reg in Reg)
                 writer.Write(reg);
 

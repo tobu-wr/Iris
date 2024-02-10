@@ -38,6 +38,8 @@
         private Channel _channel2;
         private Channel _channel3;
 
+        private const int StateSaveVersion = 1;
+
         internal Timer(Common.Scheduler scheduler)
         {
             _scheduler = scheduler;
@@ -63,6 +65,9 @@
 
         internal void LoadState(BinaryReader reader)
         {
+            if (reader.ReadInt32() != StateSaveVersion)
+                throw new Exception();
+
             void LoadChannel(ref Channel channel)
             {
                 channel.Counter = reader.ReadUInt16();
@@ -80,6 +85,8 @@
 
         internal void SaveState(BinaryWriter writer)
         {
+            writer.Write(StateSaveVersion);
+
             void SaveChannel(Channel channel)
             {
                 writer.Write(channel.Counter);

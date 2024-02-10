@@ -156,6 +156,8 @@ namespace Iris.GBA
 
         private readonly UInt16[] _displayFrameBuffer = new UInt16[DisplayScreenSize];
 
+        private const int StateSaveVersion = 1;
+
         internal Video(Common.Scheduler scheduler, Common.System.DrawFrame_Delegate drawFrameCallback)
         {
             _scheduler = scheduler;
@@ -266,6 +268,9 @@ namespace Iris.GBA
 
         internal void LoadState(BinaryReader reader)
         {
+            if (reader.ReadInt32() != StateSaveVersion)
+                throw new Exception();
+
             byte[] paletteRamData = reader.ReadBytes(PaletteRAM_Size);
             byte[] vramData = reader.ReadBytes(VRAM_Size);
             byte[] oamData = reader.ReadBytes(OAM_Size);
@@ -334,6 +339,8 @@ namespace Iris.GBA
 
         internal void SaveState(BinaryWriter writer)
         {
+            writer.Write(StateSaveVersion);
+
             byte[] paletteRamData = new byte[PaletteRAM_Size];
             byte[] vramData = new byte[VRAM_Size];
             byte[] oamData = new byte[OAM_Size];
