@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Iris.Common
 {
+    // TODO: simplify & optimize by using an UInt64 for the cycle counter so we don't need to reset it after processing tasks
     public sealed class Scheduler(int taskListSize, int scheduledTaskListSize)
     {
         public delegate void Task_Delegate(UInt32 cycleCountDelay);
