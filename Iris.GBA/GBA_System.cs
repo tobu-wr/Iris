@@ -33,7 +33,7 @@ namespace Iris.GBA
         private readonly Memory _memory = new();
         private readonly Video _video;
 
-        private readonly BIOS _bios = new BIOS_LLE("D:\\dev\\Iris\\ROMs\\GBA\\gba_bios.bin");
+        private readonly BIOS _bios = new("D:\\dev\\Iris\\ROMs\\GBA\\gba_bios.bin");
 
         private string _romHash;
         private bool _running;
@@ -70,8 +70,7 @@ namespace Iris.GBA
             _memory.Dispose();
             _video.Dispose();
 
-            if (_bios is BIOS_LLE bios)
-                bios.Dispose();
+            _bios.Dispose();
 
             _disposed = true;
         }
