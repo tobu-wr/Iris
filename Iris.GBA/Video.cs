@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Iris.GBA
@@ -155,6 +156,7 @@ namespace Iris.GBA
         private bool _disposed;
 
         private readonly UInt16[] _displayFrameBuffer = new UInt16[DisplayScreenSize];
+        private readonly Stopwatch _renderingStopwatch = new();
 
         private const int StateSaveVersion = 1;
 
@@ -636,7 +638,8 @@ namespace Iris.GBA
 
                     _dma.PerformAllTransfers(DMA.StartTiming.VBlank);
 
-                    _presentFrameCallback(_displayFrameBuffer);
+                    _presentFrameCallback(_displayFrameBuffer, _renderingStopwatch.ElapsedTicks);
+                    _renderingStopwatch.Reset();
                     Array.Clear(_displayFrameBuffer);
                     break;
 
@@ -678,6 +681,8 @@ namespace Iris.GBA
 
         private void Render()
         {
+            _renderingStopwatch.Start();
+
             UInt16 bgMode = (UInt16)(_DISPCNT & 0b111);
 
             switch (bgMode)
@@ -729,6 +734,8 @@ namespace Iris.GBA
                 case 0b111:
                     throw new Exception(string.Format("Iris.GBA.Video: Unknown background mode {0}", bgMode));
             }
+
+            _renderingStopwatch.Stop();
         }
 
         private void RenderBackgroundMode0()

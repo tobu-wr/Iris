@@ -49,6 +49,7 @@ namespace Iris.UserInterface
         private FormWindowState _previousWindowState;
 
         private int _framerateCounter;
+        private long _renderingTime;
         private readonly System.Windows.Forms.Timer _framerateCounterTimer = new();
         private readonly Stopwatch _framerateCounterStopwatch = new();
 
@@ -109,7 +110,7 @@ namespace Iris.UserInterface
             _xboxController.PollInput();
         }
 
-        private void PresentFrame(UInt16[] frameBuffer)
+        private void PresentFrame(UInt16[] frameBuffer, long renderingTime)
         {
             const int ScreenWidth = 240;
             const int ScreenHeight = 160;
@@ -137,6 +138,7 @@ namespace Iris.UserInterface
             screenBox.Invalidate();
 
             Interlocked.Increment(ref _framerateCounter);
+            Interlocked.Add(ref _renderingTime, renderingTime);
 
             if (_framerateLimiterEnabled)
             {
@@ -197,6 +199,7 @@ namespace Iris.UserInterface
         private void Run()
         {
             _framerateCounter = 0;
+            _renderingTime = 0;
             _framerateCounterTimer.Start();
             _framerateCounterStopwatch.Restart();
 
@@ -232,6 +235,7 @@ namespace Iris.UserInterface
 
                 statusToolStripStatusLabel.Text = "Paused";
                 fpsToolStripStatusLabel.Text = "FPS: 0,00";
+                renderingLoadToolStripStatusLabel.Text = "Rendering Load: 0%";
 
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -251,6 +255,7 @@ namespace Iris.UserInterface
 
             statusToolStripStatusLabel.Text = "Paused";
             fpsToolStripStatusLabel.Text = "FPS: 0,00";
+            renderingLoadToolStripStatusLabel.Text = "Rendering Load: 0%";
         }
 
         private void LoadROMToolStripMenuItem_Click(object sender, EventArgs e)
@@ -401,7 +406,11 @@ namespace Iris.UserInterface
             double fps = Math.Round((double)_framerateCounter * Stopwatch.Frequency / _framerateCounterStopwatch.ElapsedTicks, 2, MidpointRounding.AwayFromZero);
             fpsToolStripStatusLabel.Text = "FPS: " + fps.ToString("F2");
 
+            long renderingLoad = 100 * _renderingTime / _framerateCounterStopwatch.ElapsedTicks;
+            renderingLoadToolStripStatusLabel.Text = $"Rendering Load: {renderingLoad}%";
+
             _framerateCounter = 0;
+            _renderingTime = 0;
             _framerateCounterStopwatch.Restart();
         }
     }
