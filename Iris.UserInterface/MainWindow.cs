@@ -57,6 +57,9 @@ namespace Iris.UserInterface
         private readonly Stopwatch _framerateLimiterStopwatch = Stopwatch.StartNew();
         private long _framerateLimiterExtraSleepTime;
 
+        private bool _automaticPauseEnabled = true;
+        private bool _resume;
+
         [StructLayout(LayoutKind.Sequential)]
         private readonly struct TimeCaps
         {
@@ -89,6 +92,9 @@ namespace Iris.UserInterface
             Text += " (DEV)";
 #endif
 
+            Activated += MainWindow_Activated;
+            Deactivate += MainWindow_Deactivate;
+
             _keyboard = new(Keyboard_KeyDown, Keyboard_KeyUp);
             _xboxController = new(XboxController_ButtonDown, XboxController_ButtonUp);
 
@@ -97,6 +103,30 @@ namespace Iris.UserInterface
 
             if (args.Length > 0)
                 LoadROM(args[0]);
+        }
+
+        private void MainWindow_Activated(object sender, EventArgs e)
+        {
+            if (!_automaticPauseEnabled || (_system == null))
+                return;
+
+            if (_resume)
+            {
+                Run();
+                _resume = false;
+            }
+        }
+
+        private void MainWindow_Deactivate(object sender, EventArgs e)
+        {
+            if (!_automaticPauseEnabled || (_system == null))
+                return;
+
+            if (_system.IsRunning())
+            {
+                Pause();
+                _resume = true;
+            }
         }
 
         ~MainWindow()
@@ -378,6 +408,11 @@ namespace Iris.UserInterface
         private void LimitFramerateToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _framerateLimiterEnabled = limitFramerateToolStripMenuItem.Checked;
+        }
+
+        private void AutomaticPauseToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _automaticPauseEnabled = automaticPauseToolStripMenuItem.Checked;
         }
 
         private void Keyboard_KeyDown(Keyboard.Key key)
