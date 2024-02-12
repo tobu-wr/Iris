@@ -261,16 +261,19 @@ namespace Iris.UserInterface
                 _system.Pause();
                 _system.ResetState();
 
-                _framerateCounterTimer.Stop();
+                Invoke(() =>
+                {
+                    _framerateCounterTimer.Stop();
 
-                runToolStripMenuItem.Enabled = true;
-                pauseToolStripMenuItem.Enabled = false;
+                    runToolStripMenuItem.Enabled = true;
+                    pauseToolStripMenuItem.Enabled = false;
 
-                statusToolStripStatusLabel.Text = "Paused";
-                fpsToolStripStatusLabel.Text = "FPS: 0,00";
-                renderingLoadToolStripStatusLabel.Text = "Rendering Load: 0%";
+                    statusToolStripStatusLabel.Text = "Paused";
+                    fpsToolStripStatusLabel.Text = "FPS: 0,00";
+                    renderingLoadToolStripStatusLabel.Text = "Rendering Load: 0%";
 
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                });
             }
         }
 
