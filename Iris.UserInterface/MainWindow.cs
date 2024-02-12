@@ -106,6 +106,9 @@ namespace Iris.UserInterface
 
         private void PollInput()
         {
+            if (ActiveForm != this)
+                return;
+
             _keyboard.PollInput();
             _xboxController.PollInput();
         }
