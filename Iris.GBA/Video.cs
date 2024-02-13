@@ -924,11 +924,14 @@ namespace Iris.GBA
             const int SC_Height = 256;
             const int SC_Size = (SC_Width / CharacterWidth) * (SC_Height / CharacterHeight);
 
-            int scNumberBegin = (v / SC_Height) * (virtualScreenWidth / SC_Width);
-            int characterNumberBegin = ((v % SC_Height) / CharacterHeight) * (SC_Width / CharacterWidth);
+            (int scV, int scPixelV) = Math.DivRem(v, SC_Height);
+            (int scCharacterV, int characterPixelV) = Math.DivRem(scPixelV, CharacterHeight);
 
-            int characterPixelNumberBegin = (v % CharacterHeight) * CharacterWidth;
-            int characterPixelNumberBegin_VerticalFlip = (CharacterHeight - 1 - (v % CharacterHeight)) * CharacterWidth;
+            int scNumberBegin = scV * (virtualScreenWidth / SC_Width);
+            int characterNumberBegin = scCharacterV * (SC_Width / CharacterWidth);
+
+            int characterPixelNumberBegin = characterPixelV * CharacterWidth;
+            int characterPixelNumberBegin_VerticalFlip = (CharacterHeight - 1 - characterPixelV) * CharacterWidth;
 
             for (int hcount = 0; hcount < DisplayScreenWidth; ++hcount)
             {
@@ -936,8 +939,11 @@ namespace Iris.GBA
 
                 int h = (hcount + hofs) % virtualScreenWidth;
 
-                int scNumber = scNumberBegin + (h / SC_Width);
-                int characterNumber = characterNumberBegin + ((h % SC_Width) / CharacterWidth);
+                (int scH, int scPixelH) = Math.DivRem(h, SC_Width);
+                (int scCharacterH, int characterPixelH) = Math.DivRem(scPixelH, CharacterWidth);
+
+                int scNumber = scNumberBegin + scH;
+                int characterNumber = characterNumberBegin + scCharacterH;
 
                 unsafe
                 {
@@ -956,9 +962,9 @@ namespace Iris.GBA
                         characterPixelNumber = characterPixelNumberBegin_VerticalFlip;
 
                     if (horizontalFlipFlag == 0)
-                        characterPixelNumber += h % CharacterWidth;
+                        characterPixelNumber += characterPixelH;
                     else
-                        characterPixelNumber += CharacterWidth - 1 - (h % CharacterWidth);
+                        characterPixelNumber += CharacterWidth - 1 - characterPixelH;
 
                     const UInt32 ObjectCharacterDataOffset = 0x1_0000;
 
