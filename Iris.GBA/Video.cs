@@ -139,12 +139,13 @@ namespace Iris.GBA
         private const int DisplayScreenWidth = 240;
         private const int DisplayScreenHeight = 160;
         private const int DisplayScreenSize = DisplayScreenWidth * DisplayScreenHeight;
-
-        private const UInt32 DisplayLineCycleCount = 1006;
-
         private const int ScanlineLength = 308;
 
+        private const int CharacterWidth = 8;
+        private const int CharacterHeight = 8;
+
         private const UInt32 PixelCycleCount = 4;
+        private const UInt32 DisplayLineCycleCount = 1006;
         private const UInt32 ScanlineCycleCount = ScanlineLength * PixelCycleCount;
 
         private readonly Common.Scheduler _scheduler;
@@ -904,21 +905,18 @@ namespace Iris.GBA
 
             int displayPixelNumberBegin = _VCOUNT * DisplayScreenWidth;
 
-            UInt16 screenSize = (UInt16)((cnt >> 14) & 0b11);
+            UInt16 virtualScreenSize = (UInt16)((cnt >> 14) & 0b11);
             UInt16 screenBaseBlock = (UInt16)((cnt >> 8) & 0b1_1111);
             UInt16 colorMode = (UInt16)((cnt >> 7) & 1);
             UInt16 characterBaseBlock = (UInt16)((cnt >> 2) & 0b11);
 
-            int virtualScreenWidth = ((screenSize & 0b01) == 0) ? 256 : 512;
-            int virtualScreenHeight = ((screenSize & 0b10) == 0) ? 256 : 512;
+            int virtualScreenWidth = ((virtualScreenSize & 0b01) == 0) ? 256 : 512;
+            int virtualScreenHeight = ((virtualScreenSize & 0b10) == 0) ? 256 : 512;
 
             UInt32 screenBaseBlockOffset = (UInt32)(screenBaseBlock * 2 * KB);
             UInt32 characterBaseBlockOffset = (UInt32)(characterBaseBlock * 16 * KB);
 
             int v = (_VCOUNT + vofs) % virtualScreenHeight;
-
-            const int CharacterWidth = 8;
-            const int CharacterHeight = 8;
 
             const int SC_Width = 256;
             const int SC_Height = 256;
@@ -1057,7 +1055,7 @@ namespace Iris.GBA
                     if (objPriority != bgPriority)
                         continue;
 
-                    (int characterWidth, int characterHeight) = (shape, objSize) switch
+                    (int objWidth, int objHeight) = (shape, objSize) switch
                     {
                         // square
                         (0b00, 0b00) => (8, 8),
@@ -1086,10 +1084,10 @@ namespace Iris.GBA
                     const int VirtualScreenHeight = 256;
 
                     int left = xCoordinate;
-                    int right = (xCoordinate + characterWidth) % VirtualScreenWidth;
+                    int right = (xCoordinate + objWidth) % VirtualScreenWidth;
 
                     int top = yCoordinate;
-                    int bottom = (yCoordinate + characterHeight) % VirtualScreenHeight;
+                    int bottom = (yCoordinate + objHeight) % VirtualScreenHeight;
 
                     bool leftHidden = left >= DisplayScreenWidth;
                     bool rightHidden = right >= DisplayScreenWidth;
@@ -1138,33 +1136,30 @@ namespace Iris.GBA
 
                     int v = _VCOUNT - top + vBegin;
 
-                    const int BasicCharacterWidth = 8;
-                    const int BasicCharacterHeight = 8;
+                    int characterV = v / CharacterHeight;
+                    int characterPixelV = v % CharacterHeight;
 
-                    int basicCharacterV = v / BasicCharacterHeight;
-                    int basicCharacterPixelV = v % BasicCharacterHeight;
-
-                    int basicCharacterNumberBegin;
-                    int basicCharacterPixelNumberBegin = BasicCharacterWidth;
+                    int characterNumberBegin;
+                    int characterPixelNumberBegin = CharacterWidth;
 
                     if (verticalFlipFlag == 0)
                     {
-                        basicCharacterNumberBegin = basicCharacterV;
-                        basicCharacterPixelNumberBegin *= basicCharacterPixelV;
+                        characterNumberBegin = characterV;
+                        characterPixelNumberBegin *= characterPixelV;
                     }
                     else
                     {
-                        basicCharacterNumberBegin = (characterHeight / BasicCharacterHeight) - 1 - basicCharacterV;
-                        basicCharacterPixelNumberBegin *= BasicCharacterHeight - 1 - basicCharacterPixelV;
+                        characterNumberBegin = (objHeight / CharacterHeight) - 1 - characterV;
+                        characterPixelNumberBegin *= CharacterHeight - 1 - characterPixelV;
                     }
 
                     // 2D mapping
                     if (mappingFormat == 0)
-                        basicCharacterNumberBegin *= 32;
+                        characterNumberBegin *= 32;
 
                     // 1D mapping
                     else
-                        basicCharacterNumberBegin *= characterWidth / BasicCharacterWidth;
+                        characterNumberBegin *= objWidth / CharacterWidth;
 
                     for (int hcount = left; hcount < right; ++hcount)
                     {
@@ -1172,21 +1167,21 @@ namespace Iris.GBA
 
                         int h = hcount - left + hBegin;
 
-                        int basicCharacterH = h / BasicCharacterWidth;
-                        int basicCharacterPixelH = h % BasicCharacterWidth;
+                        int characterH = h / CharacterWidth;
+                        int characterPixelH = h % CharacterWidth;
 
-                        int basicCharacterNumber = basicCharacterNumberBegin;
-                        int basicCharacterPixelNumber = basicCharacterPixelNumberBegin;
+                        int characterNumber = characterNumberBegin;
+                        int characterPixelNumber = characterPixelNumberBegin;
 
                         if (horizontalFlipFlag == 0)
                         {
-                            basicCharacterNumber += basicCharacterH;
-                            basicCharacterPixelNumber += basicCharacterPixelH;
+                            characterNumber += characterH;
+                            characterPixelNumber += characterPixelH;
                         }
                         else
                         {
-                            basicCharacterNumber += (characterWidth / BasicCharacterWidth) - 1 - basicCharacterH;
-                            basicCharacterPixelNumber += BasicCharacterWidth - 1 - basicCharacterPixelH;
+                            characterNumber += (objWidth / CharacterWidth) - 1 - characterH;
+                            characterPixelNumber += CharacterWidth - 1 - characterPixelH;
                         }
 
                         const UInt32 CharacterDataOffset = 0x1_0000;
@@ -1198,9 +1193,9 @@ namespace Iris.GBA
                         if (colorMode == 0)
                         {
                             const int BasicCharacterSize = 32;
-                            Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + CharacterDataOffset + (characterName * 32) + (basicCharacterNumber * BasicCharacterSize) + (basicCharacterPixelNumber / 2));
+                            Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + CharacterDataOffset + (characterName * 32) + (characterNumber * BasicCharacterSize) + (characterPixelNumber / 2));
 
-                            if ((basicCharacterPixelNumber % 2) == 0)
+                            if ((characterPixelNumber % 2) == 0)
                                 colorNumber &= 0b1111;
                             else
                                 colorNumber >>= 4;
@@ -1215,7 +1210,7 @@ namespace Iris.GBA
                         else
                         {
                             const int BasicCharacterSize = 64;
-                            Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + CharacterDataOffset + (characterName * 32) + (basicCharacterNumber * BasicCharacterSize) + basicCharacterPixelNumber);
+                            Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + CharacterDataOffset + (characterName * 32) + (characterNumber * BasicCharacterSize) + characterPixelNumber);
 
                             if (colorNumber == 0)
                                 continue;
