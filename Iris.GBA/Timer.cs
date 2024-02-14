@@ -211,7 +211,8 @@
                         _ => 0,
                     };
 
-                    (counterIncrement, channel.CycleCounter) = Math.DivRem(channel.CycleCounter, prescaler);
+                    counterIncrement = channel.CycleCounter / prescaler;
+                    channel.CycleCounter %= prescaler;
                 }
                 else
                 {

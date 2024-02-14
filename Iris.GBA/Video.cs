@@ -924,8 +924,11 @@ namespace Iris.GBA
             const int SC_Height = 256;
             const int SC_Size = (SC_Width / CharacterWidth) * (SC_Height / CharacterHeight);
 
-            (int scV, int scPixelV) = Math.DivRem(v, SC_Height);
-            (int scCharacterV, int characterPixelV) = Math.DivRem(scPixelV, CharacterHeight);
+            int scV = v / SC_Height;
+            int scPixelV = v % SC_Height;
+
+            int scCharacterV = scPixelV / CharacterHeight;
+            int characterPixelV = scPixelV % CharacterHeight;
 
             int scNumberBegin = scV * (virtualScreenWidth / SC_Width);
             int characterNumberBegin = scCharacterV * (SC_Width / CharacterWidth);
@@ -939,8 +942,11 @@ namespace Iris.GBA
 
                 int h = (hcount + hofs) % virtualScreenWidth;
 
-                (int scH, int scPixelH) = Math.DivRem(h, SC_Width);
-                (int scCharacterH, int characterPixelH) = Math.DivRem(scPixelH, CharacterWidth);
+                int scH = h / SC_Width;
+                int scPixelH = h % SC_Width;
+
+                int scCharacterH = scPixelH / CharacterWidth;
+                int characterPixelH = scPixelH % CharacterWidth;
 
                 int scNumber = scNumberBegin + scH;
                 int characterNumber = characterNumberBegin + scCharacterH;
