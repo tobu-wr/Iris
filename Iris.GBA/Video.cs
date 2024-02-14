@@ -1192,8 +1192,8 @@ namespace Iris.GBA
                         // 16 colors x 16 palettes
                         if (colorMode == 0)
                         {
-                            const int BasicCharacterSize = 32;
-                            Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + CharacterDataOffset + (characterName * 32) + (characterNumber * BasicCharacterSize) + (characterPixelNumber / 2));
+                            const int CharacterSize = 32;
+                            Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + CharacterDataOffset + (characterName * 32) + (characterNumber * CharacterSize) + (characterPixelNumber / 2));
 
                             if ((characterPixelNumber % 2) == 0)
                                 colorNumber &= 0b1111;
@@ -1209,8 +1209,8 @@ namespace Iris.GBA
                         // 256 colors x 1 palette
                         else
                         {
-                            const int BasicCharacterSize = 64;
-                            Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + CharacterDataOffset + (characterName * 32) + (characterNumber * BasicCharacterSize) + characterPixelNumber);
+                            const int CharacterSize = 64;
+                            Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + CharacterDataOffset + (characterName * 32) + (characterNumber * CharacterSize) + characterPixelNumber);
 
                             if (colorNumber == 0)
                                 continue;
