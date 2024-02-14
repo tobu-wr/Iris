@@ -1141,33 +1141,30 @@ namespace Iris.GBA
                     const int BasicCharacterWidth = 8;
                     const int BasicCharacterHeight = 8;
 
+                    int basicCharacterV = v / BasicCharacterHeight;
+                    int basicCharacterPixelV = v % BasicCharacterHeight;
+
                     int basicCharacterNumberBegin;
-                    int basicCharacterPixelNumberBegin;
+                    int basicCharacterPixelNumberBegin = BasicCharacterWidth;
 
                     if (verticalFlipFlag == 0)
                     {
-                        // 2D mapping
-                        if (mappingFormat == 0)
-                            basicCharacterNumberBegin = (v / BasicCharacterHeight) * 32;
-
-                        // 1D mapping
-                        else
-                            basicCharacterNumberBegin = (v / BasicCharacterHeight) * (characterWidth / BasicCharacterWidth);
-
-                        basicCharacterPixelNumberBegin = (v % BasicCharacterHeight) * BasicCharacterWidth;
+                        basicCharacterNumberBegin = basicCharacterV;
+                        basicCharacterPixelNumberBegin *= basicCharacterPixelV;
                     }
                     else
                     {
-                        // 2D mapping
-                        if (mappingFormat == 0)
-                            basicCharacterNumberBegin = ((characterHeight / BasicCharacterHeight) - 1 - (v / BasicCharacterHeight)) * 32;
-
-                        // 1D mapping
-                        else
-                            basicCharacterNumberBegin = ((characterHeight / BasicCharacterHeight) - 1 - (v / BasicCharacterHeight)) * (characterWidth / BasicCharacterWidth);
-
-                        basicCharacterPixelNumberBegin = (BasicCharacterHeight - 1 - (v % BasicCharacterHeight)) * BasicCharacterWidth;
+                        basicCharacterNumberBegin = (characterHeight / BasicCharacterHeight) - 1 - basicCharacterV;
+                        basicCharacterPixelNumberBegin *= BasicCharacterHeight - 1 - basicCharacterPixelV;
                     }
+
+                    // 2D mapping
+                    if (mappingFormat == 0)
+                        basicCharacterNumberBegin *= 32;
+
+                    // 1D mapping
+                    else
+                        basicCharacterNumberBegin *= characterWidth / BasicCharacterWidth;
 
                     for (int hcount = left; hcount < right; ++hcount)
                     {
@@ -1175,18 +1172,21 @@ namespace Iris.GBA
 
                         int h = hcount - left + hBegin;
 
+                        int basicCharacterH = h / BasicCharacterWidth;
+                        int basicCharacterPixelH = h % BasicCharacterWidth;
+
                         int basicCharacterNumber = basicCharacterNumberBegin;
                         int basicCharacterPixelNumber = basicCharacterPixelNumberBegin;
 
                         if (horizontalFlipFlag == 0)
                         {
-                            basicCharacterNumber += h / BasicCharacterWidth;
-                            basicCharacterPixelNumber += h % BasicCharacterWidth;
+                            basicCharacterNumber += basicCharacterH;
+                            basicCharacterPixelNumber += basicCharacterPixelH;
                         }
                         else
                         {
-                            basicCharacterNumber += (characterWidth / BasicCharacterWidth) - 1 - (h / BasicCharacterWidth);
-                            basicCharacterPixelNumber += BasicCharacterWidth - 1 - (h % BasicCharacterWidth);
+                            basicCharacterNumber += (characterWidth / BasicCharacterWidth) - 1 - basicCharacterH;
+                            basicCharacterPixelNumber += BasicCharacterWidth - 1 - basicCharacterPixelH;
                         }
 
                         const UInt32 CharacterDataOffset = 0x1_0000;
