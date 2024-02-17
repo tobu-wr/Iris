@@ -1041,12 +1041,12 @@ namespace Iris.GBA
 
                     UInt16 shape = (UInt16)((attribute0 >> 14) & 0b11);
                     UInt16 colorMode = (UInt16)((attribute0 >> 13) & 1);
-                    UInt16 yCoordinate = (UInt16)(attribute0 & 0xff);
+                    UInt16 vCoordinate = (UInt16)(attribute0 & 0xff);
 
                     UInt16 objSize = (UInt16)((attribute1 >> 14) & 0b11);
                     UInt16 verticalFlipFlag = (UInt16)((attribute1 >> 13) & 1);
                     UInt16 horizontalFlipFlag = (UInt16)((attribute1 >> 12) & 1);
-                    UInt16 xCoordinate = (UInt16)(attribute1 & 0x1ff);
+                    UInt16 hCoordinate = (UInt16)(attribute1 & 0x1ff);
 
                     UInt16 colorPalette = (UInt16)((attribute2 >> 12) & 0b1111);
                     UInt16 objPriority = (UInt16)((attribute2 >> 10) & 0b11);
@@ -1083,11 +1083,11 @@ namespace Iris.GBA
                     const int VirtualScreenWidth = 512;
                     const int VirtualScreenHeight = 256;
 
-                    int left = xCoordinate;
-                    int right = (xCoordinate + objWidth) % VirtualScreenWidth;
+                    int left = hCoordinate;
+                    int right = (hCoordinate + objWidth) % VirtualScreenWidth;
 
-                    int top = yCoordinate;
-                    int bottom = (yCoordinate + objHeight) % VirtualScreenHeight;
+                    int top = vCoordinate;
+                    int bottom = (vCoordinate + objHeight) % VirtualScreenHeight;
 
                     bool leftHidden = left >= DisplayScreenWidth;
                     bool rightHidden = right >= DisplayScreenWidth;
@@ -1155,7 +1155,7 @@ namespace Iris.GBA
 
                     // 2D mapping
                     if (mappingFormat == 0)
-                        characterNumberBegin *= 32;
+                        characterNumberBegin *= (colorMode == 0) ? 32 : 16;
 
                     // 1D mapping
                     else
