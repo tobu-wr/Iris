@@ -36,11 +36,11 @@ namespace Iris.GBA
 
         private const int EWRAM_Size = 256 * KB;
         private const int IWRAM_Size = 32 * KB;
-        private const int SRAM_Size = 64 * KB;
+        //private const int SRAM_Size = 64 * KB;
 
         private readonly IntPtr _ewram = Marshal.AllocHGlobal(EWRAM_Size);
         private readonly IntPtr _iwram = Marshal.AllocHGlobal(IWRAM_Size);
-        private readonly IntPtr _sram = Marshal.AllocHGlobal(SRAM_Size);
+        //private readonly IntPtr _sram = Marshal.AllocHGlobal(SRAM_Size);
 
         private const UInt32 EWRAM_StartAddress = 0x0200_0000;
         private const UInt32 EWRAM_EndAddress = 0x0300_0000;
@@ -48,8 +48,8 @@ namespace Iris.GBA
         private const UInt32 IWRAM_StartAddress = 0x0300_0000;
         private const UInt32 IWRAM_EndAddress = 0x0400_0000;
 
-        private const UInt32 SRAM_StartAddress = 0x0e00_0000;
-        private const UInt32 SRAM_EndAddress = 0x1000_0000;
+        //private const UInt32 SRAM_StartAddress = 0x0e00_0000;
+        //private const UInt32 SRAM_EndAddress = 0x1000_0000;
 
         private int _romSize;
         private IntPtr _rom;
@@ -89,7 +89,7 @@ namespace Iris.GBA
 
             Marshal.FreeHGlobal(_ewram);
             Marshal.FreeHGlobal(_iwram);
-            Marshal.FreeHGlobal(_sram);
+            //Marshal.FreeHGlobal(_sram);
 
             GC.SuppressFinalize(this);
             _disposed = true;
@@ -109,18 +109,18 @@ namespace Iris.GBA
 
             Map(_ewram, EWRAM_Size, EWRAM_StartAddress, EWRAM_EndAddress, Flag.All);
             Map(_iwram, IWRAM_Size, IWRAM_StartAddress, IWRAM_EndAddress, Flag.All);
-            Map(_sram, SRAM_Size, SRAM_StartAddress, SRAM_EndAddress, Flag.Read8 | Flag.Write8 | Flag.Mirrored);
+            //Map(_sram, SRAM_Size, SRAM_StartAddress, SRAM_EndAddress, Flag.Read8 | Flag.Write8 | Flag.Mirrored);
         }
 
         internal void ResetState()
         {
             byte[] ewramData = new byte[EWRAM_Size];
             byte[] iwramData = new byte[IWRAM_Size];
-            byte[] sramData = new byte[SRAM_Size];
+            //byte[] sramData = new byte[SRAM_Size];
 
             Marshal.Copy(ewramData, 0, _ewram, EWRAM_Size);
             Marshal.Copy(iwramData, 0, _iwram, IWRAM_Size);
-            Marshal.Copy(sramData, 0, _sram, SRAM_Size);
+            //Marshal.Copy(sramData, 0, _sram, SRAM_Size);
         }
 
         internal void LoadState(BinaryReader reader)
@@ -130,11 +130,11 @@ namespace Iris.GBA
 
             byte[] ewramData = reader.ReadBytes(EWRAM_Size);
             byte[] iwramData = reader.ReadBytes(IWRAM_Size);
-            byte[] sramData = reader.ReadBytes(SRAM_Size);
+            //byte[] sramData = reader.ReadBytes(SRAM_Size);
 
             Marshal.Copy(ewramData, 0, _ewram, EWRAM_Size);
             Marshal.Copy(iwramData, 0, _iwram, IWRAM_Size);
-            Marshal.Copy(sramData, 0, _sram, SRAM_Size);
+            //Marshal.Copy(sramData, 0, _sram, SRAM_Size);
         }
 
         internal void SaveState(BinaryWriter writer)
@@ -143,15 +143,15 @@ namespace Iris.GBA
 
             byte[] ewramData = new byte[EWRAM_Size];
             byte[] iwramData = new byte[IWRAM_Size];
-            byte[] sramData = new byte[SRAM_Size];
+            //byte[] sramData = new byte[SRAM_Size];
 
             Marshal.Copy(_ewram, ewramData, 0, EWRAM_Size);
             Marshal.Copy(_iwram, iwramData, 0, IWRAM_Size);
-            Marshal.Copy(_sram, sramData, 0, SRAM_Size);
+            //Marshal.Copy(_sram, sramData, 0, SRAM_Size);
 
             writer.Write(ewramData);
             writer.Write(iwramData);
-            writer.Write(sramData);
+            //writer.Write(sramData);
         }
 
         internal void Map(IntPtr data, int size, UInt32 startAddress, UInt32 endAddress, Flag flags)
@@ -496,6 +496,15 @@ namespace Iris.GBA
                         }
                     }
                     break;
+
+                // SRAM/Flash
+                case 0xe:
+                    return address switch
+                    {
+                        0xe00_0000 => 0x62,
+                        0xe00_0001 => 0x13,
+                        _ => 0,
+                    };
             }
 
             return 0;
