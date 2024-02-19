@@ -826,7 +826,7 @@ namespace Iris.GBA
             {
                 if (((_DISPCNT & 0x0400) == 0x0400) && ((_BG2CNT & 0b11) == bgPriority))
                 {
-                    RenderAffineBackground(_BG2CNT, _currentBG2X, _currentBG2Y, _BG2PA, _BG2PC, isFirst);
+                    RenderRotationScalingBackground(_BG2CNT, _currentBG2X, _currentBG2Y, _BG2PA, _BG2PC, isFirst);
                     isFirst = false;
                 }
 
@@ -855,13 +855,13 @@ namespace Iris.GBA
             {
                 if (((_DISPCNT & 0x0800) == 0x0800) && ((_BG3CNT & 0b11) == bgPriority))
                 {
-                    RenderAffineBackground(_BG3CNT, _currentBG3X, _currentBG3Y, _BG3PA, _BG3PC, isFirst);
+                    RenderRotationScalingBackground(_BG3CNT, _currentBG3X, _currentBG3Y, _BG3PA, _BG3PC, isFirst);
                     isFirst = false;
                 }
 
                 if (((_DISPCNT & 0x0400) == 0x0400) && ((_BG2CNT & 0b11) == bgPriority))
                 {
-                    RenderAffineBackground(_BG2CNT, _currentBG2X, _currentBG2Y, _BG2PA, _BG2PC, isFirst);
+                    RenderRotationScalingBackground(_BG2CNT, _currentBG2X, _currentBG2Y, _BG2PA, _BG2PC, isFirst);
                     isFirst = false;
                 }
 
@@ -1061,7 +1061,7 @@ namespace Iris.GBA
             }
         }
 
-        private void RenderAffineBackground(UInt16 cnt, Int32 x, Int32 y, UInt16 pa, UInt16 pc, bool isFirst)
+        private void RenderRotationScalingBackground(UInt16 cnt, Int32 x, Int32 y, UInt16 pa, UInt16 pc, bool isFirst)
         {
             ref UInt16 displayFrameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_displayFrameBuffer);
 
@@ -1156,12 +1156,13 @@ namespace Iris.GBA
 
                     UInt16 shape = (UInt16)((attribute0 >> 14) & 0b11);
                     UInt16 colorMode = (UInt16)((attribute0 >> 13) & 1);
-                    UInt16 vCoordinate = (UInt16)(attribute0 & 0xff);
+                    UInt16 rotationScalingFlag = (UInt16)((attribute0 >> 8) & 1);
+                    UInt16 yCoordinate = (UInt16)(attribute0 & 0xff);
 
                     UInt16 objSize = (UInt16)((attribute1 >> 14) & 0b11);
                     UInt16 verticalFlipFlag = (UInt16)((attribute1 >> 13) & 1);
                     UInt16 horizontalFlipFlag = (UInt16)((attribute1 >> 12) & 1);
-                    UInt16 hCoordinate = (UInt16)(attribute1 & 0x1ff);
+                    UInt16 xCoordinate = (UInt16)(attribute1 & 0x1ff);
 
                     UInt16 colorPalette = (UInt16)((attribute2 >> 12) & 0b1111);
                     UInt16 objPriority = (UInt16)((attribute2 >> 10) & 0b11);
@@ -1198,11 +1199,11 @@ namespace Iris.GBA
                     const int VirtualScreenWidth = 512;
                     const int VirtualScreenHeight = 256;
 
-                    int left = hCoordinate;
-                    int right = (hCoordinate + objWidth) % VirtualScreenWidth;
+                    int left = xCoordinate;
+                    int right = (xCoordinate + objWidth) % VirtualScreenWidth;
 
-                    int top = vCoordinate;
-                    int bottom = (vCoordinate + objHeight) % VirtualScreenHeight;
+                    int top = yCoordinate;
+                    int bottom = (yCoordinate + objHeight) % VirtualScreenHeight;
 
                     bool leftHidden = left >= DisplayScreenWidth;
                     bool rightHidden = right >= DisplayScreenWidth;
