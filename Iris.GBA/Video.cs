@@ -914,24 +914,24 @@ namespace Iris.GBA
                 const int VRAM_FrameBufferWidth = 160;
                 const int VRAM_FrameBufferHeight = 128;
 
-                if (_VCOUNT >= VRAM_FrameBufferHeight)
-                    return;
-
-                ref UInt16 displayFrameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_displayFrameBuffer);
-
-                int vramPixelNumberBegin = _VCOUNT * VRAM_FrameBufferWidth;
-                int vramPixelNumberEnd = vramPixelNumberBegin + VRAM_FrameBufferWidth;
-
-                int displayPixelNumberBegin = _VCOUNT * DisplayScreenWidth;
-
-                UInt32 vramFrameBufferOffset = ((_DISPCNT & 0x0010) == 0) ? 0x0_0000u : 0x0_a000u;
-
-                for (int vramPixelNumber = vramPixelNumberBegin, displayPixelNumber = displayPixelNumberBegin; vramPixelNumber < vramPixelNumberEnd; ++vramPixelNumber, ++displayPixelNumber)
+                if (_VCOUNT < VRAM_FrameBufferHeight)
                 {
-                    unsafe
+                    ref UInt16 displayFrameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_displayFrameBuffer);
+
+                    int vramPixelNumberBegin = _VCOUNT * VRAM_FrameBufferWidth;
+                    int vramPixelNumberEnd = vramPixelNumberBegin + VRAM_FrameBufferWidth;
+
+                    int displayPixelNumberBegin = _VCOUNT * DisplayScreenWidth;
+
+                    UInt32 vramFrameBufferOffset = ((_DISPCNT & 0x0010) == 0) ? 0x0_0000u : 0x0_a000u;
+
+                    for (int vramPixelNumber = vramPixelNumberBegin, displayPixelNumber = displayPixelNumberBegin; vramPixelNumber < vramPixelNumberEnd; ++vramPixelNumber, ++displayPixelNumber)
                     {
-                        UInt16 color = Unsafe.Read<UInt16>((Byte*)_vram + vramFrameBufferOffset + (vramPixelNumber * 2));
-                        Unsafe.Add(ref displayFrameBufferDataRef, displayPixelNumber) = color;
+                        unsafe
+                        {
+                            UInt16 color = Unsafe.Read<UInt16>((Byte*)_vram + vramFrameBufferOffset + (vramPixelNumber * 2));
+                            Unsafe.Add(ref displayFrameBufferDataRef, displayPixelNumber) = color;
+                        }
                     }
                 }
             }
