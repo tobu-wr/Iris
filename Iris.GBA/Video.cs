@@ -980,8 +980,6 @@ namespace Iris.GBA
 
             for (int hcount = 0; hcount < DisplayScreenWidth; ++hcount)
             {
-                int displayPixelNumber = displayPixelNumberBegin + hcount;
-
                 int h = (hcount + hofs) % virtualScreenWidth;
 
                 int scH = h / SC_Width;
@@ -1057,6 +1055,7 @@ namespace Iris.GBA
                         color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM + colorNumber);
                     }
 
+                    int displayPixelNumber = displayPixelNumberBegin + hcount;
                     Unsafe.Add(ref displayFrameBufferDataRef, displayPixelNumber) = color;
                 }
             }
@@ -1081,8 +1080,6 @@ namespace Iris.GBA
 
             for (int hcount = 0; hcount < DisplayScreenWidth; ++hcount, x += (Int16)pa, y += (Int16)pc)
             {
-                int displayPixelNumber = displayPixelNumberBegin + hcount;
-
                 int h = x >> 8;
                 int v = y >> 8;
 
@@ -1135,6 +1132,7 @@ namespace Iris.GBA
 
                     UInt16 color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM + colorNumber);
 
+                    int displayPixelNumber = displayPixelNumberBegin + hcount;
                     Unsafe.Add(ref displayFrameBufferDataRef, displayPixelNumber) = color;
                 }
             }
@@ -1280,8 +1278,6 @@ namespace Iris.GBA
 
                     for (int hcount = left; hcount < right; ++hcount)
                     {
-                        int displayPixelNumber = displayPixelNumberBegin + hcount;
-
                         int h = hcount - left + hBegin;
 
                         int characterH = h / CharacterWidth;
@@ -1335,6 +1331,7 @@ namespace Iris.GBA
                             color = Unsafe.Read<UInt16>((Byte*)_paletteRAM + PaletteOffset + (colorNumber * 2));
                         }
 
+                        int displayPixelNumber = displayPixelNumberBegin + hcount;
                         Unsafe.Add(ref displayFrameBufferDataRef, displayPixelNumber) = color;
                     }
                 }
