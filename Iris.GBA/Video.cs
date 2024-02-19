@@ -740,32 +740,14 @@ namespace Iris.GBA
 
                 case 0b011:
                     RenderBackgroundMode3();
-
-                    if ((_DISPCNT & 0x1000) == 0x1000)
-                    {
-                        for (int bgPriority = 3; bgPriority >= 0; --bgPriority)
-                            RenderObjects((UInt16)bgPriority);
-                    }
                     break;
 
                 case 0b100:
                     RenderBackgroundMode4();
-
-                    if ((_DISPCNT & 0x1000) == 0x1000)
-                    {
-                        for (int bgPriority = 3; bgPriority >= 0; --bgPriority)
-                            RenderObjects((UInt16)bgPriority);
-                    }
                     break;
 
                 case 0b101:
                     RenderBackgroundMode5();
-
-                    if ((_DISPCNT & 0x1000) == 0x1000)
-                    {
-                        for (int bgPriority = 3; bgPriority >= 0; --bgPriority)
-                            RenderObjects((UInt16)bgPriority);
-                    }
                     break;
 
                 // TODO: verify
@@ -872,74 +854,92 @@ namespace Iris.GBA
 
         private void RenderBackgroundMode3()
         {
-            if ((_DISPCNT & 0x0400) == 0)
-                return;
-
-            ref UInt16 displayFrameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_displayFrameBuffer);
-
-            int pixelNumberBegin = _VCOUNT * DisplayScreenWidth;
-            int pixelNumberEnd = pixelNumberBegin + DisplayScreenWidth;
-
-            for (int pixelNumber = pixelNumberBegin; pixelNumber < pixelNumberEnd; ++pixelNumber)
+            if ((_DISPCNT & 0x0400) == 0x0400)
             {
-                unsafe
+                ref UInt16 displayFrameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_displayFrameBuffer);
+
+                int pixelNumberBegin = _VCOUNT * DisplayScreenWidth;
+                int pixelNumberEnd = pixelNumberBegin + DisplayScreenWidth;
+
+                for (int pixelNumber = pixelNumberBegin; pixelNumber < pixelNumberEnd; ++pixelNumber)
                 {
-                    UInt16 color = Unsafe.Read<UInt16>((UInt16*)_vram + pixelNumber);
-                    Unsafe.Add(ref displayFrameBufferDataRef, pixelNumber) = color;
+                    unsafe
+                    {
+                        UInt16 color = Unsafe.Read<UInt16>((UInt16*)_vram + pixelNumber);
+                        Unsafe.Add(ref displayFrameBufferDataRef, pixelNumber) = color;
+                    }
                 }
+            }
+
+            if ((_DISPCNT & 0x1000) == 0x1000)
+            {
+                for (int bgPriority = 3; bgPriority >= 0; --bgPriority)
+                    RenderObjects((UInt16)bgPriority);
             }
         }
 
         private void RenderBackgroundMode4()
         {
-            if ((_DISPCNT & 0x0400) == 0)
-                return;
-
-            ref UInt16 displayFrameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_displayFrameBuffer);
-
-            int pixelNumberBegin = _VCOUNT * DisplayScreenWidth;
-            int pixelNumberEnd = pixelNumberBegin + DisplayScreenWidth;
-
-            UInt32 vramFrameBufferOffset = ((_DISPCNT & 0x0010) == 0) ? 0x0_0000u : 0x0_a000u;
-
-            for (int pixelNumber = pixelNumberBegin; pixelNumber < pixelNumberEnd; ++pixelNumber)
+            if ((_DISPCNT & 0x0400) == 0x0400)
             {
-                unsafe
+                ref UInt16 displayFrameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_displayFrameBuffer);
+
+                int pixelNumberBegin = _VCOUNT * DisplayScreenWidth;
+                int pixelNumberEnd = pixelNumberBegin + DisplayScreenWidth;
+
+                UInt32 vramFrameBufferOffset = ((_DISPCNT & 0x0010) == 0) ? 0x0_0000u : 0x0_a000u;
+
+                for (int pixelNumber = pixelNumberBegin; pixelNumber < pixelNumberEnd; ++pixelNumber)
                 {
-                    Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + vramFrameBufferOffset + pixelNumber);
-                    UInt16 color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM + colorNumber);
-                    Unsafe.Add(ref displayFrameBufferDataRef, pixelNumber) = color;
+                    unsafe
+                    {
+                        Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + vramFrameBufferOffset + pixelNumber);
+                        UInt16 color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM + colorNumber);
+                        Unsafe.Add(ref displayFrameBufferDataRef, pixelNumber) = color;
+                    }
                 }
+            }
+
+            if ((_DISPCNT & 0x1000) == 0x1000)
+            {
+                for (int bgPriority = 3; bgPriority >= 0; --bgPriority)
+                    RenderObjects((UInt16)bgPriority);
             }
         }
 
         private void RenderBackgroundMode5()
         {
-            if ((_DISPCNT & 0x0400) == 0)
-                return;
-
-            const int VRAM_FrameBufferWidth = 160;
-            const int VRAM_FrameBufferHeight = 128;
-
-            if (_VCOUNT >= VRAM_FrameBufferHeight)
-                return;
-
-            ref UInt16 displayFrameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_displayFrameBuffer);
-
-            int vramPixelNumberBegin = _VCOUNT * VRAM_FrameBufferWidth;
-            int vramPixelNumberEnd = vramPixelNumberBegin + VRAM_FrameBufferWidth;
-
-            int displayPixelNumberBegin = _VCOUNT * DisplayScreenWidth;
-
-            UInt32 vramFrameBufferOffset = ((_DISPCNT & 0x0010) == 0) ? 0x0_0000u : 0x0_a000u;
-
-            for (int vramPixelNumber = vramPixelNumberBegin, displayPixelNumber = displayPixelNumberBegin; vramPixelNumber < vramPixelNumberEnd; ++vramPixelNumber, ++displayPixelNumber)
+            if ((_DISPCNT & 0x0400) == 0x0400)
             {
-                unsafe
+                const int VRAM_FrameBufferWidth = 160;
+                const int VRAM_FrameBufferHeight = 128;
+
+                if (_VCOUNT >= VRAM_FrameBufferHeight)
+                    return;
+
+                ref UInt16 displayFrameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_displayFrameBuffer);
+
+                int vramPixelNumberBegin = _VCOUNT * VRAM_FrameBufferWidth;
+                int vramPixelNumberEnd = vramPixelNumberBegin + VRAM_FrameBufferWidth;
+
+                int displayPixelNumberBegin = _VCOUNT * DisplayScreenWidth;
+
+                UInt32 vramFrameBufferOffset = ((_DISPCNT & 0x0010) == 0) ? 0x0_0000u : 0x0_a000u;
+
+                for (int vramPixelNumber = vramPixelNumberBegin, displayPixelNumber = displayPixelNumberBegin; vramPixelNumber < vramPixelNumberEnd; ++vramPixelNumber, ++displayPixelNumber)
                 {
-                    UInt16 color = Unsafe.Read<UInt16>((Byte*)_vram + vramFrameBufferOffset + (vramPixelNumber * 2));
-                    Unsafe.Add(ref displayFrameBufferDataRef, displayPixelNumber) = color;
+                    unsafe
+                    {
+                        UInt16 color = Unsafe.Read<UInt16>((Byte*)_vram + vramFrameBufferOffset + (vramPixelNumber * 2));
+                        Unsafe.Add(ref displayFrameBufferDataRef, displayPixelNumber) = color;
+                    }
                 }
+            }
+
+            if ((_DISPCNT & 0x1000) == 0x1000)
+            {
+                for (int bgPriority = 3; bgPriority >= 0; --bgPriority)
+                    RenderObjects((UInt16)bgPriority);
             }
         }
 
