@@ -159,6 +159,12 @@ namespace Iris.GBA
         private readonly UInt16[] _displayFrameBuffer = new UInt16[DisplayScreenSize];
         private readonly Stopwatch _renderingStopwatch = new();
 
+        private Int32 _currentBG2X;
+        private Int32 _currentBG2Y;
+
+        private Int32 _currentBG3X;
+        private Int32 _currentBG3Y;
+
         private const int StateSaveVersion = 1;
 
         internal Video(Common.Scheduler scheduler, Common.System.PresentFrame_Delegate presentFrameCallback)
@@ -267,6 +273,12 @@ namespace Iris.GBA
             _scheduler.ScheduleTask((int)GBA_System.TaskId.StartScanline, ScanlineCycleCount);
 
             Array.Clear(_displayFrameBuffer);
+
+            _currentBG2X = 0;
+            _currentBG2Y = 0;
+
+            _currentBG3X = 0;
+            _currentBG3Y = 0;
         }
 
         internal void LoadState(BinaryReader reader)
@@ -338,6 +350,12 @@ namespace Iris.GBA
 
             foreach (ref UInt16 color in _displayFrameBuffer.AsSpan())
                 color = reader.ReadUInt16();
+
+            _currentBG2X = reader.ReadInt32();
+            _currentBG2Y = reader.ReadInt32();
+
+            _currentBG3X = reader.ReadInt32();
+            _currentBG3Y = reader.ReadInt32();
         }
 
         internal void SaveState(BinaryWriter writer)
@@ -412,6 +430,12 @@ namespace Iris.GBA
 
             foreach (UInt16 color in _displayFrameBuffer)
                 writer.Write(color);
+
+            writer.Write(_currentBG2X);
+            writer.Write(_currentBG2Y);
+
+            writer.Write(_currentBG3X);
+            writer.Write(_currentBG3Y);
         }
 
         internal UInt16 ReadRegister(Register register)
@@ -504,15 +528,19 @@ namespace Iris.GBA
                     break;
                 case Register.BG2X_L:
                     Memory.WriteRegisterHelper(ref _BG2X_L, value, mode);
+                    _currentBG2X = ((_BG2X_H << 20) | (_BG2X_L << 4)) >> 4;
                     break;
                 case Register.BG2X_H:
                     Memory.WriteRegisterHelper(ref _BG2X_H, value, mode);
+                    _currentBG2X = ((_BG2X_H << 20) | (_BG2X_L << 4)) >> 4;
                     break;
                 case Register.BG2Y_L:
                     Memory.WriteRegisterHelper(ref _BG2Y_L, value, mode);
+                    _currentBG2Y = ((_BG2Y_H << 20) | (_BG2Y_L << 4)) >> 4;
                     break;
                 case Register.BG2Y_H:
                     Memory.WriteRegisterHelper(ref _BG2Y_H, value, mode);
+                    _currentBG2Y = ((_BG2Y_H << 20) | (_BG2Y_L << 4)) >> 4;
                     break;
 
                 case Register.BG3PA:
@@ -529,15 +557,19 @@ namespace Iris.GBA
                     break;
                 case Register.BG3X_L:
                     Memory.WriteRegisterHelper(ref _BG3X_L, value, mode);
+                    _currentBG3X = ((_BG3X_H << 20) | (_BG3X_L << 4)) >> 4;
                     break;
                 case Register.BG3X_H:
                     Memory.WriteRegisterHelper(ref _BG3X_H, value, mode);
+                    _currentBG3X = ((_BG3X_H << 20) | (_BG3X_L << 4)) >> 4;
                     break;
                 case Register.BG3Y_L:
                     Memory.WriteRegisterHelper(ref _BG3Y_L, value, mode);
+                    _currentBG3Y = ((_BG3Y_H << 20) | (_BG3Y_L << 4)) >> 4;
                     break;
                 case Register.BG3Y_H:
                     Memory.WriteRegisterHelper(ref _BG3Y_H, value, mode);
+                    _currentBG3Y = ((_BG3Y_H << 20) | (_BG3Y_L << 4)) >> 4;
                     break;
 
                 case Register.WIN0H:
@@ -642,6 +674,12 @@ namespace Iris.GBA
                     _presentFrameCallback(_displayFrameBuffer, _renderingStopwatch.ElapsedTicks);
                     _renderingStopwatch.Reset();
                     Array.Clear(_displayFrameBuffer);
+
+                    _currentBG2X = ((_BG2X_H << 20) | (_BG2X_L << 4)) >> 4;
+                    _currentBG2Y = ((_BG2Y_H << 20) | (_BG2Y_L << 4)) >> 4;
+
+                    _currentBG3X = ((_BG3X_H << 20) | (_BG3X_L << 4)) >> 4;
+                    _currentBG3Y = ((_BG3Y_H << 20) | (_BG3Y_L << 4)) >> 4;
                     break;
 
                 // vblank
@@ -736,6 +774,12 @@ namespace Iris.GBA
                     throw new Exception(string.Format("Iris.GBA.Video: Unknown background mode {0}", bgMode));
             }
 
+            _currentBG2X += (Int16)_BG2PB;
+            _currentBG2Y += (Int16)_BG2PD;
+
+            _currentBG3X += (Int16)_BG3PB;
+            _currentBG3Y += (Int16)_BG3PD;
+
             _renderingStopwatch.Stop();
         }
 
@@ -782,7 +826,7 @@ namespace Iris.GBA
             {
                 if (((_DISPCNT & 0x0400) == 0x0400) && ((_BG2CNT & 0b11) == bgPriority))
                 {
-                    RenderAffineBackground(_BG2CNT, _BG2HOFS, _BG2VOFS, isFirst);
+                    RenderAffineBackground(_BG2CNT, _currentBG2X, _currentBG2Y, _BG2PA, _BG2PC, isFirst);
                     isFirst = false;
                 }
 
@@ -811,13 +855,13 @@ namespace Iris.GBA
             {
                 if (((_DISPCNT & 0x0800) == 0x0800) && ((_BG3CNT & 0b11) == bgPriority))
                 {
-                    RenderAffineBackground(_BG3CNT, _BG3HOFS, _BG3VOFS, isFirst);
+                    RenderAffineBackground(_BG3CNT, _currentBG3X, _currentBG3Y, _BG3PA, _BG3PC, isFirst);
                     isFirst = false;
                 }
 
                 if (((_DISPCNT & 0x0400) == 0x0400) && ((_BG2CNT & 0b11) == bgPriority))
                 {
-                    RenderAffineBackground(_BG2CNT, _BG2HOFS, _BG2VOFS, isFirst);
+                    RenderAffineBackground(_BG2CNT, _currentBG2X, _currentBG2Y, _BG2PA, _BG2PC, isFirst);
                     isFirst = false;
                 }
 
@@ -1018,9 +1062,82 @@ namespace Iris.GBA
             }
         }
 
-        private void RenderAffineBackground(UInt16 cnt, UInt16 hofs, UInt16 vofs, bool isFirst)
+        private void RenderAffineBackground(UInt16 cnt, Int32 x, Int32 y, UInt16 pa, UInt16 pc, bool isFirst)
         {
-            RenderTextBackground(cnt, hofs, vofs, isFirst);
+            ref UInt16 displayFrameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_displayFrameBuffer);
+
+            int displayPixelNumberBegin = _VCOUNT * DisplayScreenWidth;
+
+            UInt16 virtualScreenSize = (UInt16)((cnt >> 14) & 0b11);
+            UInt16 areaOverflow = (UInt16)((cnt >> 13) & 1);
+            UInt16 screenBaseBlock = (UInt16)((cnt >> 8) & 0b1_1111);
+            UInt16 characterBaseBlock = (UInt16)((cnt >> 2) & 0b11);
+
+            int virtualScreenWidth = 128 << virtualScreenSize;
+            int virtualScreenHeight = 128 << virtualScreenSize;
+
+            UInt32 screenBaseBlockOffset = (UInt32)(screenBaseBlock * 2 * KB);
+            UInt32 characterBaseBlockOffset = (UInt32)(characterBaseBlock * 16 * KB);
+
+            for (int hcount = 0; hcount < DisplayScreenWidth; ++hcount, x += (Int16)pa, y += (Int16)pc)
+            {
+                int displayPixelNumber = displayPixelNumberBegin + hcount;
+
+                int h = x >> 8;
+                int v = y >> 8;
+
+                if (areaOverflow == 0)
+                {
+                    if ((h < 0) || (h >= virtualScreenWidth))
+                        continue;
+
+                    if ((v < 0) || (v >= virtualScreenHeight))
+                        continue;
+                }
+                else
+                {
+                    if (h < 0)
+                        h = (h % virtualScreenWidth) + virtualScreenWidth;
+                    else if (h >= virtualScreenWidth)
+                        h %= virtualScreenWidth;
+
+                    if (v < 0)
+                        v = (v % virtualScreenHeight) + virtualScreenHeight;
+                    else if (v >= virtualScreenHeight)
+                        v %= virtualScreenHeight;
+                }
+
+                int characterH = h / CharacterWidth;
+                int characterPixelH = h % CharacterWidth;
+
+                int characterV = v / CharacterHeight;
+                int characterPixelV = v % CharacterHeight;
+
+                int characterNumber = (characterV * (virtualScreenWidth / CharacterWidth)) + characterH;
+                int characterPixelNumber = (characterPixelV * CharacterWidth) + characterPixelH;
+
+                unsafe
+                {
+                    Byte characterName = Unsafe.Read<Byte>((Byte*)_vram + screenBaseBlockOffset + characterNumber);
+
+                    const int CharacterSize = 64;
+                    UInt32 characterOffset = (UInt32)(characterBaseBlockOffset + (characterName * CharacterSize));
+
+                    const UInt32 ObjectCharacterDataOffset = 0x1_0000;
+
+                    if (characterOffset >= ObjectCharacterDataOffset)
+                        continue;
+
+                    Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + characterOffset + characterPixelNumber);
+
+                    if (!isFirst && (colorNumber == 0))
+                        continue;
+
+                    UInt16 color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM + colorNumber);
+
+                    Unsafe.Add(ref displayFrameBufferDataRef, displayPixelNumber) = color;
+                }
+            }
         }
 
         private void RenderObjects(UInt16 bgPriority)
