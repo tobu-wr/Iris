@@ -1093,15 +1093,14 @@ namespace Iris.GBA
                 }
                 else
                 {
+                    h %= virtualScreenWidth;
+                    v %= virtualScreenHeight;
+
                     if (h < 0)
-                        h = (h % virtualScreenWidth) + virtualScreenWidth;
-                    else if (h >= virtualScreenWidth)
-                        h %= virtualScreenWidth;
+                        h += virtualScreenWidth;
 
                     if (v < 0)
-                        v = (v % virtualScreenHeight) + virtualScreenHeight;
-                    else if (v >= virtualScreenHeight)
-                        v %= virtualScreenHeight;
+                        v += virtualScreenHeight;
                 }
 
                 int characterH = h / CharacterWidth;
