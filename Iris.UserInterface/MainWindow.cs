@@ -105,30 +105,6 @@ namespace Iris.UserInterface
                 LoadROM(args[0]);
         }
 
-        private void MainWindow_Activated(object sender, EventArgs e)
-        {
-            if (!_automaticPauseEnabled || (_system == null))
-                return;
-
-            if (_resume)
-            {
-                Run();
-                _resume = false;
-            }
-        }
-
-        private void MainWindow_Deactivate(object sender, EventArgs e)
-        {
-            if (!_automaticPauseEnabled || (_system == null))
-                return;
-
-            if (_system.IsRunning())
-            {
-                Pause();
-                _resume = true;
-            }
-        }
-
         ~MainWindow()
         {
             _ = TimeEndPeriod(_timeCaps._periodMin);
@@ -416,6 +392,30 @@ namespace Iris.UserInterface
         private void AutomaticPauseToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _automaticPauseEnabled = automaticPauseToolStripMenuItem.Checked;
+        }
+
+        private void MainWindow_Activated(object sender, EventArgs e)
+        {
+            if (!_automaticPauseEnabled || (_system == null))
+                return;
+
+            if (_resume)
+            {
+                Run();
+                _resume = false;
+            }
+        }
+
+        private void MainWindow_Deactivate(object sender, EventArgs e)
+        {
+            if (!_automaticPauseEnabled || (_system == null))
+                return;
+
+            if (_system.IsRunning())
+            {
+                Pause();
+                _resume = true;
+            }
         }
 
         private void Keyboard_KeyDown(Keyboard.Key key)
