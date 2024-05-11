@@ -21,17 +21,27 @@ namespace Iris.CPU
         public delegate UInt32 HandleIRQ_Delegate();
 
         // could have used function pointers (delegate*) for performance instead of delegates but it's less flexible (cannot use non-static function for instance)
-        public readonly record struct CallbackInterface
+        public readonly struct CallbackInterface
         (
-            Read8_Delegate Read8,
-            Read16_Delegate Read16,
-            Read32_Delegate Read32,
-            Write8_Delegate Write8,
-            Write16_Delegate Write16,
-            Write32_Delegate Write32,
-            HandleSWI_Delegate HandleSWI,
-            HandleIRQ_Delegate HandleIRQ
-        );
+            Read8_Delegate read8,
+            Read16_Delegate read16,
+            Read32_Delegate read32,
+            Write8_Delegate write8,
+            Write16_Delegate write16,
+            Write32_Delegate write32,
+            HandleSWI_Delegate handleSWI,
+            HandleIRQ_Delegate handleIRQ
+        )
+        {
+            internal readonly Read8_Delegate _read8 = read8;
+            internal readonly Read16_Delegate _read16 = read16;
+            internal readonly Read32_Delegate _read32 = read32;
+            internal readonly Write8_Delegate _write8 = write8;
+            internal readonly Write16_Delegate _write16 = write16;
+            internal readonly Write32_Delegate _write32 = write32;
+            internal readonly HandleSWI_Delegate _handleSWI = handleSWI;
+            internal readonly HandleIRQ_Delegate _handleIRQ = handleIRQ;
+        }
 
         public enum Signal
         {
@@ -251,7 +261,7 @@ namespace Iris.CPU
             UInt32 i = (CPSR >> 7) & 1;
 
             if ((i == 0) && (NIRQ == Signal.Low))
-                return _callbackInterface.HandleIRQ();
+                return _callbackInterface._handleIRQ();
 
             UInt32 t = (CPSR >> 5) & 1;
 
