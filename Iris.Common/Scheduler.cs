@@ -9,7 +9,12 @@ namespace Iris.Common
         public delegate void Task_Delegate(UInt32 cycleCountDelay);
         private readonly Task_Delegate[] _taskList = new Task_Delegate[taskListSize];
 
-        private record struct ScheduledTaskListEntry(int Id, UInt32 CycleCount);
+        private struct ScheduledTaskListEntry
+        {
+            internal int _id;
+            internal UInt32 _cycleCount;
+        }
+
         private readonly ScheduledTaskListEntry[] _scheduledTaskList = new ScheduledTaskListEntry[scheduledTaskListSize]; // sorted by CycleCount from smallest to largest
         private int _scheduledTaskCount;
 
@@ -30,8 +35,8 @@ namespace Iris.Common
 
             foreach (ref ScheduledTaskListEntry entry in _scheduledTaskList.AsSpan())
             {
-                entry.Id = reader.ReadInt32();
-                entry.CycleCount = reader.ReadUInt32();
+                entry._id = reader.ReadInt32();
+                entry._cycleCount = reader.ReadUInt32();
             }
 
             _scheduledTaskCount = reader.ReadInt32();
@@ -44,8 +49,8 @@ namespace Iris.Common
 
             foreach (ScheduledTaskListEntry entry in _scheduledTaskList)
             {
-                writer.Write(entry.Id);
-                writer.Write(entry.CycleCount);
+                writer.Write(entry._id);
+                writer.Write(entry._cycleCount);
             }
 
             writer.Write(_scheduledTaskCount);
@@ -68,7 +73,7 @@ namespace Iris.Common
             int i = _scheduledTaskCount;
             ref ScheduledTaskListEntry entry = ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_scheduledTaskList), i - 1);
 
-            while ((i > 0) && (entry.CycleCount > cycleCount))
+            while ((i > 0) && (entry._cycleCount > cycleCount))
             {
                 --i;
                 entry = ref Unsafe.Subtract(ref entry, 1);
@@ -80,8 +85,8 @@ namespace Iris.Common
             if (i < _scheduledTaskCount)
                 Array.Copy(_scheduledTaskList, i, _scheduledTaskList, i + 1, _scheduledTaskCount - i);
 
-            entry.Id = id;
-            entry.CycleCount = cycleCount;
+            entry._id = id;
+            entry._cycleCount = cycleCount;
 
             ++_scheduledTaskCount;
         }
@@ -89,7 +94,7 @@ namespace Iris.Common
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool HasTaskReady()
         {
-            return (_scheduledTaskCount > 0) && (MemoryMarshal.GetArrayDataReference(_scheduledTaskList).CycleCount <= _cycleCounter);
+            return (_scheduledTaskCount > 0) && (MemoryMarshal.GetArrayDataReference(_scheduledTaskList)._cycleCount <= _cycleCounter);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -107,9 +112,9 @@ namespace Iris.Common
             int i = 0;
             ref ScheduledTaskListEntry entry = ref scheduledTaskListDataRef;
 
-            while ((i < _scheduledTaskCount) && (entry.CycleCount <= _cycleCounter))
+            while ((i < _scheduledTaskCount) && (entry._cycleCount <= _cycleCounter))
             {
-                Unsafe.Add(ref taskListDataRef, entry.Id)(_cycleCounter - entry.CycleCount);
+                Unsafe.Add(ref taskListDataRef, entry._id)(_cycleCounter - entry._cycleCount);
 
                 ++i;
                 entry = ref Unsafe.Add(ref entry, 1);
@@ -123,7 +128,7 @@ namespace Iris.Common
                 Array.Copy(_scheduledTaskList, i, _scheduledTaskList, 0, remainingScheduledTaskCount);
 
                 for (i = 0; i < remainingScheduledTaskCount; ++i)
-                    Unsafe.Add(ref scheduledTaskListDataRef, i).CycleCount -= _cycleCounter;
+                    Unsafe.Add(ref scheduledTaskListDataRef, i)._cycleCount -= _cycleCounter;
             }
 
             // update the scheduled task count and reset the cycle counter
