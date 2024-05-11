@@ -24,14 +24,14 @@
 
         private InterruptControl _interruptControl;
 
-        private record struct Channel
-        (
-            UInt16 Counter,
-            UInt16 Reload,
-            UInt16 Control,
-            UInt32 CycleCounter,
-            bool Running
-        );
+        private struct Channel
+        {
+            internal UInt16 _counter;
+            internal UInt16 _reload;
+            internal UInt16 _control;
+            internal UInt32 _cycleCounter;
+            internal bool _running;
+        }
 
         private Channel _channel0;
         private Channel _channel1;
@@ -70,11 +70,11 @@
 
             void LoadChannel(ref Channel channel)
             {
-                channel.Counter = reader.ReadUInt16();
-                channel.Reload = reader.ReadUInt16();
-                channel.Control = reader.ReadUInt16();
-                channel.CycleCounter = reader.ReadUInt32();
-                channel.Running = reader.ReadBoolean();
+                channel._counter = reader.ReadUInt16();
+                channel._reload = reader.ReadUInt16();
+                channel._control = reader.ReadUInt16();
+                channel._cycleCounter = reader.ReadUInt32();
+                channel._running = reader.ReadBoolean();
             }
 
             LoadChannel(ref _channel0);
@@ -89,11 +89,11 @@
 
             void SaveChannel(Channel channel)
             {
-                writer.Write(channel.Counter);
-                writer.Write(channel.Reload);
-                writer.Write(channel.Control);
-                writer.Write(channel.CycleCounter);
-                writer.Write(channel.Running);
+                writer.Write(channel._counter);
+                writer.Write(channel._reload);
+                writer.Write(channel._control);
+                writer.Write(channel._cycleCounter);
+                writer.Write(channel._running);
             }
 
             SaveChannel(_channel0);
@@ -106,17 +106,17 @@
         {
             return register switch
             {
-                Register.TM0CNT_L => _channel0.Counter,
-                Register.TM0CNT_H => _channel0.Control,
+                Register.TM0CNT_L => _channel0._counter,
+                Register.TM0CNT_H => _channel0._control,
 
-                Register.TM1CNT_L => _channel1.Counter,
-                Register.TM1CNT_H => _channel1.Control,
+                Register.TM1CNT_L => _channel1._counter,
+                Register.TM1CNT_H => _channel1._control,
 
-                Register.TM2CNT_L => _channel2.Counter,
-                Register.TM2CNT_H => _channel2.Control,
+                Register.TM2CNT_L => _channel2._counter,
+                Register.TM2CNT_H => _channel2._control,
 
-                Register.TM3CNT_L => _channel3.Counter,
-                Register.TM3CNT_H => _channel3.Control,
+                Register.TM3CNT_L => _channel3._counter,
+                Register.TM3CNT_H => _channel3._control,
 
                 // should never happen
                 _ => throw new Exception("Iris.GBA.Timer: Register read error"),
@@ -127,23 +127,23 @@
         {
             void WriteReload(ref Channel channel)
             {
-                UInt16 reload = channel.Reload;
+                UInt16 reload = channel._reload;
                 Memory.WriteRegisterHelper(ref reload, value, mode);
-                channel.Reload = reload;
+                channel._reload = reload;
             }
 
             void WriteControl(ref Channel channel, GBA_System.TaskId startCountingTaskId)
             {
-                UInt16 previousControl = channel.Control;
+                UInt16 previousControl = channel._control;
 
-                UInt16 newControl = channel.Control;
+                UInt16 newControl = channel._control;
                 Memory.WriteRegisterHelper(ref newControl, value, mode);
-                channel.Control = newControl;
+                channel._control = newControl;
 
                 if (((previousControl & 0x0080) == 0) && ((newControl & 0x0080) == 0x0080))
                     _scheduler.ScheduleTask((int)startCountingTaskId, 2);
                 else if (((previousControl & 0x0080) == 0x0080) && ((newControl & 0x0080) == 0))
-                    channel.Running = false;
+                    channel._running = false;
             }
 
             switch (register)
@@ -188,7 +188,7 @@
 
             void UpdateCounter(ref Channel channel, bool isFirstChannel, InterruptControl.Interrupt interrupt)
             {
-                if (!channel.Running)
+                if (!channel._running)
                 {
                     overflowCount = 0;
                     return;
@@ -196,11 +196,11 @@
 
                 UInt32 counterIncrement;
 
-                if (((channel.Control & 0x0004) == 0) || isFirstChannel)
+                if (((channel._control & 0x0004) == 0) || isFirstChannel)
                 {
-                    channel.CycleCounter += cycleCount;
+                    channel._cycleCounter += cycleCount;
 
-                    UInt32 prescaler = (channel.Control & 0b11) switch
+                    UInt32 prescaler = (channel._control & 0b11) switch
                     {
                         0b00 => 1,
                         0b01 => 64,
@@ -211,29 +211,29 @@
                         _ => 0,
                     };
 
-                    counterIncrement = channel.CycleCounter / prescaler;
-                    channel.CycleCounter %= prescaler;
+                    counterIncrement = channel._cycleCounter / prescaler;
+                    channel._cycleCounter %= prescaler;
                 }
                 else
                 {
                     counterIncrement = overflowCount;
                 }
 
-                UInt32 counter = channel.Counter + counterIncrement;
+                UInt32 counter = channel._counter + counterIncrement;
 
                 if (counter >= 0x1_0000)
                 {
-                    (overflowCount, counterIncrement) = Math.DivRem(counter - 0x1_0000u, 0x1_0000u - channel.Reload);
+                    (overflowCount, counterIncrement) = Math.DivRem(counter - 0x1_0000u, 0x1_0000u - channel._reload);
 
-                    channel.Counter = (UInt16)(channel.Reload + counterIncrement);
+                    channel._counter = (UInt16)(channel._reload + counterIncrement);
                     ++overflowCount;
 
-                    if ((channel.Control & 0x0040) == 0x0040)
+                    if ((channel._control & 0x0040) == 0x0040)
                         _interruptControl.RequestInterrupt(interrupt);
                 }
                 else
                 {
-                    channel.Counter = (UInt16)counter;
+                    channel._counter = (UInt16)counter;
                     overflowCount = 0;
                 }
             }
@@ -246,12 +246,12 @@
 
         private static void StartCounting(ref Channel channel, UInt32 cycleCountDelay)
         {
-            if ((channel.Control & 0x0080) == 0)
+            if ((channel._control & 0x0080) == 0)
                 return;
 
-            channel.Counter = channel.Reload;
-            channel.CycleCounter = cycleCountDelay;
-            channel.Running = true;
+            channel._counter = channel._reload;
+            channel._cycleCounter = cycleCountDelay;
+            channel._running = true;
         }
     }
 }
