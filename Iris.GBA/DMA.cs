@@ -52,16 +52,16 @@
         private InterruptControl _interruptControl;
         private Memory _memory;
 
-        private record struct Channel
-        (
-            UInt32 Source,
-            UInt32 SourceReload,
-            UInt32 Destination,
-            UInt32 DestinationReload,
-            UInt32 Length,
-            UInt16 LengthReload,
-            UInt16 Control
-        );
+        private struct Channel
+        {
+            internal UInt32 _source;
+            internal UInt32 _sourceReload;
+            internal UInt32 _destination;
+            internal UInt32 _destinationReload;
+            internal UInt32 _length;
+            internal UInt16 _lengthReload;
+            internal UInt16 _control;
+        }
 
         private Channel _channel0;
         private Channel _channel1;
@@ -96,13 +96,13 @@
 
             void LoadChannel(ref Channel channel)
             {
-                channel.Source = reader.ReadUInt32();
-                channel.SourceReload = reader.ReadUInt32();
-                channel.Destination = reader.ReadUInt32();
-                channel.DestinationReload = reader.ReadUInt32();
-                channel.Length = reader.ReadUInt32();
-                channel.LengthReload = reader.ReadUInt16();
-                channel.Control = reader.ReadUInt16();
+                channel._source = reader.ReadUInt32();
+                channel._sourceReload = reader.ReadUInt32();
+                channel._destination = reader.ReadUInt32();
+                channel._destinationReload = reader.ReadUInt32();
+                channel._length = reader.ReadUInt32();
+                channel._lengthReload = reader.ReadUInt16();
+                channel._control = reader.ReadUInt16();
             }
 
             LoadChannel(ref _channel0);
@@ -117,13 +117,13 @@
 
             void SaveChannel(Channel channel)
             {
-                writer.Write(channel.Source);
-                writer.Write(channel.SourceReload);
-                writer.Write(channel.Destination);
-                writer.Write(channel.DestinationReload);
-                writer.Write(channel.Length);
-                writer.Write(channel.LengthReload);
-                writer.Write(channel.Control);
+                writer.Write(channel._source);
+                writer.Write(channel._sourceReload);
+                writer.Write(channel._destination);
+                writer.Write(channel._destinationReload);
+                writer.Write(channel._length);
+                writer.Write(channel._lengthReload);
+                writer.Write(channel._control);
             }
 
             SaveChannel(_channel0);
@@ -136,10 +136,10 @@
         {
             return register switch
             {
-                Register.DMA0CNT_H => _channel0.Control,
-                Register.DMA1CNT_H => _channel1.Control,
-                Register.DMA2CNT_H => _channel2.Control,
-                Register.DMA3CNT_H => _channel3.Control,
+                Register.DMA0CNT_H => _channel0._control,
+                Register.DMA1CNT_H => _channel1._control,
+                Register.DMA2CNT_H => _channel2._control,
+                Register.DMA3CNT_H => _channel3._control,
 
                 // should never happen
                 _ => throw new Exception("Iris.GBA.DMA: Register read error"),
@@ -150,52 +150,52 @@
         {
             void WriteSourceReload_Low(ref Channel channel)
             {
-                UInt16 low = (UInt16)channel.SourceReload;
+                UInt16 low = (UInt16)channel._sourceReload;
                 Memory.WriteRegisterHelper(ref low, value, mode);
-                channel.SourceReload = (channel.SourceReload & 0xffff_0000) | low;
+                channel._sourceReload = (channel._sourceReload & 0xffff_0000) | low;
             }
 
             void WriteSourceReload_High(ref Channel channel, UInt16 mask)
             {
-                UInt16 high = (UInt16)(channel.SourceReload >> 16);
+                UInt16 high = (UInt16)(channel._sourceReload >> 16);
                 Memory.WriteRegisterHelper(ref high, (UInt16)(value & mask), mode);
-                channel.SourceReload = (channel.SourceReload & 0x0000_ffff) | (UInt32)(high << 16);
+                channel._sourceReload = (channel._sourceReload & 0x0000_ffff) | (UInt32)(high << 16);
             }
 
             void WriteDestinationReload_Low(ref Channel channel)
             {
-                UInt16 low = (UInt16)channel.DestinationReload;
+                UInt16 low = (UInt16)channel._destinationReload;
                 Memory.WriteRegisterHelper(ref low, value, mode);
-                channel.DestinationReload = (channel.DestinationReload & 0xffff_0000) | low;
+                channel._destinationReload = (channel._destinationReload & 0xffff_0000) | low;
             }
 
             void WriteDestinationReload_High(ref Channel channel, UInt16 mask)
             {
-                UInt16 high = (UInt16)(channel.DestinationReload >> 16);
+                UInt16 high = (UInt16)(channel._destinationReload >> 16);
                 Memory.WriteRegisterHelper(ref high, (UInt16)(value & mask), mode);
-                channel.DestinationReload = (channel.DestinationReload & 0x0000_ffff) | (UInt32)(high << 16);
+                channel._destinationReload = (channel._destinationReload & 0x0000_ffff) | (UInt32)(high << 16);
             }
 
             void WriteLengthReload(ref Channel channel)
             {
-                UInt16 reload = channel.LengthReload;
+                UInt16 reload = channel._lengthReload;
                 Memory.WriteRegisterHelper(ref reload, value, mode);
-                channel.LengthReload = reload;
+                channel._lengthReload = reload;
             }
 
             void WriteControl(ref Channel channel, InterruptControl.Interrupt interrupt, UInt32 maxLength)
             {
-                UInt16 previousControl = channel.Control;
+                UInt16 previousControl = channel._control;
 
-                UInt16 newControl = channel.Control;
+                UInt16 newControl = channel._control;
                 Memory.WriteRegisterHelper(ref newControl, value, mode);
-                channel.Control = newControl;
+                channel._control = newControl;
 
                 if (((previousControl & 0x8000) == 0) && ((newControl & 0x8000) == 0x8000))
                 {
-                    channel.Source = channel.SourceReload;
-                    channel.Destination = channel.DestinationReload;
-                    channel.Length = (channel.LengthReload == 0) ? maxLength : channel.LengthReload;
+                    channel._source = channel._sourceReload;
+                    channel._destination = channel._destinationReload;
+                    channel._length = (channel._lengthReload == 0) ? maxLength : channel._lengthReload;
 
                     PerformTransfer(ref channel, StartTiming.Immediate, interrupt, maxLength);
                 }
@@ -295,26 +295,26 @@
 
         internal void PerformAllTransfers(StartTiming startTiming)
         {
-            if ((_channel0.Control & 0x8000) == 0x8000)
+            if ((_channel0._control & 0x8000) == 0x8000)
                 PerformTransfer(ref _channel0, startTiming, InterruptControl.Interrupt.DMA0, MaxLengthChannel0);
 
-            if ((_channel1.Control & 0x8000) == 0x8000)
+            if ((_channel1._control & 0x8000) == 0x8000)
                 PerformTransfer(ref _channel1, startTiming, InterruptControl.Interrupt.DMA1, MaxLengthChannel1);
 
-            if ((_channel2.Control & 0x8000) == 0x8000)
+            if ((_channel2._control & 0x8000) == 0x8000)
                 PerformTransfer(ref _channel2, startTiming, InterruptControl.Interrupt.DMA2, MaxLengthChannel2);
 
-            if ((_channel3.Control & 0x8000) == 0x8000)
+            if ((_channel3._control & 0x8000) == 0x8000)
                 PerformTransfer(ref _channel3, startTiming, InterruptControl.Interrupt.DMA3, MaxLengthChannel3);
         }
 
         private void PerformTransfer(ref Channel channel, StartTiming startTiming, InterruptControl.Interrupt interrupt, UInt32 maxLength)
         {
-            if (((channel.Control >> 12) & 0b11) != (int)startTiming)
+            if (((channel._control >> 12) & 0b11) != (int)startTiming)
                 return;
 
-            UInt16 sourceAddressControlFlag = (UInt16)((channel.Control >> 7) & 0b11);
-            UInt16 destinationAddressControlFlag = (UInt16)((channel.Control >> 5) & 0b11);
+            UInt16 sourceAddressControlFlag = (UInt16)((channel._control >> 7) & 0b11);
+            UInt16 destinationAddressControlFlag = (UInt16)((channel._control >> 5) & 0b11);
 
             int GetSourceIncrement(int dataUnitSize)
             {
@@ -353,19 +353,19 @@
             bool reloadDestination;
 
             // 16 bits
-            if ((channel.Control & 0x0400) == 0)
+            if ((channel._control & 0x0400) == 0)
             {
                 const int DataUnitSize = 2;
 
                 int sourceIncrement = GetSourceIncrement(DataUnitSize);
                 (int destinationIncrement, reloadDestination) = GetDestinationIncrement(DataUnitSize);
 
-                for (; channel.Length > 0; --channel.Length)
+                for (; channel._length > 0; --channel._length)
                 {
-                    _memory.Write16(channel.Destination, _memory.Read16(channel.Source));
+                    _memory.Write16(channel._destination, _memory.Read16(channel._source));
 
-                    channel.Source = (UInt32)(channel.Source + sourceIncrement);
-                    channel.Destination = (UInt32)(channel.Destination + destinationIncrement);
+                    channel._source = (UInt32)(channel._source + sourceIncrement);
+                    channel._destination = (UInt32)(channel._destination + destinationIncrement);
                 }
             }
 
@@ -377,31 +377,31 @@
                 int sourceIncrement = GetSourceIncrement(DataUnitSize);
                 (int destinationIncrement, reloadDestination) = GetDestinationIncrement(DataUnitSize);
 
-                for (; channel.Length > 0; --channel.Length)
+                for (; channel._length > 0; --channel._length)
                 {
-                    _memory.Write32(channel.Destination, _memory.Read32(channel.Source));
+                    _memory.Write32(channel._destination, _memory.Read32(channel._source));
 
-                    channel.Source = (UInt32)(channel.Source + sourceIncrement);
-                    channel.Destination = (UInt32)(channel.Destination + destinationIncrement);
+                    channel._source = (UInt32)(channel._source + sourceIncrement);
+                    channel._destination = (UInt32)(channel._destination + destinationIncrement);
                 }
             }
 
-            if ((channel.Control & 0x4000) == 0x4000)
+            if ((channel._control & 0x4000) == 0x4000)
                 _interruptControl.RequestInterrupt(interrupt);
 
             // Repeat off
-            if ((channel.Control & 0x0200) == 0)
+            if ((channel._control & 0x0200) == 0)
             {
-                channel.Control = (UInt16)(channel.Control & ~0x8000);
+                channel._control = (UInt16)(channel._control & ~0x8000);
             }
 
             // Repeat on
             else
             {
                 if (reloadDestination)
-                    channel.Destination = channel.DestinationReload;
+                    channel._destination = channel._destinationReload;
 
-                channel.Length = (channel.LengthReload == 0) ? maxLength : channel.LengthReload;
+                channel._length = (channel._lengthReload == 0) ? maxLength : channel._lengthReload;
             }
         }
     }
