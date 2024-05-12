@@ -163,7 +163,15 @@ namespace Iris.UserInterface
                     if (sleepTime > _framerateLimiterExtraSleepTime)
                     {
                         sleepTime -= _framerateLimiterExtraSleepTime;
-                        Thread.Sleep((int)Math.Round(1000.0 * sleepTime / Stopwatch.Frequency, MidpointRounding.AwayFromZero));
+
+                        int ms = (int)(1000 * sleepTime / Stopwatch.Frequency - _timeCaps._periodMin);
+
+                        if (ms > 0)
+                            Thread.Sleep(ms);
+
+                        while (_framerateLimiterStopwatch.ElapsedTicks < (frameDuration + sleepTime))
+                        { }
+
                         _framerateLimiterExtraSleepTime = _framerateLimiterStopwatch.ElapsedTicks - frameDuration - sleepTime;
                     }
                     else
@@ -445,7 +453,7 @@ namespace Iris.UserInterface
         private void FramerateCounterTimer_Tick(object sender, EventArgs e)
         {
             double fps = Math.Round((double)_framerateCounter * Stopwatch.Frequency / _framerateCounterStopwatch.ElapsedTicks, 2, MidpointRounding.AwayFromZero);
-            fpsToolStripStatusLabel.Text = "FPS: " + fps.ToString("F2");
+            fpsToolStripStatusLabel.Text = $"FPS: {fps:F2}";
 
             long renderingLoad = 100 * _renderingTime / _framerateCounterStopwatch.ElapsedTicks;
             renderingLoadToolStripStatusLabel.Text = $"Rendering Load: {renderingLoad}%";
