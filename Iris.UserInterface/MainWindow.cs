@@ -55,7 +55,7 @@ namespace Iris.UserInterface
 
         private bool _framerateLimiterEnabled = true;
         private readonly Stopwatch _framerateLimiterStopwatch = Stopwatch.StartNew();
-        private long _framerateLimiterExtraSleepTime;
+        private long _framerateLimiterLastFrameTime;
 
         private bool _automaticPauseEnabled = true;
         private bool _resume;
@@ -154,33 +154,26 @@ namespace Iris.UserInterface
                 const double TargetFrameRate = 59.737411711095921;
 
                 long targetFrameDuration = (long)Math.Round(Stopwatch.Frequency / TargetFrameRate, MidpointRounding.AwayFromZero);
-                long frameDuration = _framerateLimiterStopwatch.ElapsedTicks;
+                long targetFrameTime = _framerateLimiterLastFrameTime + targetFrameDuration;
+                long currentFrameTime = _framerateLimiterStopwatch.ElapsedTicks;
 
-                if (frameDuration < targetFrameDuration)
+                if (currentFrameTime < targetFrameTime)
                 {
-                    long sleepTime = targetFrameDuration - frameDuration;
+                    long sleepTime = targetFrameTime - currentFrameTime;
+                    int ms = (int)(1000 * sleepTime / Stopwatch.Frequency - _timeCaps._periodMin);
 
-                    if (sleepTime > _framerateLimiterExtraSleepTime)
-                    {
-                        sleepTime -= _framerateLimiterExtraSleepTime;
+                    if (ms > 0)
+                        Thread.Sleep(ms);
 
-                        int ms = (int)(1000 * sleepTime / Stopwatch.Frequency - _timeCaps._periodMin);
+                    while (_framerateLimiterStopwatch.ElapsedTicks < targetFrameTime)
+                    { }
 
-                        if (ms > 0)
-                            Thread.Sleep(ms);
-
-                        while (_framerateLimiterStopwatch.ElapsedTicks < (frameDuration + sleepTime))
-                        { }
-
-                        _framerateLimiterExtraSleepTime = _framerateLimiterStopwatch.ElapsedTicks - frameDuration - sleepTime;
-                    }
-                    else
-                    {
-                        _framerateLimiterExtraSleepTime -= sleepTime;
-                    }
+                    _framerateLimiterLastFrameTime = targetFrameTime;
                 }
-
-                _framerateLimiterStopwatch.Restart();
+                else
+                {
+                    _framerateLimiterLastFrameTime = currentFrameTime;
+                }
             }
         }
 
