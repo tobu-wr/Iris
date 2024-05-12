@@ -81,8 +81,8 @@ namespace Iris.UserInterface
         internal MainWindow(string[] args)
         {
             TimeGetDevCaps(ref _timeCaps, (uint)Unsafe.SizeOf<TimeCaps>());
-
             _ = TimeBeginPeriod(_timeCaps._periodMin);
+            System.Console.WriteLine($"[Iris.UserInterface.MainWindow] Timer resolution: {_timeCaps._periodMin}ms");
 
             InitializeComponent();
 
