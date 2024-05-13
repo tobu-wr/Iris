@@ -48,10 +48,10 @@ namespace Iris.UserInterface
 
         private FormWindowState _previousWindowState;
 
-        private int _framerateCounter;
-        private long _renderingTime;
-        private readonly System.Windows.Forms.Timer _framerateCounterTimer = new();
-        private readonly Stopwatch _framerateCounterStopwatch = new();
+        private int _frameCount;
+        private long _renderingDuration;
+        private readonly System.Windows.Forms.Timer _performanceCounterTimer = new();
+        private readonly Stopwatch _performanceCounterStopwatch = new();
 
         private bool _framerateLimiterEnabled = true;
         private readonly Stopwatch _framerateLimiterStopwatch = Stopwatch.StartNew();
@@ -98,8 +98,8 @@ namespace Iris.UserInterface
             _keyboard = new(Keyboard_KeyDown, Keyboard_KeyUp);
             _xboxController = new(XboxController_ButtonDown, XboxController_ButtonUp);
 
-            _framerateCounterTimer.Interval = 1000;
-            _framerateCounterTimer.Tick += FramerateCounterTimer_Tick;
+            _performanceCounterTimer.Interval = 1000;
+            _performanceCounterTimer.Tick += FramerateCounterTimer_Tick;
 
             if (args.Length > 0)
                 LoadROM(args[0]);
@@ -119,7 +119,7 @@ namespace Iris.UserInterface
             _xboxController.PollInput();
         }
 
-        private void PresentFrame(UInt16[] frameBuffer, long renderingTime)
+        private void PresentFrame(UInt16[] frameBuffer, long renderingDuration)
         {
             const int ScreenWidth = 240;
             const int ScreenHeight = 160;
@@ -146,8 +146,8 @@ namespace Iris.UserInterface
             screenBox.Invoke(() => screenBox.Image = bitmap);
             screenBox.Invalidate();
 
-            Interlocked.Increment(ref _framerateCounter);
-            Interlocked.Add(ref _renderingTime, renderingTime);
+            Interlocked.Increment(ref _frameCount);
+            Interlocked.Add(ref _renderingDuration, renderingDuration);
 
             if (_framerateLimiterEnabled)
             {
@@ -208,10 +208,10 @@ namespace Iris.UserInterface
 
         private void Run()
         {
-            _framerateCounter = 0;
-            _renderingTime = 0;
-            _framerateCounterTimer.Start();
-            _framerateCounterStopwatch.Restart();
+            _frameCount = 0;
+            _renderingDuration = 0;
+            _performanceCounterTimer.Start();
+            _performanceCounterStopwatch.Restart();
 
             runToolStripMenuItem.Enabled = false;
             pauseToolStripMenuItem.Enabled = true;
@@ -240,7 +240,7 @@ namespace Iris.UserInterface
 
                 Invoke(() =>
                 {
-                    _framerateCounterTimer.Stop();
+                    _performanceCounterTimer.Stop();
 
                     runToolStripMenuItem.Enabled = true;
                     pauseToolStripMenuItem.Enabled = false;
@@ -266,7 +266,7 @@ namespace Iris.UserInterface
                 Application.DoEvents();
             }
 
-            _framerateCounterTimer.Stop();
+            _performanceCounterTimer.Stop();
 
             runToolStripMenuItem.Enabled = true;
             pauseToolStripMenuItem.Enabled = false;
@@ -450,15 +450,15 @@ namespace Iris.UserInterface
 
         private void FramerateCounterTimer_Tick(object sender, EventArgs e)
         {
-            double fps = Math.Round((double)_framerateCounter * Stopwatch.Frequency / _framerateCounterStopwatch.ElapsedTicks, 2, MidpointRounding.AwayFromZero);
+            double fps = Math.Round((double)_frameCount * Stopwatch.Frequency / _performanceCounterStopwatch.ElapsedTicks, 2, MidpointRounding.AwayFromZero);
             fpsToolStripStatusLabel.Text = $"FPS: {fps:F2}";
 
-            long renderingLoad = 100 * _renderingTime / _framerateCounterStopwatch.ElapsedTicks;
+            long renderingLoad = 100 * _renderingDuration / _performanceCounterStopwatch.ElapsedTicks;
             renderingLoadToolStripStatusLabel.Text = $"Rendering Load: {renderingLoad}%";
 
-            _framerateCounter = 0;
-            _renderingTime = 0;
-            _framerateCounterStopwatch.Restart();
+            _frameCount = 0;
+            _renderingDuration = 0;
+            _performanceCounterStopwatch.Restart();
         }
     }
 }
