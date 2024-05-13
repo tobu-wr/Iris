@@ -258,8 +258,13 @@ namespace Iris.UserInterface
         {
             _system.Pause();
 
+            SpinWait spinWait = new();
+
             while (_systemThread.IsAlive)
+            {
+                spinWait.SpinOnce();
                 Application.DoEvents();
+            }
 
             _framerateCounterTimer.Stop();
 
