@@ -37,7 +37,6 @@ namespace Iris.GBA
 
         private string _romHash;
         private bool _running;
-        private bool _disposed;
 
         private const string StateSaveMagic = "IRIS";
         private const int StateSaveVersion = 1;
@@ -64,15 +63,10 @@ namespace Iris.GBA
 
         public override void Dispose()
         {
-            if (_disposed)
-                return;
-
             _memory.Dispose();
             _video.Dispose();
 
             _bios.Dispose();
-
-            _disposed = true;
         }
 
         public override void ResetState()
