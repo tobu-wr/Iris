@@ -48,10 +48,16 @@ namespace Iris.UserInterface
 
         private FormWindowState _previousWindowState;
 
+        private readonly Stopwatch _frameStopwatch = new();
+        private readonly object _performanceCounterLock = new(); // TODO (C#13): replace object with System.Threading.Lock
         private int _frameCount;
+        private long _frameDuration;
+        private long _minFrameDuration;
+        private long _maxFrameDuration;
         private long _renderingDuration;
+        private long _minRenderingLoad;
+        private long _maxRenderingLoad;
         private readonly System.Windows.Forms.Timer _performanceCounterTimer = new();
-        private readonly Stopwatch _performanceCounterStopwatch = new();
 
         private bool _framerateLimiterEnabled = true;
         private readonly Stopwatch _framerateLimiterStopwatch = Stopwatch.StartNew();
@@ -82,7 +88,10 @@ namespace Iris.UserInterface
         {
             TimeGetDevCaps(ref _timeCaps, (uint)Unsafe.SizeOf<TimeCaps>());
             _ = TimeBeginPeriod(_timeCaps._periodMin);
-            System.Console.WriteLine($"[Iris.UserInterface.MainWindow] Timer resolution: {_timeCaps._periodMin}ms");
+
+            System.Console.WriteLine($"[Iris.UserInterface.MainWindow] System timer resolution: {_timeCaps._periodMin}ms");
+            System.Console.WriteLine($"[Iris.UserInterface.MainWindow] Stopwatch is high-resolution: {Stopwatch.IsHighResolution}");
+            System.Console.WriteLine($"[Iris.UserInterface.MainWindow] Stopwatch resolution: {1_000_000_000 / Stopwatch.Frequency}ns");
 
             InitializeComponent();
 
@@ -99,7 +108,7 @@ namespace Iris.UserInterface
             _xboxController = new(XboxController_ButtonDown, XboxController_ButtonUp);
 
             _performanceCounterTimer.Interval = 1000;
-            _performanceCounterTimer.Tick += FramerateCounterTimer_Tick;
+            _performanceCounterTimer.Tick += PerformanceCounterTimer_Tick;
 
             if (args.Length > 0)
                 LoadROM(args[0]);
@@ -143,12 +152,6 @@ namespace Iris.UserInterface
             Marshal.Copy(buffer, 0, data.Scan0, PixelCount);
             bitmap.UnlockBits(data);
 
-            screenBox.Invoke(() => screenBox.Image = bitmap);
-            screenBox.Invalidate();
-
-            Interlocked.Increment(ref _frameCount);
-            Interlocked.Add(ref _renderingDuration, renderingDuration);
-
             if (_framerateLimiterEnabled)
             {
                 const double TargetFrameRate = 59.737411711095921;
@@ -173,6 +176,40 @@ namespace Iris.UserInterface
                 else
                 {
                     _framerateLimiterLastFrameTime = currentFrameTime;
+                }
+            }
+
+            Invoke(() =>
+            {
+                screenBox.Image = bitmap;
+            });
+
+            long frameDuration = _frameStopwatch.ElapsedTicks;
+            _frameStopwatch.Restart();
+
+            lock (_performanceCounterLock)
+            {
+                ++_frameCount;
+                _frameDuration += frameDuration;
+                _renderingDuration += renderingDuration;
+
+                long renderingLoad = 100 * renderingDuration / frameDuration;
+
+                if (_frameCount == 1) // first frame
+                {
+                    _minFrameDuration = frameDuration;
+                    _maxFrameDuration = frameDuration;
+
+                    _minRenderingLoad = renderingLoad;
+                    _maxRenderingLoad = renderingLoad;
+                }
+                else
+                {
+                    _minFrameDuration = Math.Min(frameDuration, _minFrameDuration);
+                    _maxFrameDuration = Math.Max(frameDuration, _maxFrameDuration);
+
+                    _minRenderingLoad = Math.Min(renderingLoad, _minRenderingLoad);
+                    _maxRenderingLoad = Math.Max(renderingLoad, _maxRenderingLoad);
                 }
             }
         }
@@ -208,10 +245,15 @@ namespace Iris.UserInterface
 
         private void Run()
         {
+            _frameStopwatch.Restart();
             _frameCount = 0;
+            _frameDuration = 0;
+            _minFrameDuration = 0;
+            _maxFrameDuration = 0;
             _renderingDuration = 0;
+            _minRenderingLoad = 0;
+            _maxRenderingLoad = 0;
             _performanceCounterTimer.Start();
-            _performanceCounterStopwatch.Restart();
 
             runToolStripMenuItem.Enabled = false;
             pauseToolStripMenuItem.Enabled = true;
@@ -246,8 +288,8 @@ namespace Iris.UserInterface
                     pauseToolStripMenuItem.Enabled = false;
 
                     statusToolStripStatusLabel.Text = "Paused";
-                    fpsToolStripStatusLabel.Text = "FPS: 0,00";
-                    renderingLoadToolStripStatusLabel.Text = "Rendering Load: 0%";
+                    fpsToolStripStatusLabel.Text = "FPS: 0,00 (min: 0,00 | max: 0,00)";
+                    renderingLoadToolStripStatusLabel.Text = "Rendering Load: 0% (min: 0% | max: 0%)";
 
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 });
@@ -272,8 +314,8 @@ namespace Iris.UserInterface
             pauseToolStripMenuItem.Enabled = false;
 
             statusToolStripStatusLabel.Text = "Paused";
-            fpsToolStripStatusLabel.Text = "FPS: 0,00";
-            renderingLoadToolStripStatusLabel.Text = "Rendering Load: 0%";
+            fpsToolStripStatusLabel.Text = "FPS: 0,00 (min: 0,00 | max: 0,00)";
+            renderingLoadToolStripStatusLabel.Text = "Rendering Load: 0% (min: 0% | max: 0%)";
         }
 
         private void LoadROMToolStripMenuItem_Click(object sender, EventArgs e)
@@ -448,17 +490,33 @@ namespace Iris.UserInterface
                 _system.SetKeyStatus(value, Common.System.KeyStatus.NoInput);
         }
 
-        private void FramerateCounterTimer_Tick(object sender, EventArgs e)
+        private void PerformanceCounterTimer_Tick(object sender, EventArgs e)
         {
-            double fps = Math.Round((double)_frameCount * Stopwatch.Frequency / _performanceCounterStopwatch.ElapsedTicks, 2, MidpointRounding.AwayFromZero);
-            fpsToolStripStatusLabel.Text = $"FPS: {fps:F2}";
+            lock (_performanceCounterLock)
+            {
+                if (_frameCount == 0)
+                {
+                    fpsToolStripStatusLabel.Text = "FPS: 0,00 (min: 0,00 | max: 0,00)";
+                    renderingLoadToolStripStatusLabel.Text = "Rendering Load: 0% (min: 0% | max: 0%)";
+                    return;
+                }
 
-            long renderingLoad = 100 * _renderingDuration / _performanceCounterStopwatch.ElapsedTicks;
-            renderingLoadToolStripStatusLabel.Text = $"Rendering Load: {renderingLoad}%";
+                double fps = Math.Round((double)_frameCount * Stopwatch.Frequency / _frameDuration, 2, MidpointRounding.AwayFromZero);
+                double minFps = Math.Round((double)Stopwatch.Frequency / _maxFrameDuration, 2, MidpointRounding.AwayFromZero);
+                double maxFps = Math.Round((double)Stopwatch.Frequency / _minFrameDuration, 2, MidpointRounding.AwayFromZero);
+                fpsToolStripStatusLabel.Text = $"FPS: {fps:F2} (min: {minFps:F2} | max: {maxFps:F2})";
 
-            _frameCount = 0;
-            _renderingDuration = 0;
-            _performanceCounterStopwatch.Restart();
+                long renderingLoad = 100 * _renderingDuration / _frameDuration;
+                renderingLoadToolStripStatusLabel.Text = $"Rendering Load: {renderingLoad}% (min: {_minRenderingLoad}% | max: {_maxRenderingLoad}%)";
+
+                _frameCount = 0;
+                _frameDuration = 0;
+                _minFrameDuration = 0;
+                _maxFrameDuration = 0;
+                _renderingDuration = 0;
+                _minRenderingLoad = 0;
+                _maxRenderingLoad = 0;
+            }
         }
     }
 }
