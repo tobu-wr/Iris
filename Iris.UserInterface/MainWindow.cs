@@ -194,8 +194,10 @@ namespace Iris.UserInterface
             lock (_performanceCounterLock)
             {
                 ++_frameCount;
+
                 _frameDuration += frameDuration;
                 _squareFrameDuration += frameDuration * frameDuration;
+
                 _renderingDuration += renderingDuration;
                 _squareRenderingDuration += renderingDuration * renderingDuration;
 
@@ -510,15 +512,20 @@ namespace Iris.UserInterface
                 }
 
                 double fps = Math.Round((double)_frameCount * Stopwatch.Frequency / _frameDuration, 2, MidpointRounding.AwayFromZero);
+
                 double sdFrameDuration = Math.Sqrt((double)_squareFrameDuration / _frameCount - Math.Pow((double)_frameDuration / _frameCount, 2));
                 double sdFps = Math.Round(Stopwatch.Frequency * sdFrameDuration * Math.Pow((double)_frameCount / _frameDuration, 2), 2, MidpointRounding.AwayFromZero);
+
                 double minFps = Math.Round((double)Stopwatch.Frequency / _maxFrameDuration, 2, MidpointRounding.AwayFromZero);
                 double maxFps = Math.Round((double)Stopwatch.Frequency / _minFrameDuration, 2, MidpointRounding.AwayFromZero);
+
                 fpsToolStripStatusLabel.Text = $"FPS: {fps:F2} (sd: {sdFps:F2} | min: {minFps:F2} | max: {maxFps:F2})";
 
                 int renderingLoad = (int)Math.Round(100.0 * _renderingDuration / _frameDuration, MidpointRounding.AwayFromZero);
+
                 double sdRenderingDuration = Math.Sqrt((double)_squareRenderingDuration / _frameCount - Math.Pow((double)_renderingDuration / _frameCount, 2));
                 int sdRenderingLoad = (int)Math.Round(100.0 * sdRenderingDuration * _frameCount / _frameDuration, MidpointRounding.AwayFromZero);
+
                 renderingLoadToolStripStatusLabel.Text = $"Rendering Load: {renderingLoad}% (sd: {sdRenderingLoad}% | min: {_minRenderingLoad}% | max: {_maxRenderingLoad}%)";
 
                 _frameCount = 0;
