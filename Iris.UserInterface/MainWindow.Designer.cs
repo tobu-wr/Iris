@@ -83,8 +83,8 @@
             // fpsToolStripStatusLabel
             // 
             fpsToolStripStatusLabel.Name = "fpsToolStripStatusLabel";
-            fpsToolStripStatusLabel.Size = new Size(213, 20);
-            fpsToolStripStatusLabel.Text = "FPS: 0,00 (min: 0,00 | max: 0,00)";
+            fpsToolStripStatusLabel.Size = new Size(274, 20);
+            fpsToolStripStatusLabel.Text = "FPS: 0,00 (sd: 0,00 | min: 0,00 | max: 0,00)";
             // 
             // toolStripStatusLabel1
             // 
@@ -95,8 +95,8 @@
             // renderingLoadToolStripStatusLabel
             // 
             renderingLoadToolStripStatusLabel.Name = "renderingLoadToolStripStatusLabel";
-            renderingLoadToolStripStatusLabel.Size = new Size(274, 20);
-            renderingLoadToolStripStatusLabel.Text = "Rendering Load: 0% (min: 0% | max: 0%)";
+            renderingLoadToolStripStatusLabel.Size = new Size(328, 20);
+            renderingLoadToolStripStatusLabel.Text = "Rendering Load: 0% (sd: 0% | min: 0% | max: 0%)";
             // 
             // menuStrip1
             // 
