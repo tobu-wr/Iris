@@ -87,12 +87,8 @@ namespace Iris.GBA
             _bios.Reset();
         }
 
-        public override void LoadState(string filename)
+        public override void LoadState(BinaryReader reader)
         {
-            using FileStream fileStream = File.Open(filename, FileMode.Open, FileAccess.Read);
-            using DeflateStream deflateStream = new(fileStream, CompressionMode.Decompress);
-            using BinaryReader reader = new(deflateStream, System.Text.Encoding.UTF8, false);
-
             if (reader.ReadString() != StateSaveMagic)
                 throw new Exception();
 
@@ -116,12 +112,8 @@ namespace Iris.GBA
             _video.LoadState(reader);
         }
 
-        public override void SaveState(string filename)
+        public override void SaveState(BinaryWriter writer)
         {
-            using FileStream fileStream = File.Open(filename, FileMode.Create, FileAccess.Write);
-            using DeflateStream deflateStream = new(fileStream, CompressionMode.Compress);
-            using BinaryWriter writer = new(deflateStream, System.Text.Encoding.UTF8, false);
-
             writer.Write(StateSaveMagic);
             writer.Write(StateSaveVersion);
             writer.Write(_romHash);

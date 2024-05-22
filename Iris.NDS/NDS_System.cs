@@ -32,12 +32,12 @@
             _cpu.NIRQ = CPU.CPU_Core.Signal.High;
         }
 
-        public override void LoadState(string filename)
+        public override void LoadState(BinaryReader reader)
         {
             // TODO
         }
 
-        public override void SaveState(string filename)
+        public override void SaveState(BinaryWriter writer)
         {
             // TODO
         }

@@ -30,8 +30,8 @@
         public abstract void Dispose();
 
         public abstract void ResetState();
-        public abstract void LoadState(string filename);
-        public abstract void SaveState(string filename);
+        public abstract void LoadState(BinaryReader reader);
+        public abstract void SaveState(BinaryWriter writer);
 
         public abstract void LoadROM(string filename);
         public abstract void SetKeyStatus(Key key, KeyStatus status);

@@ -1,6 +1,7 @@
 using System.Collections.Frozen;
 using System.Diagnostics;
 using System.Drawing.Imaging;
+using System.IO.Compression;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -367,7 +368,11 @@ namespace Iris.UserInterface
             {
                 try
                 {
-                    _system.LoadState(dialog.FileName);
+                    using FileStream fileStream = File.Open(dialog.FileName, FileMode.Open, FileAccess.Read);
+                    using DeflateStream deflateStream = new(fileStream, CompressionMode.Decompress);
+                    using BinaryReader reader = new(deflateStream, System.Text.Encoding.UTF8, false);
+
+                    _system.LoadState(reader);
                 }
                 catch (Exception ex)
                 {
@@ -392,7 +397,20 @@ namespace Iris.UserInterface
             };
 
             if (dialog.ShowDialog() == DialogResult.OK)
-                _system.SaveState(dialog.FileName);
+            {
+                try
+                {
+                    using FileStream fileStream = File.Open(dialog.FileName, FileMode.Create, FileAccess.Write);
+                    using DeflateStream deflateStream = new(fileStream, CompressionMode.Compress);
+                    using BinaryWriter writer = new(deflateStream, System.Text.Encoding.UTF8, false);
+
+                    _system.SaveState(writer);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
 
             if (running)
                 Run();
