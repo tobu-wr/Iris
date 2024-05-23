@@ -139,14 +139,12 @@ namespace Iris.GBA
         private const int DisplayScreenWidth = 240;
         private const int DisplayScreenHeight = 160;
         private const int DisplayScreenSize = DisplayScreenWidth * DisplayScreenHeight;
-        private const int ScanlineLength = 308;
 
         private const int CharacterWidth = 8;
         private const int CharacterHeight = 8;
 
-        private const UInt32 PixelCycleCount = 4;
         private const UInt32 DisplayLineCycleCount = 1006;
-        private const UInt32 ScanlineCycleCount = ScanlineLength * PixelCycleCount;
+        private const UInt32 HBlankCycleCount = 226;
 
         private readonly Common.Scheduler _scheduler;
         private readonly Common.System.PresentFrame_Delegate _presentFrameCallback;
@@ -270,7 +268,6 @@ namespace Iris.GBA
             _BLDY = 0;
 
             _scheduler.ScheduleTask((int)GBA_System.TaskId.StartHBlank, DisplayLineCycleCount);
-            _scheduler.ScheduleTask((int)GBA_System.TaskId.StartScanline, ScanlineCycleCount);
 
             Array.Clear(_displayFrameBuffer);
 
@@ -644,6 +641,8 @@ namespace Iris.GBA
 
             if (_VCOUNT < DisplayScreenHeight)
                 _dma.PerformAllTransfers(DMA.StartTiming.HBlank);
+
+            _scheduler.ScheduleTask((int)GBA_System.TaskId.StartScanline, HBlankCycleCount - cycleCountDelay);
         }
 
         private void StartScanline(UInt32 cycleCountDelay)
@@ -715,7 +714,6 @@ namespace Iris.GBA
             }
 
             _scheduler.ScheduleTask((int)GBA_System.TaskId.StartHBlank, DisplayLineCycleCount - cycleCountDelay);
-            _scheduler.ScheduleTask((int)GBA_System.TaskId.StartScanline, ScanlineCycleCount - cycleCountDelay);
         }
 
         private void Render()

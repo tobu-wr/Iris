@@ -19,7 +19,7 @@ namespace Iris.GBA
         }
 
         private static readonly int s_taskIdCount = Enum.GetNames(typeof(TaskId)).Length;
-        private readonly Common.Scheduler _scheduler = new(s_taskIdCount, s_taskIdCount + 1);
+        private readonly Common.Scheduler _scheduler = new(s_taskIdCount, s_taskIdCount);
 
         private readonly CPU.CPU_Core _cpu;
         private readonly Communication _communication = new();
