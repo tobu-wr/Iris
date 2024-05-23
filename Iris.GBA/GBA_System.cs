@@ -19,7 +19,6 @@ namespace Iris.GBA
         }
 
         private static readonly int s_taskIdCount = Enum.GetNames(typeof(TaskId)).Length;
-
         private readonly Common.Scheduler _scheduler = new(s_taskIdCount, s_taskIdCount + 1);
 
         private readonly CPU.CPU_Core _cpu;
@@ -32,7 +31,6 @@ namespace Iris.GBA
         private readonly InterruptControl _interruptControl = new();
         private readonly Memory _memory = new();
         private readonly Video _video;
-
         private readonly BIOS _bios = new("D:\\dev\\Iris\\ROMs\\GBA\\gba_bios.bin");
 
         private string _romHash;
@@ -57,7 +55,6 @@ namespace Iris.GBA
             _interruptControl.Initialize(_cpu);
             _memory.Initialize(_communication, _timer, _sound, _dma, _keyInput, _systemControl, _interruptControl, _video, _bios);
             _video.Initialize(_dma, _interruptControl, _memory);
-
             _bios.Initialize(_cpu, _memory);
         }
 
@@ -65,13 +62,12 @@ namespace Iris.GBA
         {
             _memory.Dispose();
             _video.Dispose();
-
             _bios.Dispose();
         }
 
         public override void ResetState()
         {
-            _scheduler.ResetState();
+            _scheduler.ResetState(); // This has to be done first
 
             _cpu.ResetState();
             _communication.ResetState();
@@ -84,7 +80,7 @@ namespace Iris.GBA
             _memory.ResetState();
             _video.ResetState();
 
-            _bios.Reset();
+            _bios.Reset(); // This has to be done last
         }
 
         public override void LoadState(BinaryReader reader)
@@ -99,7 +95,6 @@ namespace Iris.GBA
                 throw new Exception();
 
             _scheduler.LoadState(reader);
-
             _cpu.LoadState(reader);
             _communication.LoadState(reader);
             _timer.LoadState(reader);
@@ -119,7 +114,6 @@ namespace Iris.GBA
             writer.Write(_romHash);
 
             _scheduler.SaveState(writer);
-
             _cpu.SaveState(writer);
             _communication.SaveState(writer);
             _timer.SaveState(writer);
