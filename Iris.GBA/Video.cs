@@ -143,7 +143,7 @@ namespace Iris.GBA
         private const int CharacterWidth = 8;
         private const int CharacterHeight = 8;
 
-        private const UInt32 DisplayLineCycleCount = 1006;
+        private const UInt32 HDrawCycleCount = 1006;
         private const UInt32 HBlankCycleCount = 226;
 
         private readonly Common.Scheduler _scheduler;
@@ -267,7 +267,7 @@ namespace Iris.GBA
             _BLDALPHA = 0;
             _BLDY = 0;
 
-            _scheduler.ScheduleTask((int)GBA_System.TaskId.StartHBlank, DisplayLineCycleCount);
+            _scheduler.ScheduleTask((int)GBA_System.TaskId.StartHBlank, HDrawCycleCount);
 
             Array.Clear(_displayFrameBuffer);
 
@@ -713,7 +713,7 @@ namespace Iris.GBA
                 _DISPSTAT = (UInt16)(_DISPSTAT & ~0x0004); // clear VCountMatch status
             }
 
-            _scheduler.ScheduleTask((int)GBA_System.TaskId.StartHBlank, DisplayLineCycleCount - cycleCountDelay);
+            _scheduler.ScheduleTask((int)GBA_System.TaskId.StartHBlank, HDrawCycleCount - cycleCountDelay);
         }
 
         private void Render()
