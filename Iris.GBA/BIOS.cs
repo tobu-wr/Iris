@@ -49,7 +49,7 @@ namespace Iris.GBA
             _disposed = true;
         }
 
-        internal void Initialize(CPU.CPU_Core cpu, Communication communication, Memory memory)
+        internal void Initialize(CPU.CPU_Core cpu, Memory memory)
         {
             _cpu = cpu;
 
