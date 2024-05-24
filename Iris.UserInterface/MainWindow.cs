@@ -119,9 +119,7 @@ namespace Iris.UserInterface
 
         protected override void Dispose(bool disposing)
         {
-            bool running = (_system != null) && _system.IsRunning();
-
-            if (running)
+            if ((_system != null) && _system.IsRunning())
                 Pause();
 
             _ = TimeEndPeriod(_timeCaps._periodMin);
