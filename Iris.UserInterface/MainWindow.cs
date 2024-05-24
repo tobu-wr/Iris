@@ -369,8 +369,8 @@ namespace Iris.UserInterface
                 try
                 {
                     using FileStream fileStream = File.Open(dialog.FileName, FileMode.Open, FileAccess.Read);
-                    using DeflateStream deflateStream = new(fileStream, CompressionMode.Decompress);
-                    using BinaryReader reader = new(deflateStream, System.Text.Encoding.UTF8, false);
+                    using GZipStream gzipStream = new(fileStream, CompressionMode.Decompress);
+                    using BinaryReader reader = new(gzipStream, System.Text.Encoding.UTF8, false);
 
                     _system.LoadState(reader);
                 }
@@ -401,8 +401,8 @@ namespace Iris.UserInterface
                 try
                 {
                     using FileStream fileStream = File.Open(dialog.FileName, FileMode.Create, FileAccess.Write);
-                    using DeflateStream deflateStream = new(fileStream, CompressionMode.Compress);
-                    using BinaryWriter writer = new(deflateStream, System.Text.Encoding.UTF8, false);
+                    using GZipStream gzipStream = new(fileStream, CompressionMode.Compress);
+                    using BinaryWriter writer = new(gzipStream, System.Text.Encoding.UTF8, false);
 
                     _system.SaveState(writer);
                 }
