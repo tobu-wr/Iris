@@ -117,9 +117,19 @@ namespace Iris.UserInterface
                 LoadROM(args[0]);
         }
 
-        ~MainWindow()
+        protected override void Dispose(bool disposing)
         {
+            bool running = (_system != null) && _system.IsRunning();
+
+            if (running)
+                Pause();
+
             _ = TimeEndPeriod(_timeCaps._periodMin);
+
+            if (disposing)
+                components?.Dispose();
+
+            base.Dispose(disposing);
         }
 
         private void PollInput()
