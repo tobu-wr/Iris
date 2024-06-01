@@ -81,8 +81,6 @@
         private UInt16 _FIFO_B_L;
         private UInt16 _FIFO_B_H;
 
-        private const int StateSaveVersion = 1;
-
         internal void ResetState()
         {
             _SOUND1CNT_L = 0;
@@ -126,9 +124,6 @@
 
         internal void LoadState(BinaryReader reader)
         {
-            if (reader.ReadInt32() != StateSaveVersion)
-                throw new Exception();
-
             _SOUND1CNT_L = reader.ReadUInt16();
             _SOUND1CNT_H = reader.ReadUInt16();
             _SOUND1CNT_X = reader.ReadUInt16();
@@ -170,8 +165,6 @@
 
         internal void SaveState(BinaryWriter writer)
         {
-            writer.Write(StateSaveVersion);
-
             writer.Write(_SOUND1CNT_L);
             writer.Write(_SOUND1CNT_H);
             writer.Write(_SOUND1CNT_X);

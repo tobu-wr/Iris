@@ -15,8 +15,6 @@
 
         private InterruptControl _interruptControl;
 
-        private const int StateSaveVersion = 1;
-
         internal void Initialize(InterruptControl interruptControl)
         {
             _interruptControl = interruptControl;
@@ -30,17 +28,12 @@
 
         internal void LoadState(BinaryReader reader)
         {
-            if (reader.ReadInt32() != StateSaveVersion)
-                throw new Exception();
-
             _KEYINPUT = reader.ReadUInt16();
             _KEYCNT = reader.ReadUInt16();
         }
 
         internal void SaveState(BinaryWriter writer)
         {
-            writer.Write(StateSaveVersion);
-
             writer.Write(_KEYINPUT);
             writer.Write(_KEYCNT);
         }

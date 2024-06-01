@@ -11,8 +11,6 @@
         private UInt16 _WAITCNT;
         private UInt16 _SYSCNT_UND0;
 
-        private const int StateSaveVersion = 1;
-
         internal void ResetState()
         {
             _WAITCNT = 0;
@@ -21,17 +19,12 @@
 
         internal void LoadState(BinaryReader reader)
         {
-            if (reader.ReadInt32() != StateSaveVersion)
-                throw new Exception();
-
             _WAITCNT = reader.ReadUInt16();
             _SYSCNT_UND0 = reader.ReadUInt16();
         }
 
         internal void SaveState(BinaryWriter writer)
         {
-            writer.Write(StateSaveVersion);
-
             writer.Write(_WAITCNT);
             writer.Write(_SYSCNT_UND0);
         }

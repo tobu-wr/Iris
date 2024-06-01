@@ -47,8 +47,6 @@
 
         private InterruptControl _interruptControl;
 
-        private const int StateSaveVersion = 1;
-
         internal void Initialize(InterruptControl interruptControl)
         {
             _interruptControl = interruptControl;
@@ -79,9 +77,6 @@
 
         internal void LoadState(BinaryReader reader)
         {
-            if (reader.ReadInt32() != StateSaveVersion)
-                throw new Exception();
-
             _SIODATA0 = reader.ReadUInt16();
             _SIODATA1 = reader.ReadUInt16();
             _SIODATA2 = reader.ReadUInt16();
@@ -105,8 +100,6 @@
 
         internal void SaveState(BinaryWriter writer)
         {
-            writer.Write(StateSaveVersion);
-
             writer.Write(_SIODATA0);
             writer.Write(_SIODATA1);
             writer.Write(_SIODATA2);

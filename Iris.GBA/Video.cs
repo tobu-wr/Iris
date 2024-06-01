@@ -163,8 +163,6 @@ namespace Iris.GBA
         private Int32 _currentBG3X;
         private Int32 _currentBG3Y;
 
-        private const int StateSaveVersion = 1;
-
         internal Video(Common.Scheduler scheduler, Common.System.PresentFrame_Delegate presentFrameCallback)
         {
             _scheduler = scheduler;
@@ -280,9 +278,6 @@ namespace Iris.GBA
 
         internal void LoadState(BinaryReader reader)
         {
-            if (reader.ReadInt32() != StateSaveVersion)
-                throw new Exception();
-
             byte[] paletteRamData = reader.ReadBytes(PaletteRAM_Size);
             byte[] vramData = reader.ReadBytes(VRAM_Size);
             byte[] oamData = reader.ReadBytes(OAM_Size);
@@ -357,8 +352,6 @@ namespace Iris.GBA
 
         internal void SaveState(BinaryWriter writer)
         {
-            writer.Write(StateSaveVersion);
-
             byte[] paletteRamData = new byte[PaletteRAM_Size];
             byte[] vramData = new byte[VRAM_Size];
             byte[] oamData = new byte[OAM_Size];

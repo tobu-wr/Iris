@@ -36,7 +36,7 @@ namespace Iris.GBA
         private string _romHash;
         private bool _running;
 
-        private const string StateSaveMagic = "IRIS";
+        private const string StateSaveMagic = "IRISGBA";
         private const int StateSaveVersion = 1;
 
         public GBA_System(PollInput_Delegate pollInputCallback, PresentFrame_Delegate presentFrameCallback)
@@ -86,13 +86,13 @@ namespace Iris.GBA
         public override void LoadState(BinaryReader reader)
         {
             if (reader.ReadString() != StateSaveMagic)
-                throw new Exception();
+                throw new Exception("Iris.GBA.GBA_System: Wrong state save magic");
 
             if (reader.ReadInt32() != StateSaveVersion)
-                throw new Exception();
+                throw new Exception("Iris.GBA.GBA_System: Wrong state save version");
 
             if (reader.ReadString() != _romHash)
-                throw new Exception();
+                throw new Exception("Iris.GBA.GBA_System: Wrong ROM hash");
 
             _scheduler.LoadState(reader);
             _cpu.LoadState(reader);

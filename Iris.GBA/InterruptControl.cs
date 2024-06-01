@@ -33,8 +33,6 @@
 
         private CPU.CPU_Core _cpu;
 
-        private const int StateSaveVersion = 1;
-
         internal void Initialize(CPU.CPU_Core cpu)
         {
             _cpu = cpu;
@@ -49,9 +47,6 @@
 
         internal void LoadState(BinaryReader reader)
         {
-            if (reader.ReadInt32() != StateSaveVersion)
-                throw new Exception();
-
             _IE = reader.ReadUInt16();
             _IF = reader.ReadUInt16();
             _IME = reader.ReadUInt16();
@@ -59,8 +54,6 @@
 
         internal void SaveState(BinaryWriter writer)
         {
-            writer.Write(StateSaveVersion);
-
             writer.Write(_IE);
             writer.Write(_IF);
             writer.Write(_IME);

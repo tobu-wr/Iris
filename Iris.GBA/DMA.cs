@@ -68,8 +68,6 @@
         private Channel _channel2;
         private Channel _channel3;
 
-        private const int StateSaveVersion = 1;
-
         private const UInt32 MaxLengthChannel0 = 0x4000;
         private const UInt32 MaxLengthChannel1 = 0x4000;
         private const UInt32 MaxLengthChannel2 = 0x4000;
@@ -91,9 +89,6 @@
 
         internal void LoadState(BinaryReader reader)
         {
-            if (reader.ReadInt32() != StateSaveVersion)
-                throw new Exception();
-
             void LoadChannel(ref Channel channel)
             {
                 channel._source = reader.ReadUInt32();
@@ -113,8 +108,6 @@
 
         internal void SaveState(BinaryWriter writer)
         {
-            writer.Write(StateSaveVersion);
-
             void SaveChannel(Channel channel)
             {
                 writer.Write(channel._source);
