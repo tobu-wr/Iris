@@ -165,6 +165,11 @@ namespace Iris.UserInterface
             Marshal.Copy(buffer, 0, data.Scan0, PixelCount);
             bitmap.UnlockBits(data);
 
+            Invoke(() =>
+            {
+                screenBox.Image = bitmap;
+            });
+
             if (_framerateLimiterEnabled)
             {
                 const double TargetFrameRate = 59.737411711095921;
@@ -191,11 +196,6 @@ namespace Iris.UserInterface
                     _framerateLimiterLastFrameTime = currentFrameTime;
                 }
             }
-
-            Invoke(() =>
-            {
-                screenBox.Image = bitmap;
-            });
 
             long frameDuration = _frameStopwatch.ElapsedTicks;
             _frameStopwatch.Restart();

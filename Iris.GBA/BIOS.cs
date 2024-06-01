@@ -24,7 +24,7 @@ namespace Iris.GBA
             }
             catch
             {
-                throw new Exception("Iris.GBA.BIOS: Could not load BIOS");
+                throw new Exception("Iris.GBA.BIOS: Could not read BIOS");
             }
 
             if (data.Length != BIOS_Size)
