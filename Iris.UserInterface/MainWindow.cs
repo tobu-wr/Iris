@@ -1,4 +1,5 @@
 using OpenTK.Graphics.OpenGL;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 using System.Collections.Frozen;
 using System.Diagnostics;
 using System.IO.Compression;
@@ -555,6 +556,9 @@ namespace Iris.UserInterface
 
             GL.DeleteShader(vertexShader);
             GL.DeleteShader(fragmentShader);
+
+            // Disable VSYNC
+            GLFW.SwapInterval(0);
         }
 
         private void GLControl_OnResize(object sender, EventArgs e)
