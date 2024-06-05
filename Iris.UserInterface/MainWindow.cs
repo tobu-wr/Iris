@@ -155,6 +155,7 @@ namespace Iris.UserInterface
             ref UInt16 frameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(frameBuffer);
             ref UInt16 textureBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_textureBuffer);
 
+            // This loop could easily be optimized with AVX2 or SSE2
             for (int offset = 0; offset < TextureSize; ++offset)
                 Unsafe.Add(ref textureBufferDataRef, offset) = (UInt16)(Unsafe.Add(ref frameBufferDataRef, offset) << 1);
 
@@ -554,8 +555,6 @@ namespace Iris.UserInterface
 
             GL.DeleteShader(vertexShader);
             GL.DeleteShader(fragmentShader);
-
-            WglSwapIntervalEXT(0); // disable vsync
         }
 
         private void GLControl_OnResize(object sender, EventArgs e)
