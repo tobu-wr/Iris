@@ -38,51 +38,49 @@
             toolStripSeparator3 = new ToolStripSeparator();
             limitFramerateToolStripMenuItem = new ToolStripMenuItem();
             automaticPauseToolStripMenuItem = new ToolStripMenuItem();
-            screenBox = new ScreenBox();
+            glControl = new OpenTK.WinForms.GLControl();
             statusStrip1.SuspendLayout();
             menuStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)screenBox).BeginInit();
             SuspendLayout();
             // 
             // statusStrip1
             // 
             statusStrip1.ImageScalingSize = new Size(20, 20);
             statusStrip1.Items.AddRange(new ToolStripItem[] { statusToolStripStatusLabel, toolStripStatusLabel2, fpsToolStripStatusLabel, toolStripStatusLabel1, renderingLoadToolStripStatusLabel });
-            statusStrip1.Location = new Point(0, 574);
+            statusStrip1.Location = new Point(0, 428);
             statusStrip1.Name = "statusStrip1";
-            statusStrip1.Padding = new Padding(1, 0, 16, 0);
-            statusStrip1.Size = new Size(914, 26);
+            statusStrip1.Size = new Size(800, 22);
             statusStrip1.TabIndex = 0;
             statusStrip1.Text = "statusStrip1";
             // 
             // statusToolStripStatusLabel
             // 
             statusToolStripStatusLabel.Name = "statusToolStripStatusLabel";
-            statusToolStripStatusLabel.Size = new Size(117, 20);
+            statusToolStripStatusLabel.Size = new Size(92, 17);
             statusToolStripStatusLabel.Text = "No ROM loaded";
             // 
             // toolStripStatusLabel2
             // 
             toolStripStatusLabel2.Name = "toolStripStatusLabel2";
-            toolStripStatusLabel2.Size = new Size(15, 20);
+            toolStripStatusLabel2.Size = new Size(12, 17);
             toolStripStatusLabel2.Text = "-";
             // 
             // fpsToolStripStatusLabel
             // 
             fpsToolStripStatusLabel.Name = "fpsToolStripStatusLabel";
-            fpsToolStripStatusLabel.Size = new Size(274, 20);
+            fpsToolStripStatusLabel.Size = new Size(219, 17);
             fpsToolStripStatusLabel.Text = "FPS: 0,00 (sd: 0,00 | min: 0,00 | max: 0,00)";
             // 
             // toolStripStatusLabel1
             // 
             toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            toolStripStatusLabel1.Size = new Size(15, 20);
+            toolStripStatusLabel1.Size = new Size(12, 17);
             toolStripStatusLabel1.Text = "-";
             // 
             // renderingLoadToolStripStatusLabel
             // 
             renderingLoadToolStripStatusLabel.Name = "renderingLoadToolStripStatusLabel";
-            renderingLoadToolStripStatusLabel.Size = new Size(328, 20);
+            renderingLoadToolStripStatusLabel.Size = new Size(263, 17);
             renderingLoadToolStripStatusLabel.Text = "Rendering Load: 0% (sd: 0% | min: 0% | max: 0%)";
             // 
             // menuStrip1
@@ -91,8 +89,7 @@
             menuStrip1.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem, viewToolStripMenuItem, emulationToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
-            menuStrip1.Padding = new Padding(7, 3, 0, 3);
-            menuStrip1.Size = new Size(914, 30);
+            menuStrip1.Size = new Size(800, 24);
             menuStrip1.TabIndex = 1;
             menuStrip1.Text = "menuStrip1";
             // 
@@ -100,26 +97,26 @@
             // 
             fileToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { loadROMToolStripMenuItem, toolStripSeparator1, loadStateToolStripMenuItem, saveStateToolStripMenuItem, toolStripSeparator2, quitToolStripMenuItem });
             fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            fileToolStripMenuItem.Size = new Size(46, 24);
+            fileToolStripMenuItem.Size = new Size(37, 20);
             fileToolStripMenuItem.Text = "&File";
             // 
             // loadROMToolStripMenuItem
             // 
             loadROMToolStripMenuItem.Name = "loadROMToolStripMenuItem";
-            loadROMToolStripMenuItem.Size = new Size(171, 26);
+            loadROMToolStripMenuItem.Size = new Size(139, 22);
             loadROMToolStripMenuItem.Text = "Load &ROM...";
             loadROMToolStripMenuItem.Click += LoadROMToolStripMenuItem_Click;
             // 
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new Size(168, 6);
+            toolStripSeparator1.Size = new Size(136, 6);
             // 
             // loadStateToolStripMenuItem
             // 
             loadStateToolStripMenuItem.Enabled = false;
             loadStateToolStripMenuItem.Name = "loadStateToolStripMenuItem";
-            loadStateToolStripMenuItem.Size = new Size(171, 26);
+            loadStateToolStripMenuItem.Size = new Size(139, 22);
             loadStateToolStripMenuItem.Text = "&Load state...";
             loadStateToolStripMenuItem.Click += LoadStateToolStripMenuItem_Click;
             // 
@@ -127,19 +124,19 @@
             // 
             saveStateToolStripMenuItem.Enabled = false;
             saveStateToolStripMenuItem.Name = "saveStateToolStripMenuItem";
-            saveStateToolStripMenuItem.Size = new Size(171, 26);
+            saveStateToolStripMenuItem.Size = new Size(139, 22);
             saveStateToolStripMenuItem.Text = "&Save state...";
             saveStateToolStripMenuItem.Click += SaveStateToolStripMenuItem_Click;
             // 
             // toolStripSeparator2
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new Size(168, 6);
+            toolStripSeparator2.Size = new Size(136, 6);
             // 
             // quitToolStripMenuItem
             // 
             quitToolStripMenuItem.Name = "quitToolStripMenuItem";
-            quitToolStripMenuItem.Size = new Size(171, 26);
+            quitToolStripMenuItem.Size = new Size(139, 22);
             quitToolStripMenuItem.Text = "&Quit";
             quitToolStripMenuItem.Click += QuitToolStripMenuItem_Click;
             // 
@@ -147,14 +144,14 @@
             // 
             viewToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { fullScreenToolStripMenuItem });
             viewToolStripMenuItem.Name = "viewToolStripMenuItem";
-            viewToolStripMenuItem.Size = new Size(55, 24);
+            viewToolStripMenuItem.Size = new Size(44, 20);
             viewToolStripMenuItem.Text = "&View";
             // 
             // fullScreenToolStripMenuItem
             // 
             fullScreenToolStripMenuItem.CheckOnClick = true;
             fullScreenToolStripMenuItem.Name = "fullScreenToolStripMenuItem";
-            fullScreenToolStripMenuItem.Size = new Size(163, 26);
+            fullScreenToolStripMenuItem.Size = new Size(131, 22);
             fullScreenToolStripMenuItem.Text = "&Full Screen";
             fullScreenToolStripMenuItem.Click += FullScreenToolStripMenuItem_Click;
             // 
@@ -162,14 +159,14 @@
             // 
             emulationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { runToolStripMenuItem, pauseToolStripMenuItem, resetToolStripMenuItem, toolStripSeparator3, limitFramerateToolStripMenuItem, automaticPauseToolStripMenuItem });
             emulationToolStripMenuItem.Name = "emulationToolStripMenuItem";
-            emulationToolStripMenuItem.Size = new Size(90, 24);
+            emulationToolStripMenuItem.Size = new Size(73, 20);
             emulationToolStripMenuItem.Text = "&Emulation";
             // 
             // runToolStripMenuItem
             // 
             runToolStripMenuItem.Enabled = false;
             runToolStripMenuItem.Name = "runToolStripMenuItem";
-            runToolStripMenuItem.Size = new Size(202, 26);
+            runToolStripMenuItem.Size = new Size(164, 22);
             runToolStripMenuItem.Text = "R&un";
             runToolStripMenuItem.Click += RunToolStripMenuItem_Click;
             // 
@@ -177,7 +174,7 @@
             // 
             pauseToolStripMenuItem.Enabled = false;
             pauseToolStripMenuItem.Name = "pauseToolStripMenuItem";
-            pauseToolStripMenuItem.Size = new Size(202, 26);
+            pauseToolStripMenuItem.Size = new Size(164, 22);
             pauseToolStripMenuItem.Text = "&Pause";
             pauseToolStripMenuItem.Click += PauseToolStripMenuItem_Click;
             // 
@@ -185,14 +182,14 @@
             // 
             resetToolStripMenuItem.Enabled = false;
             resetToolStripMenuItem.Name = "resetToolStripMenuItem";
-            resetToolStripMenuItem.Size = new Size(202, 26);
+            resetToolStripMenuItem.Size = new Size(164, 22);
             resetToolStripMenuItem.Text = "R&eset";
             resetToolStripMenuItem.Click += ResetToolStripMenuItem_Click;
             // 
             // toolStripSeparator3
             // 
             toolStripSeparator3.Name = "toolStripSeparator3";
-            toolStripSeparator3.Size = new Size(199, 6);
+            toolStripSeparator3.Size = new Size(161, 6);
             // 
             // limitFramerateToolStripMenuItem
             // 
@@ -200,7 +197,7 @@
             limitFramerateToolStripMenuItem.CheckOnClick = true;
             limitFramerateToolStripMenuItem.CheckState = CheckState.Checked;
             limitFramerateToolStripMenuItem.Name = "limitFramerateToolStripMenuItem";
-            limitFramerateToolStripMenuItem.Size = new Size(202, 26);
+            limitFramerateToolStripMenuItem.Size = new Size(164, 22);
             limitFramerateToolStripMenuItem.Text = "Limit Framerate";
             limitFramerateToolStripMenuItem.Click += LimitFramerateToolStripMenuItem_Click;
             // 
@@ -210,31 +207,33 @@
             automaticPauseToolStripMenuItem.CheckOnClick = true;
             automaticPauseToolStripMenuItem.CheckState = CheckState.Checked;
             automaticPauseToolStripMenuItem.Name = "automaticPauseToolStripMenuItem";
-            automaticPauseToolStripMenuItem.Size = new Size(202, 26);
+            automaticPauseToolStripMenuItem.Size = new Size(164, 22);
             automaticPauseToolStripMenuItem.Text = "Automatic Pause";
             automaticPauseToolStripMenuItem.Click += AutomaticPauseToolStripMenuItem_Click;
             // 
-            // screenBox
+            // glControl
             // 
-            screenBox.Dock = DockStyle.Fill;
-            screenBox.Location = new Point(0, 30);
-            screenBox.Margin = new Padding(3, 4, 3, 4);
-            screenBox.Name = "screenBox";
-            screenBox.Size = new Size(914, 544);
-            screenBox.SizeMode = PictureBoxSizeMode.StretchImage;
-            screenBox.TabIndex = 2;
-            screenBox.TabStop = false;
+            glControl.API = OpenTK.Windowing.Common.ContextAPI.OpenGL;
+            glControl.APIVersion = new Version(3, 3, 0, 0);
+            glControl.Dock = DockStyle.Fill;
+            glControl.Flags = OpenTK.Windowing.Common.ContextFlags.Default;
+            glControl.IsEventDriven = true;
+            glControl.Location = new Point(0, 24);
+            glControl.Name = "glControl";
+            glControl.Profile = OpenTK.Windowing.Common.ContextProfile.Core;
+            glControl.Size = new Size(800, 404);
+            glControl.TabIndex = 3;
+            glControl.Text = "glControl1";
             // 
             // MainWindow
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(914, 600);
-            Controls.Add(screenBox);
+            ClientSize = new Size(800, 450);
+            Controls.Add(glControl);
             Controls.Add(statusStrip1);
             Controls.Add(menuStrip1);
             MainMenuStrip = menuStrip1;
-            Margin = new Padding(3, 4, 3, 4);
             Name = "MainWindow";
             ShowIcon = false;
             StartPosition = FormStartPosition.CenterScreen;
@@ -243,7 +242,6 @@
             statusStrip1.PerformLayout();
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)screenBox).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -266,7 +264,6 @@
         private ToolStripMenuItem runToolStripMenuItem;
         private ToolStripMenuItem pauseToolStripMenuItem;
         private ToolStripMenuItem resetToolStripMenuItem;
-        private ScreenBox screenBox;
         private ToolStripMenuItem viewToolStripMenuItem;
         private ToolStripMenuItem fullScreenToolStripMenuItem;
         private ToolStripSeparator toolStripSeparator3;
@@ -274,5 +271,6 @@
         private ToolStripStatusLabel toolStripStatusLabel1;
         private ToolStripStatusLabel renderingLoadToolStripStatusLabel;
         private ToolStripMenuItem automaticPauseToolStripMenuItem;
+        private OpenTK.WinForms.GLControl glControl;
     }
 }

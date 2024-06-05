@@ -1,6 +1,6 @@
+using OpenTK.Graphics.OpenGL;
 using System.Collections.Frozen;
 using System.Diagnostics;
-using System.Drawing.Imaging;
 using System.IO.Compression;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -69,6 +69,12 @@ namespace Iris.UserInterface
         private bool _automaticPauseEnabled = true;
         private bool _resume;
 
+        private const int TextureWidth = 240;
+        private const int TextureHeight = 160;
+        private const int TextureSize = TextureWidth * TextureHeight;
+
+        private readonly UInt16[] _textureBuffer = new UInt16[TextureSize];
+
         [StructLayout(LayoutKind.Sequential)]
         private readonly struct TimeCaps
         {
@@ -107,6 +113,9 @@ namespace Iris.UserInterface
             Activated += MainWindow_Activated;
             Deactivate += MainWindow_Deactivate;
 
+            glControl.Load += GLControl_OnLoad;
+            glControl.Resize += GLControl_OnResize;
+
             _keyboard = new(Keyboard_KeyDown, Keyboard_KeyUp);
             _xboxController = new(XboxController_ButtonDown, XboxController_ButtonUp);
 
@@ -143,31 +152,20 @@ namespace Iris.UserInterface
 
         private void PresentFrame(UInt16[] frameBuffer, long renderingDuration)
         {
-            const int ScreenWidth = 240;
-            const int ScreenHeight = 160;
-            const int PixelCount = ScreenWidth * ScreenHeight;
-            const PixelFormat PixelFormat = PixelFormat.Format16bppRgb555;
+            ref UInt16 frameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(frameBuffer);
+            ref UInt16 textureBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_textureBuffer);
 
-            Bitmap bitmap = new(ScreenWidth, ScreenHeight, PixelFormat);
-            BitmapData data = bitmap.LockBits(new Rectangle(0, 0, ScreenWidth, ScreenHeight), ImageLockMode.WriteOnly, PixelFormat);
-
-            Int16[] buffer = new Int16[PixelCount];
-
-            for (int i = 0; i < PixelCount; ++i)
-            {
-                UInt16 gbaColor = frameBuffer[i]; // BGR format
-                Byte red = (Byte)((gbaColor >> 0) & 0x1f);
-                Byte green = (Byte)((gbaColor >> 5) & 0x1f);
-                Byte blue = (Byte)((gbaColor >> 10) & 0x1f);
-                buffer[i] = (Int16)((red << 10) | (green << 5) | blue);
-            }
-
-            Marshal.Copy(buffer, 0, data.Scan0, PixelCount);
-            bitmap.UnlockBits(data);
+            for (int offset = 0; offset < TextureSize; ++offset)
+                Unsafe.Add(ref textureBufferDataRef, offset) = (UInt16)(Unsafe.Add(ref frameBufferDataRef, offset) << 1);
 
             Invoke(() =>
             {
-                screenBox.Image = bitmap;
+                GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, TextureWidth, TextureHeight, 0, PixelFormat.Bgra, PixelType.UnsignedShort5551, _textureBuffer);
+                GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+
+                GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
+
+                glControl.SwapBuffers();
             });
 
             if (_framerateLimiterEnabled)
@@ -500,6 +498,69 @@ namespace Iris.UserInterface
                 Pause();
                 _resume = true;
             }
+        }
+
+        private void GLControl_OnLoad(object sender, EventArgs e)
+        {
+            int vao = GL.GenVertexArray();
+            GL.BindVertexArray(vao);
+
+            float[] vertexData = [
+                1, 1, 1, 1,
+                1, -1, 1, 0,
+                -1, -1, 0, 0,
+                -1, 1, 0, 1
+            ];
+
+            int vbo = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
+            GL.BufferData(BufferTarget.ArrayBuffer, vertexData.Length * sizeof(float), vertexData, BufferUsageHint.StaticDraw);
+
+            uint[] indices = [
+                0, 1, 3,
+                1, 2, 3
+            ];
+
+            int ebo = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, ebo);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length * sizeof(float), indices, BufferUsageHint.StaticDraw);
+
+            GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, 4 * sizeof(float), 0);
+            GL.EnableVertexAttribArray(0);
+
+            GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, 4 * sizeof(float), 2 * sizeof(float));
+            GL.EnableVertexAttribArray(1);
+
+            int texture = GL.GenTexture();
+            GL.BindTexture(TextureTarget.Texture2D, texture);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+
+            int vertexShader = GL.CreateShader(ShaderType.VertexShader);
+            string vertexShaderSource = File.ReadAllText("D:\\dev\\Iris\\Iris.UserInterface\\VertexShader.glsl");
+            GL.ShaderSource(vertexShader, vertexShaderSource);
+            GL.CompileShader(vertexShader);
+
+            int fragmentShader = GL.CreateShader(ShaderType.FragmentShader);
+            string fragmentShaderSource = File.ReadAllText("D:\\dev\\Iris\\Iris.UserInterface\\FragmentShader.glsl");
+            GL.ShaderSource(fragmentShader, fragmentShaderSource);
+            GL.CompileShader(fragmentShader);
+
+            int shaderProgram = GL.CreateProgram();
+            GL.AttachShader(shaderProgram, vertexShader);
+            GL.AttachShader(shaderProgram, fragmentShader);
+            GL.LinkProgram(shaderProgram);
+            GL.UseProgram(shaderProgram);
+
+            GL.DeleteShader(vertexShader);
+            GL.DeleteShader(fragmentShader);
+
+            WglSwapIntervalEXT(0); // disable vsync
+        }
+
+        private void GLControl_OnResize(object sender, EventArgs e)
+        {
+            GL.Viewport(0, 0, glControl.ClientSize.Width, glControl.ClientSize.Height);
         }
 
         private void Keyboard_KeyDown(Keyboard.Key key)
