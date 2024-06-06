@@ -19,8 +19,6 @@
             statusToolStripStatusLabel = new ToolStripStatusLabel();
             toolStripStatusLabel2 = new ToolStripStatusLabel();
             fpsToolStripStatusLabel = new ToolStripStatusLabel();
-            toolStripStatusLabel1 = new ToolStripStatusLabel();
-            renderingLoadToolStripStatusLabel = new ToolStripStatusLabel();
             menuStrip1 = new MenuStrip();
             fileToolStripMenuItem = new ToolStripMenuItem();
             loadROMToolStripMenuItem = new ToolStripMenuItem();
@@ -46,7 +44,7 @@
             // statusStrip1
             // 
             statusStrip1.ImageScalingSize = new Size(20, 20);
-            statusStrip1.Items.AddRange(new ToolStripItem[] { statusToolStripStatusLabel, toolStripStatusLabel2, fpsToolStripStatusLabel, toolStripStatusLabel1, renderingLoadToolStripStatusLabel });
+            statusStrip1.Items.AddRange(new ToolStripItem[] { statusToolStripStatusLabel, toolStripStatusLabel2, fpsToolStripStatusLabel });
             statusStrip1.Location = new Point(0, 428);
             statusStrip1.Name = "statusStrip1";
             statusStrip1.Size = new Size(800, 22);
@@ -70,18 +68,6 @@
             fpsToolStripStatusLabel.Name = "fpsToolStripStatusLabel";
             fpsToolStripStatusLabel.Size = new Size(219, 17);
             fpsToolStripStatusLabel.Text = "FPS: 0,00 (sd: 0,00 | min: 0,00 | max: 0,00)";
-            // 
-            // toolStripStatusLabel1
-            // 
-            toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            toolStripStatusLabel1.Size = new Size(12, 17);
-            toolStripStatusLabel1.Text = "-";
-            // 
-            // renderingLoadToolStripStatusLabel
-            // 
-            renderingLoadToolStripStatusLabel.Name = "renderingLoadToolStripStatusLabel";
-            renderingLoadToolStripStatusLabel.Size = new Size(263, 17);
-            renderingLoadToolStripStatusLabel.Text = "Rendering Load: 0% (sd: 0% | min: 0% | max: 0%)";
             // 
             // menuStrip1
             // 
@@ -268,8 +254,6 @@
         private ToolStripMenuItem fullScreenToolStripMenuItem;
         private ToolStripSeparator toolStripSeparator3;
         private ToolStripMenuItem limitFramerateToolStripMenuItem;
-        private ToolStripStatusLabel toolStripStatusLabel1;
-        private ToolStripStatusLabel renderingLoadToolStripStatusLabel;
         private ToolStripMenuItem automaticPauseToolStripMenuItem;
         private OpenTK.WinForms.GLControl glControl;
     }

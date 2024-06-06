@@ -56,10 +56,6 @@ namespace Iris.UserInterface
         private long _squareFrameDuration;
         private long _minFrameDuration;
         private long _maxFrameDuration;
-        private long _renderingDuration;
-        private long _squareRenderingDuration;
-        private int _minRenderingLoad;
-        private int _maxRenderingLoad;
         private readonly System.Windows.Forms.Timer _performanceCounterTimer = new();
 
         private bool _framerateLimiterEnabled = true;
@@ -147,7 +143,7 @@ namespace Iris.UserInterface
             _xboxController.PollInput();
         }
 
-        private void PresentFrame(UInt16[] frameBuffer, long renderingDuration)
+        private void PresentFrame(UInt16[] frameBuffer)
         {
             Invoke(() =>
             {
@@ -193,26 +189,15 @@ namespace Iris.UserInterface
                 _frameDuration += frameDuration;
                 _squareFrameDuration += frameDuration * frameDuration;
 
-                _renderingDuration += renderingDuration;
-                _squareRenderingDuration += renderingDuration * renderingDuration;
-
-                int renderingLoad = (int)Math.Round(100.0 * renderingDuration / frameDuration, MidpointRounding.AwayFromZero);
-
                 if (_frameCount == 1) // first frame
                 {
                     _minFrameDuration = frameDuration;
                     _maxFrameDuration = frameDuration;
-
-                    _minRenderingLoad = renderingLoad;
-                    _maxRenderingLoad = renderingLoad;
                 }
                 else
                 {
                     _minFrameDuration = Math.Min(frameDuration, _minFrameDuration);
                     _maxFrameDuration = Math.Max(frameDuration, _maxFrameDuration);
-
-                    _minRenderingLoad = Math.Min(renderingLoad, _minRenderingLoad);
-                    _maxRenderingLoad = Math.Max(renderingLoad, _maxRenderingLoad);
                 }
             }
         }
@@ -254,10 +239,6 @@ namespace Iris.UserInterface
             _squareFrameDuration = 0;
             _minFrameDuration = 0;
             _maxFrameDuration = 0;
-            _renderingDuration = 0;
-            _squareRenderingDuration = 0;
-            _minRenderingLoad = 0;
-            _maxRenderingLoad = 0;
             _performanceCounterTimer.Start();
 
             runToolStripMenuItem.Enabled = false;
@@ -294,7 +275,6 @@ namespace Iris.UserInterface
 
                     statusToolStripStatusLabel.Text = "Paused";
                     fpsToolStripStatusLabel.Text = "FPS: 0,00 (sd: 0,00 | min: 0,00 | max: 0,00)";
-                    renderingLoadToolStripStatusLabel.Text = "Rendering Load: 0% (sd: 0% | min: 0% | max: 0%)";
 
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 });
@@ -320,7 +300,6 @@ namespace Iris.UserInterface
 
             statusToolStripStatusLabel.Text = "Paused";
             fpsToolStripStatusLabel.Text = "FPS: 0,00 (sd: 0,00 | min: 0,00 | max: 0,00)";
-            renderingLoadToolStripStatusLabel.Text = "Rendering Load: 0% (sd: 0% | min: 0% | max: 0%)";
         }
 
         private void LoadROMToolStripMenuItem_Click(object sender, EventArgs e)
@@ -584,7 +563,6 @@ namespace Iris.UserInterface
                 if (_frameCount == 0)
                 {
                     fpsToolStripStatusLabel.Text = "FPS: 0,00 (sd: 0,00 | min: 0,00 | max: 0,00)";
-                    renderingLoadToolStripStatusLabel.Text = "Rendering Load: 0% (sd: 0% | min: 0% | max: 0%)";
                     return;
                 }
 
@@ -598,22 +576,11 @@ namespace Iris.UserInterface
 
                 fpsToolStripStatusLabel.Text = $"FPS: {fps:F2} (sd: {sdFps:F2} | min: {minFps:F2} | max: {maxFps:F2})";
 
-                int renderingLoad = (int)Math.Round(100.0 * _renderingDuration / _frameDuration, MidpointRounding.AwayFromZero);
-
-                double sdRenderingDuration = Math.Sqrt((double)_squareRenderingDuration / _frameCount - Math.Pow((double)_renderingDuration / _frameCount, 2));
-                int sdRenderingLoad = (int)Math.Round(100.0 * sdRenderingDuration * _frameCount / _frameDuration, MidpointRounding.AwayFromZero);
-
-                renderingLoadToolStripStatusLabel.Text = $"Rendering Load: {renderingLoad}% (sd: {sdRenderingLoad}% | min: {_minRenderingLoad}% | max: {_maxRenderingLoad}%)";
-
                 _frameCount = 0;
                 _frameDuration = 0;
                 _squareFrameDuration = 0;
                 _minFrameDuration = 0;
                 _maxFrameDuration = 0;
-                _renderingDuration = 0;
-                _squareRenderingDuration = 0;
-                _minRenderingLoad = 0;
-                _maxRenderingLoad = 0;
             }
         }
     }

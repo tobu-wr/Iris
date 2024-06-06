@@ -155,7 +155,6 @@ namespace Iris.GBA
         private bool _disposed;
 
         private readonly UInt16[] _displayFrameBuffer = new UInt16[DisplayScreenSize];
-        private readonly Stopwatch _renderingStopwatch = new();
 
         private Int32 _currentBG2X;
         private Int32 _currentBG2Y;
@@ -663,8 +662,7 @@ namespace Iris.GBA
 
                     _dma.PerformAllTransfers(DMA.StartTiming.VBlank);
 
-                    _presentFrameCallback(_displayFrameBuffer, _renderingStopwatch.ElapsedTicks);
-                    _renderingStopwatch.Reset();
+                    _presentFrameCallback(_displayFrameBuffer);
                     Array.Clear(_displayFrameBuffer);
 
                     _currentBG2X = ((_BG2X_H << 20) | (_BG2X_L << 4)) >> 4;
@@ -711,8 +709,6 @@ namespace Iris.GBA
 
         private void Render()
         {
-            _renderingStopwatch.Start();
-
             UInt16 bgMode = (UInt16)(_DISPCNT & 0b111);
 
             switch (bgMode)
@@ -747,8 +743,6 @@ namespace Iris.GBA
 
             _currentBG3X += (Int16)_BG3PB;
             _currentBG3Y += (Int16)_BG3PD;
-
-            _renderingStopwatch.Stop();
         }
 
         private void RenderBackgroundMode0()
