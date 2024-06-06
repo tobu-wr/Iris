@@ -204,7 +204,17 @@ namespace Iris.UserInterface
 
         private void LoadROM(string fileName)
         {
-            Common.System system = fileName.EndsWith(".gba") ? new GBA.GBA_System(PollInput, PresentFrame) : new NDS.NDS_System(PollInput, PresentFrame);
+            Common.System system;
+
+            try
+            {
+                system = fileName.EndsWith(".gba") ? new GBA.GBA_System(PollInput, PresentFrame) : new NDS.NDS_System(PollInput, PresentFrame);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
             try
             {
@@ -218,6 +228,7 @@ namespace Iris.UserInterface
             }
 
             _system?.Dispose();
+
             _system = system;
             _system.ResetState();
 

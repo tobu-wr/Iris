@@ -1,5 +1,4 @@
-﻿using System.IO.Compression;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 
 namespace Iris.GBA
 {
@@ -7,15 +6,15 @@ namespace Iris.GBA
     {
         internal enum TaskId
         {
-            // Video
-            StartHBlank,
-            StartScanline,
-
             // Timer
             StartCountingChannel0,
             StartCountingChannel1,
             StartCountingChannel2,
-            StartCountingChannel3
+            StartCountingChannel3,
+
+            // Video
+            StartHBlank,
+            StartScanline
         }
 
         private static readonly int s_taskIdCount = Enum.GetNames(typeof(TaskId)).Length;
@@ -31,7 +30,7 @@ namespace Iris.GBA
         private readonly InterruptControl _interruptControl = new();
         private readonly Memory _memory = new();
         private readonly Video _video;
-        private readonly BIOS _bios = new("D:\\dev\\Iris\\ROMs\\GBA\\gba_bios.bin");
+        private readonly BIOS _bios = new();
 
         private string _romHash;
         private bool _running;

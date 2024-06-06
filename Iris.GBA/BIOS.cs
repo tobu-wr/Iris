@@ -14,13 +14,17 @@ namespace Iris.GBA
         private CPU.CPU_Core _cpu;
         private bool _disposed;
 
-        internal BIOS(string filename)
+        internal BIOS()
         {
             Byte[] data;
 
             try
             {
-                data = File.ReadAllBytes(filename);
+                data = File.ReadAllBytes("gba_bios.bin");
+            }
+            catch (FileNotFoundException)
+            {
+                throw new Exception("Iris.GBA.BIOS: Could not find BIOS");
             }
             catch
             {
