@@ -71,9 +71,6 @@ namespace Iris.UserInterface
 
         private const int TextureWidth = 240;
         private const int TextureHeight = 160;
-        private const int TextureSize = TextureWidth * TextureHeight;
-
-        private readonly UInt16[] _textureBuffer = new UInt16[TextureSize];
 
         [StructLayout(LayoutKind.Sequential)]
         private readonly struct TimeCaps
@@ -152,20 +149,10 @@ namespace Iris.UserInterface
 
         private void PresentFrame(UInt16[] frameBuffer, long renderingDuration)
         {
-            ref UInt16 frameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(frameBuffer);
-            ref UInt16 textureBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_textureBuffer);
-
-            // This loop could easily be optimized with AVX2 or SSE2
-            for (int offset = 0; offset < TextureSize; ++offset)
-                Unsafe.Add(ref textureBufferDataRef, offset) = (UInt16)(Unsafe.Add(ref frameBufferDataRef, offset) << 1);
-
             Invoke(() =>
             {
-                GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, TextureWidth, TextureHeight, 0, PixelFormat.Bgra, PixelType.UnsignedShort5551, _textureBuffer);
-                GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
-
+                GL.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, TextureWidth, TextureHeight, PixelFormat.Rgba, PixelType.UnsignedShort1555Reversed, frameBuffer);
                 GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
-
                 glControl.SwapBuffers();
             });
 
@@ -536,6 +523,7 @@ namespace Iris.UserInterface
             GL.BindTexture(TextureTarget.Texture2D, texture);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+            GL.TexStorage2D(TextureTarget2d.Texture2D, 1, SizedInternalFormat.Rgb5, TextureWidth, TextureHeight);
 
             int vertexShader = GL.CreateShader(ShaderType.VertexShader);
             string vertexShaderSource = File.ReadAllText("D:\\dev\\Iris\\Iris.UserInterface\\VertexShader.glsl");
