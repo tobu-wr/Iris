@@ -50,7 +50,6 @@ namespace Iris.UserInterface
         private FormWindowState _previousWindowState;
 
         private readonly Stopwatch _frameStopwatch = new();
-        private readonly object _performanceCounterLock = new(); // TODO (C#13): replace object with System.Threading.Lock
         private int _frameCount;
         private long _frameDuration;
         private long _squareFrameDuration;
@@ -177,13 +176,10 @@ namespace Iris.UserInterface
                 GL.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, TextureWidth, TextureHeight, PixelFormat.Rgba, PixelType.UnsignedShort1555Reversed, frameBuffer);
                 GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
                 glControl.SwapBuffers();
-            });
 
-            long frameDuration = _frameStopwatch.ElapsedTicks;
-            _frameStopwatch.Restart();
+                long frameDuration = _frameStopwatch.ElapsedTicks;
+                _frameStopwatch.Restart();
 
-            lock (_performanceCounterLock)
-            {
                 ++_frameCount;
 
                 _frameDuration += frameDuration;
@@ -199,7 +195,7 @@ namespace Iris.UserInterface
                     _minFrameDuration = Math.Min(frameDuration, _minFrameDuration);
                     _maxFrameDuration = Math.Max(frameDuration, _maxFrameDuration);
                 }
-            }
+            });
 
             // TODO: add frame delay here or PollInput() sync?
         }
@@ -571,30 +567,27 @@ namespace Iris.UserInterface
 
         private void PerformanceCounterTimer_Tick(object sender, EventArgs e)
         {
-            lock (_performanceCounterLock)
+            if (_frameCount == 0)
             {
-                if (_frameCount == 0)
-                {
-                    fpsToolStripStatusLabel.Text = "FPS: 0,00 (sd: 0,00 | min: 0,00 | max: 0,00)";
-                    return;
-                }
-
-                double fps = Math.Round((double)_frameCount * Stopwatch.Frequency / _frameDuration, 2, MidpointRounding.AwayFromZero);
-
-                double sdFrameDuration = Math.Sqrt((double)_squareFrameDuration / _frameCount - Math.Pow((double)_frameDuration / _frameCount, 2));
-                double sdFps = Math.Round(Stopwatch.Frequency * sdFrameDuration * Math.Pow((double)_frameCount / _frameDuration, 2), 2, MidpointRounding.AwayFromZero);
-
-                double minFps = Math.Round((double)Stopwatch.Frequency / _maxFrameDuration, 2, MidpointRounding.AwayFromZero);
-                double maxFps = Math.Round((double)Stopwatch.Frequency / _minFrameDuration, 2, MidpointRounding.AwayFromZero);
-
-                fpsToolStripStatusLabel.Text = $"FPS: {fps:F2} (sd: {sdFps:F2} | min: {minFps:F2} | max: {maxFps:F2})";
-
-                _frameCount = 0;
-                _frameDuration = 0;
-                _squareFrameDuration = 0;
-                _minFrameDuration = 0;
-                _maxFrameDuration = 0;
+                fpsToolStripStatusLabel.Text = "FPS: 0,00 (sd: 0,00 | min: 0,00 | max: 0,00)";
+                return;
             }
+
+            double fps = Math.Round((double)_frameCount * Stopwatch.Frequency / _frameDuration, 2, MidpointRounding.AwayFromZero);
+
+            double sdFrameDuration = Math.Sqrt((double)_squareFrameDuration / _frameCount - Math.Pow((double)_frameDuration / _frameCount, 2));
+            double sdFps = Math.Round(Stopwatch.Frequency * sdFrameDuration * Math.Pow((double)_frameCount / _frameDuration, 2), 2, MidpointRounding.AwayFromZero);
+
+            double minFps = Math.Round((double)Stopwatch.Frequency / _maxFrameDuration, 2, MidpointRounding.AwayFromZero);
+            double maxFps = Math.Round((double)Stopwatch.Frequency / _minFrameDuration, 2, MidpointRounding.AwayFromZero);
+
+            fpsToolStripStatusLabel.Text = $"FPS: {fps:F2} (sd: {sdFps:F2} | min: {minFps:F2} | max: {maxFps:F2})";
+
+            _frameCount = 0;
+            _frameDuration = 0;
+            _squareFrameDuration = 0;
+            _minFrameDuration = 0;
+            _maxFrameDuration = 0;
         }
     }
 }
