@@ -200,7 +200,7 @@
             // glControl
             // 
             glControl.API = OpenTK.Windowing.Common.ContextAPI.OpenGL;
-            glControl.APIVersion = new Version(3, 3, 0, 0);
+            glControl.APIVersion = new Version(4, 2, 0, 0);
             glControl.Dock = DockStyle.Fill;
             glControl.Flags = OpenTK.Windowing.Common.ContextFlags.Default;
             glControl.IsEventDriven = true;

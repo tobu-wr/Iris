@@ -145,13 +145,6 @@ namespace Iris.UserInterface
 
         private void PresentFrame(UInt16[] frameBuffer)
         {
-            Invoke(() =>
-            {
-                GL.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, TextureWidth, TextureHeight, PixelFormat.Rgba, PixelType.UnsignedShort1555Reversed, frameBuffer);
-                GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
-                glControl.SwapBuffers();
-            });
-
             if (_framerateLimiterEnabled)
             {
                 const double TargetFrameRate = 59.737411711095921;
@@ -179,6 +172,13 @@ namespace Iris.UserInterface
                 }
             }
 
+            Invoke(() =>
+            {
+                GL.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, TextureWidth, TextureHeight, PixelFormat.Rgba, PixelType.UnsignedShort1555Reversed, frameBuffer);
+                GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
+                glControl.SwapBuffers();
+            });
+
             long frameDuration = _frameStopwatch.ElapsedTicks;
             _frameStopwatch.Restart();
 
@@ -200,6 +200,8 @@ namespace Iris.UserInterface
                     _maxFrameDuration = Math.Max(frameDuration, _maxFrameDuration);
                 }
             }
+
+            // TODO: add frame delay here or PollInput() sync?
         }
 
         private void LoadROM(string fileName)
