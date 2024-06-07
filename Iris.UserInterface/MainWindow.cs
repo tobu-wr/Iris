@@ -144,37 +144,38 @@ namespace Iris.UserInterface
 
         private void PresentFrame(UInt16[] frameBuffer)
         {
-            if (_framerateLimiterEnabled)
-            {
-                const double TargetFrameRate = 59.737411711095921;
-
-                long targetFrameDuration = (long)Math.Round(Stopwatch.Frequency / TargetFrameRate, MidpointRounding.AwayFromZero);
-                long targetFrameTime = _framerateLimiterLastFrameTime + targetFrameDuration;
-                long currentFrameTime = _framerateLimiterStopwatch.ElapsedTicks;
-
-                if (currentFrameTime < targetFrameTime)
-                {
-                    long sleepTime = targetFrameTime - currentFrameTime;
-                    int ms = (int)(1000 * sleepTime / Stopwatch.Frequency - _timeCaps._periodMin);
-
-                    if (ms > 0)
-                        Thread.Sleep(ms);
-
-                    while (_framerateLimiterStopwatch.ElapsedTicks < targetFrameTime)
-                    { }
-
-                    _framerateLimiterLastFrameTime = targetFrameTime;
-                }
-                else
-                {
-                    _framerateLimiterLastFrameTime = currentFrameTime;
-                }
-            }
-
             Invoke(() =>
             {
                 GL.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, TextureWidth, TextureHeight, PixelFormat.Rgba, PixelType.UnsignedShort1555Reversed, frameBuffer);
                 GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
+
+                if (_framerateLimiterEnabled)
+                {
+                    const double TargetFrameRate = 59.737411711095921;
+
+                    long targetFrameDuration = (long)Math.Round(Stopwatch.Frequency / TargetFrameRate, MidpointRounding.AwayFromZero);
+                    long targetFrameTime = _framerateLimiterLastFrameTime + targetFrameDuration;
+                    long currentFrameTime = _framerateLimiterStopwatch.ElapsedTicks;
+
+                    if (currentFrameTime < targetFrameTime)
+                    {
+                        long sleepTime = targetFrameTime - currentFrameTime;
+                        int ms = (int)(1000 * sleepTime / Stopwatch.Frequency - _timeCaps._periodMin);
+
+                        if (ms > 0)
+                            Thread.Sleep(ms);
+
+                        while (_framerateLimiterStopwatch.ElapsedTicks < targetFrameTime)
+                        { }
+
+                        _framerateLimiterLastFrameTime = targetFrameTime;
+                    }
+                    else
+                    {
+                        _framerateLimiterLastFrameTime = currentFrameTime;
+                    }
+                }
+
                 glControl.SwapBuffers();
 
                 long frameDuration = _frameStopwatch.ElapsedTicks;
