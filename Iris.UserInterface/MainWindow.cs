@@ -462,7 +462,7 @@ namespace Iris.UserInterface
             Properties.Settings.Default.AutomaticPauseEnabled = _automaticPauseEnabled;
         }
 
-        private void skipIntroToolStripMenuItem_Click(object sender, EventArgs e)
+        private void SkipIntroToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _skipIntroEnabled = skipIntroToolStripMenuItem.Checked;
             Properties.Settings.Default.SkipIntroEnabled = _skipIntroEnabled;
