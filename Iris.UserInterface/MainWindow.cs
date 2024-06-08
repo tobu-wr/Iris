@@ -57,11 +57,11 @@ namespace Iris.UserInterface
         private long _maxFrameDuration;
         private readonly System.Windows.Forms.Timer _performanceCounterTimer = new();
 
-        private bool _framerateLimiterEnabled = true;
+        private bool _framerateLimiterEnabled = Properties.Settings.Default.FramerateLimiterEnabled;
         private readonly Stopwatch _framerateLimiterStopwatch = Stopwatch.StartNew();
         private long _framerateLimiterLastFrameTime;
 
-        private bool _automaticPauseEnabled = true;
+        private bool _automaticPauseEnabled = Properties.Settings.Default.AutomaticPauseEnabled;
         private bool _resume;
 
         private const int TextureWidth = 240;
@@ -114,6 +114,9 @@ namespace Iris.UserInterface
             _performanceCounterTimer.Interval = 1000;
             _performanceCounterTimer.Tick += PerformanceCounterTimer_Tick;
 
+            limitFramerateToolStripMenuItem.Checked = _framerateLimiterEnabled;
+            automaticPauseToolStripMenuItem.Checked = _automaticPauseEnabled;
+
             if (args.Length > 0)
                 LoadROM(args[0]);
         }
@@ -124,6 +127,7 @@ namespace Iris.UserInterface
                 Pause();
 
             _ = TimeEndPeriod(_timeCaps._periodMin);
+            Properties.Settings.Default.Save();
 
             if (disposing)
                 components?.Dispose();
@@ -446,11 +450,13 @@ namespace Iris.UserInterface
         private void LimitFramerateToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _framerateLimiterEnabled = limitFramerateToolStripMenuItem.Checked;
+            Properties.Settings.Default.FramerateLimiterEnabled = _framerateLimiterEnabled;
         }
 
         private void AutomaticPauseToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _automaticPauseEnabled = automaticPauseToolStripMenuItem.Checked;
+            Properties.Settings.Default.AutomaticPauseEnabled = _automaticPauseEnabled;
         }
 
         private void MainWindow_Activated(object sender, EventArgs e)
@@ -515,12 +521,12 @@ namespace Iris.UserInterface
             GL.TexStorage2D(TextureTarget2d.Texture2D, 1, SizedInternalFormat.Rgb5, TextureWidth, TextureHeight);
 
             int vertexShader = GL.CreateShader(ShaderType.VertexShader);
-            string vertexShaderSource = File.ReadAllText("D:\\dev\\Iris\\Iris.UserInterface\\VertexShader.glsl");
+            string vertexShaderSource = File.ReadAllText("VertexShader.glsl");
             GL.ShaderSource(vertexShader, vertexShaderSource);
             GL.CompileShader(vertexShader);
 
             int fragmentShader = GL.CreateShader(ShaderType.FragmentShader);
-            string fragmentShaderSource = File.ReadAllText("D:\\dev\\Iris\\Iris.UserInterface\\FragmentShader.glsl");
+            string fragmentShaderSource = File.ReadAllText("FragmentShader.glsl");
             GL.ShaderSource(fragmentShader, fragmentShaderSource);
             GL.CompileShader(fragmentShader);
 
