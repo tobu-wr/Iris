@@ -64,6 +64,8 @@ namespace Iris.UserInterface
         private bool _automaticPauseEnabled = Properties.Settings.Default.AutomaticPauseEnabled;
         private bool _resume;
 
+        private bool _skipIntroEnabled = Properties.Settings.Default.SkipIntroEnabled;
+
         private const int TextureWidth = 240;
         private const int TextureHeight = 160;
 
@@ -116,6 +118,7 @@ namespace Iris.UserInterface
 
             limitFramerateToolStripMenuItem.Checked = _framerateLimiterEnabled;
             automaticPauseToolStripMenuItem.Checked = _automaticPauseEnabled;
+            skipIntroToolStripMenuItem.Checked = _skipIntroEnabled;
 
             if (args.Length > 0)
                 LoadROM(args[0]);
@@ -140,7 +143,7 @@ namespace Iris.UserInterface
             if (ActiveForm != this)
                 return;
 
-            // TODO: sync
+            // TODO: sync here?
 
             _keyboard.PollInput();
             _xboxController.PollInput();
@@ -202,7 +205,7 @@ namespace Iris.UserInterface
                 }
             });
 
-            // TODO: add frame delay here or PollInput() sync?
+            // TODO: add frame delay here?
         }
 
         private void LoadROM(string fileName)
@@ -457,6 +460,12 @@ namespace Iris.UserInterface
         {
             _automaticPauseEnabled = automaticPauseToolStripMenuItem.Checked;
             Properties.Settings.Default.AutomaticPauseEnabled = _automaticPauseEnabled;
+        }
+
+        private void skipIntroToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _skipIntroEnabled = skipIntroToolStripMenuItem.Checked;
+            Properties.Settings.Default.SkipIntroEnabled = _skipIntroEnabled;
         }
 
         private void MainWindow_Activated(object sender, EventArgs e)
