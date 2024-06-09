@@ -37,6 +37,8 @@
             limitFramerateToolStripMenuItem = new ToolStripMenuItem();
             automaticPauseToolStripMenuItem = new ToolStripMenuItem();
             skipIntroToolStripMenuItem = new ToolStripMenuItem();
+            toolStripSeparator4 = new ToolStripSeparator();
+            configureKeysToolStripMenuItem = new ToolStripMenuItem();
             glControl = new OpenTK.WinForms.GLControl();
             statusStrip1.SuspendLayout();
             menuStrip1.SuspendLayout();
@@ -140,13 +142,13 @@
             // 
             fullScreenToolStripMenuItem.CheckOnClick = true;
             fullScreenToolStripMenuItem.Name = "fullScreenToolStripMenuItem";
-            fullScreenToolStripMenuItem.Size = new Size(163, 26);
+            fullScreenToolStripMenuItem.Size = new Size(224, 26);
             fullScreenToolStripMenuItem.Text = "&Full Screen";
             fullScreenToolStripMenuItem.Click += FullScreenToolStripMenuItem_Click;
             // 
             // emulationToolStripMenuItem
             // 
-            emulationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { runToolStripMenuItem, pauseToolStripMenuItem, resetToolStripMenuItem, toolStripSeparator3, limitFramerateToolStripMenuItem, automaticPauseToolStripMenuItem, skipIntroToolStripMenuItem });
+            emulationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { runToolStripMenuItem, pauseToolStripMenuItem, resetToolStripMenuItem, toolStripSeparator3, limitFramerateToolStripMenuItem, automaticPauseToolStripMenuItem, skipIntroToolStripMenuItem, toolStripSeparator4, configureKeysToolStripMenuItem });
             emulationToolStripMenuItem.Name = "emulationToolStripMenuItem";
             emulationToolStripMenuItem.Size = new Size(90, 24);
             emulationToolStripMenuItem.Text = "&Emulation";
@@ -210,6 +212,18 @@
             skipIntroToolStripMenuItem.Text = "Skip Intro";
             skipIntroToolStripMenuItem.Click += SkipIntroToolStripMenuItem_Click;
             // 
+            // toolStripSeparator4
+            // 
+            toolStripSeparator4.Name = "toolStripSeparator4";
+            toolStripSeparator4.Size = new Size(221, 6);
+            // 
+            // configureKeysToolStripMenuItem
+            // 
+            configureKeysToolStripMenuItem.Name = "configureKeysToolStripMenuItem";
+            configureKeysToolStripMenuItem.Size = new Size(224, 26);
+            configureKeysToolStripMenuItem.Text = "Configure Keys";
+            configureKeysToolStripMenuItem.Click += ConfigureKeysToolStripMenuItem_Click;
+            // 
             // glControl
             // 
             glControl.API = OpenTK.Windowing.Common.ContextAPI.OpenGL;
@@ -272,5 +286,7 @@
         private ToolStripMenuItem automaticPauseToolStripMenuItem;
         private OpenTK.WinForms.GLControl glControl;
         private ToolStripMenuItem skipIntroToolStripMenuItem;
+        private ToolStripSeparator toolStripSeparator4;
+        private ToolStripMenuItem configureKeysToolStripMenuItem;
     }
 }

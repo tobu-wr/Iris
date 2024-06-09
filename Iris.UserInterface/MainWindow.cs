@@ -1,5 +1,4 @@
 using OpenTK.Graphics.OpenGL;
-using System.Collections.Frozen;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Runtime.CompilerServices;
@@ -9,7 +8,13 @@ namespace Iris.UserInterface
 {
     internal partial class MainWindow : Form
     {
-        private static readonly FrozenDictionary<Keyboard.Key, Common.System.Key> s_keyboardMapping = new Dictionary<Keyboard.Key, Common.System.Key>()
+        private Common.System _system;
+        private Thread _systemThread;
+
+        private readonly Keyboard _keyboard;
+        private readonly XboxController _xboxController;
+
+        private Dictionary<Keyboard.Key, Common.System.Key> _keyboardMapping = new()
         {
             { Keyboard.Key.A, Common.System.Key.A },
             { Keyboard.Key.Z, Common.System.Key.B },
@@ -23,9 +28,9 @@ namespace Iris.UserInterface
             { Keyboard.Key.Q, Common.System.Key.L },
             { Keyboard.Key.E, Common.System.Key.X },
             { Keyboard.Key.R, Common.System.Key.Y },
-        }.ToFrozenDictionary();
+        };
 
-        private static readonly FrozenDictionary<XboxController.Button, Common.System.Key> s_xboxControllerMapping = new Dictionary<XboxController.Button, Common.System.Key>()
+        private Dictionary<XboxController.Button, Common.System.Key> _xboxControllerMapping = new()
         {
             { XboxController.Button.A, Common.System.Key.A },
             { XboxController.Button.B, Common.System.Key.B },
@@ -39,13 +44,7 @@ namespace Iris.UserInterface
             { XboxController.Button.LeftShoulder, Common.System.Key.L },
             { XboxController.Button.X, Common.System.Key.X },
             { XboxController.Button.Y, Common.System.Key.Y },
-        }.ToFrozenDictionary();
-
-        private Common.System _system;
-        private Thread _systemThread;
-
-        private readonly Keyboard _keyboard;
-        private readonly XboxController _xboxController;
+        };
 
         private FormWindowState _previousWindowState;
 
@@ -143,8 +142,6 @@ namespace Iris.UserInterface
             if (ActiveForm != this)
                 return;
 
-            // TODO: sync here?
-
             _keyboard.PollInput();
             _xboxController.PollInput();
         }
@@ -205,7 +202,9 @@ namespace Iris.UserInterface
                 }
             });
 
-            // TODO: add frame delay here?
+            // Notes:
+            // - use frame delay here for input latency mitigation (if I need it one day)
+            // - frame delay is better than syncing on input polling
         }
 
         private void LoadROM(string fileName)
@@ -468,6 +467,12 @@ namespace Iris.UserInterface
             Properties.Settings.Default.SkipIntroEnabled = _skipIntroEnabled;
         }
 
+        private void ConfigureKeysToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            KeyMappingDialog dialog = new(ref _keyboardMapping, ref _xboxControllerMapping);
+            dialog.ShowDialog();
+        }
+
         private void MainWindow_Activated(object sender, EventArgs e)
         {
             if (!_automaticPauseEnabled || (_system == null))
@@ -559,25 +564,25 @@ namespace Iris.UserInterface
 
         private void Keyboard_KeyDown(Keyboard.Key key)
         {
-            if (s_keyboardMapping.TryGetValue(key, out Common.System.Key value))
+            if (_keyboardMapping.TryGetValue(key, out Common.System.Key value))
                 _system.SetKeyStatus(value, Common.System.KeyStatus.Input);
         }
 
         private void Keyboard_KeyUp(Keyboard.Key key)
         {
-            if (s_keyboardMapping.TryGetValue(key, out Common.System.Key value))
+            if (_keyboardMapping.TryGetValue(key, out Common.System.Key value))
                 _system.SetKeyStatus(value, Common.System.KeyStatus.NoInput);
         }
 
         private void XboxController_ButtonDown(XboxController.Button button)
         {
-            if (s_xboxControllerMapping.TryGetValue(button, out Common.System.Key value))
+            if (_xboxControllerMapping.TryGetValue(button, out Common.System.Key value))
                 _system.SetKeyStatus(value, Common.System.KeyStatus.Input);
         }
 
         private void XboxController_ButtonUp(XboxController.Button button)
         {
-            if (s_xboxControllerMapping.TryGetValue(button, out Common.System.Key value))
+            if (_xboxControllerMapping.TryGetValue(button, out Common.System.Key value))
                 _system.SetKeyStatus(value, Common.System.KeyStatus.NoInput);
         }
 
