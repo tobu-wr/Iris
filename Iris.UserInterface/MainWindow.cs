@@ -236,7 +236,7 @@ namespace Iris.UserInterface
             _system?.Dispose();
 
             _system = system;
-            _system.ResetState();
+            _system.ResetState(_skipIntroEnabled);
 
             loadStateToolStripMenuItem.Enabled = true;
             saveStateToolStripMenuItem.Enabled = true;
@@ -281,7 +281,7 @@ namespace Iris.UserInterface
             catch (Exception ex)
             {
                 _system.Pause();
-                _system.ResetState();
+                _system.ResetState(_skipIntroEnabled);
 
                 Invoke(() =>
                 {
@@ -444,7 +444,7 @@ namespace Iris.UserInterface
             if (running)
                 Pause();
 
-            _system.ResetState();
+            _system.ResetState(_skipIntroEnabled);
 
             if (running)
                 Run();

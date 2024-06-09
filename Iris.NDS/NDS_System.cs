@@ -25,7 +25,7 @@
             _disposed = true;
         }
 
-        public override void ResetState()
+        public override void ResetState(bool skipIntro)
         {
             BIOS_Reset();
 

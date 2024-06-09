@@ -60,10 +60,29 @@ namespace Iris.GBA
             memory.Map(_bios, BIOS_Size, BIOS_StartAddress, BIOS_EndAddress, Memory.Flag.AllRead);
         }
 
-        internal void Reset()
+        internal void Reset(bool skipIntro)
         {
-            _cpu.CPSR = 0xd3;
-            _cpu.NextInstructionAddress = 0;
+            if (skipIntro)
+            {
+                _cpu.Reg[CPU.CPU_Core.SP] = 0x300_7f00;
+                _cpu.Reg[CPU.CPU_Core.LR] = 0x800_0000;
+
+                _cpu.CPSR = 0x1f;
+
+                _cpu.Reg12_usr = 0x300_fca0;
+                _cpu.Reg13_usr = 0x300_7f00;
+                _cpu.Reg14_usr = 0xc0;
+
+                _cpu.Reg13_svc = 0x300_7fe0;
+                _cpu.Reg13_irq = 0x300_7fa0;
+
+                _cpu.NextInstructionAddress = 0x800_0000;
+            }
+            else
+            {
+                _cpu.CPSR = 0xd3;
+                _cpu.NextInstructionAddress = 0;
+            }
         }
 
         internal Byte Read8(UInt32 address)

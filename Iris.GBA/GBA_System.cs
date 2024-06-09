@@ -64,7 +64,7 @@ namespace Iris.GBA
             _bios.Dispose();
         }
 
-        public override void ResetState()
+        public override void ResetState(bool skipIntro)
         {
             _scheduler.ResetState(); // This has to be done first
 
@@ -79,7 +79,7 @@ namespace Iris.GBA
             _memory.ResetState();
             _video.ResetState();
 
-            _bios.Reset(); // This has to be done last
+            _bios.Reset(skipIntro); // This has to be done last
         }
 
         public override void LoadState(BinaryReader reader)

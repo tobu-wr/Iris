@@ -29,7 +29,7 @@
 
         public abstract void Dispose();
 
-        public abstract void ResetState();
+        public abstract void ResetState(bool skipIntro);
         public abstract void LoadState(BinaryReader reader);
         public abstract void SaveState(BinaryWriter writer);
 
