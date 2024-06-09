@@ -69,10 +69,6 @@ namespace Iris.GBA
 
                 _cpu.CPSR = 0x1f;
 
-                _cpu.Reg12_usr = 0x300_fca0;
-                _cpu.Reg13_usr = 0x300_7f00;
-                _cpu.Reg14_usr = 0xc0;
-
                 _cpu.Reg13_svc = 0x300_7fe0;
                 _cpu.Reg13_irq = 0x300_7fa0;
 
