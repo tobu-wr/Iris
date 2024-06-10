@@ -469,8 +469,16 @@ namespace Iris.UserInterface
 
         private void ConfigureKeysToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            KeyMappingDialog dialog = new(ref _keyboardMapping, ref _xboxControllerMapping);
+            bool running = (_system != null) && _system.IsRunning();
+
+            if (running)
+                Pause();
+
+            using KeyMappingDialog dialog = new(ref _keyboardMapping, ref _xboxControllerMapping);
             dialog.ShowDialog();
+
+            if (running)
+                Run();
         }
 
         private void MainWindow_Activated(object sender, EventArgs e)

@@ -1,5 +1,4 @@
 ﻿using SharpDX.DirectInput;
-using System.Diagnostics;
 
 namespace Iris.UserInterface
 {
@@ -26,8 +25,6 @@ namespace Iris.UserInterface
         private readonly KeyEvent_Delegate _keyDownCallback;
         private readonly KeyEvent_Delegate _keyUpCallback;
 
-        private readonly Stopwatch _pollingStopwatch = Stopwatch.StartNew();
-
         private readonly DirectInput _directInput = new();
         private readonly SharpDX.DirectInput.Keyboard _keyboard;
         private KeyboardState _previousState = new();
@@ -43,14 +40,6 @@ namespace Iris.UserInterface
 
         internal void PollInput()
         {
-            const long PollingRate = 1000;
-            long pollingPeriod = Stopwatch.Frequency / PollingRate;
-
-            if (_pollingStopwatch.ElapsedTicks < pollingPeriod)
-                return;
-
-            _pollingStopwatch.Restart();
-
             _keyboard.Poll();
 
             KeyboardState currentState = _keyboard.GetCurrentState();

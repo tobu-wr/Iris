@@ -1,12 +1,10 @@
 ﻿using SharpDX.XInput;
-using System.Diagnostics;
-using static Iris.UserInterface.XboxController;
 
 namespace Iris.UserInterface
 {
-    internal sealed class XboxController(ButtonEvent_Delegate buttonDownCallback, ButtonEvent_Delegate buttonUpCallback)
+    internal sealed class XboxController(XboxController.ButtonEvent_Delegate buttonDownCallback, XboxController.ButtonEvent_Delegate buttonUpCallback)
     {
-        internal enum Button : ushort
+        internal enum Button
         {
             DPadUp = GamepadButtonFlags.DPadUp,
             DPadDown = GamepadButtonFlags.DPadDown,
@@ -27,21 +25,11 @@ namespace Iris.UserInterface
         private readonly ButtonEvent_Delegate _buttonDownCallback = buttonDownCallback;
         private readonly ButtonEvent_Delegate _buttonUpCallback = buttonUpCallback;
 
-        private readonly Stopwatch _pollingStopwatch = Stopwatch.StartNew();
-
         private readonly Controller _xinputController = new(UserIndex.One);
-        private State _previousState;
+        private State _previousState = new();
 
         internal void PollInput()
         {
-            const long PollingRate = 125;
-            long pollingPeriod = Stopwatch.Frequency / PollingRate;
-
-            if (_pollingStopwatch.ElapsedTicks < pollingPeriod)
-                return;
-
-            _pollingStopwatch.Restart();
-
             if (!_xinputController.GetState(out State currentState))
                 return;
 
