@@ -148,6 +148,8 @@ namespace Iris.UserInterface
 
         private void PresentFrame(UInt16[] frameBuffer)
         {
+            // could add an advanced option to switch between synchronous (by default) and asynchronous frame presentation to choose between framerate stability or performance
+
             Invoke(() =>
             {
                 GL.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, TextureWidth, TextureHeight, PixelFormat.Rgba, PixelType.UnsignedShort1555Reversed, frameBuffer);
@@ -203,8 +205,8 @@ namespace Iris.UserInterface
             });
 
             // Notes:
-            // - use frame delay here for input latency mitigation (if I need it one day)
-            // - frame delay is better than syncing on input polling
+            // - use frame delay here for input latency mitigation (if we need it one day)
+            // - frame delay is better for reducing latency than syncing on input polling
         }
 
         private void LoadROM(string fileName)
