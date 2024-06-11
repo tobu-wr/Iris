@@ -37,7 +37,7 @@
             skipIntroToolStripMenuItem = new ToolStripMenuItem();
             toolStripSeparator4 = new ToolStripSeparator();
             configureKeysToolStripMenuItem = new ToolStripMenuItem();
-            viewToolStripMenuItem = new ToolStripMenuItem();
+            displayToolStripMenuItem = new ToolStripMenuItem();
             fullScreenToolStripMenuItem = new ToolStripMenuItem();
             integerScalingToolStripMenuItem = new ToolStripMenuItem();
             fixedAspectRatioToolStripMenuItem = new ToolStripMenuItem();
@@ -77,7 +77,7 @@
             // menuStrip1
             // 
             menuStrip1.ImageScalingSize = new Size(20, 20);
-            menuStrip1.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem, emulationToolStripMenuItem, viewToolStripMenuItem });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem, emulationToolStripMenuItem, displayToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Size = new Size(720, 24);
@@ -209,12 +209,12 @@
             configureKeysToolStripMenuItem.Text = "Configure Keys...";
             configureKeysToolStripMenuItem.Click += ConfigureKeysToolStripMenuItem_Click;
             // 
-            // viewToolStripMenuItem
+            // displayToolStripMenuItem
             // 
-            viewToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { fullScreenToolStripMenuItem, integerScalingToolStripMenuItem, fixedAspectRatioToolStripMenuItem });
-            viewToolStripMenuItem.Name = "viewToolStripMenuItem";
-            viewToolStripMenuItem.Size = new Size(57, 20);
-            viewToolStripMenuItem.Text = "Display";
+            displayToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { fullScreenToolStripMenuItem, integerScalingToolStripMenuItem, fixedAspectRatioToolStripMenuItem });
+            displayToolStripMenuItem.Name = "displayToolStripMenuItem";
+            displayToolStripMenuItem.Size = new Size(57, 20);
+            displayToolStripMenuItem.Text = "Display";
             // 
             // fullScreenToolStripMenuItem
             // 
@@ -295,7 +295,7 @@
         private ToolStripMenuItem runToolStripMenuItem;
         private ToolStripMenuItem pauseToolStripMenuItem;
         private ToolStripMenuItem resetToolStripMenuItem;
-        private ToolStripMenuItem viewToolStripMenuItem;
+        private ToolStripMenuItem displayToolStripMenuItem;
         private ToolStripMenuItem fullScreenToolStripMenuItem;
         private ToolStripSeparator toolStripSeparator3;
         private ToolStripMenuItem limitFramerateToolStripMenuItem;
