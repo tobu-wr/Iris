@@ -469,14 +469,14 @@ namespace Iris.UserInterface
             Properties.Settings.Default.SkipIntroEnabled = _skipIntroEnabled;
         }
 
-        private void ConfigureKeysToolStripMenuItem_Click(object sender, EventArgs e)
+        private void InputSettingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             bool running = (_system != null) && _system.IsRunning();
 
             if (running)
                 Pause();
 
-            using KeyMappingDialog dialog = new(ref _keyboardMapping, ref _xboxControllerMapping);
+            using InputSettingsDialog dialog = new(ref _keyboardMapping, ref _xboxControllerMapping);
             dialog.ShowDialog();
 
             if (running)
