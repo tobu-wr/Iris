@@ -97,6 +97,10 @@ namespace Iris.UserInterface
 
             InitializeComponent();
 
+            limitFramerateToolStripMenuItem.Checked = _framerateLimiterEnabled;
+            automaticPauseToolStripMenuItem.Checked = _automaticPauseEnabled;
+            skipIntroToolStripMenuItem.Checked = _skipIntroEnabled;
+
 #if DEBUG
             Text += " (DEBUG)";
 #elif RELEASE_DEV
@@ -115,10 +119,6 @@ namespace Iris.UserInterface
             _performanceCounterTimer.Interval = 1000;
             _performanceCounterTimer.Tick += PerformanceCounterTimer_Tick;
 
-            limitFramerateToolStripMenuItem.Checked = _framerateLimiterEnabled;
-            automaticPauseToolStripMenuItem.Checked = _automaticPauseEnabled;
-            skipIntroToolStripMenuItem.Checked = _skipIntroEnabled;
-
             if (args.Length > 0)
                 LoadROM(args[0]);
         }
@@ -129,6 +129,10 @@ namespace Iris.UserInterface
                 Pause();
 
             _ = TimeEndPeriod(_timeCaps._periodMin);
+
+            Properties.Settings.Default.FramerateLimiterEnabled = _framerateLimiterEnabled;
+            Properties.Settings.Default.AutomaticPauseEnabled = _automaticPauseEnabled;
+            Properties.Settings.Default.SkipIntroEnabled = _skipIntroEnabled;
             Properties.Settings.Default.Save();
 
             if (disposing)
@@ -148,7 +152,7 @@ namespace Iris.UserInterface
 
         private void PresentFrame(UInt16[] frameBuffer)
         {
-            // could add an advanced option to switch between synchronous (by default) and asynchronous frame presentation to choose between framerate stability or performance
+            // could add an option to switch between synchronous (by default) and asynchronous frame presentation to choose between framerate stability and performance (potentially without stuttering)
 
             Invoke(() =>
             {
@@ -204,9 +208,7 @@ namespace Iris.UserInterface
                 }
             });
 
-            // Notes:
-            // - use frame delay here for input latency mitigation (if we need it one day)
-            // - frame delay is better for reducing latency than syncing on input polling
+            // could add frame delay here for input latency mitigation (frame delay is better for reducing latency than syncing on input polling)
         }
 
         private void LoadROM(string fileName)
@@ -454,19 +456,16 @@ namespace Iris.UserInterface
         private void LimitFramerateToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _framerateLimiterEnabled = limitFramerateToolStripMenuItem.Checked;
-            Properties.Settings.Default.FramerateLimiterEnabled = _framerateLimiterEnabled;
         }
 
         private void AutomaticPauseToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _automaticPauseEnabled = automaticPauseToolStripMenuItem.Checked;
-            Properties.Settings.Default.AutomaticPauseEnabled = _automaticPauseEnabled;
         }
 
         private void SkipIntroToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _skipIntroEnabled = skipIntroToolStripMenuItem.Checked;
-            Properties.Settings.Default.SkipIntroEnabled = _skipIntroEnabled;
         }
 
         private void InputSettingsToolStripMenuItem_Click(object sender, EventArgs e)
