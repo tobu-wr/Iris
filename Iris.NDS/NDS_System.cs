@@ -53,9 +53,9 @@
 
             while (_running)
             {
-                UInt32 cycles = _cpu.Step();
+                UInt64 cycles = _cpu.Step();
 
-                for (UInt32 i = 0; i < cycles; ++i)
+                for (UInt64 i = 0; i < cycles; ++i)
                     _ppu.Step();
             }
         }

@@ -12,12 +12,12 @@
             _cpu.NextInstructionAddress = ROMAddress;
         }
 
-        private UInt32 HandleSWI()
+        private UInt64 HandleSWI()
         {
             throw new NotImplementedException("Iris.NDS.Core.BIOS: HandleSWI unimplemented");
         }
 
-        private UInt32 HandleIRQ()
+        private UInt64 HandleIRQ()
         {
             throw new NotImplementedException("Iris.NDS.Core.BIOS: HandleIRQ unimplemented");
         }

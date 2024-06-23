@@ -96,7 +96,7 @@ namespace Iris.GBA
             return 0;
         }
 
-        internal UInt32 HandleSWI()
+        internal UInt64 HandleSWI()
         {
             _cpu.Reg14_svc = _cpu.NextInstructionAddress;
             _cpu.SPSR_svc = _cpu.CPSR;
@@ -105,7 +105,7 @@ namespace Iris.GBA
             return 3;
         }
 
-        internal UInt32 HandleIRQ()
+        internal UInt64 HandleIRQ()
         {
             _cpu.Reg14_irq = _cpu.NextInstructionAddress + 4;
             _cpu.SPSR_irq = _cpu.CPSR;

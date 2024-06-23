@@ -17,8 +17,8 @@ namespace Iris.CPU
         public delegate void Write8_Delegate(UInt32 address, Byte value);
         public delegate void Write16_Delegate(UInt32 address, UInt16 value);
         public delegate void Write32_Delegate(UInt32 address, UInt32 value);
-        public delegate UInt32 HandleSWI_Delegate();
-        public delegate UInt32 HandleIRQ_Delegate();
+        public delegate UInt64 HandleSWI_Delegate();
+        public delegate UInt64 HandleIRQ_Delegate();
 
         // could have used function pointers (delegate*) for performance instead of delegates but it's less flexible (cannot use non-static function for instance)
         public readonly struct CallbackInterface
@@ -57,17 +57,17 @@ namespace Iris.CPU
             N = 31
         }
 
-        internal unsafe readonly struct InstructionListEntry<T>(T mask, T expected, delegate*<CPU_Core, T, UInt32> handler, List<Model> modelList)
+        internal unsafe readonly struct InstructionListEntry<T>(T mask, T expected, delegate*<CPU_Core, T, UInt64> handler, List<Model> modelList)
         {
             internal readonly T _mask = mask;
             internal readonly T _expected = expected;
-            internal unsafe readonly delegate*<CPU_Core, T, UInt32> _handler = handler;
+            internal unsafe readonly delegate*<CPU_Core, T, UInt64> _handler = handler;
             internal readonly List<Model> _modelList = modelList;
         }
 
-        internal unsafe readonly struct InstructionLUTEntry<T>(delegate*<CPU_Core, T, UInt32> handler)
+        internal unsafe readonly struct InstructionLUTEntry<T>(delegate*<CPU_Core, T, UInt64> handler)
         {
-            internal unsafe readonly delegate*<CPU_Core, T, UInt32> _handler = handler;
+            internal unsafe readonly delegate*<CPU_Core, T, UInt64> _handler = handler;
         }
 
         internal const UInt32 ModeMask = 0b1_1111;
@@ -249,7 +249,7 @@ namespace Iris.CPU
             writer.Write((int)NIRQ);
         }
 
-        public UInt32 Step()
+        public UInt64 Step()
         {
             UInt32 i = (CPSR >> 7) & 1;
 
@@ -511,9 +511,9 @@ namespace Iris.CPU
             return value | ~((value & (1u << (size - 1))) - 1);
         }
 
-        internal static UInt32 ComputeMultiplicationCycleCount(UInt32 leftMultiplier, UInt32 rightMultiplier)
+        internal static UInt64 ComputeMultiplicationCycleCount(UInt32 leftMultiplier, UInt32 rightMultiplier)
         {
-            static UInt32 ComputeMultiplierCycleCount(UInt32 multiplier)
+            static UInt64 ComputeMultiplierCycleCount(UInt32 multiplier)
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 static bool CheckMultiplierAgainstMask(UInt32 multiplier, UInt32 mask)
