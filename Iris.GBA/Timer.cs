@@ -29,7 +29,7 @@
             internal UInt16 _counter;
             internal UInt16 _reload;
             internal UInt16 _control;
-            internal UInt32 _cycleCounter;
+            internal UInt64 _cycleCounter;
             internal bool _running;
         }
 
@@ -42,10 +42,10 @@
         {
             _scheduler = scheduler;
 
-            _scheduler.RegisterTask((int)GBA_System.TaskId.StartCountingChannel0, (UInt32 cycleCountDelay) => StartCounting(ref _channel0, cycleCountDelay));
-            _scheduler.RegisterTask((int)GBA_System.TaskId.StartCountingChannel1, (UInt32 cycleCountDelay) => StartCounting(ref _channel1, cycleCountDelay));
-            _scheduler.RegisterTask((int)GBA_System.TaskId.StartCountingChannel2, (UInt32 cycleCountDelay) => StartCounting(ref _channel2, cycleCountDelay));
-            _scheduler.RegisterTask((int)GBA_System.TaskId.StartCountingChannel3, (UInt32 cycleCountDelay) => StartCounting(ref _channel3, cycleCountDelay));
+            _scheduler.RegisterTask((int)GBA_System.TaskId.StartCountingChannel0, (UInt64 cycleCountDelay) => StartCounting(ref _channel0, cycleCountDelay));
+            _scheduler.RegisterTask((int)GBA_System.TaskId.StartCountingChannel1, (UInt64 cycleCountDelay) => StartCounting(ref _channel1, cycleCountDelay));
+            _scheduler.RegisterTask((int)GBA_System.TaskId.StartCountingChannel2, (UInt64 cycleCountDelay) => StartCounting(ref _channel2, cycleCountDelay));
+            _scheduler.RegisterTask((int)GBA_System.TaskId.StartCountingChannel3, (UInt64 cycleCountDelay) => StartCounting(ref _channel3, cycleCountDelay));
         }
 
         internal void Initialize(InterruptControl interruptControl)
@@ -68,7 +68,7 @@
                 channel._counter = reader.ReadUInt16();
                 channel._reload = reader.ReadUInt16();
                 channel._control = reader.ReadUInt16();
-                channel._cycleCounter = reader.ReadUInt32();
+                channel._cycleCounter = reader.ReadUInt64();
                 channel._running = reader.ReadBoolean();
             }
 
@@ -175,7 +175,7 @@
             }
         }
 
-        internal void UpdateAllCounters(UInt32 cycleCount)
+        internal void UpdateAllCounters(UInt64 cycleCount)
         {
             UInt32 overflowCount = 0;
 
@@ -193,7 +193,7 @@
                 {
                     channel._cycleCounter += cycleCount;
 
-                    UInt32 prescaler = (channel._control & 0b11) switch
+                    UInt64 prescaler = (channel._control & 0b11) switch
                     {
                         0b00 => 1,
                         0b01 => 64,
@@ -204,7 +204,7 @@
                         _ => 0,
                     };
 
-                    counterIncrement = channel._cycleCounter / prescaler;
+                    counterIncrement = (UInt32)(channel._cycleCounter / prescaler);
                     channel._cycleCounter %= prescaler;
                 }
                 else
@@ -237,7 +237,7 @@
             UpdateCounter(ref _channel3, false, InterruptControl.Interrupt.Timer3);
         }
 
-        private static void StartCounting(ref Channel channel, UInt32 cycleCountDelay)
+        private static void StartCounting(ref Channel channel, UInt64 cycleCountDelay)
         {
             if ((channel._control & 0x0080) == 0)
                 return;

@@ -142,8 +142,8 @@ namespace Iris.GBA
         private const int CharacterWidth = 8;
         private const int CharacterHeight = 8;
 
-        private const UInt32 HDrawCycleCount = 1006;
-        private const UInt32 HBlankCycleCount = 226;
+        private const UInt64 HDrawCycleCount = 1006;
+        private const UInt64 HBlankCycleCount = 226;
 
         private readonly Common.Scheduler _scheduler;
         private readonly Common.System.PresentFrame_Delegate _presentFrameCallback;
@@ -623,7 +623,7 @@ namespace Iris.GBA
             }
         }
 
-        private void StartHBlank(UInt32 cycleCountDelay)
+        private void StartHBlank(UInt64 cycleCountDelay)
         {
             _DISPSTAT |= 0x0002; // set HBlank status
 
@@ -636,7 +636,7 @@ namespace Iris.GBA
             _scheduler.ScheduleTask((int)GBA_System.TaskId.StartScanline, HBlankCycleCount - cycleCountDelay);
         }
 
-        private void StartScanline(UInt32 cycleCountDelay)
+        private void StartScanline(UInt64 cycleCountDelay)
         {
             _DISPSTAT = (UInt16)(_DISPSTAT & ~0x0002); // clear HBlank status
 
@@ -734,7 +734,7 @@ namespace Iris.GBA
                 // TODO: verify
                 case 0b110:
                 case 0b111:
-                    throw new Exception(string.Format("Iris.GBA.Video: Unknown background mode {0}", bgMode));
+                    throw new Exception($"Iris.GBA.Video: Unknown background mode {bgMode}");
             }
 
             _currentBG2X += (Int16)_BG2PB;
@@ -943,7 +943,7 @@ namespace Iris.GBA
 
             const int SC_Width = 256;
             const int SC_Height = 256;
-            const int SC_Size = (SC_Width / CharacterWidth) * (SC_Height / CharacterHeight);
+            const int SC_CharacterCount = (SC_Width / CharacterWidth) * (SC_Height / CharacterHeight);
 
             int scV = v / SC_Height;
             int scPixelV = v % SC_Height;
@@ -972,7 +972,7 @@ namespace Iris.GBA
 
                 unsafe
                 {
-                    UInt16 screenData = Unsafe.Read<UInt16>((Byte*)_vram + screenBaseBlockOffset + (scNumber * SC_Size * 2) + (characterNumber * 2));
+                    UInt16 screenData = Unsafe.Read<UInt16>((Byte*)_vram + screenBaseBlockOffset + (scNumber * SC_CharacterCount * 2) + (characterNumber * 2));
 
                     UInt16 colorPalette = (UInt16)((screenData >> 12) & 0b1111);
                     UInt16 verticalFlipFlag = (UInt16)((screenData >> 11) & 1);
