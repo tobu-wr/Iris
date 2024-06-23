@@ -1,6 +1,6 @@
 ﻿namespace Iris.GBA
 {
-    internal sealed class KeyInput(Common.System.PollInput_Delegate pollInputCallback)
+    internal sealed class KeyInput
     {
         internal enum Register
         {
@@ -11,9 +11,21 @@
         private UInt16 _KEYINPUT;
         private UInt16 _KEYCNT;
 
-        private readonly Common.System.PollInput_Delegate _pollInputCallback = pollInputCallback;
+        private readonly Common.Scheduler _scheduler;
+        private readonly Common.System.PollInput_Delegate _pollInputCallback;
 
         private InterruptControl _interruptControl;
+
+        private const UInt64 CheckInterruptCycleCount = 280_896; // one per frame
+        private bool _checkingInterrupt;
+
+        internal KeyInput(Common.Scheduler scheduler, Common.System.PollInput_Delegate pollInputCallback)
+        {
+            _scheduler = scheduler;
+            _pollInputCallback = pollInputCallback;
+
+            _scheduler.RegisterTask((int)GBA_System.TaskId.CheckKeyInterrupt, CheckInterrupt);
+        }
 
         internal void Initialize(InterruptControl interruptControl)
         {
@@ -44,7 +56,7 @@
             {
                 case Register.KEYINPUT:
                     _pollInputCallback();
-                    CheckInterrupts();
+                    CheckInterrupt();
                     return _KEYINPUT;
 
                 case Register.KEYCNT:
@@ -62,7 +74,13 @@
             {
                 case Register.KEYCNT:
                     Memory.WriteRegisterHelper(ref _KEYCNT, value, mode);
-                    CheckInterrupts();
+                    CheckInterrupt();
+
+                    if (((_KEYCNT & 0x4000) == 0x4000) && !_checkingInterrupt)
+                    {
+                        _checkingInterrupt = true;
+                        _scheduler.ScheduleTask((int)GBA_System.TaskId.CheckKeyInterrupt, CheckInterruptCycleCount);
+                    }
                     break;
 
                 // should never happen
@@ -114,20 +132,34 @@
             _KEYINPUT = (UInt16)((_KEYINPUT & ~(1 << pos)) | ((int)status << pos));
         }
 
-        private void CheckInterrupts()
+        private void CheckInterrupt(UInt64 cycleCountDelay)
         {
-            if ((_KEYCNT & 0x4000) == 0x4000)
+            if ((_KEYCNT & 0x4000) == 0)
             {
-                if ((_KEYCNT & 0x8000) == 0)
-                {
-                    if ((~_KEYINPUT & _KEYCNT & 0x03ff) != 0)
-                        _interruptControl.RequestInterrupt(InterruptControl.Interrupt.Key);
-                }
-                else
-                {
-                    if ((~_KEYINPUT & _KEYCNT & 0x03ff) == (_KEYCNT & 0x03ff))
-                        _interruptControl.RequestInterrupt(InterruptControl.Interrupt.Key);
-                }
+                _checkingInterrupt = false;
+                return;
+            }
+
+            _pollInputCallback();
+            CheckInterrupt();
+
+            _scheduler.ScheduleTask((int)GBA_System.TaskId.CheckKeyInterrupt, CheckInterruptCycleCount - cycleCountDelay);
+        }
+
+        private void CheckInterrupt()
+        {
+            if ((_KEYCNT & 0x4000) == 0)
+                return;
+
+            if ((_KEYCNT & 0x8000) == 0)
+            {
+                if ((~_KEYINPUT & _KEYCNT & 0x03ff) != 0)
+                    _interruptControl.RequestInterrupt(InterruptControl.Interrupt.Key);
+            }
+            else
+            {
+                if ((~_KEYINPUT & _KEYCNT & 0x03ff) == (_KEYCNT & 0x03ff))
+                    _interruptControl.RequestInterrupt(InterruptControl.Interrupt.Key);
             }
         }
     }

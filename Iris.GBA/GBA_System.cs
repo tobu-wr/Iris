@@ -12,13 +12,16 @@ namespace Iris.GBA
             StartCountingChannel2,
             StartCountingChannel3,
 
+            // KeyInput
+            CheckKeyInterrupt,
+
             // Video
             StartHBlank,
             StartScanline
         }
 
         private static readonly int s_taskIdCount = Enum.GetNames(typeof(TaskId)).Length;
-        private readonly Common.Scheduler _scheduler = new(s_taskIdCount, s_taskIdCount);
+        private readonly Common.Scheduler _scheduler = new(s_taskIdCount, s_taskIdCount + 1);
 
         private readonly CPU.CPU_Core _cpu;
         private readonly Communication _communication = new();
@@ -44,7 +47,7 @@ namespace Iris.GBA
 
             _cpu = new(CPU.CPU_Core.Model.ARM7TDMI, cpuCallbackInterface);
             _timer = new(_scheduler);
-            _keyInput = new(pollInputCallback);
+            _keyInput = new(_scheduler, pollInputCallback);
             _video = new(_scheduler, presentFrameCallback);
 
             _communication.Initialize(_interruptControl);
