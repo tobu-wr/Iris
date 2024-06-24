@@ -56,7 +56,10 @@
             {
                 case Register.KEYINPUT:
                     _pollInputCallback();
-                    CheckInterrupt();
+
+                    if ((_KEYCNT & 0x4000) == 0x4000)
+                        CheckInterrupt();
+
                     return _KEYINPUT;
 
                 case Register.KEYCNT:
@@ -74,12 +77,17 @@
             {
                 case Register.KEYCNT:
                     Memory.WriteRegisterHelper(ref _KEYCNT, value, mode);
-                    CheckInterrupt();
 
-                    if (((_KEYCNT & 0x4000) == 0x4000) && !_checkingInterrupt)
+                    if ((_KEYCNT & 0x4000) == 0x4000)
                     {
-                        _checkingInterrupt = true;
-                        _scheduler.ScheduleTask((int)GBA_System.TaskId.CheckKeyInterrupt, CheckInterruptCycleCount);
+                        _pollInputCallback();
+                        CheckInterrupt();
+
+                        if (!_checkingInterrupt)
+                        {
+                            _checkingInterrupt = true;
+                            _scheduler.ScheduleTask((int)GBA_System.TaskId.CheckKeyInterrupt, CheckInterruptCycleCount);
+                        }
                     }
                     break;
 
@@ -148,17 +156,17 @@
 
         private void CheckInterrupt()
         {
-            if ((_KEYCNT & 0x4000) == 0)
-                return;
+            UInt16 mask = (UInt16)(_KEYCNT & 0x03ff);
 
             if ((_KEYCNT & 0x8000) == 0)
             {
-                if ((~_KEYINPUT & _KEYCNT & 0x03ff) != 0)
+                if ((~_KEYINPUT & mask) != 0)
                     _interruptControl.RequestInterrupt(InterruptControl.Interrupt.Key);
             }
             else
             {
-                if ((~_KEYINPUT & _KEYCNT & 0x03ff) == (_KEYCNT & 0x03ff))
+                // TODO: figure out what happens when mask == 0
+                if ((~_KEYINPUT & mask) == mask)
                     _interruptControl.RequestInterrupt(InterruptControl.Interrupt.Key);
             }
         }
