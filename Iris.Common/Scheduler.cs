@@ -49,12 +49,23 @@ namespace Iris.Common
             writer.Write(_cycleCounter);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public UInt64 GetCycleCounter()
+        {
+            return _cycleCounter;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void AdvanceCycleCounter(UInt64 cycleCount)
+        {
+            _cycleCounter += cycleCount;
+        }
+
         public void RegisterTask(int id, Task_Delegate task)
         {
             _taskList[id] = task;
         }
 
-        // cycleCount must be greater than 0
         public void ScheduleTask(int id, UInt64 cycleCount)
         {
             cycleCount += _cycleCounter;
@@ -82,26 +93,40 @@ namespace Iris.Common
             ++_scheduledTaskCount;
         }
 
+        public void CancelTask(int id)
+        {
+            int index = 0;
+            ref ScheduledTaskListEntry entry = ref MemoryMarshal.GetArrayDataReference(_scheduledTaskList);
+
+            while (index < _scheduledTaskCount)
+            {
+                if (entry._id == id)
+                {
+                    --_scheduledTaskCount;
+
+                    if (index < _scheduledTaskCount)
+                        Array.Copy(_scheduledTaskList, index + 1, _scheduledTaskList, index, _scheduledTaskCount - index);
+
+                    return;
+                }
+
+                ++index;
+                entry = ref Unsafe.Add(ref entry, 1);
+            }
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool HasTaskReady()
         {
             return (_scheduledTaskCount > 0) && (MemoryMarshal.GetArrayDataReference(_scheduledTaskList)._cycleCount <= _cycleCounter);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void AdvanceCycleCounter(UInt64 cycleCount)
-        {
-            _cycleCounter += cycleCount;
-        }
-
         public void ProcessTasks()
         {
-            ref Task_Delegate taskListDataRef = ref MemoryMarshal.GetArrayDataReference(_taskList);
-            ref ScheduledTaskListEntry scheduledTaskListDataRef = ref MemoryMarshal.GetArrayDataReference(_scheduledTaskList);
-
             // execute the tasks that are ready
             int index = 0;
-            ref ScheduledTaskListEntry entry = ref scheduledTaskListDataRef;
+            ref ScheduledTaskListEntry entry = ref MemoryMarshal.GetArrayDataReference(_scheduledTaskList);
+            ref Task_Delegate taskListDataRef = ref MemoryMarshal.GetArrayDataReference(_taskList);
 
             while ((index < _scheduledTaskCount) && (entry._cycleCount <= _cycleCounter))
             {
