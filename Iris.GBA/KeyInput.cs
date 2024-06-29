@@ -16,7 +16,7 @@
 
         private InterruptControl _interruptControl;
 
-        private const UInt64 CheckInterruptCycleCount = 280_896; // one per frame
+        private const UInt64 CheckInterruptCycleCount = 280_896; // once per frame
         private bool _checkingInterrupt;
 
         internal KeyInput(Common.Scheduler scheduler, Common.System.PollInput_Delegate pollInputCallback)

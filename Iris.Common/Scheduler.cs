@@ -14,7 +14,7 @@ namespace Iris.Common
             internal UInt64 _cycleCount;
         }
 
-        private readonly ScheduledTaskListEntry[] _scheduledTaskList = new ScheduledTaskListEntry[scheduledTaskListSize]; // sorted by CycleCount from smallest to largest
+        private readonly ScheduledTaskListEntry[] _scheduledTaskList = new ScheduledTaskListEntry[scheduledTaskListSize]; // sorted by _cycleCount from smallest to largest
         private int _scheduledTaskCount;
 
         private UInt64 _cycleCounter;
@@ -71,7 +71,7 @@ namespace Iris.Common
             cycleCount += _cycleCounter;
 
             // get the position and reference of the new task
-            // (searching is done backward because the new task is more likely to be inserted towards the end)
+            // (searching is done backward because a new task is more likely to be inserted towards the end)
             int index = _scheduledTaskCount;
             ref ScheduledTaskListEntry entry = ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_scheduledTaskList), index - 1);
 

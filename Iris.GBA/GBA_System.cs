@@ -6,16 +6,21 @@ namespace Iris.GBA
     {
         internal enum TaskId
         {
-            // Timer
-            StartCountingChannel0,
-            StartCountingChannel1,
-            StartCountingChannel2,
-            StartCountingChannel3,
+            // ---- Timer ----
+            StartTimerChannel0,
+            StartTimerChannel1,
+            StartTimerChannel2,
+            StartTimerChannel3,
 
-            // KeyInput
+            HandleTimerOverflowChannel0,
+            HandleTimerOverflowChannel1,
+            HandleTimerOverflowChannel2,
+            HandleTimerOverflowChannel3,
+
+            // ---- KeyInput ----
             CheckKeyInterrupt,
 
-            // Video
+            // ---- Video ----
             StartHBlank,
             StartScanline
         }
@@ -156,7 +161,6 @@ namespace Iris.GBA
                 while (!_scheduler.HasTaskReady())
                 {
                     UInt64 cycleCount = _cpu.Step();
-                    _timer.UpdateAllCounters(cycleCount);
                     _scheduler.AdvanceCycleCounter(cycleCount);
                 }
 
