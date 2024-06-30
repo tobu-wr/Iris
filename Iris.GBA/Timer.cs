@@ -1,8 +1,5 @@
 ﻿namespace Iris.GBA
 {
-    // TODO: optimize
-    // - lazy counter update (on read and overflow)
-    // - overflow on scheduler
     internal sealed class Timer
     {
         internal enum Register
@@ -24,28 +21,38 @@
 
         private InterruptControl _interruptControl;
 
-        private struct Channel
+        private struct Channel(GBA_System.TaskId startTaskId, GBA_System.TaskId handleOverflowTaskId, InterruptControl.Interrupt interrupt)
         {
             internal UInt16 _counter;
             internal UInt16 _reload;
             internal UInt16 _control;
-            internal UInt64 _cycleCounter;
-            internal bool _running;
+            internal UInt64 _cycleCount; // only used in non-cascading mode
+
+            internal readonly GBA_System.TaskId _startTaskId = startTaskId;
+            internal readonly GBA_System.TaskId _handleOverflowTaskId = handleOverflowTaskId;
+            internal readonly InterruptControl.Interrupt _interrupt = interrupt;
         }
 
-        private Channel _channel0;
-        private Channel _channel1;
-        private Channel _channel2;
-        private Channel _channel3;
+        private readonly Channel[] _channels;
 
         internal Timer(Common.Scheduler scheduler)
         {
             _scheduler = scheduler;
 
-            _scheduler.RegisterTask((int)GBA_System.TaskId.StartCountingChannel0, (UInt64 cycleCountDelay) => StartCounting(ref _channel0, cycleCountDelay));
-            _scheduler.RegisterTask((int)GBA_System.TaskId.StartCountingChannel1, (UInt64 cycleCountDelay) => StartCounting(ref _channel1, cycleCountDelay));
-            _scheduler.RegisterTask((int)GBA_System.TaskId.StartCountingChannel2, (UInt64 cycleCountDelay) => StartCounting(ref _channel2, cycleCountDelay));
-            _scheduler.RegisterTask((int)GBA_System.TaskId.StartCountingChannel3, (UInt64 cycleCountDelay) => StartCounting(ref _channel3, cycleCountDelay));
+            _channels =
+            [
+                new(GBA_System.TaskId.StartTimerChannel0, GBA_System.TaskId.HandleTimerOverflowChannel0, InterruptControl.Interrupt.Timer0),
+                new(GBA_System.TaskId.StartTimerChannel1, GBA_System.TaskId.HandleTimerOverflowChannel1, InterruptControl.Interrupt.Timer1),
+                new(GBA_System.TaskId.StartTimerChannel2, GBA_System.TaskId.HandleTimerOverflowChannel2, InterruptControl.Interrupt.Timer2),
+                new(GBA_System.TaskId.StartTimerChannel3, GBA_System.TaskId.HandleTimerOverflowChannel3, InterruptControl.Interrupt.Timer3)
+            ];
+
+            for (int channelIndex = 0; channelIndex < 4; ++channelIndex)
+            {
+                int channelIndexCopy = channelIndex;
+                _scheduler.RegisterTask((int)_channels[channelIndex]._startTaskId, (UInt64 cycleCountDelay) => Start(channelIndexCopy, cycleCountDelay));
+                _scheduler.RegisterTask((int)_channels[channelIndex]._handleOverflowTaskId, (UInt64 cycleCountDelay) => HandleOverflow(channelIndexCopy, cycleCountDelay));
+            }
         }
 
         internal void Initialize(InterruptControl interruptControl)
@@ -55,61 +62,60 @@
 
         internal void ResetState()
         {
-            _channel0 = default;
-            _channel1 = default;
-            _channel2 = default;
-            _channel3 = default;
+            foreach (ref Channel channel in _channels.AsSpan())
+            {
+                channel._counter = 0;
+                channel._reload = 0;
+                channel._control = 0;
+                channel._cycleCount = 0;
+            }
         }
 
         internal void LoadState(BinaryReader reader)
         {
-            void LoadChannel(ref Channel channel)
+            foreach (ref Channel channel in _channels.AsSpan())
             {
                 channel._counter = reader.ReadUInt16();
                 channel._reload = reader.ReadUInt16();
                 channel._control = reader.ReadUInt16();
-                channel._cycleCounter = reader.ReadUInt64();
-                channel._running = reader.ReadBoolean();
+                channel._cycleCount = reader.ReadUInt64();
             }
-
-            LoadChannel(ref _channel0);
-            LoadChannel(ref _channel1);
-            LoadChannel(ref _channel2);
-            LoadChannel(ref _channel3);
         }
 
         internal void SaveState(BinaryWriter writer)
         {
-            void SaveChannel(Channel channel)
+            foreach (Channel channel in _channels)
             {
                 writer.Write(channel._counter);
                 writer.Write(channel._reload);
                 writer.Write(channel._control);
-                writer.Write(channel._cycleCounter);
-                writer.Write(channel._running);
+                writer.Write(channel._cycleCount);
             }
-
-            SaveChannel(_channel0);
-            SaveChannel(_channel1);
-            SaveChannel(_channel2);
-            SaveChannel(_channel3);
         }
 
         internal UInt16 ReadRegister(Register register)
         {
+            UInt16 ReadCounter(ref Channel channel)
+            {
+                if ((channel._control & 0x0084) == 0x0080)
+                    UpdateCounter(ref channel, channel._control);
+
+                return channel._counter;
+            }
+
             return register switch
             {
-                Register.TM0CNT_L => _channel0._counter,
-                Register.TM0CNT_H => _channel0._control,
+                Register.TM0CNT_L => ReadCounter(ref _channels[0]),
+                Register.TM0CNT_H => _channels[0]._control,
 
-                Register.TM1CNT_L => _channel1._counter,
-                Register.TM1CNT_H => _channel1._control,
+                Register.TM1CNT_L => ReadCounter(ref _channels[1]),
+                Register.TM1CNT_H => _channels[1]._control,
 
-                Register.TM2CNT_L => _channel2._counter,
-                Register.TM2CNT_H => _channel2._control,
+                Register.TM2CNT_L => ReadCounter(ref _channels[2]),
+                Register.TM2CNT_H => _channels[2]._control,
 
-                Register.TM3CNT_L => _channel3._counter,
-                Register.TM3CNT_H => _channel3._control,
+                Register.TM3CNT_L => ReadCounter(ref _channels[3]),
+                Register.TM3CNT_H => _channels[3]._control,
 
                 // should never happen
                 _ => throw new Exception("Iris.GBA.Timer: Register read error"),
@@ -125,7 +131,7 @@
                 channel._reload = reload;
             }
 
-            void WriteControl(ref Channel channel, GBA_System.TaskId startCountingTaskId)
+            void WriteControl(ref Channel channel)
             {
                 UInt16 previousControl = channel._control;
 
@@ -133,40 +139,84 @@
                 Memory.WriteRegisterHelper(ref newControl, value, mode);
                 channel._control = newControl;
 
-                if (((previousControl & 0x0080) == 0) && ((newControl & 0x0080) == 0x0080))
-                    _scheduler.ScheduleTask((int)startCountingTaskId, 2);
-                else if (((previousControl & 0x0080) == 0x0080) && ((newControl & 0x0080) == 0))
-                    channel._running = false;
+                if ((previousControl & 0x0080) == 0)
+                {
+                    if ((newControl & 0x0080) == 0x0080)
+                        _scheduler.ScheduleTask((int)channel._startTaskId, 2);
+                }
+                else
+                {
+                    if ((newControl & 0x0080) == 0)
+                    {
+                        if ((previousControl & 0x0004) == 0)
+                        {
+                            UpdateCounter(ref channel, previousControl);
+
+                            _scheduler.CancelTask((int)channel._handleOverflowTaskId);
+                        }
+                    }
+                    else
+                    {
+                        if ((previousControl & 0x0004) == 0)
+                        {
+                            if ((newControl & 0x0004) == 0)
+                            {
+                                if ((previousControl & 0b11) != (newControl & 0b11))
+                                {
+                                    UpdateCounter(ref channel, previousControl);
+
+                                    _scheduler.CancelTask((int)channel._handleOverflowTaskId);
+                                    _scheduler.ScheduleTask((int)channel._handleOverflowTaskId, ComputeCycleCountUntilOverflow(ref channel));
+                                }
+                            }
+                            else
+                            {
+                                UpdateCounter(ref channel, previousControl);
+
+                                _scheduler.CancelTask((int)channel._handleOverflowTaskId);
+                            }
+                        }
+                        else
+                        {
+                            if ((newControl & 0x0004) == 0)
+                            {
+                                channel._cycleCount = _scheduler.GetCycleCounter();
+
+                                _scheduler.ScheduleTask((int)channel._handleOverflowTaskId, ComputeCycleCountUntilOverflow(ref channel));
+                            }
+                        }
+                    }
+                }
             }
 
             switch (register)
             {
                 case Register.TM0CNT_L:
-                    WriteReload(ref _channel0);
+                    WriteReload(ref _channels[0]);
                     break;
                 case Register.TM0CNT_H:
-                    WriteControl(ref _channel0, GBA_System.TaskId.StartCountingChannel0);
+                    WriteControl(ref _channels[0]);
                     break;
 
                 case Register.TM1CNT_L:
-                    WriteReload(ref _channel1);
+                    WriteReload(ref _channels[1]);
                     break;
                 case Register.TM1CNT_H:
-                    WriteControl(ref _channel1, GBA_System.TaskId.StartCountingChannel1);
+                    WriteControl(ref _channels[1]);
                     break;
 
                 case Register.TM2CNT_L:
-                    WriteReload(ref _channel2);
+                    WriteReload(ref _channels[2]);
                     break;
                 case Register.TM2CNT_H:
-                    WriteControl(ref _channel2, GBA_System.TaskId.StartCountingChannel2);
+                    WriteControl(ref _channels[2]);
                     break;
 
                 case Register.TM3CNT_L:
-                    WriteReload(ref _channel3);
+                    WriteReload(ref _channels[3]);
                     break;
                 case Register.TM3CNT_H:
-                    WriteControl(ref _channel3, GBA_System.TaskId.StartCountingChannel3);
+                    WriteControl(ref _channels[3]);
                     break;
 
                 // should never happen
@@ -175,76 +225,87 @@
             }
         }
 
-        internal void UpdateAllCounters(UInt64 cycleCount)
+        private void UpdateCounter(ref Channel channel, UInt16 control)
         {
-            UInt32 overflowCount = 0;
+            UInt64 currentCycleCount = _scheduler.GetCycleCounter();
+            UInt64 cycleCountDelta = currentCycleCount - channel._cycleCount;
+            UInt64 prescaler = GetPrescaler(control);
 
-            void UpdateCounter(ref Channel channel, bool isFirstChannel, InterruptControl.Interrupt interrupt)
-            {
-                if (!channel._running)
-                {
-                    overflowCount = 0;
-                    return;
-                }
-
-                UInt32 counterIncrement;
-
-                if (((channel._control & 0x0004) == 0) || isFirstChannel)
-                {
-                    channel._cycleCounter += cycleCount;
-
-                    UInt64 prescaler = (channel._control & 0b11) switch
-                    {
-                        0b00 => 1,
-                        0b01 => 64,
-                        0b10 => 256,
-                        0b11 => 1024,
-
-                        // cannot happen
-                        _ => 0,
-                    };
-
-                    counterIncrement = (UInt32)(channel._cycleCounter / prescaler);
-                    channel._cycleCounter %= prescaler;
-                }
-                else
-                {
-                    counterIncrement = overflowCount;
-                }
-
-                UInt32 counter = channel._counter + counterIncrement;
-
-                if (counter >= 0x1_0000)
-                {
-                    (overflowCount, counterIncrement) = Math.DivRem(counter - 0x1_0000u, 0x1_0000u - channel._reload);
-
-                    channel._counter = (UInt16)(channel._reload + counterIncrement);
-                    ++overflowCount;
-
-                    if ((channel._control & 0x0040) == 0x0040)
-                        _interruptControl.RequestInterrupt(interrupt);
-                }
-                else
-                {
-                    channel._counter = (UInt16)counter;
-                    overflowCount = 0;
-                }
-            }
-
-            UpdateCounter(ref _channel0, true, InterruptControl.Interrupt.Timer0);
-            UpdateCounter(ref _channel1, false, InterruptControl.Interrupt.Timer1);
-            UpdateCounter(ref _channel2, false, InterruptControl.Interrupt.Timer2);
-            UpdateCounter(ref _channel3, false, InterruptControl.Interrupt.Timer3);
+            channel._counter += (UInt16)(cycleCountDelta / prescaler);
+            channel._cycleCount = currentCycleCount - (UInt16)(cycleCountDelta % prescaler);
         }
 
-        private static void StartCounting(ref Channel channel, UInt64 cycleCountDelay)
+        private void Start(int channelIndex, UInt64 cycleCountDelay)
         {
-            if ((channel._control & 0x0080) == 0)
-                return;
+            ref Channel channel = ref _channels[channelIndex];
 
             channel._counter = channel._reload;
-            channel._cycleCounter = cycleCountDelay;
-            channel._running = true;
+
+            if ((channel._control & 0x0004) == 0 || (channelIndex == 0))
+            {
+                channel._cycleCount = _scheduler.GetCycleCounter() - cycleCountDelay;
+
+                _scheduler.ScheduleTask((int)channel._handleOverflowTaskId, ComputeCycleCountUntilOverflow(ref channel) - cycleCountDelay);
+            }
+        }
+
+        private void HandleOverflow(int channelIndex, UInt64 cycleCountDelay)
+        {
+            ref Channel channel = ref _channels[channelIndex];
+
+            channel._counter = channel._reload;
+            channel._cycleCount = _scheduler.GetCycleCounter() - cycleCountDelay;
+
+            _scheduler.ScheduleTask((int)channel._handleOverflowTaskId, ComputeCycleCountUntilOverflow(ref channel) - cycleCountDelay);
+
+            if ((channel._control & 0x0040) == 0x0040)
+                _interruptControl.RequestInterrupt(channel._interrupt);
+
+            CascadeOverflow(channelIndex);
+        }
+
+        private void CascadeOverflow(int channelIndex)
+        {
+            if (channelIndex == 3)
+                return;
+
+            ++channelIndex;
+
+            ref Channel channel = ref _channels[channelIndex];
+
+            if ((channel._control & 0x0084) != 0x0084)
+                return;
+
+            if (channel._counter == 0xffff)
+            {
+                channel._counter = channel._reload;
+
+                if ((channel._control & 0x0040) == 0x0040)
+                    _interruptControl.RequestInterrupt(channel._interrupt);
+
+                CascadeOverflow(channelIndex);
+            }
+            else
+            {
+                ++channel._counter;
+            }
+        }
+
+        private static UInt64 ComputeCycleCountUntilOverflow(ref Channel channel)
+        {
+            return (0x1_0000u - channel._counter) * GetPrescaler(channel._control);
+        }
+
+        private static UInt64 GetPrescaler(UInt16 control)
+        {
+            return (control & 0b11) switch
+            {
+                0b00 => 1,
+                0b01 => 64,
+                0b10 => 256,
+                0b11 => 1024,
+                _ => 0, // cannot happen
+            };
         }
     }
 }
