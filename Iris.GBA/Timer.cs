@@ -139,54 +139,7 @@
                 Memory.WriteRegisterHelper(ref newControl, value, mode);
                 channel._control = newControl;
 
-                if ((previousControl & 0x0080) == 0)
-                {
-                    if ((newControl & 0x0080) == 0x0080)
-                        _scheduler.ScheduleTask((int)channel._startTaskId, 2);
-                }
-                else
-                {
-                    if ((newControl & 0x0080) == 0)
-                    {
-                        if ((previousControl & 0x0004) == 0)
-                        {
-                            UpdateCounter(ref channel, previousControl);
-
-                            _scheduler.CancelTask((int)channel._handleOverflowTaskId);
-                        }
-                    }
-                    else
-                    {
-                        if ((previousControl & 0x0004) == 0)
-                        {
-                            if ((newControl & 0x0004) == 0)
-                            {
-                                if ((previousControl & 0b11) != (newControl & 0b11))
-                                {
-                                    UpdateCounter(ref channel, previousControl);
-
-                                    _scheduler.CancelTask((int)channel._handleOverflowTaskId);
-                                    _scheduler.ScheduleTask((int)channel._handleOverflowTaskId, ComputeCycleCountUntilOverflow(ref channel));
-                                }
-                            }
-                            else
-                            {
-                                UpdateCounter(ref channel, previousControl);
-
-                                _scheduler.CancelTask((int)channel._handleOverflowTaskId);
-                            }
-                        }
-                        else
-                        {
-                            if ((newControl & 0x0004) == 0)
-                            {
-                                channel._cycleCount = _scheduler.GetCycleCounter();
-
-                                _scheduler.ScheduleTask((int)channel._handleOverflowTaskId, ComputeCycleCountUntilOverflow(ref channel));
-                            }
-                        }
-                    }
-                }
+                CheckControl(ref channel, previousControl, newControl);
             }
 
             switch (register)
@@ -222,6 +175,58 @@
                 // should never happen
                 default:
                     throw new Exception("Iris.GBA.Timer: Register write error");
+            }
+        }
+
+        private void CheckControl(ref Channel channel, UInt16 previousControl, UInt16 newControl)
+        {
+            if ((previousControl & 0x0080) == 0)
+            {
+                if ((newControl & 0x0080) == 0x0080)
+                    _scheduler.ScheduleTask((int)channel._startTaskId, 2);
+            }
+            else
+            {
+                if ((newControl & 0x0080) == 0)
+                {
+                    if ((previousControl & 0x0004) == 0)
+                    {
+                        UpdateCounter(ref channel, previousControl);
+
+                        _scheduler.CancelTask((int)channel._handleOverflowTaskId);
+                    }
+                }
+                else
+                {
+                    if ((previousControl & 0x0004) == 0)
+                    {
+                        if ((newControl & 0x0004) == 0)
+                        {
+                            if ((previousControl & 0b11) != (newControl & 0b11))
+                            {
+                                UpdateCounter(ref channel, previousControl);
+
+                                _scheduler.CancelTask((int)channel._handleOverflowTaskId);
+                                _scheduler.ScheduleTask((int)channel._handleOverflowTaskId, ComputeCycleCountUntilOverflow(ref channel));
+                            }
+                        }
+                        else
+                        {
+                            UpdateCounter(ref channel, previousControl);
+
+                            _scheduler.CancelTask((int)channel._handleOverflowTaskId);
+                        }
+                    }
+                    else
+                    {
+                        if ((newControl & 0x0004) == 0)
+                        {
+                            channel._cycleCount = _scheduler.GetCycleCounter();
+
+                            _scheduler.ScheduleTask((int)channel._handleOverflowTaskId, ComputeCycleCountUntilOverflow(ref channel));
+                        }
+                    }
+                }
             }
         }
 

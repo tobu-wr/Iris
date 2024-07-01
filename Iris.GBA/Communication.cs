@@ -152,42 +152,6 @@
 
         internal void WriteRegister(Register register, UInt16 value, Memory.RegisterWriteMode mode)
         {
-            void CheckTransfer()
-            {
-                switch ((_RCNT >> 14) & 0b11)
-                {
-                    case 0b00:
-                    case 0b01:
-                        switch ((_SIOCNT >> 12) & 0b11)
-                        {
-                            case 0b00: // 8 bits normal serial communication
-                            case 0b01: // 32 bits normal serial communication
-                            case 0b10: // 16 bits multiplayer serial communication
-                                if ((_SIOCNT & 0x0080) == 0x0080)
-                                {
-                                    _SIOCNT = (UInt16)(_SIOCNT & ~0x0080);
-
-                                    if ((_SIOCNT & 0x4000) == 0x4000)
-                                        _interruptControl.RequestInterrupt(InterruptControl.Interrupt.SIO);
-                                }
-                                break;
-
-                            case 0b11:
-                                Console.WriteLine("[Iris.GBA.Communication] UART communication not implemented");
-                                break;
-                        }
-                        break;
-
-                    case 0b10:
-                        Console.WriteLine("[Iris.GBA.Communication] General purpose communication not implemented");
-                        break;
-
-                    case 0b11:
-                        Console.WriteLine("[Iris.GBA.Communication] JOY Bus communication not implemented");
-                        break;
-                }
-            }
-
             switch (register)
             {
                 case Register.SIODATA0:
@@ -241,6 +205,42 @@
                 // should never happen
                 default:
                     throw new Exception("Iris.GBA.Communication: Register write error");
+            }
+        }
+
+        private void CheckTransfer()
+        {
+            switch ((_RCNT >> 14) & 0b11)
+            {
+                case 0b00:
+                case 0b01:
+                    switch ((_SIOCNT >> 12) & 0b11)
+                    {
+                        case 0b00: // 8 bits normal serial communication
+                        case 0b01: // 32 bits normal serial communication
+                        case 0b10: // 16 bits multiplayer serial communication
+                            if ((_SIOCNT & 0x0080) == 0x0080)
+                            {
+                                _SIOCNT = (UInt16)(_SIOCNT & ~0x0080);
+
+                                if ((_SIOCNT & 0x4000) == 0x4000)
+                                    _interruptControl.RequestInterrupt(InterruptControl.Interrupt.SIO);
+                            }
+                            break;
+
+                        case 0b11:
+                            Console.WriteLine("[Iris.GBA.Communication] UART communication not implemented");
+                            break;
+                    }
+                    break;
+
+                case 0b10:
+                    Console.WriteLine("[Iris.GBA.Communication] General purpose communication not implemented");
+                    break;
+
+                case 0b11:
+                    Console.WriteLine("[Iris.GBA.Communication] JOY Bus communication not implemented");
+                    break;
             }
         }
     }
