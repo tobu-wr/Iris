@@ -631,7 +631,7 @@ namespace Iris.GBA
                 _interruptControl.RequestInterrupt(InterruptControl.Interrupt.HBlank);
 
             if (_VCOUNT < DisplayScreenHeight)
-                _dma.PerformAllTransfers(DMA.StartTiming.HBlank);
+                _dma.PerformHBlankTransfers();
 
             _scheduler.ScheduleTask((int)GBA_System.TaskId.StartScanline, HBlankCycleCount - cycleCountDelay);
         }
@@ -643,14 +643,25 @@ namespace Iris.GBA
             switch (_VCOUNT)
             {
                 // rendering
-                case < 159:
+                case 0:
                     ++_VCOUNT;
+
+                    Render();
+                    break;
+
+                // rendering
+                // video transfer DMA
+                case > 0 and < 159:
+                    ++_VCOUNT;
+
+                    _dma.PerformVideoTransfer(false);
 
                     Render();
                     break;
 
                 // end rendering
                 // start vblank
+                // video transfer DMA
                 case 159:
                     _VCOUNT = 160;
 
@@ -659,7 +670,8 @@ namespace Iris.GBA
                     if ((_DISPSTAT & 0x0008) == 0x0008)
                         _interruptControl.RequestInterrupt(InterruptControl.Interrupt.VBlank);
 
-                    _dma.PerformAllTransfers(DMA.StartTiming.VBlank);
+                    _dma.PerformVBlankTransfers();
+                    _dma.PerformVideoTransfer(false);
 
                     _presentFrameCallback(_displayFrameBuffer);
                     Array.Clear(_displayFrameBuffer);
@@ -672,7 +684,15 @@ namespace Iris.GBA
                     break;
 
                 // vblank
-                case > 159 and < 226:
+                // end of video transfer DMA
+                case 160:
+                    _VCOUNT = 161;
+
+                    _dma.PerformVideoTransfer(true);
+                    break;
+
+                // vblank
+                case > 160 and < 226:
                     ++_VCOUNT;
                     break;
 
