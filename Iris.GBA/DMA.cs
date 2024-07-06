@@ -401,9 +401,6 @@
                     channel._destination = (UInt32)(channel._destination + destinationIncrement);
 
                     _scheduler.AdvanceCycleCounter(2);
-
-                    if (_scheduler.HasTaskReady())
-                        _scheduler.ProcessTasks();
                 }
             }
 
@@ -423,16 +420,10 @@
                     channel._destination = (UInt32)(channel._destination + destinationIncrement);
 
                     _scheduler.AdvanceCycleCounter(2);
-
-                    if (_scheduler.HasTaskReady())
-                        _scheduler.ProcessTasks();
                 }
             }
 
             _scheduler.AdvanceCycleCounter(isGamepakTransfer ? 4u : 2u);
-
-            if (_scheduler.HasTaskReady())
-                _scheduler.ProcessTasks();
 
             if ((channel._control & 0x4000) == 0x4000)
                 _interruptControl.RequestInterrupt(interrupt);

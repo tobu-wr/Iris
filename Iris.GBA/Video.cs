@@ -684,7 +684,7 @@ namespace Iris.GBA
                     break;
 
                 // vblank
-                // end of video transfer DMA
+                // end video transfer DMA
                 case 160:
                     _VCOUNT = 161;
 

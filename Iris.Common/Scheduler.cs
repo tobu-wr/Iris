@@ -55,10 +55,28 @@ namespace Iris.Common
             return _cycleCounter;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AdvanceCycleCounter(UInt64 cycleCount)
         {
             _cycleCounter += cycleCount;
+
+            // process tasks
+            ref readonly ScheduledTaskListEntry firstEntry = ref MemoryMarshal.GetArrayDataReference(_scheduledTaskList);
+            ref Task_Delegate taskListDataRef = ref MemoryMarshal.GetArrayDataReference(_taskList);
+
+            while ((_scheduledTaskCount > 0) && (firstEntry._cycleCount <= _cycleCounter))
+            {
+                // save the task
+                ScheduledTaskListEntry entry = firstEntry;
+
+                // remove it from the list
+                --_scheduledTaskCount;
+
+                if (_scheduledTaskCount > 0)
+                    Array.Copy(_scheduledTaskList, 1, _scheduledTaskList, 0, _scheduledTaskCount);
+
+                // execute it
+                Unsafe.Add(ref taskListDataRef, entry._id)(_cycleCounter - entry._cycleCount);
+            }
         }
 
         public void RegisterTask(int id, Task_Delegate task)
@@ -113,33 +131,6 @@ namespace Iris.Common
 
                 ++index;
                 entry = ref Unsafe.Add(ref entry, 1);
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool HasTaskReady()
-        {
-            return (_scheduledTaskCount > 0) && (MemoryMarshal.GetArrayDataReference(_scheduledTaskList)._cycleCount <= _cycleCounter);
-        }
-
-        public void ProcessTasks()
-        {
-            ref readonly ScheduledTaskListEntry firstEntry = ref MemoryMarshal.GetArrayDataReference(_scheduledTaskList);
-            ref Task_Delegate taskListDataRef = ref MemoryMarshal.GetArrayDataReference(_taskList);
-
-            while ((_scheduledTaskCount > 0) && (firstEntry._cycleCount <= _cycleCounter))
-            {
-                // save the task
-                ScheduledTaskListEntry entry = firstEntry;
-
-                // remove it from the list
-                --_scheduledTaskCount;
-
-                if (_scheduledTaskCount > 0)
-                    Array.Copy(_scheduledTaskList, 1, _scheduledTaskList, 0, _scheduledTaskCount);
-
-                // execute it
-                Unsafe.Add(ref taskListDataRef, entry._id)(_cycleCounter - entry._cycleCount);
             }
         }
     }
