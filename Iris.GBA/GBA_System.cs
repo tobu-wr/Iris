@@ -7,15 +7,21 @@ namespace Iris.GBA
         internal enum TaskId
         {
             // ---- Timer ----
-            StartTimerChannel0,
-            StartTimerChannel1,
-            StartTimerChannel2,
-            StartTimerChannel3,
+            StartTimer_Channel0,
+            StartTimer_Channel1,
+            StartTimer_Channel2,
+            StartTimer_Channel3,
 
-            HandleTimerOverflowChannel0,
-            HandleTimerOverflowChannel1,
-            HandleTimerOverflowChannel2,
-            HandleTimerOverflowChannel3,
+            HandleTimerOverflow_Channel0,
+            HandleTimerOverflow_Channel1,
+            HandleTimerOverflow_Channel2,
+            HandleTimerOverflow_Channel3,
+
+            // ---- DMA ----
+            StartDMA_Channel0,
+            StartDMA_Channel1,
+            StartDMA_Channel2,
+            StartDMA_Channel3,
 
             // ---- KeyInput ----
             CheckKeyInterrupt,
@@ -26,13 +32,13 @@ namespace Iris.GBA
         }
 
         private static readonly int s_taskIdCount = Enum.GetNames(typeof(TaskId)).Length;
-        private readonly Common.Scheduler _scheduler = new(s_taskIdCount, s_taskIdCount + 1);
+        private readonly Common.Scheduler _scheduler = new(s_taskIdCount, 2 * s_taskIdCount);
 
         private readonly CPU.CPU_Core _cpu;
         private readonly Communication _communication = new();
         private readonly Timer _timer;
         private readonly Sound _sound = new();
-        private readonly DMA _dma = new();
+        private readonly DMA _dma;
         private readonly KeyInput _keyInput;
         private readonly SystemControl _systemControl = new();
         private readonly InterruptControl _interruptControl = new();
@@ -52,6 +58,7 @@ namespace Iris.GBA
 
             _cpu = new(CPU.CPU_Core.Model.ARM7TDMI, cpuCallbackInterface);
             _timer = new(_scheduler);
+            _dma = new(_scheduler);
             _keyInput = new(_scheduler, pollInputCallback);
             _video = new(_scheduler, presentFrameCallback);
 

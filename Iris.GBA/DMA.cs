@@ -49,6 +49,8 @@
             //Special = 0b11
         }
 
+        private readonly Common.Scheduler _scheduler;
+
         private InterruptControl _interruptControl;
         private Memory _memory;
 
@@ -72,6 +74,16 @@
         private const UInt32 MaxLengthChannel1 = 0x4000;
         private const UInt32 MaxLengthChannel2 = 0x4000;
         private const UInt32 MaxLengthChannel3 = 0x1_0000;
+
+        internal DMA(Common.Scheduler scheduler)
+        {
+            _scheduler = scheduler;
+
+            _scheduler.RegisterTask((int)GBA_System.TaskId.StartDMA_Channel0, _ => PerformTransfer(ref _channel0, StartTiming.Immediate, InterruptControl.Interrupt.DMA0, MaxLengthChannel0));
+            _scheduler.RegisterTask((int)GBA_System.TaskId.StartDMA_Channel1, _ => PerformTransfer(ref _channel1, StartTiming.Immediate, InterruptControl.Interrupt.DMA1, MaxLengthChannel1));
+            _scheduler.RegisterTask((int)GBA_System.TaskId.StartDMA_Channel2, _ => PerformTransfer(ref _channel2, StartTiming.Immediate, InterruptControl.Interrupt.DMA2, MaxLengthChannel2));
+            _scheduler.RegisterTask((int)GBA_System.TaskId.StartDMA_Channel3, _ => PerformTransfer(ref _channel3, StartTiming.Immediate, InterruptControl.Interrupt.DMA3, MaxLengthChannel3));
+        }
 
         internal void Initialize(InterruptControl interruptControl, Memory memory)
         {
@@ -176,7 +188,7 @@
                 channel._lengthReload = reload;
             }
 
-            void WriteControl(ref Channel channel, InterruptControl.Interrupt interrupt, UInt32 maxLength)
+            void WriteControl(ref Channel channel, GBA_System.TaskId startTaskId, UInt32 maxLength)
             {
                 UInt16 previousControl = channel._control;
 
@@ -190,7 +202,7 @@
                     channel._destination = channel._destinationReload;
                     channel._length = (channel._lengthReload == 0) ? maxLength : channel._lengthReload;
 
-                    PerformTransfer(ref channel, StartTiming.Immediate, interrupt, maxLength);
+                    _scheduler.ScheduleTask((int)startTaskId, 2);
                 }
             }
 
@@ -214,7 +226,7 @@
                     WriteLengthReload(ref _channel0);
                     break;
                 case Register.DMA0CNT_H:
-                    WriteControl(ref _channel0, InterruptControl.Interrupt.DMA0, MaxLengthChannel0);
+                    WriteControl(ref _channel0, GBA_System.TaskId.StartDMA_Channel0, MaxLengthChannel0);
                     break;
 
                 case Register.DMA1SAD_L:
@@ -235,7 +247,7 @@
                     WriteLengthReload(ref _channel1);
                     break;
                 case Register.DMA1CNT_H:
-                    WriteControl(ref _channel1, InterruptControl.Interrupt.DMA1, MaxLengthChannel1);
+                    WriteControl(ref _channel1, GBA_System.TaskId.StartDMA_Channel1, MaxLengthChannel1);
                     break;
 
                 case Register.DMA2SAD_L:
@@ -256,7 +268,7 @@
                     WriteLengthReload(ref _channel2);
                     break;
                 case Register.DMA2CNT_H:
-                    WriteControl(ref _channel2, InterruptControl.Interrupt.DMA2, MaxLengthChannel2);
+                    WriteControl(ref _channel2, GBA_System.TaskId.StartDMA_Channel2, MaxLengthChannel2);
                     break;
 
                 case Register.DMA3SAD_L:
@@ -277,7 +289,7 @@
                     WriteLengthReload(ref _channel3);
                     break;
                 case Register.DMA3CNT_H:
-                    WriteControl(ref _channel3, InterruptControl.Interrupt.DMA3, MaxLengthChannel3);
+                    WriteControl(ref _channel3, GBA_System.TaskId.StartDMA_Channel3, MaxLengthChannel3);
                     break;
 
                 // should never happen
@@ -343,6 +355,8 @@
                 };
             }
 
+            bool isGamepakTransfer = (channel._source >= 0x800_0000) && (channel._destination >= 0x800_0000);
+
             bool reloadDestination;
 
             // 16 bits
@@ -359,6 +373,11 @@
 
                     channel._source = (UInt32)(channel._source + sourceIncrement);
                     channel._destination = (UInt32)(channel._destination + destinationIncrement);
+
+                    _scheduler.AdvanceCycleCounter(2);
+
+                    if (_scheduler.HasTaskReady())
+                        _scheduler.ProcessTasks();
                 }
             }
 
@@ -376,8 +395,18 @@
 
                     channel._source = (UInt32)(channel._source + sourceIncrement);
                     channel._destination = (UInt32)(channel._destination + destinationIncrement);
+
+                    _scheduler.AdvanceCycleCounter(2);
+
+                    if (_scheduler.HasTaskReady())
+                        _scheduler.ProcessTasks();
                 }
             }
+
+            _scheduler.AdvanceCycleCounter(isGamepakTransfer ? 4u : 2u);
+
+            if (_scheduler.HasTaskReady())
+                _scheduler.ProcessTasks();
 
             if ((channel._control & 0x4000) == 0x4000)
                 _interruptControl.RequestInterrupt(interrupt);

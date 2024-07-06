@@ -68,12 +68,13 @@ namespace Iris.Common
 
         public void ScheduleTask(int id, UInt64 cycleCount)
         {
+            // convert cycleCount from relative to absolute
             cycleCount += _cycleCounter;
 
             // get the position and reference of the new task
             // (searching is done backward because a new task is more likely to be inserted towards the end)
             int index = _scheduledTaskCount;
-            ref ScheduledTaskListEntry entry = ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_scheduledTaskList), index - 1);
+            ref ScheduledTaskListEntry entry = ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_scheduledTaskList), _scheduledTaskCount - 1);
 
             while ((index > 0) && (entry._cycleCount > cycleCount))
             {
@@ -123,26 +124,23 @@ namespace Iris.Common
 
         public void ProcessTasks()
         {
-            // execute the tasks that are ready
-            int index = 0;
-            ref ScheduledTaskListEntry entry = ref MemoryMarshal.GetArrayDataReference(_scheduledTaskList);
+            ref readonly ScheduledTaskListEntry firstEntry = ref MemoryMarshal.GetArrayDataReference(_scheduledTaskList);
             ref Task_Delegate taskListDataRef = ref MemoryMarshal.GetArrayDataReference(_taskList);
 
-            while ((index < _scheduledTaskCount) && (entry._cycleCount <= _cycleCounter))
+            while ((_scheduledTaskCount > 0) && (firstEntry._cycleCount <= _cycleCounter))
             {
+                // save the task
+                ScheduledTaskListEntry entry = firstEntry;
+
+                // remove it from the list
+                --_scheduledTaskCount;
+
+                if (_scheduledTaskCount > 0)
+                    Array.Copy(_scheduledTaskList, 1, _scheduledTaskList, 0, _scheduledTaskCount);
+
+                // execute it
                 Unsafe.Add(ref taskListDataRef, entry._id)(_cycleCounter - entry._cycleCount);
-
-                ++index;
-                entry = ref Unsafe.Add(ref entry, 1);
             }
-
-            // move the remaining tasks at the begin
-            int remainingScheduledTaskCount = _scheduledTaskCount - index;
-
-            if (remainingScheduledTaskCount > 0)
-                Array.Copy(_scheduledTaskList, index, _scheduledTaskList, 0, remainingScheduledTaskCount);
-
-            _scheduledTaskCount = remainingScheduledTaskCount;
         }
     }
 }

@@ -41,17 +41,17 @@
 
             _channels =
             [
-                new(GBA_System.TaskId.StartTimerChannel0, GBA_System.TaskId.HandleTimerOverflowChannel0, InterruptControl.Interrupt.Timer0),
-                new(GBA_System.TaskId.StartTimerChannel1, GBA_System.TaskId.HandleTimerOverflowChannel1, InterruptControl.Interrupt.Timer1),
-                new(GBA_System.TaskId.StartTimerChannel2, GBA_System.TaskId.HandleTimerOverflowChannel2, InterruptControl.Interrupt.Timer2),
-                new(GBA_System.TaskId.StartTimerChannel3, GBA_System.TaskId.HandleTimerOverflowChannel3, InterruptControl.Interrupt.Timer3)
+                new(GBA_System.TaskId.StartTimer_Channel0, GBA_System.TaskId.HandleTimerOverflow_Channel0, InterruptControl.Interrupt.Timer0),
+                new(GBA_System.TaskId.StartTimer_Channel1, GBA_System.TaskId.HandleTimerOverflow_Channel1, InterruptControl.Interrupt.Timer1),
+                new(GBA_System.TaskId.StartTimer_Channel2, GBA_System.TaskId.HandleTimerOverflow_Channel2, InterruptControl.Interrupt.Timer2),
+                new(GBA_System.TaskId.StartTimer_Channel3, GBA_System.TaskId.HandleTimerOverflow_Channel3, InterruptControl.Interrupt.Timer3)
             ];
 
             for (int channelIndex = 0; channelIndex < 4; ++channelIndex)
             {
                 int channelIndexCopy = channelIndex;
-                _scheduler.RegisterTask((int)_channels[channelIndex]._startTaskId, (UInt64 cycleCountDelay) => Start(channelIndexCopy, cycleCountDelay));
-                _scheduler.RegisterTask((int)_channels[channelIndex]._handleOverflowTaskId, (UInt64 cycleCountDelay) => HandleOverflow(channelIndexCopy, cycleCountDelay));
+                _scheduler.RegisterTask((int)_channels[channelIndex]._startTaskId, cycleCountDelay => Start(channelIndexCopy, cycleCountDelay));
+                _scheduler.RegisterTask((int)_channels[channelIndex]._handleOverflowTaskId, cycleCountDelay => HandleOverflow(channelIndexCopy, cycleCountDelay));
             }
         }
 
