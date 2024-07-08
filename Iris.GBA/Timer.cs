@@ -27,6 +27,7 @@
             internal UInt16 _reload;
             internal UInt16 _control;
             internal UInt64 _cycleCount; // only used in non-cascading mode
+            internal bool _running;
 
             internal readonly GBA_System.TaskId _startTaskId = startTaskId;
             internal readonly GBA_System.TaskId _handleOverflowTaskId = handleOverflowTaskId;
@@ -68,6 +69,7 @@
                 channel._reload = 0;
                 channel._control = 0;
                 channel._cycleCount = 0;
+                channel._running = false;
             }
         }
 
@@ -79,6 +81,7 @@
                 channel._reload = reader.ReadUInt16();
                 channel._control = reader.ReadUInt16();
                 channel._cycleCount = reader.ReadUInt64();
+                channel._running = reader.ReadBoolean();
             }
         }
 
@@ -90,14 +93,17 @@
                 writer.Write(channel._reload);
                 writer.Write(channel._control);
                 writer.Write(channel._cycleCount);
+                writer.Write(channel._running);
             }
         }
 
         internal UInt16 ReadRegister(Register register)
         {
-            UInt16 ReadCounter(ref Channel channel)
+            UInt16 ReadCounter(int channelIndex)
             {
-                if ((channel._control & 0x0084) == 0x0080)
+                ref Channel channel = ref _channels[channelIndex];
+
+                if (channel._running && (((channel._control & 0x0004) == 0) || (channelIndex == 0)))
                     UpdateCounter(ref channel, channel._control);
 
                 return channel._counter;
@@ -105,16 +111,16 @@
 
             return register switch
             {
-                Register.TM0CNT_L => ReadCounter(ref _channels[0]),
+                Register.TM0CNT_L => ReadCounter(0),
                 Register.TM0CNT_H => _channels[0]._control,
 
-                Register.TM1CNT_L => ReadCounter(ref _channels[1]),
+                Register.TM1CNT_L => ReadCounter(1),
                 Register.TM1CNT_H => _channels[1]._control,
 
-                Register.TM2CNT_L => ReadCounter(ref _channels[2]),
+                Register.TM2CNT_L => ReadCounter(2),
                 Register.TM2CNT_H => _channels[2]._control,
 
-                Register.TM3CNT_L => ReadCounter(ref _channels[3]),
+                Register.TM3CNT_L => ReadCounter(3),
                 Register.TM3CNT_H => _channels[3]._control,
 
                 // should never happen
@@ -131,15 +137,17 @@
                 channel._reload = reload;
             }
 
-            void WriteControl(ref Channel channel)
+            void WriteControl(int channelIndex)
             {
+                ref Channel channel = ref _channels[channelIndex];
+
                 UInt16 previousControl = channel._control;
 
                 UInt16 newControl = channel._control;
                 Memory.WriteRegisterHelper(ref newControl, value, mode);
                 channel._control = newControl;
 
-                CheckControl(ref channel, previousControl, newControl);
+                CheckControl(ref channel, channelIndex, previousControl, newControl);
             }
 
             switch (register)
@@ -148,28 +156,28 @@
                     WriteReload(ref _channels[0]);
                     break;
                 case Register.TM0CNT_H:
-                    WriteControl(ref _channels[0]);
+                    WriteControl(0);
                     break;
 
                 case Register.TM1CNT_L:
                     WriteReload(ref _channels[1]);
                     break;
                 case Register.TM1CNT_H:
-                    WriteControl(ref _channels[1]);
+                    WriteControl(1);
                     break;
 
                 case Register.TM2CNT_L:
                     WriteReload(ref _channels[2]);
                     break;
                 case Register.TM2CNT_H:
-                    WriteControl(ref _channels[2]);
+                    WriteControl(2);
                     break;
 
                 case Register.TM3CNT_L:
                     WriteReload(ref _channels[3]);
                     break;
                 case Register.TM3CNT_H:
-                    WriteControl(ref _channels[3]);
+                    WriteControl(3);
                     break;
 
                 // should never happen
@@ -178,8 +186,9 @@
             }
         }
 
-        private void CheckControl(ref Channel channel, UInt16 previousControl, UInt16 newControl)
+        private void CheckControl(ref Channel channel, int channelIndex, UInt16 previousControl, UInt16 newControl)
         {
+            // TODO
             if ((previousControl & 0x0080) == 0)
             {
                 if ((newControl & 0x0080) == 0x0080)
@@ -245,8 +254,9 @@
             ref Channel channel = ref _channels[channelIndex];
 
             channel._counter = channel._reload;
+            channel._running = true;
 
-            if ((channel._control & 0x0004) == 0 || (channelIndex == 0))
+            if (((channel._control & 0x0004) == 0) || (channelIndex == 0))
             {
                 channel._cycleCount = _scheduler.GetCycleCounter() - cycleCountDelay;
 
@@ -278,7 +288,7 @@
 
             ref Channel channel = ref _channels[channelIndex];
 
-            if ((channel._control & 0x0084) != 0x0084)
+            if (!channel._running || ((channel._control & 0x0004) == 0))
                 return;
 
             if (channel._counter == 0xffff)
@@ -296,7 +306,7 @@
             }
         }
 
-        private static UInt64 ComputeCycleCountUntilOverflow(ref Channel channel)
+        private static UInt64 ComputeCycleCountUntilOverflow(ref readonly Channel channel)
         {
             return (0x1_0000u - channel._counter) * GetPrescaler(channel._control);
         }

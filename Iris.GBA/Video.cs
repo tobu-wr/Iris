@@ -644,7 +644,7 @@ namespace Iris.GBA
             {
                 // rendering
                 case 0:
-                    ++_VCOUNT;
+                    _VCOUNT = 1;
 
                     Render();
                     break;
