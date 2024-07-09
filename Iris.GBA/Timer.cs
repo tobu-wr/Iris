@@ -188,7 +188,6 @@
 
         private void CheckControl(ref Channel channel, int channelIndex, UInt16 previousControl, UInt16 newControl)
         {
-            // TODO
             if ((previousControl & 0x0080) == 0)
             {
                 if ((newControl & 0x0080) == 0x0080)
@@ -198,18 +197,27 @@
             {
                 if ((newControl & 0x0080) == 0)
                 {
-                    if ((previousControl & 0x0004) == 0)
+                    if (channel._running)
                     {
-                        UpdateCounter(ref channel, previousControl);
+                        if (((previousControl & 0x0004) == 0) || (channelIndex == 0))
+                        {
+                            UpdateCounter(ref channel, previousControl);
 
-                        _scheduler.CancelTask((int)channel._handleOverflowTaskId);
+                            _scheduler.CancelTask((int)channel._handleOverflowTaskId);
+                        }
+
+                        channel._running = false;
+                    }
+                    else
+                    {
+                        _scheduler.CancelTask((int)channel._startTaskId);
                     }
                 }
                 else
                 {
-                    if ((previousControl & 0x0004) == 0)
+                    if (channel._running)
                     {
-                        if ((newControl & 0x0004) == 0)
+                        if (channelIndex == 0)
                         {
                             if ((previousControl & 0b11) != (newControl & 0b11))
                             {
@@ -221,18 +229,34 @@
                         }
                         else
                         {
-                            UpdateCounter(ref channel, previousControl);
+                            if ((previousControl & 0x0004) == 0)
+                            {
+                                if ((newControl & 0x0004) == 0)
+                                {
+                                    if ((previousControl & 0b11) != (newControl & 0b11))
+                                    {
+                                        UpdateCounter(ref channel, previousControl);
 
-                            _scheduler.CancelTask((int)channel._handleOverflowTaskId);
-                        }
-                    }
-                    else
-                    {
-                        if ((newControl & 0x0004) == 0)
-                        {
-                            channel._cycleCount = _scheduler.GetCycleCounter();
+                                        _scheduler.CancelTask((int)channel._handleOverflowTaskId);
+                                        _scheduler.ScheduleTask((int)channel._handleOverflowTaskId, ComputeCycleCountUntilOverflow(ref channel));
+                                    }
+                                }
+                                else
+                                {
+                                    UpdateCounter(ref channel, previousControl);
 
-                            _scheduler.ScheduleTask((int)channel._handleOverflowTaskId, ComputeCycleCountUntilOverflow(ref channel));
+                                    _scheduler.CancelTask((int)channel._handleOverflowTaskId);
+                                }
+                            }
+                            else
+                            {
+                                if ((newControl & 0x0004) == 0)
+                                {
+                                    channel._cycleCount = _scheduler.GetCycleCounter();
+
+                                    _scheduler.ScheduleTask((int)channel._handleOverflowTaskId, ComputeCycleCountUntilOverflow(ref channel));
+                                }
+                            }
                         }
                     }
                 }
@@ -288,7 +312,7 @@
 
             ref Channel channel = ref _channels[channelIndex];
 
-            if (!channel._running || ((channel._control & 0x0004) == 0))
+            if (!channel._running || ((channel._control & 0x0004) != 0x0004))
                 return;
 
             if (channel._counter == 0xffff)
