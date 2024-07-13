@@ -1,4 +1,6 @@
-﻿namespace Iris.GBA
+﻿using System.Runtime.CompilerServices;
+
+namespace Iris.GBA
 {
     internal sealed class InterruptControl
     {
@@ -107,12 +109,14 @@
             CheckInterrupts();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void RequestInterrupt(Interrupt interrupt)
         {
             _IF |= (UInt16)interrupt;
             CheckInterrupts();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CheckInterrupts()
         {
             _cpu.NIRQ = ((_IME == 0) || ((_IE & _IF) == 0)) ? CPU.CPU_Core.Signal.High : CPU.CPU_Core.Signal.Low;

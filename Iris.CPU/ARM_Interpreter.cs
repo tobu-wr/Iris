@@ -233,6 +233,7 @@ namespace Iris.CPU
             return ((value >> 16) & 0xff0) | ((value >> 4) & 0x00f);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal UInt64 Step()
         {
             UInt32 instruction = _cpu._callbackInterface._read32(_cpu.NextInstructionAddress);

@@ -249,6 +249,7 @@ namespace Iris.CPU
             writer.Write((int)NIRQ);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public UInt64 Step()
         {
             UInt32 i = (CPSR >> 7) & 1;

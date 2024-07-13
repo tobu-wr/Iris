@@ -189,6 +189,7 @@ namespace Iris.CPU
             return (UInt16)(value >> 6);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal UInt64 Step()
         {
             UInt16 instruction = _cpu._callbackInterface._read16(_cpu.NextInstructionAddress);

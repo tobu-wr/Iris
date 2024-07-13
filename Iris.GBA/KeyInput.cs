@@ -1,4 +1,6 @@
-﻿namespace Iris.GBA
+﻿using System.Runtime.CompilerServices;
+
+namespace Iris.GBA
 {
     internal sealed class KeyInput
     {
@@ -97,6 +99,7 @@
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void SetKeyStatus(Common.System.Key key, Common.System.KeyStatus status)
         {
             int pos;

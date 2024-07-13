@@ -1,4 +1,6 @@
-﻿namespace Iris.GBA
+﻿using System.Runtime.CompilerServices;
+
+namespace Iris.GBA
 {
     internal sealed class Timer
     {
@@ -186,6 +188,7 @@
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CheckControl(ref Channel channel, int channelIndex, UInt16 previousControl, UInt16 newControl)
         {
             if ((previousControl & 0x0080) == 0)

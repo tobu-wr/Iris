@@ -764,6 +764,7 @@ namespace Iris.GBA
             _currentBG3Y += (Int16)_BG3PD;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void RenderBackgroundMode0()
         {
             bool isFirst = true;
@@ -799,6 +800,7 @@ namespace Iris.GBA
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void RenderBackgroundMode1()
         {
             bool isFirst = true;
@@ -828,6 +830,7 @@ namespace Iris.GBA
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void RenderBackgroundMode2()
         {
             bool isFirst = true;
@@ -851,6 +854,7 @@ namespace Iris.GBA
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void RenderBackgroundMode3()
         {
             if ((_DISPCNT & 0x0400) == 0x0400)
@@ -877,6 +881,7 @@ namespace Iris.GBA
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void RenderBackgroundMode4()
         {
             if ((_DISPCNT & 0x0400) == 0x0400)
@@ -906,6 +911,7 @@ namespace Iris.GBA
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void RenderBackgroundMode5()
         {
             if ((_DISPCNT & 0x0400) == 0x0400)
