@@ -63,6 +63,7 @@
             internal UInt32 _length;
             internal UInt16 _lengthReload;
             internal UInt16 _control;
+            internal bool _running;
         }
 
         private Channel _channel0;
@@ -110,6 +111,7 @@
                 channel._length = reader.ReadUInt32();
                 channel._lengthReload = reader.ReadUInt16();
                 channel._control = reader.ReadUInt16();
+                channel._running = reader.ReadBoolean();
             }
 
             LoadChannel(ref _channel0);
@@ -129,6 +131,7 @@
                 writer.Write(channel._length);
                 writer.Write(channel._lengthReload);
                 writer.Write(channel._control);
+                writer.Write(channel._running);
             }
 
             SaveChannel(_channel0);
@@ -196,8 +199,21 @@
                 Memory.WriteRegisterHelper(ref newControl, value, mode);
                 channel._control = newControl;
 
-                if (((previousControl & 0x8000) == 0) && ((newControl & 0x8000) == 0x8000))
-                    _scheduler.ScheduleTask((int)startTaskId, 2);
+                if ((previousControl & 0x8000) == 0)
+                {
+                    if ((newControl & 0x8000) == 0x8000)
+                        _scheduler.ScheduleTask((int)startTaskId, 2);
+                }
+                else
+                {
+                    if ((newControl & 0x8000) == 0)
+                    {
+                        if (channel._running)
+                            channel._running = false;
+                        else
+                            _scheduler.CancelTask((int)startTaskId);
+                    }
+                }
             }
 
             switch (register)
@@ -294,42 +310,45 @@
 
         internal void PerformVBlankTransfers()
         {
-            if ((_channel0._control & 0x8000) == 0x8000)
-                PerformTransfer(ref _channel0, StartTiming.VBlank, InterruptControl.Interrupt.DMA0, MaxLengthChannel0);
+            if (_channel0._running && (((_channel0._control >> 12) & 0b11) == (int)StartTiming.VBlank))
+                PerformTransfer(ref _channel0, InterruptControl.Interrupt.DMA0, MaxLengthChannel0);
 
-            if ((_channel1._control & 0x8000) == 0x8000)
-                PerformTransfer(ref _channel1, StartTiming.VBlank, InterruptControl.Interrupt.DMA1, MaxLengthChannel1);
+            if (_channel1._running && (((_channel1._control >> 12) & 0b11) == (int)StartTiming.VBlank))
+                PerformTransfer(ref _channel1, InterruptControl.Interrupt.DMA1, MaxLengthChannel1);
 
-            if ((_channel2._control & 0x8000) == 0x8000)
-                PerformTransfer(ref _channel2, StartTiming.VBlank, InterruptControl.Interrupt.DMA2, MaxLengthChannel2);
+            if (_channel2._running && (((_channel2._control >> 12) & 0b11) == (int)StartTiming.VBlank))
+                PerformTransfer(ref _channel2, InterruptControl.Interrupt.DMA2, MaxLengthChannel2);
 
-            if ((_channel3._control & 0x8000) == 0x8000)
-                PerformTransfer(ref _channel3, StartTiming.VBlank, InterruptControl.Interrupt.DMA3, MaxLengthChannel3);
+            if (_channel3._running && (((_channel3._control >> 12) & 0b11) == (int)StartTiming.VBlank))
+                PerformTransfer(ref _channel3, InterruptControl.Interrupt.DMA3, MaxLengthChannel3);
         }
 
         internal void PerformHBlankTransfers()
         {
-            if ((_channel0._control & 0x8000) == 0x8000)
-                PerformTransfer(ref _channel0, StartTiming.HBlank, InterruptControl.Interrupt.DMA0, MaxLengthChannel0);
+            if (_channel0._running && (((_channel0._control >> 12) & 0b11) == (int)StartTiming.HBlank))
+                PerformTransfer(ref _channel0, InterruptControl.Interrupt.DMA0, MaxLengthChannel0);
 
-            if ((_channel1._control & 0x8000) == 0x8000)
-                PerformTransfer(ref _channel1, StartTiming.HBlank, InterruptControl.Interrupt.DMA1, MaxLengthChannel1);
+            if (_channel1._running && (((_channel1._control >> 12) & 0b11) == (int)StartTiming.HBlank))
+                PerformTransfer(ref _channel1, InterruptControl.Interrupt.DMA1, MaxLengthChannel1);
 
-            if ((_channel2._control & 0x8000) == 0x8000)
-                PerformTransfer(ref _channel2, StartTiming.HBlank, InterruptControl.Interrupt.DMA2, MaxLengthChannel2);
+            if (_channel2._running && (((_channel2._control >> 12) & 0b11) == (int)StartTiming.HBlank))
+                PerformTransfer(ref _channel2, InterruptControl.Interrupt.DMA2, MaxLengthChannel2);
 
-            if ((_channel3._control & 0x8000) == 0x8000)
-                PerformTransfer(ref _channel3, StartTiming.HBlank, InterruptControl.Interrupt.DMA3, MaxLengthChannel3);
+            if (_channel3._running && (((_channel3._control >> 12) & 0b11) == (int)StartTiming.HBlank))
+                PerformTransfer(ref _channel3, InterruptControl.Interrupt.DMA3, MaxLengthChannel3);
         }
 
         internal void PerformVideoTransfer(bool disable)
         {
-            if ((_channel3._control & 0x8000) == 0x8000)
+            if (_channel3._running && (((_channel3._control >> 12) & 0b11) == (int)StartTiming.Special))
             {
-                PerformTransfer(ref _channel3, StartTiming.Special, InterruptControl.Interrupt.DMA3, MaxLengthChannel3);
+                PerformTransfer(ref _channel3, InterruptControl.Interrupt.DMA3, MaxLengthChannel3);
 
                 if (disable)
+                {
                     _channel3._control = (UInt16)(_channel3._control & ~0x8000);
+                    _channel3._running = false;
+                }
             }
         }
 
@@ -338,15 +357,14 @@
             channel._source = channel._sourceReload;
             channel._destination = channel._destinationReload;
             channel._length = (channel._lengthReload == 0) ? maxLength : channel._lengthReload;
+            channel._running = true;
 
-            PerformTransfer(ref channel, StartTiming.Immediate, interrupt, maxLength);
+            if (((channel._control >> 12) & 0b11) == (int)StartTiming.Immediate)
+                PerformTransfer(ref channel, interrupt, maxLength);
         }
 
-        private void PerformTransfer(ref Channel channel, StartTiming startTiming, InterruptControl.Interrupt interrupt, UInt32 maxLength)
+        private void PerformTransfer(ref Channel channel, InterruptControl.Interrupt interrupt, UInt32 maxLength)
         {
-            if (((channel._control >> 12) & 0b11) != (int)startTiming)
-                return;
-
             UInt16 sourceAddressControlFlag = (UInt16)((channel._control >> 7) & 0b11);
             UInt16 destinationAddressControlFlag = (UInt16)((channel._control >> 5) & 0b11);
 
@@ -431,6 +449,7 @@
             if ((channel._control & 0x0200) == 0)
             {
                 channel._control = (UInt16)(channel._control & ~0x8000);
+                channel._running = false;
             }
 
             // Repeat on
