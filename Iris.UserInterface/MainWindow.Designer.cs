@@ -46,7 +46,7 @@
             fixedAspectRatioToolStripMenuItem = new ToolStripMenuItem();
             audioToolStripMenuItem = new ToolStripMenuItem();
             exclusiveModeToolStripMenuItem = new ToolStripMenuItem();
-            glControl = new OpenTK.WinForms.GLControl();
+            glControl = new OpenTK.GLControl.GLControl();
             statusStrip1.SuspendLayout();
             menuStrip1.SuspendLayout();
             SuspendLayout();
@@ -339,7 +339,7 @@
         private ToolStripSeparator toolStripSeparator3;
         private ToolStripMenuItem limitFramerateToolStripMenuItem;
         private ToolStripMenuItem automaticPauseToolStripMenuItem;
-        private OpenTK.WinForms.GLControl glControl;
+        private OpenTK.GLControl.GLControl glControl;
         private ToolStripMenuItem skipIntroToolStripMenuItem;
         private ToolStripSeparator toolStripSeparator4;
         private ToolStripMenuItem inputSettingsToolStripMenuItem;
