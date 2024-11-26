@@ -152,10 +152,14 @@ namespace Iris.UserInterface
 
         private void PresentFrame(UInt16[] frameBuffer)
         {
-            // could add an option to switch between synchronous (by default) and asynchronous frame presentation to choose between framerate stability and performance (potentially without stuttering)
+            // could add an option to switch between synchronous (by default) and asynchronous frame presentation to choose between framerate stability and performance (potentially with VSYNC to avoid tearing)
 
             Invoke(() =>
             {
+                // Force garbage collection to avoid slowdowns
+                // (could add an option to disable it and get more performance)
+                GC.Collect();
+
                 GL.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, TextureWidth, TextureHeight, PixelFormat.Rgba, PixelType.UnsignedShort1555Reversed, frameBuffer);
                 GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
 
