@@ -27,6 +27,7 @@ namespace Iris.UserInterface
 
         private readonly DirectInput _directInput = new();
         private readonly SharpDX.DirectInput.Keyboard _keyboard;
+        private KeyboardState _currentState = new();
         private KeyboardState _previousState = new();
 
         internal Keyboard(KeyEvent_Delegate keyDownCallback, KeyEvent_Delegate keyUpCallback)
@@ -42,11 +43,12 @@ namespace Iris.UserInterface
         {
             _keyboard.Poll();
 
-            KeyboardState currentState = _keyboard.GetCurrentState();
+            // we use the unsafe version of GetCurrentState to avoid allocating a new KeyboardState each call
+            _keyboard.GetCurrentState(ref _currentState);
 
             void CheckKeyState(SharpDX.DirectInput.Key key)
             {
-                bool currentKeyState = currentState.IsPressed(key);
+                bool currentKeyState = _currentState.IsPressed(key);
                 bool previousKeyState = _previousState.IsPressed(key);
 
                 if (currentKeyState != previousKeyState)
@@ -71,7 +73,7 @@ namespace Iris.UserInterface
             CheckKeyState(SharpDX.DirectInput.Key.Right);
             CheckKeyState(SharpDX.DirectInput.Key.Down);
 
-            _previousState = currentState;
+            _previousState = _currentState;
         }
     }
 }
