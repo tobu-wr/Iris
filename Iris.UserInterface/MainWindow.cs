@@ -156,9 +156,10 @@ namespace Iris.UserInterface
 
             Invoke(() =>
             {
-                // Force garbage collection to avoid slowdowns
-                // (could add an option to disable it and get more performance)
-                GC.Collect();
+                // Force garbage collection of generations 0 and 1 to avoid slowdowns
+                // Collecting generation 2 would have more performance impact with no additional benefit
+                // Could add an option to disable it if more performance is needed
+                GC.Collect(1);
 
                 GL.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, TextureWidth, TextureHeight, PixelFormat.Rgba, PixelType.UnsignedShort1555Reversed, frameBuffer);
                 GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
