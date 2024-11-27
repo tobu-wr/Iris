@@ -299,7 +299,7 @@ namespace Iris.UserInterface
                     pauseToolStripMenuItem.Enabled = false;
 
                     statusToolStripStatusLabel.Text = "Paused";
-                    fpsToolStripStatusLabel.Text = "FPS: 0,00 (sd: 0,00 | min: 0,00 | max: 0,00)";
+                    UpdateFpsToolStripStatusLabelText(0, 0, 0, 0);
 
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 });
@@ -324,7 +324,7 @@ namespace Iris.UserInterface
             pauseToolStripMenuItem.Enabled = false;
 
             statusToolStripStatusLabel.Text = "Paused";
-            fpsToolStripStatusLabel.Text = "FPS: 0,00 (sd: 0,00 | min: 0,00 | max: 0,00)";
+            UpdateFpsToolStripStatusLabelText(0, 0, 0, 0);
         }
 
         private void LoadROMToolStripMenuItem_Click(object sender, EventArgs e)
@@ -604,7 +604,7 @@ namespace Iris.UserInterface
         {
             if (_frameCount == 0)
             {
-                fpsToolStripStatusLabel.Text = "FPS: 0,00 (sd: 0,00 | min: 0,00 | max: 0,00)";
+                UpdateFpsToolStripStatusLabelText(0, 0, 0, 0);
                 return;
             }
 
@@ -616,13 +616,18 @@ namespace Iris.UserInterface
             double minFps = Math.Round((double)Stopwatch.Frequency / _maxFrameDuration, 2, MidpointRounding.AwayFromZero);
             double maxFps = Math.Round((double)Stopwatch.Frequency / _minFrameDuration, 2, MidpointRounding.AwayFromZero);
 
-            fpsToolStripStatusLabel.Text = $"FPS: {fps:F2} (sd: {sdFps:F2} | min: {minFps:F2} | max: {maxFps:F2})";
+            UpdateFpsToolStripStatusLabelText(fps, sdFps, minFps, maxFps);
 
             _frameCount = 0;
             _frameDuration = 0;
             _squareFrameDuration = 0;
             _minFrameDuration = 0;
             _maxFrameDuration = 0;
+        }
+
+        private void UpdateFpsToolStripStatusLabelText(double fps, double sd, double min, double max)
+        {
+            fpsToolStripStatusLabel.Text = $"FPS: {fps:F2} (sd: {sd:F2} | min: {min:F2} | max: {max:F2})";
         }
     }
 }
