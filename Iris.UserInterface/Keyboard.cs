@@ -43,7 +43,7 @@ namespace Iris.UserInterface
         {
             _keyboard.Poll();
 
-            // we use the unsafe version of GetCurrentState to avoid allocating a new KeyboardState each call
+            // Use the unsafe version of GetCurrentState to avoid allocating a new KeyboardState each call
             _keyboard.GetCurrentState(ref _currentState);
 
             void CheckKeyState(SharpDX.DirectInput.Key key)
@@ -73,7 +73,6 @@ namespace Iris.UserInterface
             CheckKeyState(SharpDX.DirectInput.Key.Right);
             CheckKeyState(SharpDX.DirectInput.Key.Down);
 
-            // swap
             (_previousState, _currentState) = (_currentState, _previousState); 
         }
     }

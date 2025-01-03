@@ -68,6 +68,12 @@ namespace Iris.UserInterface
         private const int TextureWidth = 240;
         private const int TextureHeight = 160;
 
+        // Cache the delegate to avoid allocating a new one each frame
+        private readonly Delegate _presentFrameDelegate;
+
+        // Used to pass the frame buffer to the delegate and, therefore, avoid boxing and unboxing
+        private UInt16[] _frameBuffer;
+
         [StructLayout(LayoutKind.Sequential)]
         private readonly struct TimeCaps
         {
@@ -119,6 +125,8 @@ namespace Iris.UserInterface
             _performanceCounterTimer.Interval = 1000;
             _performanceCounterTimer.Tick += PerformanceCounterTimer_Tick;
 
+            _presentFrameDelegate = PresentFrameDelegate;
+
             if (args.Length > 0)
                 LoadROM(args[0]);
         }
@@ -154,67 +162,73 @@ namespace Iris.UserInterface
         {
             // could add an option to switch between synchronous (by default) and asynchronous frame presentation to choose between framerate stability and performance (potentially with VSYNC to avoid tearing)
 
-            Invoke(() =>
+            _frameBuffer = frameBuffer;
+            Invoke(_presentFrameDelegate);
+
+            if (_framerateLimiterEnabled)
             {
-                GL.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, TextureWidth, TextureHeight, PixelFormat.Rgba, PixelType.UnsignedShort1555Reversed, frameBuffer);
-                GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
+                // Force garbage collection of generations 0 and 1 to avoid slowdowns
+                // Collecting generation 2 would have more performance impact with no additional benefit
+                // Doing it here, at the beginning of the new frame, reduces the input latency
+                // Could add an option to disable it if more performance is needed
+                GC.Collect(1);
 
-                if (_framerateLimiterEnabled)
+                // could add frame delay here for input latency mitigation (frame delay is better for reducing latency than syncing on input polling)
+            }
+        }
+
+        private void PresentFrameDelegate()
+        {
+            GL.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, TextureWidth, TextureHeight, PixelFormat.Rgba, PixelType.UnsignedShort1555Reversed, _frameBuffer);
+            GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
+
+            if (_framerateLimiterEnabled)
+            {
+                const double TargetFrameRate = 59.737411711095921;
+
+                long targetFrameDuration = (long)Math.Round(Stopwatch.Frequency / TargetFrameRate, MidpointRounding.AwayFromZero);
+                long targetFrameTime = _framerateLimiterLastFrameTime + targetFrameDuration;
+                long currentFrameTime = _framerateLimiterStopwatch.ElapsedTicks;
+
+                if (currentFrameTime < targetFrameTime)
                 {
-                    const double TargetFrameRate = 59.737411711095921;
+                    long sleepTime = targetFrameTime - currentFrameTime;
+                    int ms = (int)(1000 * sleepTime / Stopwatch.Frequency - _timeCaps._periodMin);
 
-                    long targetFrameDuration = (long)Math.Round(Stopwatch.Frequency / TargetFrameRate, MidpointRounding.AwayFromZero);
-                    long targetFrameTime = _framerateLimiterLastFrameTime + targetFrameDuration;
-                    long currentFrameTime = _framerateLimiterStopwatch.ElapsedTicks;
+                    if (ms > 0)
+                        Thread.Sleep(ms);
 
-                    if (currentFrameTime < targetFrameTime)
-                    {
-                        long sleepTime = targetFrameTime - currentFrameTime;
-                        int ms = (int)(1000 * sleepTime / Stopwatch.Frequency - _timeCaps._periodMin);
+                    while (_framerateLimiterStopwatch.ElapsedTicks < targetFrameTime)
+                    { }
 
-                        if (ms > 0)
-                            Thread.Sleep(ms);
-
-                        while (_framerateLimiterStopwatch.ElapsedTicks < targetFrameTime)
-                        { }
-
-                        _framerateLimiterLastFrameTime = targetFrameTime;
-                    }
-                    else
-                    {
-                        _framerateLimiterLastFrameTime = currentFrameTime;
-                    }
-                }
-
-                glControl.SwapBuffers();
-
-                long frameDuration = _frameStopwatch.ElapsedTicks;
-                _frameStopwatch.Restart();
-
-                ++_frameCount;
-
-                _frameDuration += frameDuration;
-                _squareFrameDuration += frameDuration * frameDuration;
-
-                if (_frameCount == 1) // first frame
-                {
-                    _minFrameDuration = frameDuration;
-                    _maxFrameDuration = frameDuration;
+                    _framerateLimiterLastFrameTime = targetFrameTime;
                 }
                 else
                 {
-                    _minFrameDuration = Math.Min(frameDuration, _minFrameDuration);
-                    _maxFrameDuration = Math.Max(frameDuration, _maxFrameDuration);
+                    _framerateLimiterLastFrameTime = currentFrameTime;
                 }
-            });
+            }
 
-            // Force garbage collection of generations 0 and 1 to avoid slowdowns
-            // Collecting generation 2 would have more performance impact with no additional benefit
-            // Doing it here, at the beginning of the new frame, reduces the input latency
-            // Could add an option to disable it if more performance is needed
-            GC.Collect(1);
+            glControl.SwapBuffers();
 
-            // could add frame delay here for input latency mitigation (frame delay is better for reducing latency than syncing on input polling)
+            long frameDuration = _frameStopwatch.ElapsedTicks;
+            _frameStopwatch.Restart();
+
+            ++_frameCount;
+
+            _frameDuration += frameDuration;
+            _squareFrameDuration += frameDuration * frameDuration;
+
+            if (_frameCount == 1) // first frame
+            {
+                _minFrameDuration = frameDuration;
+                _maxFrameDuration = frameDuration;
+            }
+            else
+            {
+                _minFrameDuration = Math.Min(frameDuration, _minFrameDuration);
+                _maxFrameDuration = Math.Max(frameDuration, _maxFrameDuration);
+            }
         }
 
         private void LoadROM(string fileName)
@@ -243,7 +257,6 @@ namespace Iris.UserInterface
             }
 
             _system?.Dispose();
-
             _system = system;
             _system.ResetState(_skipIntroEnabled);
 
