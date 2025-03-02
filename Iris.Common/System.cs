@@ -3,7 +3,7 @@
     public abstract class System : IDisposable
     {
         public delegate void PollInput_Delegate();
-        public delegate void PresentFrame_Delegate(UInt16[] frameBuffer);
+        public delegate void PresentFrame_Delegate();
 
         public enum Key
         {
@@ -33,6 +33,7 @@
         public abstract void LoadState(BinaryReader reader);
         public abstract void SaveState(BinaryWriter writer);
 
+        public abstract UInt16[] GetFrameBuffer();
         public abstract void LoadROM(string filename);
         public abstract void SetKeyStatus(Key key, KeyStatus status);
 

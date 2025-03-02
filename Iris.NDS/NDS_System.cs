@@ -69,5 +69,10 @@
         {
             // TODO
         }
+
+        public override UInt16[] GetFrameBuffer()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

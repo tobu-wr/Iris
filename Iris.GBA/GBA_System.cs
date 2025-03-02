@@ -31,7 +31,7 @@ namespace Iris.GBA
             StartScanline
         }
 
-        private static readonly int s_taskIdCount = Enum.GetNames(typeof(TaskId)).Length;
+        private static readonly int s_taskIdCount = Enum.GetNames<TaskId>().Length;
         private readonly Common.Scheduler _scheduler = new(s_taskIdCount, 2 * s_taskIdCount);
 
         private readonly CPU.CPU_Core _cpu;
@@ -138,6 +138,11 @@ namespace Iris.GBA
             _interruptControl.SaveState(writer);
             _memory.SaveState(writer);
             _video.SaveState(writer);
+        }
+
+        public override UInt16[] GetFrameBuffer()
+        {
+            return _video.GetFrameBuffer();
         }
 
         public override void LoadROM(string filename)

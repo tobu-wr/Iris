@@ -601,6 +601,11 @@ namespace Iris.GBA
             }
         }
 
+        internal UInt16[] GetFrameBuffer()
+        {
+            return _displayFrameBuffer;
+        }
+
         internal void Write8_PaletteRAM(UInt32 address, Byte value)
         {
             UInt32 offset = (UInt32)((address - PaletteRAM_StartAddress) & ~1) % PaletteRAM_Size;
@@ -673,7 +678,7 @@ namespace Iris.GBA
                     _dma.PerformVBlankTransfers();
                     _dma.PerformVideoTransfer(false);
 
-                    _presentFrameCallback(_displayFrameBuffer);
+                    _presentFrameCallback();
                     Array.Clear(_displayFrameBuffer);
 
                     _currentBG2X = ((_BG2X_H << 20) | (_BG2X_L << 4)) >> 4;

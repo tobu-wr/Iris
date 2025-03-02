@@ -71,7 +71,6 @@ namespace Iris.UserInterface
         // Cache the delegate to avoid allocating a new one each frame
         private readonly Delegate _presentFrameDelegate;
 
-        // Used to pass the frame buffer to the delegate and, therefore, avoid boxing and unboxing
         private UInt16[] _frameBuffer;
 
         [StructLayout(LayoutKind.Sequential)]
@@ -158,11 +157,10 @@ namespace Iris.UserInterface
             _xboxController.PollInput();
         }
 
-        private void PresentFrame(UInt16[] frameBuffer)
+        private void PresentFrame()
         {
             // could add an option to switch between synchronous (by default) and asynchronous frame presentation to choose between framerate stability and performance (potentially with VSYNC to avoid tearing)
 
-            _frameBuffer = frameBuffer;
             Invoke(_presentFrameDelegate);
 
             if (_framerateLimiterEnabled)
@@ -259,6 +257,8 @@ namespace Iris.UserInterface
             _system?.Dispose();
             _system = system;
             _system.ResetState(_skipIntroEnabled);
+
+            _frameBuffer = _system.GetFrameBuffer();
 
             loadStateToolStripMenuItem.Enabled = true;
             saveStateToolStripMenuItem.Enabled = true;
