@@ -73,6 +73,7 @@ namespace Iris.UserInterface
             CheckKeyState(SharpDX.DirectInput.Key.Right);
             CheckKeyState(SharpDX.DirectInput.Key.Down);
 
+            // Swap states
             (_previousState, _currentState) = (_currentState, _previousState); 
         }
     }

@@ -68,10 +68,10 @@ namespace Iris.UserInterface
         private const int TextureWidth = 240;
         private const int TextureHeight = 160;
 
-        // Cache the delegate to avoid allocating a new one each frame
-        private readonly Delegate _presentFrameDelegate;
-
         private UInt16[] _frameBuffer;
+
+        // Cache the delegate to avoid allocating a new one each frame
+        private readonly Delegate _presentFrameOnMainThread;
 
         [StructLayout(LayoutKind.Sequential)]
         private readonly struct TimeCaps
@@ -124,7 +124,7 @@ namespace Iris.UserInterface
             _performanceCounterTimer.Interval = 1000;
             _performanceCounterTimer.Tick += PerformanceCounterTimer_Tick;
 
-            _presentFrameDelegate = PresentFrameDelegate;
+            _presentFrameOnMainThread = PresentFrameOnMainThread;
 
             if (args.Length > 0)
                 LoadROM(args[0]);
@@ -161,21 +161,21 @@ namespace Iris.UserInterface
         {
             // could add an option to switch between synchronous (by default) and asynchronous frame presentation to choose between framerate stability and performance (potentially with VSYNC to avoid tearing)
 
-            Invoke(_presentFrameDelegate);
+            Invoke(_presentFrameOnMainThread);
 
             if (_framerateLimiterEnabled)
             {
                 // Force garbage collection of generations 0 and 1 to avoid slowdowns
                 // Collecting generation 2 would have more performance impact with no additional benefit
-                // Doing it here, at the beginning of the new frame, reduces the input latency
-                // Could add an option to disable it if more performance is needed
+                // Doing it here, at the beginning of each new frame, reduces the input latency
+                // Could add an option to disable it if more performance is really needed
                 GC.Collect(1);
 
                 // could add frame delay here for input latency mitigation (frame delay is better for reducing latency than syncing on input polling)
             }
         }
 
-        private void PresentFrameDelegate()
+        private void PresentFrameOnMainThread()
         {
             GL.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, TextureWidth, TextureHeight, PixelFormat.Rgba, PixelType.UnsignedShort1555Reversed, _frameBuffer);
             GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
