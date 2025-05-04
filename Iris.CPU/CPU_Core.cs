@@ -1,7 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-
-namespace Iris.CPU
+﻿namespace Iris.CPU
 {
     public sealed class CPU_Core
     {
@@ -20,7 +17,6 @@ namespace Iris.CPU
         public delegate UInt64 HandleSWI_Delegate();
         public delegate UInt64 HandleIRQ_Delegate();
 
-        // could have used function pointers (delegate*) for performance instead of delegates but it's less flexible (cannot use non-static function for instance)
         public readonly record struct CallbackInterface
         (
             Read8_Delegate Read8,
@@ -239,7 +235,6 @@ namespace Iris.CPU
             writer.Write((int)NIRQ);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public UInt64 Step()
         {
             UInt32 i = (CPSR >> 7) & 1;
@@ -264,76 +259,67 @@ namespace Iris.CPU
 
             if (previousMode != newMode)
             {
-                ref UInt32 regDataRef = ref MemoryMarshal.GetArrayDataReference(Reg);
-                ref UInt32 reg8 = ref Unsafe.Add(ref regDataRef, 8);
-                ref UInt32 reg9 = ref Unsafe.Add(ref regDataRef, 9);
-                ref UInt32 reg10 = ref Unsafe.Add(ref regDataRef, 10);
-                ref UInt32 reg11 = ref Unsafe.Add(ref regDataRef, 11);
-                ref UInt32 reg12 = ref Unsafe.Add(ref regDataRef, 12);
-                ref UInt32 reg13 = ref Unsafe.Add(ref regDataRef, 13);
-                ref UInt32 reg14 = ref Unsafe.Add(ref regDataRef, 14);
-
                 // save previous mode registers
                 switch (previousMode)
                 {
                     case UserMode:
                     case SystemMode:
-                        Reg8_usr = reg8;
-                        Reg9_usr = reg9;
-                        Reg10_usr = reg10;
-                        Reg11_usr = reg11;
-                        Reg12_usr = reg12;
-                        Reg13_usr = reg13;
-                        Reg14_usr = reg14;
+                        Reg8_usr = Reg[8];
+                        Reg9_usr = Reg[9];
+                        Reg10_usr = Reg[10];
+                        Reg11_usr = Reg[11];
+                        Reg12_usr = Reg[12];
+                        Reg13_usr = Reg[13];
+                        Reg14_usr = Reg[14];
                         break;
                     case SupervisorMode:
-                        Reg8_usr = reg8;
-                        Reg9_usr = reg9;
-                        Reg10_usr = reg10;
-                        Reg11_usr = reg11;
-                        Reg12_usr = reg12;
-                        Reg13_svc = reg13;
-                        Reg14_svc = reg14;
+                        Reg8_usr = Reg[8];
+                        Reg9_usr = Reg[9];
+                        Reg10_usr = Reg[10];
+                        Reg11_usr = Reg[11];
+                        Reg12_usr = Reg[12];
+                        Reg13_svc = Reg[13];
+                        Reg14_svc = Reg[14];
                         SPSR_svc = SPSR;
                         break;
                     case AbortMode:
-                        Reg8_usr = reg8;
-                        Reg9_usr = reg9;
-                        Reg10_usr = reg10;
-                        Reg11_usr = reg11;
-                        Reg12_usr = reg12;
-                        Reg13_abt = reg13;
-                        Reg14_abt = reg14;
+                        Reg8_usr = Reg[8];
+                        Reg9_usr = Reg[9];
+                        Reg10_usr = Reg[10];
+                        Reg11_usr = Reg[11];
+                        Reg12_usr = Reg[12];
+                        Reg13_abt = Reg[13];
+                        Reg14_abt = Reg[14];
                         SPSR_abt = SPSR;
                         break;
                     case UndefinedMode:
-                        Reg8_usr = reg8;
-                        Reg9_usr = reg9;
-                        Reg10_usr = reg10;
-                        Reg11_usr = reg11;
-                        Reg12_usr = reg12;
-                        Reg13_und = reg13;
-                        Reg14_und = reg14;
+                        Reg8_usr = Reg[8];
+                        Reg9_usr = Reg[9];
+                        Reg10_usr = Reg[10];
+                        Reg11_usr = Reg[11];
+                        Reg12_usr = Reg[12];
+                        Reg13_und = Reg[13];
+                        Reg14_und = Reg[14];
                         SPSR_und = SPSR;
                         break;
                     case InterruptMode:
-                        Reg8_usr = reg8;
-                        Reg9_usr = reg9;
-                        Reg10_usr = reg10;
-                        Reg11_usr = reg11;
-                        Reg12_usr = reg12;
-                        Reg13_irq = reg13;
-                        Reg14_irq = reg14;
+                        Reg8_usr = Reg[8];
+                        Reg9_usr = Reg[9];
+                        Reg10_usr = Reg[10];
+                        Reg11_usr = Reg[11];
+                        Reg12_usr = Reg[12];
+                        Reg13_irq = Reg[13];
+                        Reg14_irq = Reg[14];
                         SPSR_irq = SPSR;
                         break;
                     case FastInterruptMode:
-                        Reg8_fiq = reg8;
-                        Reg9_fiq = reg9;
-                        Reg10_fiq = reg10;
-                        Reg11_fiq = reg11;
-                        Reg12_fiq = reg12;
-                        Reg13_fiq = reg13;
-                        Reg14_fiq = reg14;
+                        Reg8_fiq = Reg[8];
+                        Reg9_fiq = Reg[9];
+                        Reg10_fiq = Reg[10];
+                        Reg11_fiq = Reg[11];
+                        Reg12_fiq = Reg[12];
+                        Reg13_fiq = Reg[13];
+                        Reg14_fiq = Reg[14];
                         SPSR_fiq = SPSR;
                         break;
                 }
@@ -343,75 +329,73 @@ namespace Iris.CPU
                 {
                     case UserMode:
                     case SystemMode:
-                        reg8 = Reg8_usr;
-                        reg9 = Reg9_usr;
-                        reg10 = Reg10_usr;
-                        reg11 = Reg11_usr;
-                        reg12 = Reg12_usr;
-                        reg13 = Reg13_usr;
-                        reg14 = Reg14_usr;
+                        Reg[8] = Reg8_usr;
+                        Reg[9] = Reg9_usr;
+                        Reg[10] = Reg10_usr;
+                        Reg[11] = Reg11_usr;
+                        Reg[12] = Reg12_usr;
+                        Reg[13] = Reg13_usr;
+                        Reg[14] = Reg14_usr;
                         break;
                     case SupervisorMode:
-                        reg8 = Reg8_usr;
-                        reg9 = Reg9_usr;
-                        reg10 = Reg10_usr;
-                        reg11 = Reg11_usr;
-                        reg12 = Reg12_usr;
-                        reg13 = Reg13_svc;
-                        reg14 = Reg14_svc;
+                        Reg[8] = Reg8_usr;
+                        Reg[9] = Reg9_usr;
+                        Reg[10] = Reg10_usr;
+                        Reg[11] = Reg11_usr;
+                        Reg[12] = Reg12_usr;
+                        Reg[13] = Reg13_svc;
+                        Reg[14] = Reg14_svc;
                         SPSR = SPSR_svc;
                         break;
                     case AbortMode:
-                        reg8 = Reg8_usr;
-                        reg9 = Reg9_usr;
-                        reg10 = Reg10_usr;
-                        reg11 = Reg11_usr;
-                        reg12 = Reg12_usr;
-                        reg13 = Reg13_abt;
-                        reg14 = Reg14_abt;
+                        Reg[8] = Reg8_usr;
+                        Reg[9] = Reg9_usr;
+                        Reg[10] = Reg10_usr;
+                        Reg[11] = Reg11_usr;
+                        Reg[12] = Reg12_usr;
+                        Reg[13] = Reg13_abt;
+                        Reg[14] = Reg14_abt;
                         SPSR = SPSR_abt;
                         break;
                     case UndefinedMode:
-                        reg8 = Reg8_usr;
-                        reg9 = Reg9_usr;
-                        reg10 = Reg10_usr;
-                        reg11 = Reg11_usr;
-                        reg12 = Reg12_usr;
-                        reg13 = Reg13_und;
-                        reg14 = Reg14_und;
+                        Reg[8] = Reg8_usr;
+                        Reg[9] = Reg9_usr;
+                        Reg[10] = Reg10_usr;
+                        Reg[11] = Reg11_usr;
+                        Reg[12] = Reg12_usr;
+                        Reg[13] = Reg13_und;
+                        Reg[14] = Reg14_und;
                         SPSR = SPSR_und;
                         break;
                     case InterruptMode:
-                        reg8 = Reg8_usr;
-                        reg9 = Reg9_usr;
-                        reg10 = Reg10_usr;
-                        reg11 = Reg11_usr;
-                        reg12 = Reg12_usr;
-                        reg13 = Reg13_irq;
-                        reg14 = Reg14_irq;
+                        Reg[8] = Reg8_usr;
+                        Reg[9] = Reg9_usr;
+                        Reg[10] = Reg10_usr;
+                        Reg[11] = Reg11_usr;
+                        Reg[12] = Reg12_usr;
+                        Reg[13] = Reg13_irq;
+                        Reg[14] = Reg14_irq;
                         SPSR = SPSR_irq;
                         break;
                     case FastInterruptMode:
-                        reg8 = Reg8_fiq;
-                        reg9 = Reg9_fiq;
-                        reg10 = Reg10_fiq;
-                        reg11 = Reg11_fiq;
-                        reg12 = Reg12_fiq;
-                        reg13 = Reg13_fiq;
-                        reg14 = Reg14_fiq;
+                        Reg[8] = Reg8_fiq;
+                        Reg[9] = Reg9_fiq;
+                        Reg[10] = Reg10_fiq;
+                        Reg[11] = Reg11_fiq;
+                        Reg[12] = Reg12_fiq;
+                        Reg[13] = Reg13_fiq;
+                        Reg[14] = Reg14_fiq;
                         SPSR = SPSR_fiq;
                         break;
                 }
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal UInt32 GetFlag(Flag flag)
         {
             return (CPSR >> (int)flag) & 1;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void SetFlag(Flag flag, UInt32 value)
         {
             CPSR = (CPSR & ~(1u << (int)flag)) | (value << (int)flag);
@@ -458,45 +442,38 @@ namespace Iris.CPU
             };
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static UInt32 Not(UInt32 flag)
         {
             return flag ^ 1;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static UInt32 CarryFrom(UInt64 result)
         {
             return (result > 0xffff_ffff) ? 1u : 0u;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static UInt32 BorrowFrom(UInt64 result)
         {
             return (result >= 0x8000_0000_0000_0000) ? 1u : 0u;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static UInt32 OverflowFrom_Addition(UInt32 leftOperand, UInt32 rightOperand, UInt32 result)
         {
             return (((leftOperand >> 31) == (rightOperand >> 31))
                  && ((leftOperand >> 31) != (result >> 31))) ? 1u : 0u;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static UInt32 OverflowFrom_Subtraction(UInt32 leftOperand, UInt32 rightOperand, UInt32 result)
         {
             return (((leftOperand >> 31) != (rightOperand >> 31))
                  && ((leftOperand >> 31) != (result >> 31))) ? 1u : 0u;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static UInt32 ArithmeticShiftRight(UInt32 value, int shiftAmount)
         {
             return (UInt32)((Int32)value >> shiftAmount);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static UInt32 SignExtend(UInt32 value, int size)
         {
             return value | ~((value & (1u << (size - 1))) - 1);
@@ -506,7 +483,6 @@ namespace Iris.CPU
         {
             static UInt64 ComputeMultiplierCycleCount(UInt32 multiplier)
             {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 static bool CheckMultiplierAgainstMask(UInt32 multiplier, UInt32 mask)
                 {
                     UInt32 masked = multiplier & mask;
