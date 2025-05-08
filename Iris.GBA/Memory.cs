@@ -226,7 +226,7 @@ namespace Iris.GBA
         {
             address &= 0x0fff_ffff;
 
-            IntPtr page = Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_read8PageTable), address >> 10);
+            IntPtr page = _read8PageTable[address >> 10];
 
             if (page != IntPtr.Zero)
             {
@@ -248,10 +248,7 @@ namespace Iris.GBA
                 // IO and registers
                 case 0x4:
                     {
-                        [MethodImpl(MethodImplOptions.AggressiveInlining)]
                         static Byte GetLowByte(UInt16 value) => (Byte)value;
-
-                        [MethodImpl(MethodImplOptions.AggressiveInlining)]
                         static Byte GetHighByte(UInt16 value) => (Byte)(value >> 8);
 
                         UInt32 offset = address - 0x400_0000;
@@ -507,7 +504,7 @@ namespace Iris.GBA
         {
             address &= 0x0fff_fffe;
 
-            IntPtr page = Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_read16PageTable), address >> 10);
+            IntPtr page = _read16PageTable[address >> 10];
 
             if (page != IntPtr.Zero)
             {
@@ -655,7 +652,7 @@ namespace Iris.GBA
         {
             address &= 0x0fff_fffc;
 
-            IntPtr page = Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_read32PageTable), address >> 10);
+            IntPtr page = _read32PageTable[address >> 10];
 
             if (page != IntPtr.Zero)
             {
@@ -778,7 +775,7 @@ namespace Iris.GBA
         {
             address &= 0x0fff_ffff;
 
-            IntPtr page = Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_write8PageTable), address >> 10);
+            IntPtr page = _write8PageTable[address >> 10];
 
             if (page != IntPtr.Zero)
             {
@@ -1499,7 +1496,7 @@ namespace Iris.GBA
         {
             address &= 0x0fff_fffe;
 
-            IntPtr page = Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_write16PageTable), address >> 10);
+            IntPtr page = _write16PageTable[address >> 10];
 
             if (page != IntPtr.Zero)
             {
@@ -1883,7 +1880,7 @@ namespace Iris.GBA
         {
             address &= 0x0fff_fffc;
 
-            IntPtr page = Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_write32PageTable), address >> 10);
+            IntPtr page = _write32PageTable[address >> 10];
 
             if (page != IntPtr.Zero)
             {
@@ -1907,10 +1904,7 @@ namespace Iris.GBA
                 // IO and registers
                 case 0x4:
                     {
-                        [MethodImpl(MethodImplOptions.AggressiveInlining)]
                         static UInt16 GetLowHalfword(UInt32 value) => (UInt16)value;
-
-                        [MethodImpl(MethodImplOptions.AggressiveInlining)]
                         static UInt16 GetHighHalfword(UInt32 value) => (UInt16)(value >> 16);
 
                         UInt32 offset = address - 0x400_0000;

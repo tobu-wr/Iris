@@ -99,7 +99,6 @@ namespace Iris.GBA
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void SetKeyStatus(Common.System.Key key, Common.System.KeyStatus status)
         {
             int pos;

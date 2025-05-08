@@ -769,7 +769,6 @@ namespace Iris.GBA
             _currentBG3Y += (Int16)_BG3PD;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void RenderBackgroundMode0()
         {
             bool isFirst = true;
@@ -805,7 +804,6 @@ namespace Iris.GBA
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void RenderBackgroundMode1()
         {
             bool isFirst = true;
@@ -835,7 +833,6 @@ namespace Iris.GBA
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void RenderBackgroundMode2()
         {
             bool isFirst = true;
@@ -859,13 +856,10 @@ namespace Iris.GBA
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void RenderBackgroundMode3()
         {
             if ((_DISPCNT & 0x0400) == 0x0400)
             {
-                ref UInt16 displayFrameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_displayFrameBuffer);
-
                 int pixelNumberBegin = _VCOUNT * DisplayScreenWidth;
                 int pixelNumberEnd = pixelNumberBegin + DisplayScreenWidth;
 
@@ -874,7 +868,7 @@ namespace Iris.GBA
                     unsafe
                     {
                         UInt16 color = Unsafe.Read<UInt16>((UInt16*)_vram + pixelNumber);
-                        Unsafe.Add(ref displayFrameBufferDataRef, pixelNumber) = color;
+                        _displayFrameBuffer[pixelNumber] = color;
                     }
                 }
             }
@@ -886,13 +880,10 @@ namespace Iris.GBA
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void RenderBackgroundMode4()
         {
             if ((_DISPCNT & 0x0400) == 0x0400)
             {
-                ref UInt16 displayFrameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_displayFrameBuffer);
-
                 int pixelNumberBegin = _VCOUNT * DisplayScreenWidth;
                 int pixelNumberEnd = pixelNumberBegin + DisplayScreenWidth;
 
@@ -904,7 +895,7 @@ namespace Iris.GBA
                     {
                         Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram + vramFrameBufferOffset + pixelNumber);
                         UInt16 color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM + colorNumber);
-                        Unsafe.Add(ref displayFrameBufferDataRef, pixelNumber) = color;
+                        _displayFrameBuffer[pixelNumber] = color;
                     }
                 }
             }
@@ -916,7 +907,6 @@ namespace Iris.GBA
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void RenderBackgroundMode5()
         {
             if ((_DISPCNT & 0x0400) == 0x0400)
@@ -926,8 +916,6 @@ namespace Iris.GBA
 
                 if (_VCOUNT < VRAM_FrameBufferHeight)
                 {
-                    ref UInt16 displayFrameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_displayFrameBuffer);
-
                     int vramPixelNumberBegin = _VCOUNT * VRAM_FrameBufferWidth;
                     int vramPixelNumberEnd = vramPixelNumberBegin + VRAM_FrameBufferWidth;
 
@@ -940,7 +928,7 @@ namespace Iris.GBA
                         unsafe
                         {
                             UInt16 color = Unsafe.Read<UInt16>((Byte*)_vram + vramFrameBufferOffset + (vramPixelNumber * 2));
-                            Unsafe.Add(ref displayFrameBufferDataRef, displayPixelNumber) = color;
+                            _displayFrameBuffer[displayPixelNumber] = color;
                         }
                     }
                 }
@@ -955,8 +943,6 @@ namespace Iris.GBA
 
         private void RenderTextBackground(UInt16 cnt, UInt16 hofs, UInt16 vofs, bool isFirst)
         {
-            ref UInt16 displayFrameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_displayFrameBuffer);
-
             int displayPixelNumberBegin = _VCOUNT * DisplayScreenWidth;
 
             UInt16 virtualScreenSize = (UInt16)((cnt >> 14) & 0b11);
@@ -1066,15 +1052,13 @@ namespace Iris.GBA
                     }
 
                     int displayPixelNumber = displayPixelNumberBegin + hcount;
-                    Unsafe.Add(ref displayFrameBufferDataRef, displayPixelNumber) = color;
+                    _displayFrameBuffer[displayPixelNumber] = color;
                 }
             }
         }
 
         private void RenderRotationScalingBackground(UInt16 cnt, Int32 x, Int32 y, UInt16 pa, UInt16 pc, bool isFirst)
         {
-            ref UInt16 displayFrameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_displayFrameBuffer);
-
             int displayPixelNumberBegin = _VCOUNT * DisplayScreenWidth;
 
             UInt16 virtualScreenSize = (UInt16)((cnt >> 14) & 0b11);
@@ -1142,15 +1126,13 @@ namespace Iris.GBA
                     UInt16 color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM + colorNumber);
 
                     int displayPixelNumber = displayPixelNumberBegin + hcount;
-                    Unsafe.Add(ref displayFrameBufferDataRef, displayPixelNumber) = color;
+                    _displayFrameBuffer[displayPixelNumber] = color;
                 }
             }
         }
 
         private void RenderObjects(UInt16 bgPriority)
         {
-            ref UInt16 displayFrameBufferDataRef = ref MemoryMarshal.GetArrayDataReference(_displayFrameBuffer);
-
             int displayPixelNumberBegin = _VCOUNT * DisplayScreenWidth;
 
             UInt16 mappingFormat = (UInt16)((_DISPCNT >> 6) & 1);
@@ -1342,7 +1324,7 @@ namespace Iris.GBA
                         }
 
                         int displayPixelNumber = displayPixelNumberBegin + hcount;
-                        Unsafe.Add(ref displayFrameBufferDataRef, displayPixelNumber) = color;
+                        _displayFrameBuffer[displayPixelNumber] = color;
                     }
                 }
             }

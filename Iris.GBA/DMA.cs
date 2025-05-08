@@ -310,7 +310,6 @@ namespace Iris.GBA
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void PerformVBlankTransfers()
         {
             if (_channel0._running && (((_channel0._control >> 12) & 0b11) == (int)StartTiming.VBlank))
@@ -326,7 +325,6 @@ namespace Iris.GBA
                 PerformTransfer(ref _channel3, InterruptControl.Interrupt.DMA3, MaxLengthChannel3);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void PerformHBlankTransfers()
         {
             if (_channel0._running && (((_channel0._control >> 12) & 0b11) == (int)StartTiming.HBlank))
