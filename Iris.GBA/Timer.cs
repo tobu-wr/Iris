@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace Iris.GBA
+﻿namespace Iris.GBA
 {
     internal sealed class Timer
     {
