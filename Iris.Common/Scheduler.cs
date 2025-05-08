@@ -1,20 +1,12 @@
-﻿using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-
-namespace Iris.Common
+﻿namespace Iris.Common
 {
     public sealed class Scheduler(int taskListSize, int scheduledTaskListSize)
     {
         public delegate void Task_Delegate(UInt64 cycleCountDelay);
         private readonly Task_Delegate[] _taskList = new Task_Delegate[taskListSize];
 
-        private struct ScheduledTaskListEntry
-        {
-            internal int _id;
-            internal UInt64 _cycleCount;
-        }
-
-        private readonly ScheduledTaskListEntry[] _scheduledTaskList = new ScheduledTaskListEntry[scheduledTaskListSize]; // sorted by _cycleCount from smallest to largest
+        private record struct ScheduledTaskListEntry(int Id, UInt64 CycleCount);
+        private readonly ScheduledTaskListEntry[] _scheduledTaskList = new ScheduledTaskListEntry[scheduledTaskListSize]; // sorted by CycleCount in ascending order
         private int _scheduledTaskCount;
 
         private UInt64 _cycleCounter;
@@ -29,8 +21,8 @@ namespace Iris.Common
         {
             foreach (ref ScheduledTaskListEntry entry in _scheduledTaskList.AsSpan())
             {
-                entry._id = reader.ReadInt32();
-                entry._cycleCount = reader.ReadUInt64();
+                entry.Id = reader.ReadInt32();
+                entry.CycleCount = reader.ReadUInt64();
             }
 
             _scheduledTaskCount = reader.ReadInt32();
@@ -41,15 +33,14 @@ namespace Iris.Common
         {
             foreach (ScheduledTaskListEntry entry in _scheduledTaskList)
             {
-                writer.Write(entry._id);
-                writer.Write(entry._cycleCount);
+                writer.Write(entry.Id);
+                writer.Write(entry.CycleCount);
             }
 
             writer.Write(_scheduledTaskCount);
             writer.Write(_cycleCounter);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public UInt64 GetCycleCounter()
         {
             return _cycleCounter;
@@ -59,23 +50,18 @@ namespace Iris.Common
         {
             _cycleCounter += cycleCount;
 
-            // process tasks
-            ref readonly ScheduledTaskListEntry firstEntry = ref MemoryMarshal.GetArrayDataReference(_scheduledTaskList);
-            ref Task_Delegate taskListDataRef = ref MemoryMarshal.GetArrayDataReference(_taskList);
-
-            while ((_scheduledTaskCount > 0) && (firstEntry._cycleCount <= _cycleCounter))
+            while ((_scheduledTaskCount > 0) && (_scheduledTaskList[0].CycleCount <= _cycleCounter))
             {
-                // save the task
-                ScheduledTaskListEntry entry = firstEntry;
+                // save the entry and remove it from the scheduling beforehand
+                // because AdvanceCycleCounter can be called again while executing the task
+                ScheduledTaskListEntry entry = _scheduledTaskList[0];
 
-                // remove it from the list
                 --_scheduledTaskCount;
 
                 if (_scheduledTaskCount > 0)
                     Array.Copy(_scheduledTaskList, 1, _scheduledTaskList, 0, _scheduledTaskCount);
 
-                // execute it
-                Unsafe.Add(ref taskListDataRef, entry._id)(_cycleCounter - entry._cycleCount);
+                _taskList[entry.Id](_cycleCounter - entry.CycleCount);
             }
         }
 
@@ -86,40 +72,28 @@ namespace Iris.Common
 
         public void ScheduleTask(int id, UInt64 cycleCount)
         {
-            // convert cycleCount from relative to absolute
             cycleCount += _cycleCounter;
 
-            // get the position and reference of the new task
-            // (searching is done backward because a new task is more likely to be inserted towards the end)
+            // searching is done backward because a new task is more likely to be inserted towards the end
             int index = _scheduledTaskCount;
-            ref ScheduledTaskListEntry entry = ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_scheduledTaskList), _scheduledTaskCount - 1);
 
-            while ((index > 0) && (entry._cycleCount > cycleCount))
-            {
+            while ((index > 0) && (_scheduledTaskList[index - 1].CycleCount > cycleCount))
                 --index;
-                entry = ref Unsafe.Subtract(ref entry, 1);
-            }
 
-            entry = ref Unsafe.Add(ref entry, 1);
-
-            // insert the new task
             if (index < _scheduledTaskCount)
                 Array.Copy(_scheduledTaskList, index, _scheduledTaskList, index + 1, _scheduledTaskCount - index);
 
-            entry._id = id;
-            entry._cycleCount = cycleCount;
-
             ++_scheduledTaskCount;
+
+            _scheduledTaskList[index].Id = id;
+            _scheduledTaskList[index].CycleCount = cycleCount;
         }
 
         public void CancelTask(int id)
         {
-            int index = 0;
-            ref ScheduledTaskListEntry entry = ref MemoryMarshal.GetArrayDataReference(_scheduledTaskList);
-
-            while (index < _scheduledTaskCount)
+            for (int index = 0; index < _scheduledTaskCount; ++index)
             {
-                if (entry._id == id)
+                if (_scheduledTaskList[index].Id == id)
                 {
                     --_scheduledTaskCount;
 
@@ -128,9 +102,6 @@ namespace Iris.Common
 
                     return;
                 }
-
-                ++index;
-                entry = ref Unsafe.Add(ref entry, 1);
             }
         }
     }
