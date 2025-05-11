@@ -205,10 +205,8 @@ namespace Iris.GBA
             }
         }
 
-        internal void LoadROM(string filename)
+        internal void LoadROM(byte[] data)
         {
-            Byte[] data = File.ReadAllBytes(filename);
-
             _romSize = data.Length;
 
             if (_rom != IntPtr.Zero)
@@ -232,7 +230,6 @@ namespace Iris.GBA
             {
                 unsafe
                 {
-                    // much faster than Marshal.ReadByte
                     return Unsafe.Read<Byte>((Byte*)page + (address & 0x3ff));
                 }
             }
@@ -446,7 +443,6 @@ namespace Iris.GBA
                         {
                             unsafe
                             {
-                                // much faster than Marshal.ReadByte
                                 return Unsafe.Read<Byte>((Byte*)_rom + offset);
                             }
                         }
@@ -463,7 +459,6 @@ namespace Iris.GBA
                         {
                             unsafe
                             {
-                                // much faster than Marshal.ReadByte
                                 return Unsafe.Read<Byte>((Byte*)_rom + offset);
                             }
                         }
@@ -480,7 +475,6 @@ namespace Iris.GBA
                         {
                             unsafe
                             {
-                                // much faster than Marshal.ReadByte
                                 return Unsafe.Read<Byte>((Byte*)_rom + offset);
                             }
                         }
@@ -510,7 +504,6 @@ namespace Iris.GBA
             {
                 unsafe
                 {
-                    // much faster than Marshal.ReadInt16
                     return Unsafe.Read<UInt16>((Byte*)page + (address & 0x3ff));
                 }
             }
@@ -603,7 +596,6 @@ namespace Iris.GBA
                         {
                             unsafe
                             {
-                                // much faster than Marshal.ReadInt16
                                 return Unsafe.Read<UInt16>((Byte*)_rom + offset);
                             }
                         }
@@ -620,7 +612,6 @@ namespace Iris.GBA
                         {
                             unsafe
                             {
-                                // much faster than Marshal.ReadInt16
                                 return Unsafe.Read<UInt16>((Byte*)_rom + offset);
                             }
                         }
@@ -637,7 +628,6 @@ namespace Iris.GBA
                         {
                             unsafe
                             {
-                                // much faster than Marshal.ReadInt16
                                 return Unsafe.Read<UInt16>((Byte*)_rom + offset);
                             }
                         }
@@ -658,7 +648,6 @@ namespace Iris.GBA
             {
                 unsafe
                 {
-                    // much faster than Marshal.ReadInt32
                     return Unsafe.Read<UInt32>((Byte*)page + (address & 0x3ff));
                 }
             }
@@ -703,7 +692,6 @@ namespace Iris.GBA
                         {
                             unsafe
                             {
-                                // much faster than Marshal.ReadInt32
                                 return Unsafe.Read<UInt32>((Byte*)_rom + offset);
                             }
                         }
@@ -720,7 +708,6 @@ namespace Iris.GBA
                         {
                             unsafe
                             {
-                                // much faster than Marshal.ReadInt32
                                 return Unsafe.Read<UInt32>((Byte*)_rom + offset);
                             }
                         }
@@ -737,7 +724,6 @@ namespace Iris.GBA
                         {
                             unsafe
                             {
-                                // much faster than Marshal.ReadInt32
                                 return Unsafe.Read<UInt32>((Byte*)_rom + offset);
                             }
                         }
@@ -781,8 +767,7 @@ namespace Iris.GBA
             {
                 unsafe
                 {
-                    // much faster than Marshal.WriteByte
-                    Unsafe.Write<Byte>((Byte*)page + (address & 0x3ff), value);
+                    Unsafe.Write((Byte*)page + (address & 0x3ff), value);
                 }
 
                 return;
@@ -1502,8 +1487,7 @@ namespace Iris.GBA
             {
                 unsafe
                 {
-                    // much faster than Marshal.WriteInt16
-                    Unsafe.Write<UInt16>((Byte*)page + (address & 0x3ff), value);
+                    Unsafe.Write((Byte*)page + (address & 0x3ff), value);
                 }
 
                 return;
@@ -1886,8 +1870,7 @@ namespace Iris.GBA
             {
                 unsafe
                 {
-                    // much faster than Marshal.WriteInt32
-                    Unsafe.Write<UInt32>((Byte*)page + (address & 0x3ff), value);
+                    Unsafe.Write((Byte*)page + (address & 0x3ff), value);
                 }
 
                 return;

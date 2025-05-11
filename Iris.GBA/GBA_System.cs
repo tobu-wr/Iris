@@ -54,7 +54,17 @@ namespace Iris.GBA
 
         public GBA_System(PollInput_Delegate pollInputCallback, PresentFrame_Delegate presentFrameCallback)
         {
-            CPU.CPU_Core.CallbackInterface cpuCallbackInterface = new(_memory.Read8, _memory.Read16, _memory.Read32, _memory.Write8, _memory.Write16, _memory.Write32, _bios.HandleSWI, _bios.HandleIRQ);
+            CPU.CPU_Core.CallbackInterface cpuCallbackInterface = new
+            (
+                _memory.Read8,
+                _memory.Read16,
+                _memory.Read32,
+                _memory.Write8,
+                _memory.Write16,
+                _memory.Write32,
+                _bios.HandleSWI,
+                _bios.HandleIRQ
+            );
 
             _cpu = new(CPU.CPU_Core.Model.ARM7TDMI, cpuCallbackInterface);
             _timer = new(_scheduler);
@@ -81,7 +91,7 @@ namespace Iris.GBA
 
         public override void ResetState(bool skipIntro)
         {
-            _scheduler.ResetState(); // This has to be done first
+            _scheduler.ResetState();
 
             _cpu.ResetState();
             _communication.ResetState();
@@ -94,7 +104,7 @@ namespace Iris.GBA
             _memory.ResetState();
             _video.ResetState();
 
-            _bios.Reset(skipIntro); // This has to be done last
+            _bios.Reset(skipIntro);
         }
 
         public override void LoadState(BinaryReader reader)
@@ -108,17 +118,26 @@ namespace Iris.GBA
             if (reader.ReadString() != _romHash)
                 throw new Exception("Iris.GBA.GBA_System: Wrong ROM hash");
 
-            _scheduler.LoadState(reader);
-            _cpu.LoadState(reader);
-            _communication.LoadState(reader);
-            _timer.LoadState(reader);
-            _sound.LoadState(reader);
-            _dma.LoadState(reader);
-            _keyInput.LoadState(reader);
-            _systemControl.LoadState(reader);
-            _interruptControl.LoadState(reader);
-            _memory.LoadState(reader);
-            _video.LoadState(reader);
+            int dataLength = reader.ReadInt32();
+            byte[] data = reader.ReadBytes(dataLength);
+
+            if (reader.ReadString() != Convert.ToHexString(MD5.HashData(data)))
+                throw new Exception("Iris.GBA.GBA_System: Wrong data hash");
+
+            using MemoryStream dataStream = new(data, false);
+            using BinaryReader dataReader = new(dataStream, System.Text.Encoding.UTF8, false);
+
+            _scheduler.LoadState(dataReader);
+            _cpu.LoadState(dataReader);
+            _communication.LoadState(dataReader);
+            _timer.LoadState(dataReader);
+            _sound.LoadState(dataReader);
+            _dma.LoadState(dataReader);
+            _keyInput.LoadState(dataReader);
+            _systemControl.LoadState(dataReader);
+            _interruptControl.LoadState(dataReader);
+            _memory.LoadState(dataReader);
+            _video.LoadState(dataReader);
         }
 
         public override void SaveState(BinaryWriter writer)
@@ -127,17 +146,26 @@ namespace Iris.GBA
             writer.Write(StateSaveVersion);
             writer.Write(_romHash);
 
-            _scheduler.SaveState(writer);
-            _cpu.SaveState(writer);
-            _communication.SaveState(writer);
-            _timer.SaveState(writer);
-            _sound.SaveState(writer);
-            _dma.SaveState(writer);
-            _keyInput.SaveState(writer);
-            _systemControl.SaveState(writer);
-            _interruptControl.SaveState(writer);
-            _memory.SaveState(writer);
-            _video.SaveState(writer);
+            using MemoryStream dataStream = new();
+            using BinaryWriter dataWriter = new(dataStream, System.Text.Encoding.UTF8, false);
+
+            _scheduler.SaveState(dataWriter);
+            _cpu.SaveState(dataWriter);
+            _communication.SaveState(dataWriter);
+            _timer.SaveState(dataWriter);
+            _sound.SaveState(dataWriter);
+            _dma.SaveState(dataWriter);
+            _keyInput.SaveState(dataWriter);
+            _systemControl.SaveState(dataWriter);
+            _interruptControl.SaveState(dataWriter);
+            _memory.SaveState(dataWriter);
+            _video.SaveState(dataWriter);
+
+            byte[] data = dataStream.GetBuffer();
+
+            writer.Write(data.Length);
+            writer.Write(data);
+            writer.Write(Convert.ToHexString(MD5.HashData(data)));
         }
 
         public override UInt16[] GetFrameBuffer()
@@ -145,13 +173,10 @@ namespace Iris.GBA
             return _video.GetFrameBuffer();
         }
 
-        public override void LoadROM(string filename)
+        public override void LoadROM(byte[] data)
         {
-            _memory.LoadROM(filename);
-
-            using HashAlgorithm hashAlgorithm = SHA512.Create();
-            using FileStream fileStream = File.OpenRead(filename);
-            _romHash = BitConverter.ToString(hashAlgorithm.ComputeHash(fileStream));
+            _memory.LoadROM(data);
+            _romHash = Convert.ToHexString(MD5.HashData(data));
         }
 
         public override void SetKeyStatus(Key key, KeyStatus status)

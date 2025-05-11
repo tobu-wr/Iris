@@ -6,9 +6,9 @@
 
         private Byte[]? _ROM;
 
-        public override void LoadROM(string filename)
+        public override void LoadROM(byte[] data)
         {
-            _ROM = File.ReadAllBytes(filename);
+            _ROM = data;
         }
 
         private Byte ReadMemory8(UInt32 address)

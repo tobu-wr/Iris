@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 namespace Iris.GBA
 {
@@ -33,6 +34,9 @@ namespace Iris.GBA
 
             if (data.Length != BIOS_Size)
                 throw new Exception("Iris.GBA.BIOS: Wrong BIOS size");
+
+            if (Convert.ToHexString(MD5.HashData(data)) != "A860E8C0B6D573D191E4EC7DB1B1E4F6")
+                throw new Exception("Iris.GBA.BIOS: Wrong BIOS hash");
 
             Marshal.Copy(data, 0, _bios, BIOS_Size);
         }

@@ -612,8 +612,8 @@ namespace Iris.GBA
 
             unsafe
             {
-                Unsafe.Write<Byte>((Byte*)_paletteRAM + offset, value);
-                Unsafe.Write<Byte>((Byte*)_paletteRAM + offset + 1, value);
+                Unsafe.Write((Byte*)_paletteRAM + offset, value);
+                Unsafe.Write((Byte*)_paletteRAM + offset + 1, value);
             }
         }
 
@@ -623,8 +623,8 @@ namespace Iris.GBA
 
             unsafe
             {
-                Unsafe.Write<Byte>((Byte*)_vram + offset, value);
-                Unsafe.Write<Byte>((Byte*)_vram + offset + 1, value);
+                Unsafe.Write((Byte*)_vram + offset, value);
+                Unsafe.Write((Byte*)_vram + offset + 1, value);
             }
         }
 

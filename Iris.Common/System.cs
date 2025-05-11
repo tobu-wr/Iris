@@ -34,7 +34,7 @@
         public abstract void SaveState(BinaryWriter writer);
 
         public abstract UInt16[] GetFrameBuffer();
-        public abstract void LoadROM(string filename);
+        public abstract void LoadROM(byte[] data);
         public abstract void SetKeyStatus(Key key, KeyStatus status);
 
         public abstract bool IsRunning();

@@ -171,7 +171,8 @@ namespace Iris.UserInterface
                 // Could add an option to disable it if more performance is really needed
                 GC.Collect(1);
 
-                // could add frame delay here for input latency mitigation (frame delay is better for reducing latency than syncing on input polling)
+                // could add (automatic?) frame delay here for input latency mitigation (it's better for reducing latency than syncing on input polling)
+                // but it may only be worth it for GBA and not NDS as there isn't that much margin on the latter
             }
         }
 
@@ -245,7 +246,7 @@ namespace Iris.UserInterface
 
             try
             {
-                system.LoadROM(fileName);
+                system.LoadROM(File.ReadAllBytes(fileName));
             }
             catch (Exception ex)
             {
@@ -284,6 +285,8 @@ namespace Iris.UserInterface
             pauseToolStripMenuItem.Enabled = true;
 
             statusToolStripStatusLabel.Text = "Running";
+
+            GC.Collect();
 
             _systemThread = new(RunSystemThread)
             {
