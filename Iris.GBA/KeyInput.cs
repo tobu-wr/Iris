@@ -86,7 +86,7 @@
                         if (!_checkingInterrupt)
                         {
                             _checkingInterrupt = true;
-                            _scheduler.ScheduleTask((int)GBA_System.TaskId.CheckKeyInterrupt, CheckInterruptCycleCount);
+                            _scheduler.ScheduleTaskLate((int)GBA_System.TaskId.CheckKeyInterrupt, CheckInterruptCycleCount);
                         }
                     }
                     break;
@@ -151,7 +151,7 @@
             _pollInputCallback();
             CheckInterrupt();
 
-            _scheduler.ScheduleTask((int)GBA_System.TaskId.CheckKeyInterrupt, CheckInterruptCycleCount - cycleCountDelay);
+            _scheduler.ScheduleTaskLate((int)GBA_System.TaskId.CheckKeyInterrupt, CheckInterruptCycleCount - cycleCountDelay);
         }
 
         private void CheckInterrupt()

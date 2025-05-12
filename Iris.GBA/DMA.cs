@@ -202,7 +202,7 @@
                 if ((previousControl & 0x8000) == 0)
                 {
                     if ((newControl & 0x8000) == 0x8000)
-                        _scheduler.ScheduleTask((int)startTaskId, 2);
+                        _scheduler.ScheduleTaskSoon((int)startTaskId, 2);
                 }
                 else
                 {

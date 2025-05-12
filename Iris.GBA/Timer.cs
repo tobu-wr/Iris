@@ -191,7 +191,7 @@
             if ((previousControl & 0x0080) == 0)
             {
                 if ((newControl & 0x0080) == 0x0080)
-                    _scheduler.ScheduleTask((int)channel._startTaskId, 2);
+                    _scheduler.ScheduleTaskSoon((int)channel._startTaskId, 2);
             }
             else
             {
@@ -224,7 +224,7 @@
                                 UpdateCounter(ref channel, previousControl);
 
                                 _scheduler.CancelTask((int)channel._handleOverflowTaskId);
-                                _scheduler.ScheduleTask((int)channel._handleOverflowTaskId, ComputeCycleCountUntilOverflow(ref channel));
+                                _scheduler.ScheduleTaskLate((int)channel._handleOverflowTaskId, ComputeCycleCountUntilOverflow(ref channel));
                             }
                         }
                         else
@@ -238,7 +238,7 @@
                                         UpdateCounter(ref channel, previousControl);
 
                                         _scheduler.CancelTask((int)channel._handleOverflowTaskId);
-                                        _scheduler.ScheduleTask((int)channel._handleOverflowTaskId, ComputeCycleCountUntilOverflow(ref channel));
+                                        _scheduler.ScheduleTaskLate((int)channel._handleOverflowTaskId, ComputeCycleCountUntilOverflow(ref channel));
                                     }
                                 }
                                 else
@@ -254,7 +254,7 @@
                                 {
                                     channel._cycleCount = _scheduler.GetCycleCounter();
 
-                                    _scheduler.ScheduleTask((int)channel._handleOverflowTaskId, ComputeCycleCountUntilOverflow(ref channel));
+                                    _scheduler.ScheduleTaskLate((int)channel._handleOverflowTaskId, ComputeCycleCountUntilOverflow(ref channel));
                                 }
                             }
                         }
@@ -284,7 +284,7 @@
             {
                 channel._cycleCount = _scheduler.GetCycleCounter() - cycleCountDelay;
 
-                _scheduler.ScheduleTask((int)channel._handleOverflowTaskId, ComputeCycleCountUntilOverflow(ref channel) - cycleCountDelay);
+                _scheduler.ScheduleTaskLate((int)channel._handleOverflowTaskId, ComputeCycleCountUntilOverflow(ref channel) - cycleCountDelay);
             }
         }
 
@@ -295,7 +295,7 @@
             channel._counter = channel._reload;
             channel._cycleCount = _scheduler.GetCycleCounter() - cycleCountDelay;
 
-            _scheduler.ScheduleTask((int)channel._handleOverflowTaskId, ComputeCycleCountUntilOverflow(ref channel) - cycleCountDelay);
+            _scheduler.ScheduleTaskLate((int)channel._handleOverflowTaskId, ComputeCycleCountUntilOverflow(ref channel) - cycleCountDelay);
 
             if ((channel._control & 0x0040) == 0x0040)
                 _interruptControl.RequestInterrupt(channel._interrupt);

@@ -70,11 +70,28 @@
             _taskList[id] = task;
         }
 
-        public void ScheduleTask(int id, UInt64 cycleCount)
+        public void ScheduleTaskSoon(int id, UInt64 cycleCount)
         {
             cycleCount += _cycleCounter;
 
-            // searching is done backward because a new task is more likely to be inserted towards the end
+            int index = 0;
+
+            while ((index < _scheduledTaskCount) && (_scheduledTaskList[index].CycleCount <= cycleCount))
+                ++index;
+
+            if (index < _scheduledTaskCount)
+                Array.Copy(_scheduledTaskList, index, _scheduledTaskList, index + 1, _scheduledTaskCount - index);
+
+            ++_scheduledTaskCount;
+
+            _scheduledTaskList[index].Id = id;
+            _scheduledTaskList[index].CycleCount = cycleCount;
+        }
+
+        public void ScheduleTaskLate(int id, UInt64 cycleCount)
+        {
+            cycleCount += _cycleCounter;
+
             int index = _scheduledTaskCount;
 
             while ((index > 0) && (_scheduledTaskList[index - 1].CycleCount > cycleCount))

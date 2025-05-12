@@ -263,7 +263,7 @@ namespace Iris.GBA
             _BLDALPHA = 0;
             _BLDY = 0;
 
-            _scheduler.ScheduleTask((int)GBA_System.TaskId.StartHBlank, HDrawCycleCount);
+            _scheduler.ScheduleTaskLate((int)GBA_System.TaskId.StartHBlank, HDrawCycleCount);
 
             Array.Clear(_displayFrameBuffer);
 
@@ -638,7 +638,7 @@ namespace Iris.GBA
             if (_VCOUNT < DisplayScreenHeight)
                 _dma.PerformHBlankTransfers();
 
-            _scheduler.ScheduleTask((int)GBA_System.TaskId.StartScanline, HBlankCycleCount - cycleCountDelay);
+            _scheduler.ScheduleTaskLate((int)GBA_System.TaskId.StartScanline, HBlankCycleCount - cycleCountDelay);
         }
 
         private void StartScanline(UInt64 cycleCountDelay)
@@ -728,7 +728,7 @@ namespace Iris.GBA
                 _DISPSTAT = (UInt16)(_DISPSTAT & ~0x0004); // clear VCountMatch status
             }
 
-            _scheduler.ScheduleTask((int)GBA_System.TaskId.StartHBlank, HDrawCycleCount - cycleCountDelay);
+            _scheduler.ScheduleTaskLate((int)GBA_System.TaskId.StartHBlank, HDrawCycleCount - cycleCountDelay);
         }
 
         private void Render()
