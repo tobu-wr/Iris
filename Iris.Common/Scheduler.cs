@@ -79,13 +79,7 @@
             while ((index < _scheduledTaskCount) && (_scheduledTaskList[index].CycleCount <= cycleCount))
                 ++index;
 
-            if (index < _scheduledTaskCount)
-                Array.Copy(_scheduledTaskList, index, _scheduledTaskList, index + 1, _scheduledTaskCount - index);
-
-            ++_scheduledTaskCount;
-
-            _scheduledTaskList[index].Id = id;
-            _scheduledTaskList[index].CycleCount = cycleCount;
+            InsertScheduledTask(index, id, cycleCount);
         }
 
         public void ScheduleTaskLate(int id, UInt64 cycleCount)
@@ -97,13 +91,7 @@
             while ((index > 0) && (_scheduledTaskList[index - 1].CycleCount > cycleCount))
                 --index;
 
-            if (index < _scheduledTaskCount)
-                Array.Copy(_scheduledTaskList, index, _scheduledTaskList, index + 1, _scheduledTaskCount - index);
-
-            ++_scheduledTaskCount;
-
-            _scheduledTaskList[index].Id = id;
-            _scheduledTaskList[index].CycleCount = cycleCount;
+            InsertScheduledTask(index, id, cycleCount);
         }
 
         public void CancelTask(int id)
@@ -120,6 +108,17 @@
                     return;
                 }
             }
+        }
+
+        private void InsertScheduledTask(int index, int id, UInt64 cycleCount)
+        {
+            if (index < _scheduledTaskCount)
+                Array.Copy(_scheduledTaskList, index, _scheduledTaskList, index + 1, _scheduledTaskCount - index);
+
+            ++_scheduledTaskCount;
+
+            _scheduledTaskList[index].Id = id;
+            _scheduledTaskList[index].CycleCount = cycleCount;
         }
     }
 }
