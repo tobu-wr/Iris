@@ -52,7 +52,7 @@
 
             while ((_scheduledTaskCount > 0) && (_scheduledTaskList[0].CycleCount <= _cycleCounter))
             {
-                // save the entry and remove it from the scheduling beforehand
+                // save the entry and remove it from the list beforehand
                 // because AdvanceCycleCounter can be called again while executing the task
                 ScheduledTaskListEntry entry = _scheduledTaskList[0];
 

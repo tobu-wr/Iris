@@ -636,7 +636,7 @@ namespace Iris.GBA
                 _interruptControl.RequestInterrupt(InterruptControl.Interrupt.HBlank);
 
             if (_VCOUNT < DisplayScreenHeight)
-                _dma.PerformHBlankTransfers();
+                _scheduler.ScheduleTaskSoon((int)GBA_System.TaskId.PerformHBlankTransfers, 0);
 
             _scheduler.ScheduleTaskLate((int)GBA_System.TaskId.StartScanline, HBlankCycleCount - cycleCountDelay);
         }
@@ -659,7 +659,7 @@ namespace Iris.GBA
                 case > 0 and < 159:
                     ++_VCOUNT;
 
-                    _dma.PerformVideoTransfer(false);
+                    _scheduler.ScheduleTaskSoon((int)GBA_System.TaskId.PerformVideoTransfer, 0);
 
                     Render();
                     break;
@@ -675,8 +675,8 @@ namespace Iris.GBA
                     if ((_DISPSTAT & 0x0008) == 0x0008)
                         _interruptControl.RequestInterrupt(InterruptControl.Interrupt.VBlank);
 
-                    _dma.PerformVBlankTransfers();
-                    _dma.PerformVideoTransfer(false);
+                    _scheduler.ScheduleTaskSoon((int)GBA_System.TaskId.PerformVBlankTransfers, 0);
+                    _scheduler.ScheduleTaskSoon((int)GBA_System.TaskId.PerformVideoTransfer, 0);
 
                     _presentFrameCallback();
                     Array.Clear(_displayFrameBuffer);
@@ -693,7 +693,7 @@ namespace Iris.GBA
                 case 160:
                     _VCOUNT = 161;
 
-                    _dma.PerformVideoTransfer(true);
+                    _scheduler.ScheduleTaskSoon((int)GBA_System.TaskId.PerformVideoTransferEnd, 0);
                     break;
 
                 // vblank

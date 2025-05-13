@@ -41,7 +41,7 @@
             DMA3CNT_H
         }
 
-        internal enum StartTiming
+        private enum StartTiming
         {
             Immediate = 0b00,
             VBlank = 0b01,
@@ -84,6 +84,11 @@
             _scheduler.RegisterTask((int)GBA_System.TaskId.StartDMA_Channel1, _ => Start(ref _channel1, InterruptControl.Interrupt.DMA1, MaxLengthChannel1));
             _scheduler.RegisterTask((int)GBA_System.TaskId.StartDMA_Channel2, _ => Start(ref _channel2, InterruptControl.Interrupt.DMA2, MaxLengthChannel2));
             _scheduler.RegisterTask((int)GBA_System.TaskId.StartDMA_Channel3, _ => Start(ref _channel3, InterruptControl.Interrupt.DMA3, MaxLengthChannel3));
+
+            _scheduler.RegisterTask((int)GBA_System.TaskId.PerformVBlankTransfers, _ => PerformVBlankTransfers());
+            _scheduler.RegisterTask((int)GBA_System.TaskId.PerformHBlankTransfers, _ => PerformHBlankTransfers());
+            _scheduler.RegisterTask((int)GBA_System.TaskId.PerformVideoTransfer, _ => PerformVideoTransfer(false));
+            _scheduler.RegisterTask((int)GBA_System.TaskId.PerformVideoTransferEnd, _ => PerformVideoTransfer(true));
         }
 
         internal void Initialize(InterruptControl interruptControl, Memory memory)
@@ -308,7 +313,7 @@
             }
         }
 
-        internal void PerformVBlankTransfers()
+        private void PerformVBlankTransfers()
         {
             if (_channel0._running && (((_channel0._control >> 12) & 0b11) == (int)StartTiming.VBlank))
                 PerformTransfer(ref _channel0, InterruptControl.Interrupt.DMA0, MaxLengthChannel0);
@@ -323,7 +328,7 @@
                 PerformTransfer(ref _channel3, InterruptControl.Interrupt.DMA3, MaxLengthChannel3);
         }
 
-        internal void PerformHBlankTransfers()
+        private void PerformHBlankTransfers()
         {
             if (_channel0._running && (((_channel0._control >> 12) & 0b11) == (int)StartTiming.HBlank))
                 PerformTransfer(ref _channel0, InterruptControl.Interrupt.DMA0, MaxLengthChannel0);
@@ -338,7 +343,7 @@
                 PerformTransfer(ref _channel3, InterruptControl.Interrupt.DMA3, MaxLengthChannel3);
         }
 
-        internal void PerformVideoTransfer(bool disable)
+        private void PerformVideoTransfer(bool disable)
         {
             if (_channel3._running && (((_channel3._control >> 12) & 0b11) == (int)StartTiming.Special))
             {

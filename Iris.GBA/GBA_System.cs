@@ -23,6 +23,11 @@ namespace Iris.GBA
             StartDMA_Channel2,
             StartDMA_Channel3,
 
+            PerformVBlankTransfers,
+            PerformHBlankTransfers,
+            PerformVideoTransfer,
+            PerformVideoTransferEnd,
+
             // ---- KeyInput ----
             CheckKeyInterrupt,
 
