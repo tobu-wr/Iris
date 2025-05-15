@@ -54,7 +54,7 @@
         private InterruptControl _interruptControl;
         private Memory _memory;
 
-        private struct Channel
+        private struct Channel(GBA_System.TaskId startTaskId, InterruptControl.Interrupt interrupt, UInt32 maxLength)
         {
             internal UInt32 _source;
             internal UInt32 _sourceReload;
@@ -64,26 +64,31 @@
             internal UInt16 _lengthReload;
             internal UInt16 _control;
             internal bool _running;
+
+            internal readonly GBA_System.TaskId _startTaskId = startTaskId;
+            internal readonly InterruptControl.Interrupt _interrupt = interrupt;
+            internal readonly UInt32 _maxLength = maxLength;
         }
 
-        private Channel _channel0;
-        private Channel _channel1;
-        private Channel _channel2;
-        private Channel _channel3;
-
-        private const UInt32 MaxLengthChannel0 = 0x4000;
-        private const UInt32 MaxLengthChannel1 = 0x4000;
-        private const UInt32 MaxLengthChannel2 = 0x4000;
-        private const UInt32 MaxLengthChannel3 = 0x1_0000;
+        private readonly Channel[] _channels;
 
         internal DMA(Common.Scheduler scheduler)
         {
             _scheduler = scheduler;
 
-            _scheduler.RegisterTask((int)GBA_System.TaskId.StartDMA_Channel0, _ => Start(ref _channel0, InterruptControl.Interrupt.DMA0, MaxLengthChannel0));
-            _scheduler.RegisterTask((int)GBA_System.TaskId.StartDMA_Channel1, _ => Start(ref _channel1, InterruptControl.Interrupt.DMA1, MaxLengthChannel1));
-            _scheduler.RegisterTask((int)GBA_System.TaskId.StartDMA_Channel2, _ => Start(ref _channel2, InterruptControl.Interrupt.DMA2, MaxLengthChannel2));
-            _scheduler.RegisterTask((int)GBA_System.TaskId.StartDMA_Channel3, _ => Start(ref _channel3, InterruptControl.Interrupt.DMA3, MaxLengthChannel3));
+            _channels =
+            [
+                new (GBA_System.TaskId.StartDMA_Channel0, InterruptControl.Interrupt.DMA0, 0x4000),
+                new (GBA_System.TaskId.StartDMA_Channel1, InterruptControl.Interrupt.DMA1, 0x4000),
+                new (GBA_System.TaskId.StartDMA_Channel2, InterruptControl.Interrupt.DMA2, 0x4000),
+                new (GBA_System.TaskId.StartDMA_Channel3, InterruptControl.Interrupt.DMA3, 0x1_0000)
+            ];
+
+            for (int channelIndex = 0; channelIndex < 4; ++channelIndex)
+            {
+                int channelIndexCopy = channelIndex;
+                _scheduler.RegisterTask((int)_channels[channelIndex]._startTaskId, _ => Start(channelIndexCopy));
+            }
 
             _scheduler.RegisterTask((int)GBA_System.TaskId.PerformVBlankTransfers, _ => PerformVBlankTransfers());
             _scheduler.RegisterTask((int)GBA_System.TaskId.PerformHBlankTransfers, _ => PerformHBlankTransfers());
@@ -99,15 +104,22 @@
 
         internal void ResetState()
         {
-            _channel0 = default;
-            _channel1 = default;
-            _channel2 = default;
-            _channel3 = default;
+            foreach (ref Channel channel in _channels.AsSpan())
+            {
+                channel._source = 0;
+                channel._sourceReload = 0;
+                channel._destination = 0;
+                channel._destinationReload = 0;
+                channel._length = 0;
+                channel._lengthReload = 0;
+                channel._control = 0;
+                channel._running = false;
+            }
         }
 
         internal void LoadState(BinaryReader reader)
         {
-            void LoadChannel(ref Channel channel)
+            foreach (ref Channel channel in _channels.AsSpan())
             {
                 channel._source = reader.ReadUInt32();
                 channel._sourceReload = reader.ReadUInt32();
@@ -118,16 +130,11 @@
                 channel._control = reader.ReadUInt16();
                 channel._running = reader.ReadBoolean();
             }
-
-            LoadChannel(ref _channel0);
-            LoadChannel(ref _channel1);
-            LoadChannel(ref _channel2);
-            LoadChannel(ref _channel3);
         }
 
         internal void SaveState(BinaryWriter writer)
         {
-            void SaveChannel(Channel channel)
+            foreach (Channel channel in _channels)
             {
                 writer.Write(channel._source);
                 writer.Write(channel._sourceReload);
@@ -138,21 +145,16 @@
                 writer.Write(channel._control);
                 writer.Write(channel._running);
             }
-
-            SaveChannel(_channel0);
-            SaveChannel(_channel1);
-            SaveChannel(_channel2);
-            SaveChannel(_channel3);
         }
 
         internal UInt16 ReadRegister(Register register)
         {
             return register switch
             {
-                Register.DMA0CNT_H => _channel0._control,
-                Register.DMA1CNT_H => _channel1._control,
-                Register.DMA2CNT_H => _channel2._control,
-                Register.DMA3CNT_H => _channel3._control,
+                Register.DMA0CNT_H => _channels[0]._control,
+                Register.DMA1CNT_H => _channels[1]._control,
+                Register.DMA2CNT_H => _channels[2]._control,
+                Register.DMA3CNT_H => _channels[3]._control,
 
                 // should never happen
                 _ => throw new Exception("Iris.GBA.DMA: Register read error"),
@@ -196,7 +198,7 @@
                 channel._lengthReload = reload;
             }
 
-            void WriteControl(ref Channel channel, GBA_System.TaskId startTaskId)
+            void WriteControl(ref Channel channel)
             {
                 UInt16 previousControl = channel._control;
 
@@ -207,7 +209,7 @@
                 if ((previousControl & 0x8000) == 0)
                 {
                     if ((newControl & 0x8000) == 0x8000)
-                        _scheduler.ScheduleTaskSoon((int)startTaskId, 2);
+                        _scheduler.ScheduleTaskSoon((int)channel._startTaskId, 2);
                 }
                 else
                 {
@@ -216,7 +218,7 @@
                         if (channel._running)
                             channel._running = false;
                         else
-                            _scheduler.CancelTask((int)startTaskId);
+                            _scheduler.CancelTask((int)channel._startTaskId);
                     }
                 }
             }
@@ -224,87 +226,87 @@
             switch (register)
             {
                 case Register.DMA0SAD_L:
-                    WriteSourceReload_Low(ref _channel0);
+                    WriteSourceReload_Low(ref _channels[0]);
                     break;
                 case Register.DMA0SAD_H:
-                    WriteSourceReload_High(ref _channel0, 0x07ff);
+                    WriteSourceReload_High(ref _channels[0], 0x07ff);
                     break;
 
                 case Register.DMA0DAD_L:
-                    WriteDestinationReload_Low(ref _channel0);
+                    WriteDestinationReload_Low(ref _channels[0]);
                     break;
                 case Register.DMA0DAD_H:
-                    WriteDestinationReload_High(ref _channel0, 0x07ff);
+                    WriteDestinationReload_High(ref _channels[0], 0x07ff);
                     break;
 
                 case Register.DMA0CNT_L:
-                    WriteLengthReload(ref _channel0);
+                    WriteLengthReload(ref _channels[0]);
                     break;
                 case Register.DMA0CNT_H:
-                    WriteControl(ref _channel0, GBA_System.TaskId.StartDMA_Channel0);
+                    WriteControl(ref _channels[0]);
                     break;
 
                 case Register.DMA1SAD_L:
-                    WriteSourceReload_Low(ref _channel1);
+                    WriteSourceReload_Low(ref _channels[1]);
                     break;
                 case Register.DMA1SAD_H:
-                    WriteSourceReload_High(ref _channel1, 0x0fff);
+                    WriteSourceReload_High(ref _channels[1], 0x0fff);
                     break;
 
                 case Register.DMA1DAD_L:
-                    WriteDestinationReload_Low(ref _channel1);
+                    WriteDestinationReload_Low(ref _channels[1]);
                     break;
                 case Register.DMA1DAD_H:
-                    WriteDestinationReload_High(ref _channel1, 0x07ff);
+                    WriteDestinationReload_High(ref _channels[1], 0x07ff);
                     break;
 
                 case Register.DMA1CNT_L:
-                    WriteLengthReload(ref _channel1);
+                    WriteLengthReload(ref _channels[1]);
                     break;
                 case Register.DMA1CNT_H:
-                    WriteControl(ref _channel1, GBA_System.TaskId.StartDMA_Channel1);
+                    WriteControl(ref _channels[1]);
                     break;
 
                 case Register.DMA2SAD_L:
-                    WriteSourceReload_Low(ref _channel2);
+                    WriteSourceReload_Low(ref _channels[2]);
                     break;
                 case Register.DMA2SAD_H:
-                    WriteSourceReload_High(ref _channel2, 0x0fff);
+                    WriteSourceReload_High(ref _channels[2], 0x0fff);
                     break;
 
                 case Register.DMA2DAD_L:
-                    WriteDestinationReload_Low(ref _channel2);
+                    WriteDestinationReload_Low(ref _channels[2]);
                     break;
                 case Register.DMA2DAD_H:
-                    WriteDestinationReload_High(ref _channel2, 0x07ff);
+                    WriteDestinationReload_High(ref _channels[2], 0x07ff);
                     break;
 
                 case Register.DMA2CNT_L:
-                    WriteLengthReload(ref _channel2);
+                    WriteLengthReload(ref _channels[2]);
                     break;
                 case Register.DMA2CNT_H:
-                    WriteControl(ref _channel2, GBA_System.TaskId.StartDMA_Channel2);
+                    WriteControl(ref _channels[2]);
                     break;
 
                 case Register.DMA3SAD_L:
-                    WriteSourceReload_Low(ref _channel3);
+                    WriteSourceReload_Low(ref _channels[3]);
                     break;
                 case Register.DMA3SAD_H:
-                    WriteSourceReload_High(ref _channel3, 0x0fff);
+                    WriteSourceReload_High(ref _channels[3], 0x0fff);
                     break;
 
                 case Register.DMA3DAD_L:
-                    WriteDestinationReload_Low(ref _channel3);
+                    WriteDestinationReload_Low(ref _channels[3]);
                     break;
                 case Register.DMA3DAD_H:
-                    WriteDestinationReload_High(ref _channel3, 0x0fff);
+                    WriteDestinationReload_High(ref _channels[3], 0x0fff);
                     break;
 
                 case Register.DMA3CNT_L:
-                    WriteLengthReload(ref _channel3);
+                    WriteLengthReload(ref _channels[3]);
                     break;
                 case Register.DMA3CNT_H:
-                    WriteControl(ref _channel3, GBA_System.TaskId.StartDMA_Channel3);
+                    WriteControl(ref _channels[3]);
                     break;
 
                 // should never happen
@@ -315,60 +317,58 @@
 
         private void PerformVBlankTransfers()
         {
-            if (_channel0._running && (((_channel0._control >> 12) & 0b11) == (int)StartTiming.VBlank))
-                PerformTransfer(ref _channel0, InterruptControl.Interrupt.DMA0, MaxLengthChannel0);
+            for (int channelIndex = 0; channelIndex < 4; ++channelIndex)
+            {
+                ref Channel channel = ref _channels[channelIndex];
 
-            if (_channel1._running && (((_channel1._control >> 12) & 0b11) == (int)StartTiming.VBlank))
-                PerformTransfer(ref _channel1, InterruptControl.Interrupt.DMA1, MaxLengthChannel1);
-
-            if (_channel2._running && (((_channel2._control >> 12) & 0b11) == (int)StartTiming.VBlank))
-                PerformTransfer(ref _channel2, InterruptControl.Interrupt.DMA2, MaxLengthChannel2);
-
-            if (_channel3._running && (((_channel3._control >> 12) & 0b11) == (int)StartTiming.VBlank))
-                PerformTransfer(ref _channel3, InterruptControl.Interrupt.DMA3, MaxLengthChannel3);
+                if (channel._running && (((channel._control >> 12) & 0b11) == (int)StartTiming.VBlank))
+                    PerformTransfer(ref channel, channelIndex);
+            }
         }
 
         private void PerformHBlankTransfers()
         {
-            if (_channel0._running && (((_channel0._control >> 12) & 0b11) == (int)StartTiming.HBlank))
-                PerformTransfer(ref _channel0, InterruptControl.Interrupt.DMA0, MaxLengthChannel0);
+            for (int channelIndex = 0; channelIndex < 4; ++channelIndex)
+            {
+                ref Channel channel = ref _channels[channelIndex];
 
-            if (_channel1._running && (((_channel1._control >> 12) & 0b11) == (int)StartTiming.HBlank))
-                PerformTransfer(ref _channel1, InterruptControl.Interrupt.DMA1, MaxLengthChannel1);
-
-            if (_channel2._running && (((_channel2._control >> 12) & 0b11) == (int)StartTiming.HBlank))
-                PerformTransfer(ref _channel2, InterruptControl.Interrupt.DMA2, MaxLengthChannel2);
-
-            if (_channel3._running && (((_channel3._control >> 12) & 0b11) == (int)StartTiming.HBlank))
-                PerformTransfer(ref _channel3, InterruptControl.Interrupt.DMA3, MaxLengthChannel3);
+                if (channel._running && (((channel._control >> 12) & 0b11) == (int)StartTiming.HBlank))
+                    PerformTransfer(ref channel, channelIndex);
+            }
         }
 
         private void PerformVideoTransfer(bool disable)
         {
-            if (_channel3._running && (((_channel3._control >> 12) & 0b11) == (int)StartTiming.Special))
+            const int channelIndex = 3;
+
+            ref Channel channel = ref _channels[channelIndex];
+
+            if (channel._running && (((channel._control >> 12) & 0b11) == (int)StartTiming.Special))
             {
-                PerformTransfer(ref _channel3, InterruptControl.Interrupt.DMA3, MaxLengthChannel3);
+                PerformTransfer(ref channel, channelIndex);
 
                 if (disable)
                 {
-                    _channel3._control = (UInt16)(_channel3._control & ~0x8000);
-                    _channel3._running = false;
+                    channel._control = (UInt16)(channel._control & ~0x8000);
+                    channel._running = false;
                 }
             }
         }
 
-        private void Start(ref Channel channel, InterruptControl.Interrupt interrupt, UInt32 maxLength)
+        private void Start(int channelIndex)
         {
+            ref Channel channel = ref _channels[channelIndex];
+
             channel._source = channel._sourceReload;
             channel._destination = channel._destinationReload;
-            channel._length = (channel._lengthReload == 0) ? maxLength : channel._lengthReload;
+            channel._length = (channel._lengthReload == 0) ? channel._maxLength : channel._lengthReload;
             channel._running = true;
 
             if (((channel._control >> 12) & 0b11) == (int)StartTiming.Immediate)
-                PerformTransfer(ref channel, interrupt, maxLength);
+                PerformTransfer(ref channel, channelIndex);
         }
 
-        private void PerformTransfer(ref Channel channel, InterruptControl.Interrupt interrupt, UInt32 maxLength)
+        private void PerformTransfer(ref Channel channel, int channelIndex)
         {
             UInt16 sourceAddressControlFlag = (UInt16)((channel._control >> 7) & 0b11);
             UInt16 destinationAddressControlFlag = (UInt16)((channel._control >> 5) & 0b11);
@@ -448,7 +448,7 @@
             }
 
             if ((channel._control & 0x4000) == 0x4000)
-                _interruptControl.RequestInterrupt(interrupt);
+                _interruptControl.RequestInterrupt(channel._interrupt);
 
             // Repeat off
             if ((channel._control & 0x0200) == 0)
@@ -463,7 +463,7 @@
                 if (reloadDestination)
                     channel._destination = channel._destinationReload;
 
-                channel._length = (channel._lengthReload == 0) ? maxLength : channel._lengthReload;
+                channel._length = (channel._lengthReload == 0) ? channel._maxLength : channel._lengthReload;
             }
         }
     }
