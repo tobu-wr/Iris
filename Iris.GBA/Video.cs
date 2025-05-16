@@ -201,13 +201,12 @@ namespace Iris.GBA
 
         internal void ResetState()
         {
-            byte[] paletteRamData = new byte[PaletteRAM_Size];
-            byte[] vramData = new byte[VRAM_Size];
-            byte[] oamData = new byte[OAM_Size];
-
-            Marshal.Copy(paletteRamData, 0, _paletteRAM, PaletteRAM_Size);
-            Marshal.Copy(vramData, 0, _vram, VRAM_Size);
-            Marshal.Copy(oamData, 0, _oam, OAM_Size);
+            unsafe
+            {
+                NativeMemory.Clear(_paletteRAM.ToPointer(), PaletteRAM_Size);
+                NativeMemory.Clear(_vram.ToPointer(), VRAM_Size);
+                NativeMemory.Clear(_oam.ToPointer(), OAM_Size);
+            }
 
             _DISPCNT = 0;
             _DISPSTAT = 0;

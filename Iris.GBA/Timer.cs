@@ -34,19 +34,17 @@
             internal readonly InterruptControl.Interrupt _interrupt = interrupt;
         }
 
-        private readonly Channel[] _channels;
+        private readonly Channel[] _channels =
+        [
+            new(GBA_System.TaskId.StartTimer_Channel0, GBA_System.TaskId.HandleTimerOverflow_Channel0, InterruptControl.Interrupt.Timer0),
+            new(GBA_System.TaskId.StartTimer_Channel1, GBA_System.TaskId.HandleTimerOverflow_Channel1, InterruptControl.Interrupt.Timer1),
+            new(GBA_System.TaskId.StartTimer_Channel2, GBA_System.TaskId.HandleTimerOverflow_Channel2, InterruptControl.Interrupt.Timer2),
+            new(GBA_System.TaskId.StartTimer_Channel3, GBA_System.TaskId.HandleTimerOverflow_Channel3, InterruptControl.Interrupt.Timer3)
+        ];
 
         internal Timer(Common.Scheduler scheduler)
         {
             _scheduler = scheduler;
-
-            _channels =
-            [
-                new(GBA_System.TaskId.StartTimer_Channel0, GBA_System.TaskId.HandleTimerOverflow_Channel0, InterruptControl.Interrupt.Timer0),
-                new(GBA_System.TaskId.StartTimer_Channel1, GBA_System.TaskId.HandleTimerOverflow_Channel1, InterruptControl.Interrupt.Timer1),
-                new(GBA_System.TaskId.StartTimer_Channel2, GBA_System.TaskId.HandleTimerOverflow_Channel2, InterruptControl.Interrupt.Timer2),
-                new(GBA_System.TaskId.StartTimer_Channel3, GBA_System.TaskId.HandleTimerOverflow_Channel3, InterruptControl.Interrupt.Timer3)
-            ];
 
             for (int channelIndex = 0; channelIndex < 4; ++channelIndex)
             {

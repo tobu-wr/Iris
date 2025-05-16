@@ -142,7 +142,7 @@ namespace Iris.Common
             private bool _firstTaskExecuted;
             private bool _secondTaskExecuted;
 
-            private void SetupSimpleTasks()
+            private void SetupIndependantTasks()
             {
                 _scheduler.RegisterTask((int)TaskId.FirstTask, _ =>
                 {
@@ -165,7 +165,7 @@ namespace Iris.Common
                 });
             }
 
-            private void ExecuteSimpleTasks()
+            private void ExecuteIndependantTasks()
             {
                 _scheduler.AdvanceCycleCounter(42);
 
@@ -180,12 +180,12 @@ namespace Iris.Common
             [InlineData(0, 0)]
             private void ScheduleTaskSoon_IndependantTasks_ExecutedInCorrectOrder(UInt64 firstTaskCycleCount, UInt64 secondTaskCycleCount)
             {
-                SetupSimpleTasks();
+                SetupIndependantTasks();
 
                 _scheduler.ScheduleTaskSoon((int)TaskId.FirstTask, firstTaskCycleCount);
                 _scheduler.ScheduleTaskSoon((int)TaskId.SecondTask, secondTaskCycleCount);
 
-                ExecuteSimpleTasks();
+                ExecuteIndependantTasks();
             }
 
             [Theory]
@@ -193,12 +193,12 @@ namespace Iris.Common
             [InlineData(0, 0)]
             private void ScheduleTaskLate_IndependantTasks_ExecutedInCorrectOrder(UInt64 firstTaskCycleCount, UInt64 secondTaskCycleCount)
             {
-                SetupSimpleTasks();
+                SetupIndependantTasks();
 
                 _scheduler.ScheduleTaskLate((int)TaskId.FirstTask, firstTaskCycleCount);
                 _scheduler.ScheduleTaskLate((int)TaskId.SecondTask, secondTaskCycleCount);
 
-                ExecuteSimpleTasks();
+                ExecuteIndependantTasks();
             }
 
             [Fact]

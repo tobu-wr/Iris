@@ -70,19 +70,17 @@
             internal readonly UInt32 _maxLength = maxLength;
         }
 
-        private readonly Channel[] _channels;
+        private readonly Channel[] _channels =
+        [
+            new (GBA_System.TaskId.StartDMA_Channel0, InterruptControl.Interrupt.DMA0, 0x4000),
+            new (GBA_System.TaskId.StartDMA_Channel1, InterruptControl.Interrupt.DMA1, 0x4000),
+            new (GBA_System.TaskId.StartDMA_Channel2, InterruptControl.Interrupt.DMA2, 0x4000),
+            new (GBA_System.TaskId.StartDMA_Channel3, InterruptControl.Interrupt.DMA3, 0x1_0000)
+        ];
 
         internal DMA(Common.Scheduler scheduler)
         {
             _scheduler = scheduler;
-
-            _channels =
-            [
-                new (GBA_System.TaskId.StartDMA_Channel0, InterruptControl.Interrupt.DMA0, 0x4000),
-                new (GBA_System.TaskId.StartDMA_Channel1, InterruptControl.Interrupt.DMA1, 0x4000),
-                new (GBA_System.TaskId.StartDMA_Channel2, InterruptControl.Interrupt.DMA2, 0x4000),
-                new (GBA_System.TaskId.StartDMA_Channel3, InterruptControl.Interrupt.DMA3, 0x1_0000)
-            ];
 
             for (int channelIndex = 0; channelIndex < 4; ++channelIndex)
             {

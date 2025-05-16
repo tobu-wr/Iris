@@ -112,13 +112,12 @@ namespace Iris.GBA
 
         internal void ResetState()
         {
-            byte[] ewramData = new byte[EWRAM_Size];
-            byte[] iwramData = new byte[IWRAM_Size];
-            //byte[] sramData = new byte[SRAM_Size];
-
-            Marshal.Copy(ewramData, 0, _ewram, EWRAM_Size);
-            Marshal.Copy(iwramData, 0, _iwram, IWRAM_Size);
-            //Marshal.Copy(sramData, 0, _sram, SRAM_Size);
+            unsafe
+            {
+                NativeMemory.Clear(_ewram.ToPointer(), EWRAM_Size);
+                NativeMemory.Clear(_iwram.ToPointer(), IWRAM_Size);
+                //NativeMemory.Clear(_sram.ToPointer(), SRAM_Size);
+            }
         }
 
         internal void LoadState(BinaryReader reader)
