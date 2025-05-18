@@ -2,7 +2,7 @@
 
 Iris is a WIP GameBoy Advance (and Nintendo DS in the future) emulator.<br>
 The goal is to provide a user-friendly experience with good enough accuracy and speed to play most games without major issues.<br>
-It requires a BIOS dump of an original GameBoy Advance.<br>
+It requires a BIOS dump of an original GameBoy Advance. The BIOS dump file must be named `gba_bios.bin` and located at the root of the emulator.<br>
 
 <p align="center">
     <img src="Screenshot.PNG"/>

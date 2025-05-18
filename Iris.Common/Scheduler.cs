@@ -102,7 +102,7 @@ namespace Iris.Common
                 if (_scheduledTaskList[index].Id == id)
                 {
                     RemoveTask(index);
-                    return;
+                    break;
                 }
             }
         }

@@ -96,9 +96,9 @@ namespace Iris.UserInterface
             TimeGetDevCaps(ref _timeCaps, (uint)Unsafe.SizeOf<TimeCaps>());
             _ = TimeBeginPeriod(_timeCaps._periodMin);
 
-            System.Console.WriteLine($"[Iris.UserInterface.MainWindow] System timer resolution: {_timeCaps._periodMin}ms");
-            System.Console.WriteLine($"[Iris.UserInterface.MainWindow] Stopwatch is high-resolution: {Stopwatch.IsHighResolution}");
-            System.Console.WriteLine($"[Iris.UserInterface.MainWindow] Stopwatch resolution: {1_000_000_000 / Stopwatch.Frequency}ns");
+            Console.WriteLine($"[Iris.UserInterface.MainWindow] System timer resolution: {_timeCaps._periodMin}ms");
+            Console.WriteLine($"[Iris.UserInterface.MainWindow] Stopwatch is high-resolution: {Stopwatch.IsHighResolution}");
+            Console.WriteLine($"[Iris.UserInterface.MainWindow] Stopwatch resolution: {1_000_000_000 / Stopwatch.Frequency}ns");
 
             InitializeComponent();
 

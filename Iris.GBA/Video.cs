@@ -732,9 +732,7 @@ namespace Iris.GBA
 
         private void Render()
         {
-            UInt16 bgMode = (UInt16)(_DISPCNT & 0b111);
-
-            switch (bgMode)
+            switch (_DISPCNT & 0b111)
             {
                 case 0b000:
                     RenderBackgroundMode0();
@@ -758,7 +756,7 @@ namespace Iris.GBA
                 // TODO: verify
                 case 0b110:
                 case 0b111:
-                    throw new Exception($"Iris.GBA.Video: Unknown background mode {bgMode}");
+                    throw new Exception("Iris.GBA.Video: Unknown background mode");
             }
 
             _currentBG2X += (Int16)_BG2PB;
