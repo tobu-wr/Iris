@@ -1,5 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Iris.GBA
 {
@@ -35,12 +37,24 @@ namespace Iris.GBA
         private const int KB = 1024;
 
         private const int EWRAM_Size = 256 * KB;
-        private const int IWRAM_Size = 32 * KB;
-        //private const int SRAM_Size = 64 * KB;
-
         private readonly IntPtr _ewram = Marshal.AllocHGlobal(EWRAM_Size);
+
+        private const int IWRAM_Size = 32 * KB;
         private readonly IntPtr _iwram = Marshal.AllocHGlobal(IWRAM_Size);
-        //private readonly IntPtr _sram = Marshal.AllocHGlobal(SRAM_Size);
+
+        private int _romSize;
+        private IntPtr _rom;
+
+        //private const int EEPROM_Size = 8 * KB;
+        //private IntPtr _eeprom;
+
+        private const int SRAM_Size = 64 * KB;
+        private IntPtr _sram;
+
+        private const int FLASH_BankSize = 64 * KB;
+        private int _flashBank;
+        private int _flashSize;
+        private IntPtr _flash;
 
         private const UInt32 EWRAM_StartAddress = 0x0200_0000;
         private const UInt32 EWRAM_EndAddress = 0x0300_0000;
@@ -48,11 +62,7 @@ namespace Iris.GBA
         private const UInt32 IWRAM_StartAddress = 0x0300_0000;
         private const UInt32 IWRAM_EndAddress = 0x0400_0000;
 
-        //private const UInt32 SRAM_StartAddress = 0x0e00_0000;
-        //private const UInt32 SRAM_EndAddress = 0x1000_0000;
-
-        private int _romSize;
-        private IntPtr _rom;
+        private const UInt32 RegistersStartAddress = 0x0400_0000;
 
         private const UInt32 ROM_WaitState0_StartAddress = 0x0800_0000;
         private const UInt32 ROM_WaitState0_EndAddress = 0x0a00_0000;
@@ -62,6 +72,21 @@ namespace Iris.GBA
 
         private const UInt32 ROM_WaitState2_StartAddress = 0x0c00_0000;
         private const UInt32 ROM_WaitState2_EndAddress = 0x0e00_0000;
+
+        private const UInt32 SRAM_StartAddress = 0x0e00_0000;
+        private const UInt32 SRAM_EndAddress = 0x1000_0000;
+
+        private const UInt32 FLASH_StartAddress = 0x0e00_0000;
+
+        private enum SaveType
+        {
+            None,
+            //EEPROM,
+            SRAM,
+            FLASH
+        }
+
+        private SaveType _saveType;
 
         private const int PageSize = 1 * KB;
         private const int PageTableSize = 1 << 18;
@@ -87,7 +112,10 @@ namespace Iris.GBA
 
             Marshal.FreeHGlobal(_ewram);
             Marshal.FreeHGlobal(_iwram);
-            //Marshal.FreeHGlobal(_sram);
+            Marshal.FreeHGlobal(_rom);
+            //Marshal.FreeHGlobal(_eeprom);
+            Marshal.FreeHGlobal(_sram);
+            Marshal.FreeHGlobal(_flash);
 
             GC.SuppressFinalize(this);
             _disposed = true;
@@ -107,7 +135,6 @@ namespace Iris.GBA
 
             Map(_ewram, EWRAM_Size, EWRAM_StartAddress, EWRAM_EndAddress, Flag.All);
             Map(_iwram, IWRAM_Size, IWRAM_StartAddress, IWRAM_EndAddress, Flag.All);
-            //Map(_sram, SRAM_Size, SRAM_StartAddress, SRAM_EndAddress, Flag.Read8 | Flag.Write8 | Flag.Mirrored);
         }
 
         internal void ResetState()
@@ -116,73 +143,96 @@ namespace Iris.GBA
             {
                 NativeMemory.Clear(_ewram.ToPointer(), EWRAM_Size);
                 NativeMemory.Clear(_iwram.ToPointer(), IWRAM_Size);
-                //NativeMemory.Clear(_sram.ToPointer(), SRAM_Size);
+
+                //if (_eeprom != IntPtr.Zero)
+                //    NativeMemory.Clear(_eeprom.ToPointer(), EEPROM_Size);
+
+                if (_sram != IntPtr.Zero)
+                    NativeMemory.Fill(_sram.ToPointer(), SRAM_Size, 0xff);
+
+                if (_flash != IntPtr.Zero)
+                    NativeMemory.Fill(_flash.ToPointer(), (nuint)_flashSize, 0xff);
             }
+
+            _flashBank = 0;
         }
 
         internal void LoadState(BinaryReader reader)
         {
-            byte[] ewramData = reader.ReadBytes(EWRAM_Size);
-            byte[] iwramData = reader.ReadBytes(IWRAM_Size);
-            //byte[] sramData = reader.ReadBytes(SRAM_Size);
+            void LoadData(IntPtr destination, int size)
+            {
+                if (destination == IntPtr.Zero)
+                    return;
 
-            Marshal.Copy(ewramData, 0, _ewram, EWRAM_Size);
-            Marshal.Copy(iwramData, 0, _iwram, IWRAM_Size);
-            //Marshal.Copy(sramData, 0, _sram, SRAM_Size);
+                byte[] data = reader.ReadBytes(size);
+                Marshal.Copy(data, 0, destination, size);
+            }
+
+            LoadData(_ewram, EWRAM_Size);
+            LoadData(_iwram, IWRAM_Size);
+            //LoadData(_eeprom, EEPROM_Size);
+            LoadData(_sram, SRAM_Size);
+            LoadData(_flash, _flashSize);
+
+            _flashBank = reader.ReadInt32();
         }
 
         internal void SaveState(BinaryWriter writer)
         {
-            byte[] ewramData = new byte[EWRAM_Size];
-            byte[] iwramData = new byte[IWRAM_Size];
-            //byte[] sramData = new byte[SRAM_Size];
+            void SaveData(IntPtr source, int size)
+            {
+                if (source == IntPtr.Zero)
+                    return;
 
-            Marshal.Copy(_ewram, ewramData, 0, EWRAM_Size);
-            Marshal.Copy(_iwram, iwramData, 0, IWRAM_Size);
-            //Marshal.Copy(_sram, sramData, 0, SRAM_Size);
+                byte[] data = new byte[size];
+                Marshal.Copy(source, data, 0, size);
+                writer.Write(data);
+            }
 
-            writer.Write(ewramData);
-            writer.Write(iwramData);
-            //writer.Write(sramData);
+            SaveData(_ewram, EWRAM_Size);
+            SaveData(_iwram, IWRAM_Size);
+            //SaveData(_eeprom, EEPROM_Size);
+            SaveData(_sram, SRAM_Size);
+            SaveData(_flash, _flashSize);
+
+            writer.Write(_flashBank);
         }
+
+        private static int GetPageIndex(UInt32 address) => (int)(address >> 10);
+        private static int GetPageOffset(UInt32 address) => (int)(address & 0x3ff);
 
         internal void Map(IntPtr data, int size, UInt32 startAddress, UInt32 endAddress, Flag flags)
         {
             int pageCount = size / PageSize;
-            int startTablePageIndex = (int)(startAddress >> 10);
-            int endPageTableIndex = (int)(endAddress >> 10);
 
-            bool readable8 = flags.HasFlag(Flag.Read8);
-            bool readable16 = flags.HasFlag(Flag.Read16);
-            bool readable32 = flags.HasFlag(Flag.Read32);
-            bool writable8 = flags.HasFlag(Flag.Write8);
-            bool writable16 = flags.HasFlag(Flag.Write16);
-            bool writable32 = flags.HasFlag(Flag.Write32);
-            bool mirrored = flags.HasFlag(Flag.Mirrored);
+            int startPageTableIndex = GetPageIndex(startAddress);
+            int endPageTableIndex = GetPageIndex(endAddress);
 
-            for (int pageTableIndex = startTablePageIndex, pageIndex = 0; pageTableIndex != endPageTableIndex; ++pageTableIndex, ++pageIndex)
+            for (int pageTableIndex = startPageTableIndex, pageIndex = 0; pageTableIndex != endPageTableIndex; ++pageTableIndex, ++pageIndex)
             {
                 if (pageIndex < pageCount)
                 {
                     int pageOffset = pageIndex * PageSize;
                     IntPtr page = data + pageOffset;
-                    _read8PageTable[pageTableIndex] = readable8 ? page : IntPtr.Zero;
-                    _read16PageTable[pageTableIndex] = readable16 ? page : IntPtr.Zero;
-                    _read32PageTable[pageTableIndex] = readable32 ? page : IntPtr.Zero;
-                    _write8PageTable[pageTableIndex] = writable8 ? page : IntPtr.Zero;
-                    _write16PageTable[pageTableIndex] = writable16 ? page : IntPtr.Zero;
-                    _write32PageTable[pageTableIndex] = writable32 ? page : IntPtr.Zero;
+
+                    _read8PageTable[pageTableIndex] = flags.HasFlag(Flag.Read8) ? page : IntPtr.Zero;
+                    _read16PageTable[pageTableIndex] = flags.HasFlag(Flag.Read16) ? page : IntPtr.Zero;
+                    _read32PageTable[pageTableIndex] = flags.HasFlag(Flag.Read32) ? page : IntPtr.Zero;
+                    _write8PageTable[pageTableIndex] = flags.HasFlag(Flag.Write8) ? page : IntPtr.Zero;
+                    _write16PageTable[pageTableIndex] = flags.HasFlag(Flag.Write16) ? page : IntPtr.Zero;
+                    _write32PageTable[pageTableIndex] = flags.HasFlag(Flag.Write32) ? page : IntPtr.Zero;
                 }
-                else if (mirrored)
+                else if (flags.HasFlag(Flag.Mirrored))
                 {
                     int pageOffset = (pageIndex % pageCount) * PageSize;
                     IntPtr page = data + pageOffset;
-                    _read8PageTable[pageTableIndex] = readable8 ? page : IntPtr.Zero;
-                    _read16PageTable[pageTableIndex] = readable16 ? page : IntPtr.Zero;
-                    _read32PageTable[pageTableIndex] = readable32 ? page : IntPtr.Zero;
-                    _write8PageTable[pageTableIndex] = writable8 ? page : IntPtr.Zero;
-                    _write16PageTable[pageTableIndex] = writable16 ? page : IntPtr.Zero;
-                    _write32PageTable[pageTableIndex] = writable32 ? page : IntPtr.Zero;
+
+                    _read8PageTable[pageTableIndex] = flags.HasFlag(Flag.Read8) ? page : IntPtr.Zero;
+                    _read16PageTable[pageTableIndex] = flags.HasFlag(Flag.Read16) ? page : IntPtr.Zero;
+                    _read32PageTable[pageTableIndex] = flags.HasFlag(Flag.Read32) ? page : IntPtr.Zero;
+                    _write8PageTable[pageTableIndex] = flags.HasFlag(Flag.Write8) ? page : IntPtr.Zero;
+                    _write16PageTable[pageTableIndex] = flags.HasFlag(Flag.Write16) ? page : IntPtr.Zero;
+                    _write32PageTable[pageTableIndex] = flags.HasFlag(Flag.Write32) ? page : IntPtr.Zero;
                 }
                 else
                 {
@@ -194,42 +244,67 @@ namespace Iris.GBA
                     _write32PageTable[pageTableIndex] = IntPtr.Zero;
                 }
             }
-
-            if (writable8 || writable16 || writable32)
-            {
-                int length = pageCount * PageSize;
-
-                for (int offset = 0; offset < length; ++offset)
-                    Marshal.WriteByte(data, offset, 0);
-            }
         }
 
         internal void LoadROM(byte[] data)
         {
             _romSize = data.Length;
-
-            if (_rom != IntPtr.Zero)
-                Marshal.FreeHGlobal(_rom);
-
             _rom = Marshal.AllocHGlobal(_romSize);
             Marshal.Copy(data, 0, _rom, _romSize);
 
             Map(_rom, _romSize, ROM_WaitState0_StartAddress, ROM_WaitState0_EndAddress, Flag.AllRead);
             Map(_rom, _romSize, ROM_WaitState1_StartAddress, ROM_WaitState1_EndAddress, Flag.AllRead);
             Map(_rom, _romSize, ROM_WaitState2_StartAddress, ROM_WaitState2_EndAddress, Flag.AllRead);
+
+            string saveTypeString = Regex.Match(Encoding.ASCII.GetString(data, 0, _romSize), "EEPROM|SRAM|FLASH_|FLASH512|FLASH1M", RegexOptions.Compiled).ToString();
+
+            switch (saveTypeString)
+            {
+                case "EEPROM":
+                    Console.WriteLine("[Iris.GBA.Memory] EEPROM not implemented");
+                    _saveType = SaveType.None;
+                    break;
+
+                case "SRAM":
+                    Console.WriteLine("[Iris.GBA.Memory] Save type: SRAM");
+                    _saveType = SaveType.SRAM;
+                    _sram = Marshal.AllocHGlobal(SRAM_Size);
+                    Map(_sram, SRAM_Size, SRAM_StartAddress, SRAM_EndAddress, Flag.Read8 | Flag.Write8 | Flag.Mirrored);
+                    break;
+
+                case "FLASH_":
+                case "FLASH512":
+                    Console.WriteLine($"[Iris.GBA.Memory] Save type: FLASH 64KB");
+                    _saveType = SaveType.FLASH;
+                    _flashSize = 1 * FLASH_BankSize;
+                    _flash = Marshal.AllocHGlobal(_flashSize);
+                    break;
+
+                case "FLASH1M":
+                    Console.WriteLine($"[Iris.GBA.Memory] Save type: FLASH 128KB");
+                    _saveType = SaveType.FLASH;
+                    _flashSize = 2 * FLASH_BankSize;
+                    _flash = Marshal.AllocHGlobal(_flashSize);
+                    break;
+
+                default:
+                    Console.WriteLine("[Iris.GBA.Memory] Save type: None");
+                    _saveType = SaveType.None;
+                    break;
+            }
         }
 
         internal Byte Read8(UInt32 address)
         {
             address &= 0x0fff_ffff;
 
-            IntPtr page = _read8PageTable[address >> 10];
+            IntPtr page = _read8PageTable[GetPageIndex(address)];
 
             if (page != IntPtr.Zero)
             {
                 unsafe
                 {
-                    return Unsafe.Read<Byte>((Byte*)page + (address & 0x3ff));
+                    return Unsafe.Read<Byte>((Byte*)page + GetPageOffset(address));
                 }
             }
 
@@ -241,13 +316,13 @@ namespace Iris.GBA
                 case 0x1:
                     return _bios!.Read8(address);
 
-                // IO and registers
+                // Registers
                 case 0x4:
                     {
                         static Byte GetLowByte(UInt16 value) => (Byte)value;
                         static Byte GetHighByte(UInt16 value) => (Byte)(value >> 8);
 
-                        UInt32 offset = address - 0x400_0000;
+                        UInt32 offset = address - RegistersStartAddress;
 
                         return offset switch
                         {
@@ -482,12 +557,23 @@ namespace Iris.GBA
 
                 // SRAM/Flash
                 case 0xe:
-                    return address switch
+                case 0xf:
+                    switch (_saveType)
                     {
-                        0xe00_0000 => 0x62,
-                        0xe00_0001 => 0x13,
-                        _ => 0,
-                    };
+                        case SaveType.None:
+                            return 0xff;
+
+                        case SaveType.FLASH:
+                            {
+                                UInt32 offset = (address - FLASH_StartAddress) % FLASH_BankSize;
+
+                                unsafe
+                                {
+                                    return Unsafe.Read<Byte>((Byte*)_flash + offset);
+                                }
+                            }
+                    }
+                    break;
             }
 
             return 0;
@@ -497,13 +583,13 @@ namespace Iris.GBA
         {
             address &= 0x0fff_fffe;
 
-            IntPtr page = _read16PageTable[address >> 10];
+            IntPtr page = _read16PageTable[GetPageIndex(address)];
 
             if (page != IntPtr.Zero)
             {
                 unsafe
                 {
-                    return Unsafe.Read<UInt16>((Byte*)page + (address & 0x3ff));
+                    return Unsafe.Read<UInt16>((Byte*)page + GetPageOffset(address));
                 }
             }
 
@@ -515,10 +601,10 @@ namespace Iris.GBA
                 case 0x1:
                     return _bios!.Read16(address);
 
-                // IO and registers
+                // Registers
                 case 0x4:
                     {
-                        UInt32 offset = address - 0x400_0000;
+                        UInt32 offset = address - RegistersStartAddress;
 
                         return offset switch
                         {
@@ -632,6 +718,38 @@ namespace Iris.GBA
                         }
                     }
                     break;
+
+                // SRAM/Flash
+                case 0xe:
+                case 0xf:
+                    switch (_saveType)
+                    {
+                        case SaveType.None:
+                            return 0xffff;
+
+                        case SaveType.SRAM:
+                            {
+                                UInt32 offset = (address - SRAM_StartAddress) % SRAM_Size;
+
+                                unsafe
+                                {
+                                    Byte value = Unsafe.Read<Byte>((Byte*)_sram + offset);
+                                    return (UInt16)((value << 8) | value);
+                                }
+                            }
+
+                        case SaveType.FLASH:
+                            {
+                                UInt32 offset = (address - FLASH_StartAddress) % FLASH_BankSize;
+
+                                unsafe
+                                {
+                                    Byte value = Unsafe.Read<Byte>((Byte*)_flash + offset);
+                                    return (UInt16)((value << 8) | value);
+                                }
+                            }
+                    }
+                    break;
             }
 
             return 0;
@@ -641,13 +759,13 @@ namespace Iris.GBA
         {
             address &= 0x0fff_fffc;
 
-            IntPtr page = _read32PageTable[address >> 10];
+            IntPtr page = _read32PageTable[GetPageIndex(address)];
 
             if (page != IntPtr.Zero)
             {
                 unsafe
                 {
-                    return Unsafe.Read<UInt32>((Byte*)page + (address & 0x3ff));
+                    return Unsafe.Read<UInt32>((Byte*)page + GetPageOffset(address));
                 }
             }
 
@@ -659,10 +777,10 @@ namespace Iris.GBA
                 case 0x1:
                     return _bios!.Read32(address);
 
-                // IO and registers
+                // Registers
                 case 0x4:
                     {
-                        UInt32 offset = address - 0x400_0000;
+                        UInt32 offset = address - RegistersStartAddress;
 
                         return offset switch
                         {
@@ -728,6 +846,38 @@ namespace Iris.GBA
                         }
                     }
                     break;
+
+                // SRAM/Flash
+                case 0xe:
+                case 0xf:
+                    switch (_saveType)
+                    {
+                        case SaveType.None:
+                            return 0xffff_ffff;
+
+                        case SaveType.SRAM:
+                            {
+                                UInt32 offset = (address - SRAM_StartAddress) % SRAM_Size;
+
+                                unsafe
+                                {
+                                    Byte value = Unsafe.Read<Byte>((Byte*)_sram + offset);
+                                    return (UInt32)((value << 24) | (value << 16) | (value << 8) | value);
+                                }
+                            }
+
+                        case SaveType.FLASH:
+                            {
+                                UInt32 offset = (address - FLASH_StartAddress) % FLASH_BankSize;
+
+                                unsafe
+                                {
+                                    Byte value = Unsafe.Read<Byte>((Byte*)_flash + offset);
+                                    return (UInt32)((value << 24) | (value << 16) | (value << 8) | value);
+                                }
+                            }
+                    }
+                    break;
             }
 
             return 0;
@@ -760,15 +910,14 @@ namespace Iris.GBA
         {
             address &= 0x0fff_ffff;
 
-            IntPtr page = _write8PageTable[address >> 10];
+            IntPtr page = _write8PageTable[GetPageIndex(address)];
 
             if (page != IntPtr.Zero)
             {
                 unsafe
                 {
-                    Unsafe.Write((Byte*)page + (address & 0x3ff), value);
+                    Unsafe.Write((Byte*)page + GetPageOffset(address), value);
                 }
-
                 return;
             }
 
@@ -780,10 +929,10 @@ namespace Iris.GBA
                 case 0x1:
                     break;
 
-                // IO and registers
+                // Registers
                 case 0x4:
                     {
-                        UInt32 offset = address - 0x400_0000;
+                        UInt32 offset = address - RegistersStartAddress;
 
                         switch (offset)
                         {
@@ -1470,6 +1619,27 @@ namespace Iris.GBA
                 case 0xd:
                     break;
 
+                // SRAM/Flash
+                case 0xe:
+                case 0xf:
+                    switch (_saveType)
+                    {
+                        case SaveType.None:
+                            break;
+
+                        case SaveType.FLASH:
+                            {
+                                UInt32 offset = (address - FLASH_StartAddress) % FLASH_BankSize;
+
+                                unsafe
+                                {
+                                    Unsafe.Write((Byte*)_flash + offset, value);
+                                }
+                            }
+                            break;
+                    }
+                    break;
+
                 default:
                     Console.WriteLine($"[Iris.GBA.Memory] Unhandled write to address 0x{address:x8}");
                     break;
@@ -1478,32 +1648,32 @@ namespace Iris.GBA
 
         internal void Write16(UInt32 address, UInt16 value)
         {
-            address &= 0x0fff_fffe;
+            address &= 0x0fff_ffff;
 
-            IntPtr page = _write16PageTable[address >> 10];
+            UInt32 alignedAddress = address & 0x0fff_fffe;
+            IntPtr page = _write16PageTable[GetPageIndex(alignedAddress)];
 
             if (page != IntPtr.Zero)
             {
                 unsafe
                 {
-                    Unsafe.Write((Byte*)page + (address & 0x3ff), value);
+                    Unsafe.Write((Byte*)page + GetPageOffset(alignedAddress), value);
                 }
-
                 return;
             }
 
             // page fault
-            switch (address >> 24)
+            switch (alignedAddress >> 24)
             {
                 // BIOS
                 case 0x0:
                 case 0x1:
                     break;
 
-                // IO and registers
+                // Registers
                 case 0x4:
                     {
-                        UInt32 offset = address - 0x400_0000;
+                        UInt32 offset = alignedAddress - RegistersStartAddress;
 
                         switch (offset)
                         {
@@ -1838,7 +2008,7 @@ namespace Iris.GBA
                                 _systemControl!.WriteRegister(SystemControl.Register.SYSCNT_UND0, value, RegisterWriteMode.HalfWord);
                                 break;
                             default:
-                                Console.WriteLine($"[Iris.GBA.Memory] Unhandled write to address 0x{address:x8}");
+                                Console.WriteLine($"[Iris.GBA.Memory] Unhandled write to address 0x{alignedAddress:x8}");
                                 break;
                         }
                     }
@@ -1853,43 +2023,81 @@ namespace Iris.GBA
                 case 0xd:
                     break;
 
+                // SRAM/Flash
+                case 0xe:
+                case 0xf:
+                    switch (_saveType)
+                    {
+                        case SaveType.None:
+                            break;
+
+                        case SaveType.SRAM:
+                            {
+                                UInt32 offset = (address - SRAM_StartAddress) % SRAM_Size;
+
+                                if ((address & 1) == 1)
+                                    value >>= 8;
+
+                                unsafe
+                                {
+                                    Unsafe.Write((Byte*)_sram + offset, (Byte)value);
+                                }
+                            }
+                            break;
+
+                        case SaveType.FLASH:
+                            {
+                                UInt32 offset = (address - FLASH_StartAddress) % FLASH_BankSize;
+
+                                if ((address & 1) == 1)
+                                    value >>= 8;
+
+                                unsafe
+                                {
+                                    Unsafe.Write((Byte*)_flash + offset, (Byte)value);
+                                }
+                            }
+                            break;
+                    }
+                    break;
+
                 default:
-                    Console.WriteLine($"[Iris.GBA.Memory] Unhandled write to address 0x{address:x8}");
+                    Console.WriteLine($"[Iris.GBA.Memory] Unhandled write to address 0x{alignedAddress:x8}");
                     break;
             }
         }
 
         internal void Write32(UInt32 address, UInt32 value)
         {
-            address &= 0x0fff_fffc;
+            address &= 0x0fff_ffff;
 
-            IntPtr page = _write32PageTable[address >> 10];
+            UInt32 alignedAddress = address & 0x0fff_fffc;
+            IntPtr page = _write32PageTable[GetPageIndex(alignedAddress)];
 
             if (page != IntPtr.Zero)
             {
                 unsafe
                 {
-                    Unsafe.Write((Byte*)page + (address & 0x3ff), value);
+                    Unsafe.Write((Byte*)page + GetPageOffset(alignedAddress), value);
                 }
-
                 return;
             }
 
             // page fault
-            switch (address >> 24)
+            switch (alignedAddress >> 24)
             {
                 // BIOS
                 case 0x0:
                 case 0x1:
                     break;
 
-                // IO and registers
+                // Registers
                 case 0x4:
                     {
                         static UInt16 GetLowHalfword(UInt32 value) => (UInt16)value;
                         static UInt16 GetHighHalfword(UInt32 value) => (UInt16)(value >> 16);
 
-                        UInt32 offset = address - 0x400_0000;
+                        UInt32 offset = alignedAddress - RegistersStartAddress;
 
                         switch (offset)
                         {
@@ -2167,7 +2375,7 @@ namespace Iris.GBA
                                 // 16 upper bits are unused
                                 break;
                             default:
-                                Console.WriteLine($"[Iris.GBA.Memory] Unhandled write to address 0x{address:x8}");
+                                Console.WriteLine($"[Iris.GBA.Memory] Unhandled write to address 0x{alignedAddress:x8}");
                                 break;
                         }
                     }
@@ -2182,8 +2390,66 @@ namespace Iris.GBA
                 case 0xd:
                     break;
 
+                // SRAM/Flash
+                case 0xe:
+                case 0xf:
+                    switch (_saveType)
+                    {
+                        case SaveType.None:
+                            break;
+
+                        case SaveType.SRAM:
+                            {
+                                UInt32 offset = (address - SRAM_StartAddress) % SRAM_Size;
+
+                                switch (address & 0b11)
+                                {
+                                    case 0b01:
+                                        value >>= 8;
+                                        break;
+                                    case 0b10:
+                                        value >>= 16;
+                                        break;
+                                    case 0b11:
+                                        value >>= 24;
+                                        break;
+                                }
+
+                                unsafe
+                                {
+                                    Unsafe.Write((Byte*)_sram + offset, (Byte)value);
+                                }
+                            }
+                            break;
+
+                        case SaveType.FLASH:
+                            {
+                                UInt32 offset = (address - FLASH_StartAddress) % FLASH_BankSize;
+
+                                switch (address & 0b11)
+                                {
+                                    case 0b01:
+                                        value >>= 8;
+                                        break;
+                                    case 0b10:
+                                        value >>= 16;
+                                        break;
+                                    case 0b11:
+                                        value >>= 24;
+                                        break;
+                                }
+
+                                unsafe
+                                {
+                                    Unsafe.Write((Byte*)_flash + offset, (Byte)value);
+                                }
+                            }
+                            break;
+                    }
+                    break;
+
                 default:
-                    Console.WriteLine($"[Iris.GBA.Memory] Unhandled write to address 0x{address:x8}");
+                    Console.WriteLine($"[Iris.GBA.Memory] Unhandled write to address 0x{alignedAddress:x8}");
                     break;
             }
         }
