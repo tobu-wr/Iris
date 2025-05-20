@@ -203,9 +203,9 @@ namespace Iris.GBA
         {
             unsafe
             {
-                NativeMemory.Clear(_paletteRAM.ToPointer(), PaletteRAM_Size);
-                NativeMemory.Clear(_vram.ToPointer(), VRAM_Size);
-                NativeMemory.Clear(_oam.ToPointer(), OAM_Size);
+                NativeMemory.Clear((Byte*)_paletteRAM, PaletteRAM_Size);
+                NativeMemory.Clear((Byte*)_vram, VRAM_Size);
+                NativeMemory.Clear((Byte*)_oam, OAM_Size);
             }
 
             _DISPCNT = 0;

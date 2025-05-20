@@ -85,21 +85,6 @@ namespace Iris.GBA
             }
         }
 
-        internal Byte Read8(UInt32 address)
-        {
-            return 0;
-        }
-
-        internal UInt16 Read16(UInt32 address)
-        {
-            return 0;
-        }
-
-        internal UInt32 Read32(UInt32 address)
-        {
-            return 0;
-        }
-
         internal UInt64 HandleSWI()
         {
             _cpu.Reg14_svc = _cpu.NextInstructionAddress;

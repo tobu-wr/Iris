@@ -329,7 +329,7 @@ namespace Iris.GBA
                 // BIOS
                 case 0x0:
                 case 0x1:
-                    return _bios!.Read8(address);
+                    break;
 
                 // Registers
                 case 0x4:
@@ -625,7 +625,7 @@ namespace Iris.GBA
                 // BIOS
                 case 0x0:
                 case 0x1:
-                    return _bios!.Read16(address);
+                    break;
 
                 // Registers
                 case 0x4:
@@ -801,7 +801,7 @@ namespace Iris.GBA
                 // BIOS
                 case 0x0:
                 case 0x1:
-                    return _bios!.Read32(address);
+                    break;
 
                 // Registers
                 case 0x4:
