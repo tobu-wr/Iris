@@ -48,26 +48,6 @@ namespace Iris.GBA
         //private const int EEPROM_Size = 8 * KB;
         //private IntPtr _eeprom;
 
-        private const int SRAM_Size = 64 * KB;
-        private IntPtr _sram;
-
-        private const int FLASH_BankSize = 64 * KB;
-        private int _flashBank;
-        private int _flashSize;
-        private IntPtr _flash;
-
-        private enum FLASH_State
-        {
-            WaitingForCommandArgument1,
-            WaitingForCommandArgument2,
-            WaitingForCommandArgument3,
-            WriteCommand,
-            SelectBankCommand
-        }
-
-        private FLASH_State _flashState;
-        private bool _flashIdMode;
-
         private const UInt32 EWRAM_StartAddress = 0x0200_0000;
         private const UInt32 EWRAM_EndAddress = 0x0300_0000;
 
@@ -85,20 +65,24 @@ namespace Iris.GBA
         private const UInt32 ROM_WaitState2_StartAddress = 0x0c00_0000;
         private const UInt32 ROM_WaitState2_EndAddress = 0x0e00_0000;
 
-        private const UInt32 SRAM_StartAddress = 0x0e00_0000;
-        private const UInt32 SRAM_EndAddress = 0x1000_0000;
-
-        private const UInt32 FLASH_StartAddress = 0x0e00_0000;
-
-        private enum SaveType
+        internal abstract class BackupMemory : IDisposable
         {
-            None,
-            //EEPROM,
-            SRAM,
-            FLASH
+            public abstract void Dispose();
+
+            internal abstract void ResetState();
+            internal abstract void LoadState(BinaryReader reader);
+            internal abstract void SaveState(BinaryWriter writer);
+
+            internal abstract Byte Read8(UInt32 address);
+            internal abstract UInt16 Read16(UInt32 address);
+            internal abstract UInt32 Read32(UInt32 address);
+
+            internal abstract void Write8(UInt32 address, Byte value);
+            internal abstract void Write16(UInt32 address, UInt16 value);
+            internal abstract void Write32(UInt32 address, UInt32 value);
         }
 
-        private SaveType _saveType;
+        private BackupMemory _backupMemory;
 
         private const int PageSize = 1 * KB;
         private const int PageTableSize = 1 << 18;
@@ -114,10 +98,16 @@ namespace Iris.GBA
 
         ~Memory()
         {
-            Dispose();
+            Dispose(false);
         }
 
         public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
         {
             if (_disposed)
                 return;
@@ -126,10 +116,10 @@ namespace Iris.GBA
             Marshal.FreeHGlobal(_iwram);
             Marshal.FreeHGlobal(_rom);
             //Marshal.FreeHGlobal(_eeprom);
-            Marshal.FreeHGlobal(_sram);
-            Marshal.FreeHGlobal(_flash);
 
-            GC.SuppressFinalize(this);
+            if (disposing)
+                _backupMemory?.Dispose();
+
             _disposed = true;
         }
 
@@ -158,25 +148,15 @@ namespace Iris.GBA
 
                 //if (_eeprom != IntPtr.Zero)
                 //    NativeMemory.Clear((Byte*)_eeprom, EEPROM_Size);
-
-                if (_sram != IntPtr.Zero)
-                    NativeMemory.Fill((Byte*)_sram, SRAM_Size, 0xff);
-
-                if (_flash != IntPtr.Zero)
-                    NativeMemory.Fill((Byte*)_flash, (nuint)_flashSize, 0xff);
             }
 
-            _flashBank = 0;
-            _flashState = FLASH_State.WaitingForCommandArgument1;
+            _backupMemory?.ResetState();
         }
 
         internal void LoadState(BinaryReader reader)
         {
             void LoadData(IntPtr destination, int size)
             {
-                if (destination == IntPtr.Zero)
-                    return;
-
                 byte[] data = reader.ReadBytes(size);
                 Marshal.Copy(data, 0, destination, size);
             }
@@ -184,20 +164,14 @@ namespace Iris.GBA
             LoadData(_ewram, EWRAM_Size);
             LoadData(_iwram, IWRAM_Size);
             //LoadData(_eeprom, EEPROM_Size);
-            LoadData(_sram, SRAM_Size);
-            LoadData(_flash, _flashSize);
 
-            _flashBank = reader.ReadInt32();
-            _flashState = (FLASH_State)reader.ReadInt32();
+            _backupMemory?.LoadState(reader);
         }
 
         internal void SaveState(BinaryWriter writer)
         {
             void SaveData(IntPtr source, int size)
             {
-                if (source == IntPtr.Zero)
-                    return;
-
                 byte[] data = new byte[size];
                 Marshal.Copy(source, data, 0, size);
                 writer.Write(data);
@@ -206,11 +180,8 @@ namespace Iris.GBA
             SaveData(_ewram, EWRAM_Size);
             SaveData(_iwram, IWRAM_Size);
             //SaveData(_eeprom, EEPROM_Size);
-            SaveData(_sram, SRAM_Size);
-            SaveData(_flash, _flashSize);
 
-            writer.Write(_flashBank);
-            writer.Write((int)_flashState);
+            _backupMemory?.SaveState(writer);
         }
 
         private static int GetPageIndex(UInt32 address) => (int)(address >> 10);
@@ -277,34 +248,26 @@ namespace Iris.GBA
             {
                 case "EEPROM":
                     Console.WriteLine("[Iris.GBA.Memory] EEPROM not implemented");
-                    _saveType = SaveType.None;
                     break;
 
                 case "SRAM":
-                    Console.WriteLine("[Iris.GBA.Memory] Save type: SRAM");
-                    _saveType = SaveType.SRAM;
-                    _sram = Marshal.AllocHGlobal(SRAM_Size);
-                    Map(_sram, SRAM_Size, SRAM_StartAddress, SRAM_EndAddress, Flag.Read8 | Flag.Write8 | Flag.Mirrored);
+                    Console.WriteLine("[Iris.GBA.Memory] Backup memory type: SRAM");
+                    _backupMemory = new SRAM(this);
                     break;
 
                 case "FLASH_":
                 case "FLASH512":
-                    Console.WriteLine($"[Iris.GBA.Memory] Save type: FLASH 64KB");
-                    _saveType = SaveType.FLASH;
-                    _flashSize = 1 * FLASH_BankSize;
-                    _flash = Marshal.AllocHGlobal(_flashSize);
+                    Console.WriteLine($"[Iris.GBA.Memory] Backup memory type: FLASH 64KB");
+                    _backupMemory = new FLASH(FLASH.Size.FLASH_64KB);
                     break;
 
                 case "FLASH1M":
-                    Console.WriteLine($"[Iris.GBA.Memory] Save type: FLASH 128KB");
-                    _saveType = SaveType.FLASH;
-                    _flashSize = 2 * FLASH_BankSize;
-                    _flash = Marshal.AllocHGlobal(_flashSize);
+                    Console.WriteLine($"[Iris.GBA.Memory] Backup memory type: FLASH 128KB");
+                    _backupMemory = new FLASH(FLASH.Size.FLASH_128KB);
                     break;
 
                 default:
-                    Console.WriteLine("[Iris.GBA.Memory] Save type: None");
-                    _saveType = SaveType.None;
+                    Console.WriteLine("[Iris.GBA.Memory] Backup memory type: None");
                     break;
             }
         }
@@ -573,33 +536,10 @@ namespace Iris.GBA
                 // SRAM/Flash
                 case 0xe:
                 case 0xf:
-                    switch (_saveType)
-                    {
-                        case SaveType.None:
-                            return 0xff;
-
-                        case SaveType.FLASH:
-                            {
-                                UInt32 offset = (address - FLASH_StartAddress) % FLASH_BankSize;
-
-                                if (_flashIdMode)
-                                {
-                                    switch (offset)
-                                    {
-                                        case 0:
-                                            return 0x62;
-                                        case 1:
-                                            return 0x13;
-                                    }
-                                }
-
-                                unsafe
-                                {
-                                    return Unsafe.Read<Byte>((Byte*)_flash + offset + (_flashBank * FLASH_BankSize));
-                                }
-                            }
-                    }
-                    break;
+                    if (_backupMemory != null)
+                        return _backupMemory.Read8(address);
+                    else
+                        return 0xff;
             }
 
             return 0;
@@ -748,34 +688,10 @@ namespace Iris.GBA
                 // SRAM/Flash
                 case 0xe:
                 case 0xf:
-                    switch (_saveType)
-                    {
-                        case SaveType.None:
-                            return 0xffff;
-
-                        case SaveType.SRAM:
-                            {
-                                UInt32 offset = (address - SRAM_StartAddress) % SRAM_Size;
-
-                                unsafe
-                                {
-                                    Byte value = Unsafe.Read<Byte>((Byte*)_sram + offset);
-                                    return (UInt16)((value << 8) | value);
-                                }
-                            }
-
-                        case SaveType.FLASH:
-                            {
-                                UInt32 offset = (address - FLASH_StartAddress) % FLASH_BankSize;
-
-                                unsafe
-                                {
-                                    Byte value = Unsafe.Read<Byte>((Byte*)_flash + offset + (_flashBank * FLASH_BankSize));
-                                    return (UInt16)((value << 8) | value);
-                                }
-                            }
-                    }
-                    break;
+                    if (_backupMemory != null)
+                        return _backupMemory.Read16(address);
+                    else
+                        return 0xffff;
             }
 
             return 0;
@@ -876,34 +792,10 @@ namespace Iris.GBA
                 // SRAM/Flash
                 case 0xe:
                 case 0xf:
-                    switch (_saveType)
-                    {
-                        case SaveType.None:
-                            return 0xffff_ffff;
-
-                        case SaveType.SRAM:
-                            {
-                                UInt32 offset = (address - SRAM_StartAddress) % SRAM_Size;
-
-                                unsafe
-                                {
-                                    Byte value = Unsafe.Read<Byte>((Byte*)_sram + offset);
-                                    return (UInt32)((value << 24) | (value << 16) | (value << 8) | value);
-                                }
-                            }
-
-                        case SaveType.FLASH:
-                            {
-                                UInt32 offset = (address - FLASH_StartAddress) % FLASH_BankSize;
-
-                                unsafe
-                                {
-                                    Byte value = Unsafe.Read<Byte>((Byte*)_flash + offset + (_flashBank * FLASH_BankSize));
-                                    return (UInt32)((value << 24) | (value << 16) | (value << 8) | value);
-                                }
-                            }
-                    }
-                    break;
+                    if (_backupMemory != null)
+                        return _backupMemory.Read32(address);
+                    else
+                        return 0xffff_ffff;
             }
 
             return 0;
@@ -1648,91 +1540,7 @@ namespace Iris.GBA
                 // SRAM/Flash
                 case 0xe:
                 case 0xf:
-                    switch (_saveType)
-                    {
-                        case SaveType.None:
-                            break;
-
-                        case SaveType.FLASH:
-                            {
-                                UInt32 offset = (address - FLASH_StartAddress) % FLASH_BankSize;
-
-                                switch (_flashState)
-                                {
-                                    case FLASH_State.WaitingForCommandArgument1:
-                                        if ((offset == 0x5555) && (value == 0xaa))
-                                            _flashState = FLASH_State.WaitingForCommandArgument2;
-                                        break;
-
-                                    case FLASH_State.WaitingForCommandArgument2:
-                                        if ((offset == 0x2aaa) && (value == 0x55))
-                                            _flashState = FLASH_State.WaitingForCommandArgument3;
-                                        break;
-
-                                    case FLASH_State.WaitingForCommandArgument3:
-                                        if (offset == 0x5555)
-                                        {
-                                            switch (value)
-                                            {
-                                                case 0xa0:
-                                                    _flashState = FLASH_State.WriteCommand;
-                                                    break;
-
-                                                case 0x80: // erase command
-                                                    _flashState = FLASH_State.WaitingForCommandArgument1;
-                                                    break;
-
-                                                case 0x10: // erase entire chip
-                                                    unsafe
-                                                    {
-                                                        NativeMemory.Fill((Byte*)_flash, (nuint)_flashSize, 0xff);
-                                                    }
-                                                    _flashState = FLASH_State.WaitingForCommandArgument1;
-                                                    break;
-
-                                                case 0xb0:
-                                                    _flashState = FLASH_State.SelectBankCommand;
-                                                    break;
-
-                                                case 0x90:
-                                                    _flashIdMode = true;
-                                                    _flashState = FLASH_State.WaitingForCommandArgument1;
-                                                    break;
-
-                                                case 0xf0:
-                                                    _flashIdMode = false;
-                                                    _flashState = FLASH_State.WaitingForCommandArgument1;
-                                                    break;
-                                            }
-                                        }
-                                        else if (value == 0x30) // erase sector
-                                        {
-                                            unsafe
-                                            {
-                                                NativeMemory.Fill((Byte*)_flash + offset + (_flashBank * FLASH_BankSize), 0x1000, 0xff);
-                                            }
-                                        }
-                                        break;
-
-                                    case FLASH_State.WriteCommand:
-                                        unsafe
-                                        {
-                                            Unsafe.Write((Byte*)_flash + offset + (_flashBank * FLASH_BankSize), value);
-                                        }
-                                        _flashState = FLASH_State.WaitingForCommandArgument1;
-                                        break;
-
-                                    case FLASH_State.SelectBankCommand:
-                                        if (offset == 0)
-                                        {
-                                            _flashBank = value;
-                                            _flashState = FLASH_State.WaitingForCommandArgument1;
-                                        }
-                                        break;
-                                }
-                            }
-                            break;
-                    }
+                    _backupMemory?.Write8(address, value);
                     break;
 
                 default:
@@ -2121,38 +1929,7 @@ namespace Iris.GBA
                 // SRAM/Flash
                 case 0xe:
                 case 0xf:
-                    switch (_saveType)
-                    {
-                        case SaveType.None:
-                            break;
-
-                        case SaveType.SRAM:
-                            {
-                                UInt32 offset = (address - SRAM_StartAddress) % SRAM_Size;
-                                value >>= 8 * (int)(address & 1);
-
-                                unsafe
-                                {
-                                    Unsafe.Write((Byte*)_sram + offset, (Byte)value);
-                                }
-                            }
-                            break;
-
-                        case SaveType.FLASH:
-                            if (_flashState == FLASH_State.WriteCommand)
-                            {
-                                UInt32 offset = (address - FLASH_StartAddress) % FLASH_BankSize;
-                                value >>= 8 * (int)(address & 1);
-
-                                unsafe
-                                {
-                                    Unsafe.Write((Byte*)_flash + offset + (_flashBank * FLASH_BankSize), (Byte)value);
-                                }
-
-                                _flashState = FLASH_State.WaitingForCommandArgument1;
-                            }
-                            break;
-                    }
+                    _backupMemory?.Write16(address, value);
                     break;
 
                 default:
@@ -2487,38 +2264,7 @@ namespace Iris.GBA
                 // SRAM/Flash
                 case 0xe:
                 case 0xf:
-                    switch (_saveType)
-                    {
-                        case SaveType.None:
-                            break;
-
-                        case SaveType.SRAM:
-                            {
-                                UInt32 offset = (address - SRAM_StartAddress) % SRAM_Size;
-                                value >>= 8 * (int)(address & 0b11);
-
-                                unsafe
-                                {
-                                    Unsafe.Write((Byte*)_sram + offset, (Byte)value);
-                                }
-                            }
-                            break;
-
-                        case SaveType.FLASH:
-                            if (_flashState == FLASH_State.WriteCommand)
-                            {
-                                UInt32 offset = (address - FLASH_StartAddress) % FLASH_BankSize;
-                                value >>= 8 * (int)(address & 0b11);
-
-                                unsafe
-                                {
-                                    Unsafe.Write((Byte*)_flash + offset + (_flashBank * FLASH_BankSize), (Byte)value);
-                                }
-
-                                _flashState = FLASH_State.WaitingForCommandArgument1;
-                            }
-                            break;
-                    }
+                    _backupMemory?.Write32(address, value);
                     break;
 
                 default:
