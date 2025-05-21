@@ -15,7 +15,6 @@ namespace Iris.GBA
         private SystemControl _systemControl;
         private InterruptControl _interruptControl;
         private Video _video;
-        private BIOS _bios;
 
         [Flags]
         internal enum Flag
@@ -123,7 +122,7 @@ namespace Iris.GBA
             _disposed = true;
         }
 
-        internal void Initialize(Communication communication, Timer timer, Sound sound, DMA dma, KeyInput keyInput, SystemControl systemControl, InterruptControl interruptControl, Video video, BIOS bios)
+        internal void Initialize(Communication communication, Timer timer, Sound sound, DMA dma, KeyInput keyInput, SystemControl systemControl, InterruptControl interruptControl, Video video)
         {
             _communication = communication;
             _timer = timer;
@@ -133,7 +132,6 @@ namespace Iris.GBA
             _systemControl = systemControl;
             _interruptControl = interruptControl;
             _video = video;
-            _bios = bios;
 
             Map(_ewram, EWRAM_Size, EWRAM_StartAddress, EWRAM_EndAddress, Flag.All);
             Map(_iwram, IWRAM_Size, IWRAM_StartAddress, IWRAM_EndAddress, Flag.All);
