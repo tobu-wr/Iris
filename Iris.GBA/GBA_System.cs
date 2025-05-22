@@ -121,13 +121,13 @@ namespace Iris.GBA
                 throw new Exception("Iris.GBA.GBA_System: Wrong state save version");
 
             if (reader.ReadString() != _romHash)
-                throw new Exception("Iris.GBA.GBA_System: Wrong ROM hash");
+                throw new Exception("Iris.GBA.GBA_System: Wrong state save ROM hash");
 
             int dataLength = reader.ReadInt32();
             byte[] data = reader.ReadBytes(dataLength);
 
             if (reader.ReadString() != Convert.ToHexString(MD5.HashData(data)))
-                throw new Exception("Iris.GBA.GBA_System: Wrong data hash");
+                throw new Exception("Iris.GBA.GBA_System: Wrong state save data hash");
 
             using MemoryStream dataStream = new(data, false);
             using BinaryReader dataReader = new(dataStream, System.Text.Encoding.UTF8, false);

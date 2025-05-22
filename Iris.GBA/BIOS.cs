@@ -6,11 +6,11 @@ namespace Iris.GBA
     internal sealed class BIOS : IDisposable
     {
         private const int KB = 1024;
-        private const int BIOS_Size = 16 * KB;
-        private readonly IntPtr _bios = Marshal.AllocHGlobal(BIOS_Size);
+        private const int Size = 16 * KB;
+        private readonly IntPtr _data = Marshal.AllocHGlobal(Size);
 
-        private const UInt32 BIOS_StartAddress = 0x0000_0000;
-        private const UInt32 BIOS_EndAddress = 0x0000_4000;
+        private const UInt32 StartAddress = 0x0000_0000;
+        private const UInt32 EndAddress = 0x0000_4000;
 
         private CPU.CPU_Core _cpu;
         private bool _disposed;
@@ -21,24 +21,24 @@ namespace Iris.GBA
 
             try
             {
-                data = File.ReadAllBytes("gba_bios.bin");
+                data = File.ReadAllBytes("gba_data.bin");
             }
             catch (FileNotFoundException)
             {
-                throw new Exception("Iris.GBA.BIOS: Could not find BIOS");
+                throw new Exception("Iris.GBA.BIOS: Could not find dump file");
             }
             catch
             {
-                throw new Exception("Iris.GBA.BIOS: Could not read BIOS");
+                throw new Exception("Iris.GBA.BIOS: Could not read dump file");
             }
 
-            if (data.Length != BIOS_Size)
-                throw new Exception("Iris.GBA.BIOS: Wrong BIOS size");
+            if (data.Length != Size)
+                throw new Exception("Iris.GBA.BIOS: Wrong size");
 
             if (Convert.ToHexString(MD5.HashData(data)) != "A860E8C0B6D573D191E4EC7DB1B1E4F6")
-                throw new Exception("Iris.GBA.BIOS: Wrong BIOS hash");
+                throw new Exception("Iris.GBA.BIOS: Wrong hash");
 
-            Marshal.Copy(data, 0, _bios, BIOS_Size);
+            Marshal.Copy(data, 0, _data, Size);
         }
 
         ~BIOS()
@@ -51,7 +51,7 @@ namespace Iris.GBA
             if (_disposed)
                 return;
 
-            Marshal.FreeHGlobal(_bios);
+            Marshal.FreeHGlobal(_data);
 
             GC.SuppressFinalize(this);
             _disposed = true;
@@ -61,7 +61,7 @@ namespace Iris.GBA
         {
             _cpu = cpu;
 
-            memory.Map(_bios, BIOS_Size, BIOS_StartAddress, BIOS_EndAddress, Memory.Flag.AllRead);
+            memory.Map(_data, Size, StartAddress, EndAddress, Memory.Flag.AllRead);
         }
 
         internal void Reset(bool skipIntro)
