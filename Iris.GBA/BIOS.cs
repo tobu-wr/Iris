@@ -21,7 +21,7 @@ namespace Iris.GBA
 
             try
             {
-                data = File.ReadAllBytes("gba_data.bin");
+                data = File.ReadAllBytes("gba_bios.bin");
             }
             catch (FileNotFoundException)
             {
