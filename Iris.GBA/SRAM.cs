@@ -84,7 +84,7 @@ namespace Iris.GBA
 
             unsafe
             {
-                Unsafe.Write((Byte*)_data + offset, (Byte)value);
+                Unsafe.Write((Byte*)_data + offset, value);
             }
         }
 

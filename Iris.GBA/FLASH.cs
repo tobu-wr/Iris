@@ -6,24 +6,26 @@ namespace Iris.GBA
     internal sealed class FLASH : Memory.BackupMemory
     {
         private const int KB = 1024;
-        private const int FLASH_BankSize = 64 * KB;
-        private int _flashBank;
-        private readonly int _flashSize;
-        private readonly IntPtr _flash;
+        private const int BankSize = 64 * KB;
 
-        private enum FLASH_State
+        private readonly int _size;
+        private readonly IntPtr _data;
+
+        private const UInt32 StartAddress = 0x0e00_0000;
+
+        private enum State
         {
-            WaitingForCommandArgument1,
-            WaitingForCommandArgument2,
-            WaitingForCommandArgument3,
-            WriteCommand,
-            SelectBankCommand
+            Idle,
+            StateAA,
+            State55,
+            WriteByte,
+            SelectBank
         }
 
-        private FLASH_State _flashState;
-        private bool _flashIdMode;
-
-        private const UInt32 FLASH_StartAddress = 0x0e00_0000;
+        private State _state;
+        private bool _idMode;
+        private bool _eraseCommand;
+        private Byte _bank;
 
         private bool _disposed;
 
@@ -35,8 +37,8 @@ namespace Iris.GBA
 
         internal FLASH(Size size)
         {
-            _flashSize = (int)size;
-            _flash = Marshal.AllocHGlobal(_flashSize);
+            _size = (int)size;
+            _data = Marshal.AllocHGlobal(_size);
         }
 
         ~FLASH()
@@ -49,7 +51,7 @@ namespace Iris.GBA
             if (_disposed)
                 return;
 
-            Marshal.FreeHGlobal(_flash);
+            Marshal.FreeHGlobal(_data);
 
             GC.SuppressFinalize(this);
             _disposed = true;
@@ -59,149 +61,170 @@ namespace Iris.GBA
         {
             unsafe
             {
-                NativeMemory.Fill((Byte*)_flash, (nuint)_flashSize, 0xff);
+                NativeMemory.Fill((Byte*)_data, (nuint)_size, 0xff);
             }
 
-            _flashBank = 0;
-            _flashState = FLASH_State.WaitingForCommandArgument1;
+            _state = State.Idle;
+            _idMode = false;
+            _eraseCommand = false;
+            _bank = 0;
         }
 
         internal override void LoadState(BinaryReader reader)
         {
-            byte[] data = reader.ReadBytes(_flashSize);
-            Marshal.Copy(data, 0, _flash, _flashSize);
+            byte[] data = reader.ReadBytes(_size);
+            Marshal.Copy(data, 0, _data, _size);
 
-            _flashBank = reader.ReadInt32();
-            _flashState = (FLASH_State)reader.ReadInt32();
+            _state = (State)reader.ReadInt32();
+            _idMode = reader.ReadBoolean();
+            _eraseCommand = reader.ReadBoolean();
+            _bank = reader.ReadByte();
         }
 
         internal override void SaveState(BinaryWriter writer)
         {
-            byte[] data = new byte[_flashSize];
-            Marshal.Copy(_flash, data, 0, _flashSize);
+            byte[] data = new byte[_size];
+            Marshal.Copy(_data, data, 0, _size);
             writer.Write(data);
 
-            writer.Write(_flashBank);
-            writer.Write((int)_flashState);
+            writer.Write((int)_state);
+            writer.Write(_idMode);
+            writer.Write(_eraseCommand);
+            writer.Write(_bank);
         }
 
         internal override Byte Read8(UInt32 address)
         {
-            UInt32 offset = (address - FLASH_StartAddress) % FLASH_BankSize;
+            UInt32 offset = (address - StartAddress) % BankSize;
 
-            if (_flashIdMode)
+            if (_idMode)
             {
                 switch (offset)
                 {
                     case 0:
-                        return 0x62;
+                        return (Size)_size switch
+                        {
+                            Size.FLASH_64KB => 0x32, // Panasonic
+                            Size.FLASH_128KB => 0x62, // Sanyo
+
+                            // should never happen
+                            _ => throw new Exception("Iris.GBA.FLASH: Wrong size")
+                        };
+
                     case 1:
-                        return 0x13;
+                        return (Size)_size switch
+                        {
+                            Size.FLASH_64KB => 0x1b, // Panasonic
+                            Size.FLASH_128KB => 0x13, // Sanyo
+
+                            // should never happen
+                            _ => throw new Exception("Iris.GBA.FLASH: Wrong size")
+                        };
                 }
             }
 
             unsafe
             {
-                return Unsafe.Read<Byte>((Byte*)_flash + offset + (_flashBank * FLASH_BankSize));
+                return Unsafe.Read<Byte>((Byte*)_data + (_bank * BankSize) + offset);
             }
         }
 
         internal override UInt16 Read16(UInt32 address)
         {
-            UInt32 offset = (address - FLASH_StartAddress) % FLASH_BankSize;
-
-            unsafe
-            {
-                Byte value = Unsafe.Read<Byte>((Byte*)_flash + offset + (_flashBank * FLASH_BankSize));
-                return (UInt16)((value << 8) | value);
-            }
+            Byte value = Read8(address);
+            return (UInt16)((value << 8) | value);
         }
 
         internal override UInt32 Read32(UInt32 address)
         {
-            UInt32 offset = (address - FLASH_StartAddress) % FLASH_BankSize;
-
-            unsafe
-            {
-                Byte value = Unsafe.Read<Byte>((Byte*)_flash + offset + (_flashBank * FLASH_BankSize));
-                return (UInt32)((value << 24) | (value << 16) | (value << 8) | value);
-            }
+            Byte value = Read8(address);
+            return (UInt32)((value << 24) | (value << 16) | (value << 8) | value);
         }
 
         internal override void Write8(UInt32 address, Byte value)
         {
-            UInt32 offset = (address - FLASH_StartAddress) % FLASH_BankSize;
+            UInt32 offset = (address - StartAddress) % BankSize;
 
-            switch (_flashState)
+            switch (_state)
             {
-                case FLASH_State.WaitingForCommandArgument1:
-                    if ((offset == 0x5555) && (value == 0xaa))
-                        _flashState = FLASH_State.WaitingForCommandArgument2;
+                case State.Idle:
+                    if (offset == 0x5555 && value == 0xaa)
+                        _state = State.StateAA;
                     break;
 
-                case FLASH_State.WaitingForCommandArgument2:
-                    if ((offset == 0x2aaa) && (value == 0x55))
-                        _flashState = FLASH_State.WaitingForCommandArgument3;
+                case State.StateAA:
+                    if (offset == 0x2aaa && value == 0x55)
+                        _state = State.State55;
                     break;
 
-                case FLASH_State.WaitingForCommandArgument3:
+                case State.State55:
                     if (offset == 0x5555)
                     {
                         switch (value)
                         {
-                            case 0xa0:
-                                _flashState = FLASH_State.WriteCommand;
-                                break;
-
-                            case 0x80: // erase command
-                                _flashState = FLASH_State.WaitingForCommandArgument1;
-                                break;
-
-                            case 0x10: // erase entire chip
-                                unsafe
-                                {
-                                    NativeMemory.Fill((Byte*)_flash, (nuint)_flashSize, 0xff);
-                                }
-                                _flashState = FLASH_State.WaitingForCommandArgument1;
-                                break;
-
-                            case 0xb0:
-                                _flashState = FLASH_State.SelectBankCommand;
-                                break;
-
                             case 0x90:
-                                _flashIdMode = true;
-                                _flashState = FLASH_State.WaitingForCommandArgument1;
+                                _idMode = true;
+                                _state = State.Idle;
                                 break;
 
                             case 0xf0:
-                                _flashIdMode = false;
-                                _flashState = FLASH_State.WaitingForCommandArgument1;
+                                _idMode = false;
+                                _state = State.Idle;
+                                break;
+
+                            case 0x80:
+                                _eraseCommand = true;
+                                _state = State.Idle;
+                                break;
+
+                            case 0x10:
+                                if (_eraseCommand)
+                                {
+                                    unsafe
+                                    {
+                                        NativeMemory.Fill((Byte*)_data, (nuint)_size, 0xff);
+                                    }
+
+                                    _eraseCommand = false;
+                                    _state = State.Idle;
+                                }
+                                break;
+
+                            case 0xa0:
+                                _state = State.WriteByte;
+                                break;
+
+                            case 0xb0:
+                                _state = State.SelectBank;
                                 break;
                         }
                     }
-                    else if (value == 0x30) // erase sector
+                    else if ((offset & 0xfff) == 0 && value == 0x30 && _eraseCommand)
                     {
                         unsafe
                         {
-                            NativeMemory.Fill((Byte*)_flash + offset + (_flashBank * FLASH_BankSize), 0x1000, 0xff);
+                            NativeMemory.Fill((Byte*)_data + (_bank * BankSize) + offset, 0x1000, 0xff);
                         }
+
+                        _eraseCommand = false;
+                        _state = State.Idle;
                     }
                     break;
 
-                case FLASH_State.WriteCommand:
+                case State.WriteByte:
                     unsafe
                     {
-                        Unsafe.Write((Byte*)_flash + offset + (_flashBank * FLASH_BankSize), value);
+                        Unsafe.Write((Byte*)_data + (_bank * BankSize) + offset, value);
                     }
-                    _flashState = FLASH_State.WaitingForCommandArgument1;
+
+                    _state = State.Idle;
                     break;
 
-                case FLASH_State.SelectBankCommand:
+                case State.SelectBank:
                     if (offset == 0)
                     {
-                        _flashBank = value;
-                        _flashState = FLASH_State.WaitingForCommandArgument1;
+                        _bank = (Byte)(value & 1);
+                        _state = State.Idle;
                     }
                     break;
             }
@@ -209,34 +232,14 @@ namespace Iris.GBA
 
         internal override void Write16(UInt32 address, UInt16 value)
         {
-            if (_flashState == FLASH_State.WriteCommand)
-            {
-                UInt32 offset = (address - FLASH_StartAddress) % FLASH_BankSize;
-                value >>= 8 * (int)(address & 1);
-
-                unsafe
-                {
-                    Unsafe.Write((Byte*)_flash + offset + (_flashBank * FLASH_BankSize), (Byte)value);
-                }
-
-                _flashState = FLASH_State.WaitingForCommandArgument1;
-            }
+            value >>= 8 * (int)(address & 1);
+            Write8(address, (Byte)value);
         }
 
         internal override void Write32(UInt32 address, UInt32 value)
         {
-            if (_flashState == FLASH_State.WriteCommand)
-            {
-                UInt32 offset = (address - FLASH_StartAddress) % FLASH_BankSize;
-                value >>= 8 * (int)(address & 0b11);
-
-                unsafe
-                {
-                    Unsafe.Write((Byte*)_flash + offset + (_flashBank * FLASH_BankSize), (Byte)value);
-                }
-
-                _flashState = FLASH_State.WaitingForCommandArgument1;
-            }
+            value >>= 8 * (int)(address & 0b11);
+            Write8(address, (Byte)value);
         }
     }
 }
