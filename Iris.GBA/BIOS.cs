@@ -61,7 +61,7 @@ namespace Iris.GBA
         {
             _cpu = cpu;
 
-            memory.Map(_data, Size, StartAddress, EndAddress, Memory.Flag.AllRead);
+            memory.Map(_data, Size, StartAddress, EndAddress, Size, Memory.Flag.AllRead);
         }
 
         internal void Reset(bool skipIntro)

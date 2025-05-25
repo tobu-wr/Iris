@@ -194,9 +194,9 @@ namespace Iris.GBA
             _interruptControl = interruptControl;
 
             const Memory.Flag flags = Memory.Flag.All & ~Memory.Flag.Write8;
-            memory.Map(_paletteRAM, PaletteRAM_Size, PaletteRAM_StartAddress, PaletteRAM_EndAddress, flags);
-            memory.Map(_vram, VRAM_Size, VRAM_StartAddress, VRAM_EndAddress, flags);
-            memory.Map(_oam, OAM_Size, OAM_StartAddress, OAM_EndAddress, flags);
+            memory.Map(_paletteRAM, PaletteRAM_Size, PaletteRAM_StartAddress, PaletteRAM_EndAddress, PaletteRAM_Size, flags);
+            memory.Map(_vram, VRAM_Size, VRAM_StartAddress, VRAM_EndAddress, 0x2_0000, flags);
+            memory.Map(_oam, OAM_Size, OAM_StartAddress, OAM_EndAddress, OAM_Size, flags);
         }
 
         internal void ResetState()
@@ -607,7 +607,7 @@ namespace Iris.GBA
 
         internal void Write8_PaletteRAM(UInt32 address, Byte value)
         {
-            UInt32 offset = (UInt32)((address - PaletteRAM_StartAddress) & ~1) % PaletteRAM_Size;
+            UInt32 offset = (UInt32)((address & ~1) - PaletteRAM_StartAddress) % PaletteRAM_Size;
 
             unsafe
             {
@@ -618,7 +618,7 @@ namespace Iris.GBA
 
         internal void Write8_VRAM(UInt32 address, Byte value)
         {
-            UInt32 offset = (UInt32)((address - VRAM_StartAddress) & ~1) % VRAM_Size;
+            UInt32 offset = (UInt32)((address & ~1) - VRAM_StartAddress) % VRAM_Size;
 
             unsafe
             {

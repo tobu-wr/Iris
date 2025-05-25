@@ -133,8 +133,8 @@ namespace Iris.GBA
             _interruptControl = interruptControl;
             _video = video;
 
-            Map(_ewram, EWRAM_Size, EWRAM_StartAddress, EWRAM_EndAddress, Flag.All);
-            Map(_iwram, IWRAM_Size, IWRAM_StartAddress, IWRAM_EndAddress, Flag.All);
+            Map(_ewram, EWRAM_Size, EWRAM_StartAddress, EWRAM_EndAddress, EWRAM_Size, Flag.All);
+            Map(_iwram, IWRAM_Size, IWRAM_StartAddress, IWRAM_EndAddress, IWRAM_Size, Flag.All);
         }
 
         internal void ResetState()
@@ -183,50 +183,56 @@ namespace Iris.GBA
         }
 
         private static int GetPageIndex(UInt32 address) => (int)(address >> 10);
-        private static int GetPageOffset(UInt32 address) => (int)(address & 0x3ff);
+        private static UInt32 GetPageOffset(UInt32 address) => address & 0x3ff;
 
-        internal void Map(IntPtr data, int size, UInt32 startAddress, UInt32 endAddress, Flag flags)
+        internal void Map(IntPtr data, int size, UInt32 startAddress, UInt32 endAddress, UInt32 addressIncrement, Flag flags)
         {
             int pageCount = size / PageSize;
 
-            int startPageTableIndex = GetPageIndex(startAddress);
-            int endPageTableIndex = GetPageIndex(endAddress);
-
-            for (int pageTableIndex = startPageTableIndex, pageIndex = 0; pageTableIndex != endPageTableIndex; ++pageTableIndex, ++pageIndex)
+            for (UInt32 address = startAddress; address < endAddress; address += addressIncrement)
             {
-                if (pageIndex < pageCount)
-                {
-                    int pageOffset = pageIndex * PageSize;
-                    IntPtr page = data + pageOffset;
+                int startPageTableIndex = GetPageIndex(address);
+                int endPageTableIndex = GetPageIndex(address + addressIncrement);
 
-                    _read8PageTable[pageTableIndex] = flags.HasFlag(Flag.Read8) ? page : IntPtr.Zero;
-                    _read16PageTable[pageTableIndex] = flags.HasFlag(Flag.Read16) ? page : IntPtr.Zero;
-                    _read32PageTable[pageTableIndex] = flags.HasFlag(Flag.Read32) ? page : IntPtr.Zero;
-                    _write8PageTable[pageTableIndex] = flags.HasFlag(Flag.Write8) ? page : IntPtr.Zero;
-                    _write16PageTable[pageTableIndex] = flags.HasFlag(Flag.Write16) ? page : IntPtr.Zero;
-                    _write32PageTable[pageTableIndex] = flags.HasFlag(Flag.Write32) ? page : IntPtr.Zero;
-                }
-                else if (flags.HasFlag(Flag.Mirrored))
+                for (int pageTableIndex = startPageTableIndex, pageIndex = 0; pageTableIndex < endPageTableIndex; ++pageTableIndex, ++pageIndex)
                 {
-                    int pageOffset = (pageIndex % pageCount) * PageSize;
-                    IntPtr page = data + pageOffset;
+                    if (pageIndex < pageCount)
+                    {
+                        int pageOffset = pageIndex * PageSize;
+                        IntPtr page = data + pageOffset;
 
-                    _read8PageTable[pageTableIndex] = flags.HasFlag(Flag.Read8) ? page : IntPtr.Zero;
-                    _read16PageTable[pageTableIndex] = flags.HasFlag(Flag.Read16) ? page : IntPtr.Zero;
-                    _read32PageTable[pageTableIndex] = flags.HasFlag(Flag.Read32) ? page : IntPtr.Zero;
-                    _write8PageTable[pageTableIndex] = flags.HasFlag(Flag.Write8) ? page : IntPtr.Zero;
-                    _write16PageTable[pageTableIndex] = flags.HasFlag(Flag.Write16) ? page : IntPtr.Zero;
-                    _write32PageTable[pageTableIndex] = flags.HasFlag(Flag.Write32) ? page : IntPtr.Zero;
+                        _read8PageTable[pageTableIndex] = flags.HasFlag(Flag.Read8) ? page : IntPtr.Zero;
+                        _read16PageTable[pageTableIndex] = flags.HasFlag(Flag.Read16) ? page : IntPtr.Zero;
+                        _read32PageTable[pageTableIndex] = flags.HasFlag(Flag.Read32) ? page : IntPtr.Zero;
+                        _write8PageTable[pageTableIndex] = flags.HasFlag(Flag.Write8) ? page : IntPtr.Zero;
+                        _write16PageTable[pageTableIndex] = flags.HasFlag(Flag.Write16) ? page : IntPtr.Zero;
+                        _write32PageTable[pageTableIndex] = flags.HasFlag(Flag.Write32) ? page : IntPtr.Zero;
+                    }
+                    else if (flags.HasFlag(Flag.Mirrored))
+                    {
+                        int pageOffset = (pageIndex % pageCount) * PageSize;
+                        IntPtr page = data + pageOffset;
+
+                        _read8PageTable[pageTableIndex] = flags.HasFlag(Flag.Read8) ? page : IntPtr.Zero;
+                        _read16PageTable[pageTableIndex] = flags.HasFlag(Flag.Read16) ? page : IntPtr.Zero;
+                        _read32PageTable[pageTableIndex] = flags.HasFlag(Flag.Read32) ? page : IntPtr.Zero;
+                        _write8PageTable[pageTableIndex] = flags.HasFlag(Flag.Write8) ? page : IntPtr.Zero;
+                        _write16PageTable[pageTableIndex] = flags.HasFlag(Flag.Write16) ? page : IntPtr.Zero;
+                        _write32PageTable[pageTableIndex] = flags.HasFlag(Flag.Write32) ? page : IntPtr.Zero;
+                    }
+                    else
+                    {
+                        _read8PageTable[pageTableIndex] = IntPtr.Zero;
+                        _read16PageTable[pageTableIndex] = IntPtr.Zero;
+                        _read32PageTable[pageTableIndex] = IntPtr.Zero;
+                        _write8PageTable[pageTableIndex] = IntPtr.Zero;
+                        _write16PageTable[pageTableIndex] = IntPtr.Zero;
+                        _write32PageTable[pageTableIndex] = IntPtr.Zero;
+                    }
                 }
-                else
-                {
-                    _read8PageTable[pageTableIndex] = IntPtr.Zero;
-                    _read16PageTable[pageTableIndex] = IntPtr.Zero;
-                    _read32PageTable[pageTableIndex] = IntPtr.Zero;
-                    _write8PageTable[pageTableIndex] = IntPtr.Zero;
-                    _write16PageTable[pageTableIndex] = IntPtr.Zero;
-                    _write32PageTable[pageTableIndex] = IntPtr.Zero;
-                }
+
+                if (!flags.HasFlag(Flag.Mirrored))
+                    break;
             }
         }
 
@@ -236,9 +242,9 @@ namespace Iris.GBA
             _rom = Marshal.AllocHGlobal(_romSize);
             Marshal.Copy(data, 0, _rom, _romSize);
 
-            Map(_rom, _romSize, ROM_WaitState0_StartAddress, ROM_WaitState0_EndAddress, Flag.AllRead);
-            Map(_rom, _romSize, ROM_WaitState1_StartAddress, ROM_WaitState1_EndAddress, Flag.AllRead);
-            Map(_rom, _romSize, ROM_WaitState2_StartAddress, ROM_WaitState2_EndAddress, Flag.AllRead);
+            Map(_rom, _romSize, ROM_WaitState0_StartAddress, ROM_WaitState0_EndAddress, (UInt32)_romSize, Flag.AllRead);
+            Map(_rom, _romSize, ROM_WaitState1_StartAddress, ROM_WaitState1_EndAddress, (UInt32)_romSize, Flag.AllRead);
+            Map(_rom, _romSize, ROM_WaitState2_StartAddress, ROM_WaitState2_EndAddress, (UInt32)_romSize, Flag.AllRead);
 
             string saveTypeString = Regex.Match(Encoding.ASCII.GetString(data, 0, _romSize), "EEPROM|SRAM|FLASH_|FLASH512|FLASH1M", RegexOptions.Compiled).ToString();
 
@@ -284,7 +290,6 @@ namespace Iris.GBA
                 }
             }
 
-            // page fault
             switch (address >> 24)
             {
                 // BIOS
@@ -557,7 +562,6 @@ namespace Iris.GBA
                 }
             }
 
-            // page fault
             switch (address >> 24)
             {
                 // BIOS
@@ -709,7 +713,6 @@ namespace Iris.GBA
                 }
             }
 
-            // page fault
             switch (address >> 24)
             {
                 // BIOS
@@ -837,7 +840,6 @@ namespace Iris.GBA
                 return;
             }
 
-            // page fault
             switch (address >> 24)
             {
                 // BIOS
@@ -1514,12 +1516,12 @@ namespace Iris.GBA
 
                 // Palette RAM
                 case 0x5:
-                    _video!.Write8_PaletteRAM(address, value);
+                    _video.Write8_PaletteRAM(address, value);
                     break;
 
                 // VRAM
                 case 0x6:
-                    _video!.Write8_VRAM(address, value);
+                    _video.Write8_VRAM(address, value);
                     break;
 
                 // OAM
@@ -1549,8 +1551,6 @@ namespace Iris.GBA
 
         internal void Write16(UInt32 address, UInt16 value)
         {
-            address &= 0x0fff_ffff;
-
             UInt32 alignedAddress = address & 0x0fff_fffe;
             IntPtr page = _write16PageTable[GetPageIndex(alignedAddress)];
 
@@ -1563,7 +1563,8 @@ namespace Iris.GBA
                 return;
             }
 
-            // page fault
+            address &= 0x0fff_ffff;
+
             switch (address >> 24)
             {
                 // BIOS
@@ -1938,8 +1939,6 @@ namespace Iris.GBA
 
         internal void Write32(UInt32 address, UInt32 value)
         {
-            address &= 0x0fff_ffff;
-
             UInt32 alignedAddress = address & 0x0fff_fffc;
             IntPtr page = _write32PageTable[GetPageIndex(alignedAddress)];
 
@@ -1952,7 +1951,8 @@ namespace Iris.GBA
                 return;
             }
 
-            // page fault
+            address &= 0x0fff_ffff;
+
             switch (address >> 24)
             {
                 // BIOS
