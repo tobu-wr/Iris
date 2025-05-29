@@ -1,4 +1,5 @@
 ﻿using SharpDX.XInput;
+using System.Diagnostics;
 
 namespace Iris.UserInterface
 {
@@ -44,11 +45,23 @@ namespace Iris.UserInterface
         private readonly ButtonEvent_Delegate _buttonDownCallback = buttonDownCallback;
         private readonly ButtonEvent_Delegate _buttonUpCallback = buttonUpCallback;
 
+        private readonly Stopwatch _pollingRateLimiterStopwatch = Stopwatch.StartNew();
+
         private readonly Controller _xinputController = new(UserIndex.One);
         private State _previousState = new();
 
         internal void PollInput()
         {
+            const long PollingRateLimit = 125;
+            long pollingPeriodLimit = Stopwatch.Frequency / PollingRateLimit;
+
+            if (_pollingRateLimiterStopwatch.ElapsedTicks < pollingPeriodLimit)
+                return;
+
+            _pollingRateLimiterStopwatch.Restart();
+
+            // Calling GetState is costly, therefore the polling rate has to be limited otherwise
+            // some games that call it too frequently like OpenLara can't even run at full speed.
             if (!_xinputController.GetState(out State currentState))
                 return;
 
