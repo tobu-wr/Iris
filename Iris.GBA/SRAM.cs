@@ -17,7 +17,7 @@ namespace Iris.GBA
         internal SRAM(Memory memory)
         {
             const Memory.Flag flags = Memory.Flag.Read8 | Memory.Flag.Write8 | Memory.Flag.Mirrored;
-            memory.Map(_data, Size, StartAddress, EndAddress, Size, flags);
+            memory.Map(_data, Size, StartAddress, EndAddress, flags);
         }
 
         ~SRAM()
