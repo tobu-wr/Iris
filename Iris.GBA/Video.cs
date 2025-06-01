@@ -632,27 +632,19 @@ namespace Iris.GBA
         {
             UInt32 offset = (UInt32)((address & ~1) - VRAM_StartAddress) % VRAM_MirrorStep;
 
-            switch (_DISPCNT & 0b111)
+            UInt32 objectCharacterDataOffset = (_DISPCNT & 0b111) switch
             {
-                case 0b000:
-                case 0b001:
-                case 0b010:
-                    if (offset >= 0x1_0000)
-                        return;
-                    break;
-
-                case 0b011:
-                case 0b100:
-                case 0b101:
-                    if (offset >= 0x1_4000)
-                        return;
-                    break;
+                0b000 or 0b001 or 0b010 => 0x1_0000,
+                0b011 or 0b100 or 0b101 => 0x1_4000,
 
                 // TODO: verify
-                case 0b110:
-                case 0b111:
-                    throw new Exception("Iris.GBA.Video: Unknown background mode");
-            }
+                0b110 or 0b111 => throw new Exception("Iris.GBA.Video: Unknown background mode"),
+
+                _ => 0 // cannot happen
+            };
+
+            if (offset >= objectCharacterDataOffset)
+                return;
 
             unsafe
             {
