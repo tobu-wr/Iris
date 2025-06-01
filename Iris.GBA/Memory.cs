@@ -544,17 +544,18 @@ namespace Iris.GBA
 
         internal UInt16 Read16(UInt32 address)
         {
-            address &= 0x0fff_fffe;
-
-            IntPtr page = _read16PageTable[GetPageIndex(address)];
+            UInt32 alignedAddress = address & 0x0fff_fffe;
+            IntPtr page = _read16PageTable[GetPageIndex(alignedAddress)];
 
             if (page != IntPtr.Zero)
             {
                 unsafe
                 {
-                    return Unsafe.Read<UInt16>((Byte*)page + GetPageOffset(address));
+                    return Unsafe.Read<UInt16>((Byte*)page + GetPageOffset(alignedAddress));
                 }
             }
+
+            address &= 0x0fff_ffff;
 
             switch (address >> 24)
             {
@@ -566,7 +567,7 @@ namespace Iris.GBA
                 // Registers
                 case 0x4:
                     {
-                        UInt32 offset = address - RegistersStartAddress;
+                        UInt32 offset = alignedAddress - RegistersStartAddress;
 
                         return offset switch
                         {
@@ -637,7 +638,7 @@ namespace Iris.GBA
                 case 0x8:
                 case 0x9:
                     {
-                        UInt32 offset = address - ROM_WaitState0_StartAddress;
+                        UInt32 offset = alignedAddress - ROM_WaitState0_StartAddress;
 
                         if (offset < _romSize)
                         {
@@ -653,7 +654,7 @@ namespace Iris.GBA
                 case 0xa:
                 case 0xb:
                     {
-                        UInt32 offset = address - ROM_WaitState1_StartAddress;
+                        UInt32 offset = alignedAddress - ROM_WaitState1_StartAddress;
 
                         if (offset < _romSize)
                         {
@@ -669,7 +670,7 @@ namespace Iris.GBA
                 case 0xc:
                 case 0xd:
                     {
-                        UInt32 offset = address - ROM_WaitState2_StartAddress;
+                        UInt32 offset = alignedAddress - ROM_WaitState2_StartAddress;
 
                         if (offset < _romSize)
                         {
@@ -695,17 +696,18 @@ namespace Iris.GBA
 
         internal UInt32 Read32(UInt32 address)
         {
-            address &= 0x0fff_fffc;
-
-            IntPtr page = _read32PageTable[GetPageIndex(address)];
+            UInt32 alignedAddress = address & 0x0fff_fffc;
+            IntPtr page = _read32PageTable[GetPageIndex(alignedAddress)];
 
             if (page != IntPtr.Zero)
             {
                 unsafe
                 {
-                    return Unsafe.Read<UInt32>((Byte*)page + GetPageOffset(address));
+                    return Unsafe.Read<UInt32>((Byte*)page + GetPageOffset(alignedAddress));
                 }
             }
+
+            address &= 0x0fff_ffff;
 
             switch (address >> 24)
             {
@@ -717,7 +719,7 @@ namespace Iris.GBA
                 // Registers
                 case 0x4:
                     {
-                        UInt32 offset = address - RegistersStartAddress;
+                        UInt32 offset = alignedAddress - RegistersStartAddress;
 
                         return offset switch
                         {
@@ -740,7 +742,7 @@ namespace Iris.GBA
                 case 0x8:
                 case 0x9:
                     {
-                        UInt32 offset = address - ROM_WaitState0_StartAddress;
+                        UInt32 offset = alignedAddress - ROM_WaitState0_StartAddress;
 
                         if (offset < _romSize)
                         {
@@ -756,7 +758,7 @@ namespace Iris.GBA
                 case 0xa:
                 case 0xb:
                     {
-                        UInt32 offset = address - ROM_WaitState1_StartAddress;
+                        UInt32 offset = alignedAddress - ROM_WaitState1_StartAddress;
 
                         if (offset < _romSize)
                         {
@@ -772,7 +774,7 @@ namespace Iris.GBA
                 case 0xc:
                 case 0xd:
                     {
-                        UInt32 offset = address - ROM_WaitState2_StartAddress;
+                        UInt32 offset = alignedAddress - ROM_WaitState2_StartAddress;
 
                         if (offset < _romSize)
                         {
