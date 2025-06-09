@@ -8,7 +8,7 @@ namespace Iris.GBA
         private const int KB = 1024;
         private const int BankSize = 64 * KB;
 
-        private readonly int _size;
+        private readonly Size _size;
         private readonly IntPtr _data;
 
         private const UInt32 StartAddress = 0x0e00_0000;
@@ -37,8 +37,8 @@ namespace Iris.GBA
 
         internal FLASH(Size size)
         {
-            _size = (int)size;
-            _data = Marshal.AllocHGlobal(_size);
+            _size = size;
+            _data = Marshal.AllocHGlobal((int)_size);
         }
 
         ~FLASH()
@@ -72,8 +72,8 @@ namespace Iris.GBA
 
         internal override void LoadState(BinaryReader reader)
         {
-            byte[] data = reader.ReadBytes(_size);
-            Marshal.Copy(data, 0, _data, _size);
+            byte[] data = reader.ReadBytes((int)_size);
+            Marshal.Copy(data, 0, _data, (int)_size);
 
             _state = (State)reader.ReadInt32();
             _idMode = reader.ReadBoolean();
@@ -83,8 +83,8 @@ namespace Iris.GBA
 
         internal override void SaveState(BinaryWriter writer)
         {
-            byte[] data = new byte[_size];
-            Marshal.Copy(_data, data, 0, _size);
+            byte[] data = new byte[(int)_size];
+            Marshal.Copy(_data, data, 0, (int)_size);
             writer.Write(data);
 
             writer.Write((int)_state);
@@ -102,7 +102,7 @@ namespace Iris.GBA
                 switch (offset)
                 {
                     case 0:
-                        return (Size)_size switch
+                        return _size switch
                         {
                             Size.FLASH_64KB => 0x32, // Panasonic
                             Size.FLASH_128KB => 0x62, // Sanyo
@@ -112,7 +112,7 @@ namespace Iris.GBA
                         };
 
                     case 1:
-                        return (Size)_size switch
+                        return _size switch
                         {
                             Size.FLASH_64KB => 0x1b, // Panasonic
                             Size.FLASH_128KB => 0x13, // Sanyo
