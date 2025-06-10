@@ -1,4 +1,6 @@
-﻿namespace Iris.CPU
+﻿using System.Diagnostics;
+
+namespace Iris.CPU
 {
     public sealed class CPU_Core
     {
@@ -438,7 +440,7 @@
                 // NV
                 0b1111 => false,
                 // should never happen
-                _ => throw new Exception($"Iris.CPU.CPU_Core: Wrong condition code {cond}"),
+                _ => throw new UnreachableException(),
             };
         }
 

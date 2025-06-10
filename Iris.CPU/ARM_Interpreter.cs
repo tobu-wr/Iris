@@ -257,12 +257,12 @@ namespace Iris.CPU
             cpu.NextInstructionAddress = value;
         }
 
-        private static void SetReg(CPU_Core cpu, UInt32 i, UInt32 value)
+        private static void SetReg(CPU_Core cpu, UInt32 index, UInt32 value)
         {
-            if (i == PC)
+            if (index == PC)
                 SetPC(cpu, value);
             else
-                cpu.Reg[i] = value;
+                cpu.Reg[index] = value;
         }
 
         // Addressing mode 1
@@ -619,7 +619,7 @@ namespace Iris.CPU
 
         private static UInt64 UNKNOWN(CPU_Core cpu, UInt32 instruction)
         {
-            throw new Exception(string.Format("Iris.CPU.ARM_Interpreter: Unknown ARM instruction 0x{0:x8} at address 0x{1:x8}", instruction, cpu.NextInstructionAddress - 4));
+            throw new Exception($"Iris.CPU.ARM_Interpreter: Unknown ARM instruction 0x{instruction:x8} at address 0x{(cpu.NextInstructionAddress - 4):x8}");
         }
 
         private static UInt64 ADC(CPU_Core cpu, UInt32 instruction)
