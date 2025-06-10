@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Iris.GBA
@@ -106,9 +107,7 @@ namespace Iris.GBA
                         {
                             Size.FLASH_64KB => 0x32, // Panasonic
                             Size.FLASH_128KB => 0x62, // Sanyo
-
-                            // should never happen
-                            _ => throw new Exception("Iris.GBA.FLASH: Wrong size")
+                            _ => throw new UnreachableException()
                         };
 
                     case 1:
@@ -116,9 +115,7 @@ namespace Iris.GBA
                         {
                             Size.FLASH_64KB => 0x1b, // Panasonic
                             Size.FLASH_128KB => 0x13, // Sanyo
-
-                            // should never happen
-                            _ => throw new Exception("Iris.GBA.FLASH: Wrong size")
+                            _ => throw new UnreachableException()
                         };
                 }
             }

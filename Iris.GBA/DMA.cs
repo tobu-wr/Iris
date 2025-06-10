@@ -1,4 +1,6 @@
-﻿namespace Iris.GBA
+﻿using System.Diagnostics;
+
+namespace Iris.GBA
 {
     internal sealed class DMA
     {
@@ -384,7 +386,7 @@
                     // prohibited
                     0b11 => 0,
                     // should never happen
-                    _ => throw new Exception("Iris.GBA.DMA: Wrong source address control flag"),
+                    _ => throw new UnreachableException(),
                 };
             }
 
@@ -401,7 +403,7 @@
                     // increment+reload
                     0b11 => (dataUnitSize, true),
                     // should never happen
-                    _ => throw new Exception("Iris.GBA.DMA: Wrong destination address control flag"),
+                    _ => throw new UnreachableException(),
                 };
             }
 
