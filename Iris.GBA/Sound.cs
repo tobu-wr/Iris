@@ -209,21 +209,21 @@
             return register switch
             {
                 Register.SOUND1CNT_L => _SOUND1CNT_L,
-                Register.SOUND1CNT_H => _SOUND1CNT_H,
-                Register.SOUND1CNT_X => _SOUND1CNT_X,
+                Register.SOUND1CNT_H => (UInt16)(_SOUND1CNT_H & 0xffc0),
+                Register.SOUND1CNT_X => (UInt16)(_SOUND1CNT_X & 0x4000),
 
-                Register.SOUND2CNT_L => _SOUND2CNT_L,
-                Register.SOUND2CNT_H => _SOUND2CNT_H,
+                Register.SOUND2CNT_L => (UInt16)(_SOUND2CNT_L & 0xffc0),
+                Register.SOUND2CNT_H => (UInt16)(_SOUND2CNT_H & 0x4000),
 
                 Register.SOUND3CNT_L => _SOUND3CNT_L,
-                Register.SOUND3CNT_H => _SOUND3CNT_H,
-                Register.SOUND3CNT_X => _SOUND3CNT_X,
+                Register.SOUND3CNT_H => (UInt16)(_SOUND3CNT_H & 0xe000),
+                Register.SOUND3CNT_X => (UInt16)(_SOUND3CNT_X & 0x4000),
 
-                Register.SOUND4CNT_L => _SOUND4CNT_L,
-                Register.SOUND4CNT_H => _SOUND4CNT_H,
+                Register.SOUND4CNT_L => (UInt16)(_SOUND4CNT_L & 0xff00),
+                Register.SOUND4CNT_H => (UInt16)(_SOUND4CNT_H & 0x40ff),
 
                 Register.SOUNDCNT_L => _SOUNDCNT_L,
-                Register.SOUNDCNT_H => _SOUNDCNT_H,
+                Register.SOUNDCNT_H => (UInt16)(_SOUNDCNT_H & 0x770f),
                 Register.SOUNDCNT_X => _SOUNDCNT_X,
 
                 Register.SOUNDBIAS => _SOUNDBIAS,
@@ -250,51 +250,51 @@
             switch (register)
             {
                 case Register.SOUND1CNT_L:
-                    Memory.WriteRegisterHelper(ref _SOUND1CNT_L, value, mode);
+                    Memory.WriteRegisterHelper(ref _SOUND1CNT_L, (UInt16)(value & 0x007f), mode);
                     break;
                 case Register.SOUND1CNT_H:
                     Memory.WriteRegisterHelper(ref _SOUND1CNT_H, value, mode);
                     break;
                 case Register.SOUND1CNT_X:
-                    Memory.WriteRegisterHelper(ref _SOUND1CNT_X, value, mode);
+                    Memory.WriteRegisterHelper(ref _SOUND1CNT_X, (UInt16)(value & 0xc7ff), mode);
                     break;
 
                 case Register.SOUND2CNT_L:
                     Memory.WriteRegisterHelper(ref _SOUND2CNT_L, value, mode);
                     break;
                 case Register.SOUND2CNT_H:
-                    Memory.WriteRegisterHelper(ref _SOUND2CNT_H, value, mode);
+                    Memory.WriteRegisterHelper(ref _SOUND2CNT_H, (UInt16)(value & 0xc7ff), mode);
                     break;
 
                 case Register.SOUND3CNT_L:
-                    Memory.WriteRegisterHelper(ref _SOUND3CNT_L, value, mode);
+                    Memory.WriteRegisterHelper(ref _SOUND3CNT_L, (UInt16)(value & 0x00e0), mode);
                     break;
                 case Register.SOUND3CNT_H:
-                    Memory.WriteRegisterHelper(ref _SOUND3CNT_H, value, mode);
+                    Memory.WriteRegisterHelper(ref _SOUND3CNT_H, (UInt16)(value & 0xe0ff), mode);
                     break;
                 case Register.SOUND3CNT_X:
-                    Memory.WriteRegisterHelper(ref _SOUND3CNT_X, value, mode);
+                    Memory.WriteRegisterHelper(ref _SOUND3CNT_X, (UInt16)(value & 0xc7ff), mode);
                     break;
 
                 case Register.SOUND4CNT_L:
-                    Memory.WriteRegisterHelper(ref _SOUND4CNT_L, value, mode);
+                    Memory.WriteRegisterHelper(ref _SOUND4CNT_L, (UInt16)(value & 0xff3f), mode);
                     break;
                 case Register.SOUND4CNT_H:
-                    Memory.WriteRegisterHelper(ref _SOUND4CNT_H, value, mode);
+                    Memory.WriteRegisterHelper(ref _SOUND4CNT_H, (UInt16)(value & 0xc0ff), mode);
                     break;
 
                 case Register.SOUNDCNT_L:
-                    Memory.WriteRegisterHelper(ref _SOUNDCNT_L, value, mode);
+                    Memory.WriteRegisterHelper(ref _SOUNDCNT_L, (UInt16)(value & 0xff77), mode);
                     break;
                 case Register.SOUNDCNT_H:
-                    Memory.WriteRegisterHelper(ref _SOUNDCNT_H, value, mode);
+                    Memory.WriteRegisterHelper(ref _SOUNDCNT_H, (UInt16)(value & 0xff0f), mode);
                     break;
                 case Register.SOUNDCNT_X:
-                    Memory.WriteRegisterHelper(ref _SOUNDCNT_X, value, mode);
+                    Memory.WriteRegisterHelper(ref _SOUNDCNT_X, (UInt16)((value & 0x0080) | (_SOUNDCNT_X & ~0x0080)), mode);
                     break;
 
                 case Register.SOUNDBIAS:
-                    Memory.WriteRegisterHelper(ref _SOUNDBIAS, value, mode);
+                    Memory.WriteRegisterHelper(ref _SOUNDBIAS, (UInt16)(value & 0xc3ff), mode);
                     break;
 
                 case Register.WAVE_RAM0_L:

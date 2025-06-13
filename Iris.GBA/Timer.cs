@@ -1,4 +1,6 @@
-﻿namespace Iris.GBA
+﻿using System.Diagnostics;
+
+namespace Iris.GBA
 {
     internal sealed class Timer
     {
@@ -142,7 +144,7 @@
                 UInt16 previousControl = channel._control;
 
                 UInt16 newControl = channel._control;
-                Memory.WriteRegisterHelper(ref newControl, value, mode);
+                Memory.WriteRegisterHelper(ref newControl, (UInt16)(value & 0x00c7), mode);
                 channel._control = newControl;
 
                 CheckControl(ref channel, channelIndex, previousControl, newControl);
@@ -341,7 +343,7 @@
                 0b01 => 64,
                 0b10 => 256,
                 0b11 => 1024,
-                _ => 0, // cannot happen
+                _ => throw new UnreachableException()
             };
         }
     }

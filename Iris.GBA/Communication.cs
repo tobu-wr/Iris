@@ -168,7 +168,7 @@
                     break;
 
                 case Register.SIOCNT:
-                    Memory.WriteRegisterHelper(ref _SIOCNT, value, mode);
+                    Memory.WriteRegisterHelper(ref _SIOCNT, (UInt16)(value & 0x7fff), mode);
                     CheckTransfer();
                     break;
                 case Register.SIODATA_SEND:
@@ -176,12 +176,12 @@
                     break;
 
                 case Register.RCNT:
-                    Memory.WriteRegisterHelper(ref _RCNT, value, mode);
+                    Memory.WriteRegisterHelper(ref _RCNT, (UInt16)(value & 0xc1ff), mode);
                     CheckTransfer();
                     break;
 
                 case Register.JOYCNT:
-                    Memory.WriteRegisterHelper(ref _JOYCNT, value, mode);
+                    Memory.WriteRegisterHelper(ref _JOYCNT, (UInt16)(value & 0x0047), mode);
                     break;
 
                 case Register.JOY_RECV_L:
@@ -199,7 +199,7 @@
                     break;
 
                 case Register.JOYSTAT:
-                    Memory.WriteRegisterHelper(ref _JOYSTAT, value, mode);
+                    Memory.WriteRegisterHelper(ref _JOYSTAT, (UInt16)(value & 0x003a), mode);
                     break;
 
                 // should never happen

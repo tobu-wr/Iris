@@ -191,19 +191,19 @@ namespace Iris.GBA
                 channel._destinationReload = (channel._destinationReload & 0x0000_ffff) | (UInt32)(high << 16);
             }
 
-            void WriteLengthReload(ref Channel channel)
+            void WriteLengthReload(ref Channel channel, UInt16 mask)
             {
                 UInt16 reload = channel._lengthReload;
-                Memory.WriteRegisterHelper(ref reload, value, mode);
+                Memory.WriteRegisterHelper(ref reload, (UInt16)(value & mask), mode);
                 channel._lengthReload = reload;
             }
 
-            void WriteControl(ref Channel channel)
+            void WriteControl(ref Channel channel, UInt16 mask)
             {
                 UInt16 previousControl = channel._control;
 
                 UInt16 newControl = channel._control;
-                Memory.WriteRegisterHelper(ref newControl, value, mode);
+                Memory.WriteRegisterHelper(ref newControl, (UInt16)(value & mask), mode);
                 channel._control = newControl;
 
                 if ((previousControl & 0x8000) == 0)
@@ -240,10 +240,10 @@ namespace Iris.GBA
                     break;
 
                 case Register.DMA0CNT_L:
-                    WriteLengthReload(ref _channels[0]);
+                    WriteLengthReload(ref _channels[0], 0x3fff);
                     break;
                 case Register.DMA0CNT_H:
-                    WriteControl(ref _channels[0]);
+                    WriteControl(ref _channels[0], 0xf7e0);
                     break;
 
                 case Register.DMA1SAD_L:
@@ -261,10 +261,10 @@ namespace Iris.GBA
                     break;
 
                 case Register.DMA1CNT_L:
-                    WriteLengthReload(ref _channels[1]);
+                    WriteLengthReload(ref _channels[1], 0x3fff);
                     break;
                 case Register.DMA1CNT_H:
-                    WriteControl(ref _channels[1]);
+                    WriteControl(ref _channels[1], 0xf7e0);
                     break;
 
                 case Register.DMA2SAD_L:
@@ -282,10 +282,10 @@ namespace Iris.GBA
                     break;
 
                 case Register.DMA2CNT_L:
-                    WriteLengthReload(ref _channels[2]);
+                    WriteLengthReload(ref _channels[2], 0x3fff);
                     break;
                 case Register.DMA2CNT_H:
-                    WriteControl(ref _channels[2]);
+                    WriteControl(ref _channels[2], 0xf7e0);
                     break;
 
                 case Register.DMA3SAD_L:
@@ -303,10 +303,10 @@ namespace Iris.GBA
                     break;
 
                 case Register.DMA3CNT_L:
-                    WriteLengthReload(ref _channels[3]);
+                    WriteLengthReload(ref _channels[3], 0xffff);
                     break;
                 case Register.DMA3CNT_H:
-                    WriteControl(ref _channels[3]);
+                    WriteControl(ref _channels[3], 0xffe0);
                     break;
 
                 // should never happen

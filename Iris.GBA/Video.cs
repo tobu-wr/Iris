@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Iris.GBA
@@ -466,51 +467,82 @@ namespace Iris.GBA
             switch (register)
             {
                 case Register.DISPCNT:
-                    Memory.WriteRegisterHelper(ref _DISPCNT, value, mode);
+                    Memory.WriteRegisterHelper(ref _DISPCNT, (UInt16)(value & 0xfff7), mode);
                     break;
                 case Register.DISPSTAT:
-                    Memory.WriteRegisterHelper(ref _DISPSTAT, value, mode);
+                    Memory.WriteRegisterHelper(ref _DISPSTAT, (UInt16)((value & 0xff38) | (_DISPSTAT & ~0xff38)), mode);
                     break;
 
                 case Register.BG0CNT:
-                    Memory.WriteRegisterHelper(ref _BG0CNT, value, mode);
+                    switch (_DISPCNT & 0b111)
+                    {
+                        case 0b000:
+                        case 0b001:
+                            Memory.WriteRegisterHelper(ref _BG0CNT, (UInt16)(value & 0xdfff), mode);
+                            break;
+                    }
                     break;
                 case Register.BG1CNT:
-                    Memory.WriteRegisterHelper(ref _BG1CNT, value, mode);
+                    switch (_DISPCNT & 0b111)
+                    {
+                        case 0b000:
+                        case 0b001:
+                            Memory.WriteRegisterHelper(ref _BG1CNT, (UInt16)(value & 0xdfff), mode);
+                            break;
+                    }
                     break;
                 case Register.BG2CNT:
-                    Memory.WriteRegisterHelper(ref _BG2CNT, value, mode);
+                    switch (_DISPCNT & 0b111)
+                    {
+                        case 0b000:
+                        case 0b001:
+                        case 0b010:
+                            Memory.WriteRegisterHelper(ref _BG2CNT, value, mode);
+                            break;
+
+                        case 0b011:
+                        case 0b100:
+                        case 0b101:
+                            Memory.WriteRegisterHelper(ref _BG2CNT, (UInt16)(value & 0x0043), mode);
+                            break;
+                    }
                     break;
                 case Register.BG3CNT:
-                    Memory.WriteRegisterHelper(ref _BG3CNT, value, mode);
+                    switch (_DISPCNT & 0b111)
+                    {
+                        case 0b000:
+                        case 0b010:
+                            Memory.WriteRegisterHelper(ref _BG3CNT, value, mode);
+                            break;
+                    }
                     break;
 
                 case Register.BG0HOFS:
-                    Memory.WriteRegisterHelper(ref _BG0HOFS, value, mode);
+                    Memory.WriteRegisterHelper(ref _BG0HOFS, (UInt16)(value & 0x01ff), mode);
                     break;
                 case Register.BG0VOFS:
-                    Memory.WriteRegisterHelper(ref _BG0VOFS, value, mode);
+                    Memory.WriteRegisterHelper(ref _BG0VOFS, (UInt16)(value & 0x01ff), mode);
                     break;
 
                 case Register.BG1HOFS:
-                    Memory.WriteRegisterHelper(ref _BG1HOFS, value, mode);
+                    Memory.WriteRegisterHelper(ref _BG1HOFS, (UInt16)(value & 0x01ff), mode);
                     break;
                 case Register.BG1VOFS:
-                    Memory.WriteRegisterHelper(ref _BG1VOFS, value, mode);
+                    Memory.WriteRegisterHelper(ref _BG1VOFS, (UInt16)(value & 0x01ff), mode);
                     break;
 
                 case Register.BG2HOFS:
-                    Memory.WriteRegisterHelper(ref _BG2HOFS, value, mode);
+                    Memory.WriteRegisterHelper(ref _BG2HOFS, (UInt16)(value & 0x01ff), mode);
                     break;
                 case Register.BG2VOFS:
-                    Memory.WriteRegisterHelper(ref _BG2VOFS, value, mode);
+                    Memory.WriteRegisterHelper(ref _BG2VOFS, (UInt16)(value & 0x01ff), mode);
                     break;
 
                 case Register.BG3HOFS:
-                    Memory.WriteRegisterHelper(ref _BG3HOFS, value, mode);
+                    Memory.WriteRegisterHelper(ref _BG3HOFS, (UInt16)(value & 0x01ff), mode);
                     break;
                 case Register.BG3VOFS:
-                    Memory.WriteRegisterHelper(ref _BG3VOFS, value, mode);
+                    Memory.WriteRegisterHelper(ref _BG3VOFS, (UInt16)(value & 0x01ff), mode);
                     break;
 
                 case Register.BG2PA:
@@ -525,12 +557,13 @@ namespace Iris.GBA
                 case Register.BG2PD:
                     Memory.WriteRegisterHelper(ref _BG2PD, value, mode);
                     break;
+
                 case Register.BG2X_L:
                     Memory.WriteRegisterHelper(ref _BG2X_L, value, mode);
                     _currentBG2X = ((_BG2X_H << 20) | (_BG2X_L << 4)) >> 4;
                     break;
                 case Register.BG2X_H:
-                    Memory.WriteRegisterHelper(ref _BG2X_H, value, mode);
+                    Memory.WriteRegisterHelper(ref _BG2X_H, (UInt16)(value & 0x0fff), mode);
                     _currentBG2X = ((_BG2X_H << 20) | (_BG2X_L << 4)) >> 4;
                     break;
                 case Register.BG2Y_L:
@@ -538,7 +571,7 @@ namespace Iris.GBA
                     _currentBG2Y = ((_BG2Y_H << 20) | (_BG2Y_L << 4)) >> 4;
                     break;
                 case Register.BG2Y_H:
-                    Memory.WriteRegisterHelper(ref _BG2Y_H, value, mode);
+                    Memory.WriteRegisterHelper(ref _BG2Y_H, (UInt16)(value & 0x0fff), mode);
                     _currentBG2Y = ((_BG2Y_H << 20) | (_BG2Y_L << 4)) >> 4;
                     break;
 
@@ -554,12 +587,13 @@ namespace Iris.GBA
                 case Register.BG3PD:
                     Memory.WriteRegisterHelper(ref _BG3PD, value, mode);
                     break;
+
                 case Register.BG3X_L:
                     Memory.WriteRegisterHelper(ref _BG3X_L, value, mode);
                     _currentBG3X = ((_BG3X_H << 20) | (_BG3X_L << 4)) >> 4;
                     break;
                 case Register.BG3X_H:
-                    Memory.WriteRegisterHelper(ref _BG3X_H, value, mode);
+                    Memory.WriteRegisterHelper(ref _BG3X_H, (UInt16)(value & 0x0fff), mode);
                     _currentBG3X = ((_BG3X_H << 20) | (_BG3X_L << 4)) >> 4;
                     break;
                 case Register.BG3Y_L:
@@ -567,7 +601,7 @@ namespace Iris.GBA
                     _currentBG3Y = ((_BG3Y_H << 20) | (_BG3Y_L << 4)) >> 4;
                     break;
                 case Register.BG3Y_H:
-                    Memory.WriteRegisterHelper(ref _BG3Y_H, value, mode);
+                    Memory.WriteRegisterHelper(ref _BG3Y_H, (UInt16)(value & 0x0fff), mode);
                     _currentBG3Y = ((_BG3Y_H << 20) | (_BG3Y_L << 4)) >> 4;
                     break;
 
@@ -586,10 +620,10 @@ namespace Iris.GBA
                     break;
 
                 case Register.WININ:
-                    Memory.WriteRegisterHelper(ref _WININ, value, mode);
+                    Memory.WriteRegisterHelper(ref _WININ, (UInt16)(value & 0x3f3f), mode);
                     break;
                 case Register.WINOUT:
-                    Memory.WriteRegisterHelper(ref _WINOUT, value, mode);
+                    Memory.WriteRegisterHelper(ref _WINOUT, (UInt16)(value & 0x3f3f), mode);
                     break;
 
                 case Register.MOSAIC:
@@ -597,13 +631,13 @@ namespace Iris.GBA
                     break;
 
                 case Register.BLDCNT:
-                    Memory.WriteRegisterHelper(ref _BLDCNT, value, mode);
+                    Memory.WriteRegisterHelper(ref _BLDCNT, (UInt16)(value & 0x3fff), mode);
                     break;
                 case Register.BLDALPHA:
-                    Memory.WriteRegisterHelper(ref _BLDALPHA, value, mode);
+                    Memory.WriteRegisterHelper(ref _BLDALPHA, (UInt16)(value & 0x1f1f), mode);
                     break;
                 case Register.BLDY:
-                    Memory.WriteRegisterHelper(ref _BLDY, value, mode);
+                    Memory.WriteRegisterHelper(ref _BLDY, (UInt16)(value & 0x001f), mode);
                     break;
 
                 // should never happen
@@ -619,7 +653,7 @@ namespace Iris.GBA
 
         internal void Write8_PaletteRAM(UInt32 address, Byte value)
         {
-            UInt32 offset = (UInt32)((address & ~1) - PaletteRAM_StartAddress) % PaletteRAM_Size;
+            UInt32 offset = ((UInt32)(address & ~1) - PaletteRAM_StartAddress) % PaletteRAM_Size;
 
             unsafe
             {
@@ -630,7 +664,7 @@ namespace Iris.GBA
 
         internal void Write8_VRAM(UInt32 address, Byte value)
         {
-            UInt32 offset = (UInt32)((address & ~1) - VRAM_StartAddress) % VRAM_MirrorStep;
+            UInt32 offset = ((UInt32)(address & ~1) - VRAM_StartAddress) % VRAM_MirrorStep;
 
             UInt32 objectCharacterDataOffset = (_DISPCNT & 0b111) switch
             {
@@ -640,7 +674,7 @@ namespace Iris.GBA
                 // TODO: verify
                 0b110 or 0b111 => throw new Exception("Iris.GBA.Video: Unknown background mode"),
 
-                _ => 0 // cannot happen
+                _ => throw new UnreachableException()
             };
 
             if (offset >= objectCharacterDataOffset)

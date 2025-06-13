@@ -76,7 +76,7 @@
             switch (register)
             {
                 case Register.KEYCNT:
-                    Memory.WriteRegisterHelper(ref _KEYCNT, value, mode);
+                    Memory.WriteRegisterHelper(ref _KEYCNT, (UInt16)(value & 0xc3ff), mode);
 
                     if ((_KEYCNT & 0x4000) == 0x4000)
                     {

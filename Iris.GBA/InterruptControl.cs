@@ -1,4 +1,6 @@
-﻿namespace Iris.GBA
+﻿using System.Diagnostics;
+
+namespace Iris.GBA
 {
     internal sealed class InterruptControl
     {
@@ -77,26 +79,21 @@
             switch (register)
             {
                 case Register.IE:
-                    Memory.WriteRegisterHelper(ref _IE, value, mode);
+                    Memory.WriteRegisterHelper(ref _IE, (UInt16)(value & 0x3fff), mode);
                     break;
 
                 case Register.IF:
-                    switch (mode)
+                    _IF &= (mode) switch
                     {
-                        case Memory.RegisterWriteMode.LowByte:
-                            _IF &= (UInt16)~value;
-                            break;
-                        case Memory.RegisterWriteMode.HighByte:
-                            _IF &= (UInt16)~(value << 8);
-                            break;
-                        case Memory.RegisterWriteMode.HalfWord:
-                            _IF &= (UInt16)~value;
-                            break;
-                    }
+                        Memory.RegisterWriteMode.LowByte => (UInt16)~value,
+                        Memory.RegisterWriteMode.HighByte => (UInt16)~(value << 8),
+                        Memory.RegisterWriteMode.HalfWord => (UInt16)~value,
+                        _ => throw new UnreachableException(),
+                    };
                     break;
 
                 case Register.IME:
-                    Memory.WriteRegisterHelper(ref _IME, value, mode);
+                    Memory.WriteRegisterHelper(ref _IME, (UInt16)(value & 0x0001), mode);
                     break;
 
                 // should never happen
