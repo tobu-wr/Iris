@@ -46,7 +46,7 @@
             switch (register)
             {
                 case Register.WAITCNT:
-                    Memory.WriteRegisterHelper(ref _WAITCNT, (UInt16)((value & 0x5fff) | (_WAITCNT & ~0x5fff)), mode);
+                    Memory.WriteRegisterHelper(ref _WAITCNT, (UInt16)((value & 0x5fff) | (_WAITCNT & 0x8000)), mode);
                     break;
                 case Register.SYSCNT_UND0:
                     Memory.WriteRegisterHelper(ref _SYSCNT_UND0, value, mode);

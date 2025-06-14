@@ -290,7 +290,7 @@
                     Memory.WriteRegisterHelper(ref _SOUNDCNT_H, (UInt16)(value & 0xff0f), mode);
                     break;
                 case Register.SOUNDCNT_X:
-                    Memory.WriteRegisterHelper(ref _SOUNDCNT_X, (UInt16)((value & 0x0080) | (_SOUNDCNT_X & ~0x0080)), mode);
+                    Memory.WriteRegisterHelper(ref _SOUNDCNT_X, (UInt16)((value & 0x0080) | (_SOUNDCNT_X & 0x000f)), mode);
                     break;
 
                 case Register.SOUNDBIAS:

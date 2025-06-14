@@ -107,15 +107,14 @@ namespace Iris.GBA
                         {
                             Size.FLASH_64KB => 0x32, // Panasonic
                             Size.FLASH_128KB => 0x62, // Sanyo
-                            _ => throw new UnreachableException()
+                            _ => throw new UnreachableException(),
                         };
-
                     case 1:
                         return _size switch
                         {
                             Size.FLASH_64KB => 0x1b, // Panasonic
                             Size.FLASH_128KB => 0x13, // Sanyo
-                            _ => throw new UnreachableException()
+                            _ => throw new UnreachableException(),
                         };
                 }
             }
@@ -145,12 +144,12 @@ namespace Iris.GBA
             switch (_state)
             {
                 case State.Idle:
-                    if (offset == 0x5555 && value == 0xaa)
+                    if ((offset == 0x5555) && (value == 0xaa))
                         _state = State.StateAA;
                     break;
 
                 case State.StateAA:
-                    if (offset == 0x2aaa && value == 0x55)
+                    if ((offset == 0x2aaa) && (value == 0x55))
                         _state = State.State55;
                     break;
 
@@ -196,7 +195,7 @@ namespace Iris.GBA
                                 break;
                         }
                     }
-                    else if ((offset & 0xfff) == 0 && value == 0x30 && _eraseCommand)
+                    else if (((offset & 0xfff) == 0) && (value == 0x30) && _eraseCommand)
                     {
                         unsafe
                         {

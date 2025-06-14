@@ -33,6 +33,7 @@ namespace Iris.GBA
             BG2PB,
             BG2PC,
             BG2PD,
+
             BG2X_L,
             BG2X_H,
             BG2Y_L,
@@ -42,6 +43,7 @@ namespace Iris.GBA
             BG3PB,
             BG3PC,
             BG3PD,
+
             BG3X_L,
             BG3X_H,
             BG3Y_L,
@@ -109,6 +111,7 @@ namespace Iris.GBA
         private UInt16 _BG2PB;
         private UInt16 _BG2PC;
         private UInt16 _BG2PD;
+
         private UInt16 _BG2X_L;
         private UInt16 _BG2X_H;
         private UInt16 _BG2Y_L;
@@ -118,6 +121,7 @@ namespace Iris.GBA
         private UInt16 _BG3PB;
         private UInt16 _BG3PC;
         private UInt16 _BG3PD;
+
         private UInt16 _BG3X_L;
         private UInt16 _BG3X_H;
         private UInt16 _BG3Y_L;
@@ -246,6 +250,7 @@ namespace Iris.GBA
             _BG2PB = 0;
             _BG2PC = 0;
             _BG2PD = 0;
+
             _BG2X_L = 0;
             _BG2X_H = 0;
             _BG2Y_L = 0;
@@ -255,6 +260,7 @@ namespace Iris.GBA
             _BG3PB = 0;
             _BG3PC = 0;
             _BG3PD = 0;
+
             _BG3X_L = 0;
             _BG3X_H = 0;
             _BG3Y_L = 0;
@@ -321,6 +327,7 @@ namespace Iris.GBA
             _BG2PB = reader.ReadUInt16();
             _BG2PC = reader.ReadUInt16();
             _BG2PD = reader.ReadUInt16();
+
             _BG2X_L = reader.ReadUInt16();
             _BG2X_H = reader.ReadUInt16();
             _BG2Y_L = reader.ReadUInt16();
@@ -330,6 +337,7 @@ namespace Iris.GBA
             _BG3PB = reader.ReadUInt16();
             _BG3PC = reader.ReadUInt16();
             _BG3PD = reader.ReadUInt16();
+
             _BG3X_L = reader.ReadUInt16();
             _BG3X_H = reader.ReadUInt16();
             _BG3Y_L = reader.ReadUInt16();
@@ -399,6 +407,7 @@ namespace Iris.GBA
             writer.Write(_BG2PB);
             writer.Write(_BG2PC);
             writer.Write(_BG2PD);
+
             writer.Write(_BG2X_L);
             writer.Write(_BG2X_H);
             writer.Write(_BG2Y_L);
@@ -408,6 +417,7 @@ namespace Iris.GBA
             writer.Write(_BG3PB);
             writer.Write(_BG3PC);
             writer.Write(_BG3PD);
+
             writer.Write(_BG3X_L);
             writer.Write(_BG3X_H);
             writer.Write(_BG3Y_L);
@@ -470,7 +480,7 @@ namespace Iris.GBA
                     Memory.WriteRegisterHelper(ref _DISPCNT, (UInt16)(value & 0xfff7), mode);
                     break;
                 case Register.DISPSTAT:
-                    Memory.WriteRegisterHelper(ref _DISPSTAT, (UInt16)((value & 0xff38) | (_DISPSTAT & ~0xff38)), mode);
+                    Memory.WriteRegisterHelper(ref _DISPSTAT, (UInt16)((value & 0xff38) | (_DISPSTAT & 0x0007)), mode);
                     break;
 
                 case Register.BG0CNT:
@@ -674,7 +684,7 @@ namespace Iris.GBA
                 // TODO: verify
                 0b110 or 0b111 => throw new Exception("Iris.GBA.Video: Unknown background mode"),
 
-                _ => throw new UnreachableException()
+                _ => throw new UnreachableException(),
             };
 
             if (offset >= objectCharacterDataOffset)

@@ -343,7 +343,7 @@ namespace Iris.GBA
                 0b01 => 64,
                 0b10 => 256,
                 0b11 => 1024,
-                _ => throw new UnreachableException()
+                _ => throw new UnreachableException(),
             };
         }
     }
