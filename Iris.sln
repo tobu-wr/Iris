@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.4.33205.214
+# Visual Studio Version 18
+VisualStudioVersion = 18.5.11723.231 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Iris.UserInterface", "Iris.UserInterface\Iris.UserInterface.csproj", "{5944569D-5CC4-4D74-8969-D880DFF366B4}"
 	ProjectSection(ProjectDependencies) = postProject
