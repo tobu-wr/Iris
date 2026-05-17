@@ -17,7 +17,7 @@ namespace Iris.CPU
         public delegate void Write16_Delegate(UInt32 address, UInt16 value);
         public delegate void Write32_Delegate(UInt32 address, UInt32 value);
 
-        public readonly record struct CallbackInterface
+        public readonly record struct MemoryInterface
         (
             Read8_Delegate Read8,
             Read16_Delegate Read16,
@@ -80,7 +80,7 @@ namespace Iris.CPU
         public UInt32 SPSR_svc, SPSR_abt, SPSR_und, SPSR_irq, SPSR_fiq;
 
         internal readonly Model _model;
-        internal readonly CallbackInterface _callbackInterface;
+        internal readonly MemoryInterface _memoryInterface;
 
         private readonly ARM_Interpreter _armInterpreter;
         private readonly THUMB_Interpreter _thumbInterpreter;
@@ -88,10 +88,10 @@ namespace Iris.CPU
         public UInt32 NextInstructionAddress;
         public Signal NIRQ;
 
-        public CPU_Core(Model model, CallbackInterface callbackInterface)
+        public CPU_Core(Model model, MemoryInterface memoryInterface)
         {
             _model = model;
-            _callbackInterface = callbackInterface;
+            _memoryInterface = memoryInterface;
             _armInterpreter = new(this);
             _thumbInterpreter = new(this);
         }
@@ -254,7 +254,7 @@ namespace Iris.CPU
                 return _thumbInterpreter.Step();
         }
 
-        public void SetCPSR(UInt32 value)
+        internal void SetCPSR(UInt32 value)
         {
             UInt32 previousMode = CPSR & ModeMask;
             UInt32 newMode = value & ModeMask;
@@ -393,6 +393,15 @@ namespace Iris.CPU
                         break;
                 }
             }
+        }
+
+        internal UInt64 HandleSWI()
+        {
+            Reg14_svc = NextInstructionAddress;
+            SPSR_svc = CPSR;
+            SetCPSR((CPSR & ~0xbfu) | 0x93u);
+            NextInstructionAddress = 0x08;
+            return 3;
         }
 
         internal UInt32 GetFlag(Flag flag)

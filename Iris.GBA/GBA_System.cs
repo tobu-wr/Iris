@@ -59,7 +59,7 @@ namespace Iris.GBA
 
         public GBA_System(PollInput_Delegate pollInputCallback, PresentFrame_Delegate presentFrameCallback)
         {
-            CPU.CPU_Core.CallbackInterface cpuCallbackInterface = new
+            CPU.CPU_Core.MemoryInterface cpuMemoryInterface = new
             (
                 _memory.Read8,
                 _memory.Read16,
@@ -69,7 +69,7 @@ namespace Iris.GBA
                 _memory.Write32
             );
 
-            _cpu = new(CPU.CPU_Core.Model.ARM7TDMI, cpuCallbackInterface);
+            _cpu = new(CPU.CPU_Core.Model.ARM7TDMI, cpuMemoryInterface);
             _timer = new(_scheduler);
             _dma = new(_scheduler);
             _keyInput = new(_scheduler, pollInputCallback);
