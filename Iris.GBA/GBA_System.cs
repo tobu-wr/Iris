@@ -49,7 +49,6 @@ namespace Iris.GBA
         private readonly InterruptControl _interruptControl = new();
         private readonly Memory _memory = new();
         private readonly Video _video;
-        private readonly BIOS _bios = new();
 
         private string _romHash;
         private bool _running;
@@ -82,14 +81,12 @@ namespace Iris.GBA
             _interruptControl.Initialize(_cpu);
             _memory.Initialize(_communication, _timer, _sound, _dma, _keyInput, _systemControl, _interruptControl, _video);
             _video.Initialize(_dma, _interruptControl, _memory);
-            _bios.Initialize(_cpu, _memory);
         }
 
         public override void Dispose()
         {
             _memory.Dispose();
             _video.Dispose();
-            _bios.Dispose();
         }
 
         public override void ResetState(bool skipIntro)
@@ -107,7 +104,23 @@ namespace Iris.GBA
             _memory.ResetState();
             _video.ResetState();
 
-            _bios.Reset(skipIntro);
+            if (skipIntro)
+            {
+                _cpu.Reg[CPU.CPU_Core.SP] = 0x300_7f00;
+                _cpu.Reg[CPU.CPU_Core.LR] = 0x800_0000;
+
+                _cpu.CPSR = 0x1f;
+
+                _cpu.Reg13_svc = 0x300_7fe0;
+                _cpu.Reg13_irq = 0x300_7fa0;
+
+                _cpu.NextInstructionAddress = 0x800_0000;
+            }
+            else
+            {
+                _cpu.CPSR = 0xd3;
+                _cpu.NextInstructionAddress = 0;
+            }
         }
 
         public override void LoadState(BinaryReader reader)

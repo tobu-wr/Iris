@@ -1,6 +1,7 @@
 ﻿using Iris.Common;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -36,6 +37,9 @@ namespace Iris.GBA
 
         private const int KB = 1024;
 
+        private const int BIOS_Size = 16 * KB;
+        private readonly IntPtr _bios = Marshal.AllocHGlobal(BIOS_Size);
+
         private const int EWRAM_Size = 256 * KB;
         private readonly IntPtr _ewram = Marshal.AllocHGlobal(EWRAM_Size);
 
@@ -47,6 +51,9 @@ namespace Iris.GBA
 
         //private const int EEPROM_Size = 8 * KB;
         //private IntPtr _eeprom;
+
+        private const UInt32 BIOS_StartAddress = 0x0000_0000;
+        private const UInt32 BIOS_EndAddress = 0x0000_4000;
 
         private const UInt32 EWRAM_StartAddress = 0x0200_0000;
         private const UInt32 EWRAM_EndAddress = 0x0300_0000;
@@ -96,6 +103,33 @@ namespace Iris.GBA
 
         private bool _disposed;
 
+        internal Memory()
+        {
+            Byte[] data;
+
+            try
+            {
+                data = File.ReadAllBytes("gba_bios.bin");
+            }
+            catch (FileNotFoundException)
+            {
+                throw new Exception("Iris.GBA.Memory: Could not find BIOS dump file");
+            }
+            catch
+            {
+                throw new Exception("Iris.GBA.Memory: Could not read BIOS dump file");
+            }
+
+            if (data.Length != BIOS_Size)
+                throw new Exception("Iris.GBA.Memory: Wrong BIOS size");
+
+            if (Convert.ToHexString(MD5.HashData(data)) != "A860E8C0B6D573D191E4EC7DB1B1E4F6")
+                throw new Exception("Iris.GBA.Memory: Wrong BIOS hash");
+
+            Marshal.Copy(data, 0, _bios, BIOS_Size);
+            Map(_bios, BIOS_Size, BIOS_StartAddress, BIOS_EndAddress, Flag.AllRead);
+        }
+
         ~Memory()
         {
             Dispose(false);
@@ -112,6 +146,7 @@ namespace Iris.GBA
             if (_disposed)
                 return;
 
+            Marshal.FreeHGlobal(_bios);
             Marshal.FreeHGlobal(_ewram);
             Marshal.FreeHGlobal(_iwram);
             Marshal.FreeHGlobal(_rom);
