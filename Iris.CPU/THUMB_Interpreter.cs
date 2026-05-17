@@ -1237,7 +1237,11 @@ namespace Iris.CPU
 
         private static UInt64 SWI(CPU_Core cpu, UInt16 instruction)
         {
-            return cpu._callbackInterface.HandleSWI();
+            cpu.Reg14_svc = cpu.NextInstructionAddress;
+            cpu.SPSR_svc = cpu.CPSR;
+            cpu.SetCPSR((cpu.CPSR & ~0xbfu) | 0x93u);
+            cpu.NextInstructionAddress = 0x08;
+            return 3;
         }
 
         private static UInt64 TST(CPU_Core cpu, UInt16 instruction)

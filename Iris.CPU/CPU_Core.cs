@@ -16,8 +16,6 @@ namespace Iris.CPU
         public delegate void Write8_Delegate(UInt32 address, Byte value);
         public delegate void Write16_Delegate(UInt32 address, UInt16 value);
         public delegate void Write32_Delegate(UInt32 address, UInt32 value);
-        public delegate UInt64 HandleSWI_Delegate();
-        public delegate UInt64 HandleIRQ_Delegate();
 
         public readonly record struct CallbackInterface
         (
@@ -26,9 +24,7 @@ namespace Iris.CPU
             Read32_Delegate Read32,
             Write8_Delegate Write8,
             Write16_Delegate Write16,
-            Write32_Delegate Write32,
-            HandleSWI_Delegate HandleSWI,
-            HandleIRQ_Delegate HandleIRQ
+            Write32_Delegate Write32
         );
 
         public enum Signal
@@ -49,13 +45,13 @@ namespace Iris.CPU
         {
             internal readonly T _mask = mask;
             internal readonly T _expected = expected;
-            internal unsafe readonly delegate*<CPU_Core, T, UInt64> _handler = handler;
+            internal readonly delegate*<CPU_Core, T, UInt64> _handler = handler;
             internal readonly List<Model> _modelList = modelList;
         }
 
         internal unsafe readonly struct InstructionLUTEntry<T>(delegate*<CPU_Core, T, UInt64> handler)
         {
-            internal unsafe readonly delegate*<CPU_Core, T, UInt64> _handler = handler;
+            internal readonly delegate*<CPU_Core, T, UInt64> _handler = handler;
         }
 
         internal const UInt32 ModeMask = 0b1_1111;
@@ -242,7 +238,13 @@ namespace Iris.CPU
             UInt32 i = (CPSR >> 7) & 1;
 
             if ((i == 0) && (NIRQ == Signal.Low))
-                return _callbackInterface.HandleIRQ();
+            {
+                Reg14_irq = NextInstructionAddress + 4;
+                SPSR_irq = CPSR;
+                SetCPSR((CPSR & ~0xbfu) | 0x92u);
+                NextInstructionAddress = 0x18;
+                return 3;
+            }
 
             UInt32 t = (CPSR >> 5) & 1;
 

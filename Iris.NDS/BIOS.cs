@@ -11,15 +11,5 @@
             _cpu.Reg[CPU.CPU_Core.PC] = ROMAddress;
             _cpu.NextInstructionAddress = ROMAddress;
         }
-
-        private UInt64 HandleSWI()
-        {
-            throw new NotImplementedException("Iris.NDS.Core.BIOS: HandleSWI unimplemented");
-        }
-
-        private UInt64 HandleIRQ()
-        {
-            throw new NotImplementedException("Iris.NDS.Core.BIOS: HandleIRQ unimplemented");
-        }
     }
 }

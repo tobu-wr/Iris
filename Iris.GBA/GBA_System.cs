@@ -66,9 +66,7 @@ namespace Iris.GBA
                 _memory.Read32,
                 _memory.Write8,
                 _memory.Write16,
-                _memory.Write32,
-                _bios.HandleSWI,
-                _bios.HandleIRQ
+                _memory.Write32
             );
 
             _cpu = new(CPU.CPU_Core.Model.ARM7TDMI, cpuCallbackInterface);
