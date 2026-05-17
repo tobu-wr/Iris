@@ -1,11 +1,12 @@
-﻿using System.Runtime.CompilerServices;
+﻿using Iris.Common;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Iris.GBA
 {
-    internal sealed class Memory : IDisposable
+    internal sealed partial class Memory : IDisposable
     {
         private Communication _communication;
         private Timer _timer;
@@ -64,7 +65,7 @@ namespace Iris.GBA
         private const UInt32 ROM_WaitState2_StartAddress = 0x0c00_0000;
         private const UInt32 ROM_WaitState2_EndAddress = 0x0e00_0000;
 
-        internal abstract class BackupMemory : IDisposable
+        private abstract class BackupMemory : IDisposable
         {
             public abstract void Dispose();
 
@@ -153,31 +154,18 @@ namespace Iris.GBA
 
         internal void LoadState(BinaryReader reader)
         {
-            void LoadData(IntPtr destination, int size)
-            {
-                byte[] data = reader.ReadBytes(size);
-                Marshal.Copy(data, 0, destination, size);
-            }
-
-            LoadData(_ewram, EWRAM_Size);
-            LoadData(_iwram, IWRAM_Size);
-            //LoadData(_eeprom, EEPROM_Size);
+            reader.ReadData(_ewram, EWRAM_Size);
+            reader.ReadData(_iwram, IWRAM_Size);
+            //reader.ReadData(_eeprom, EEPROM_Size);
 
             _backupMemory?.LoadState(reader);
         }
 
         internal void SaveState(BinaryWriter writer)
         {
-            void SaveData(IntPtr source, int size)
-            {
-                byte[] data = new byte[size];
-                Marshal.Copy(source, data, 0, size);
-                writer.Write(data);
-            }
-
-            SaveData(_ewram, EWRAM_Size);
-            SaveData(_iwram, IWRAM_Size);
-            //SaveData(_eeprom, EEPROM_Size);
+            writer.WriteData(_ewram, EWRAM_Size);
+            writer.WriteData(_iwram, IWRAM_Size);
+            //writer.WriteData(_eeprom, EEPROM_Size);
 
             _backupMemory?.SaveState(writer);
         }

@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using Iris.Common;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -294,13 +295,9 @@ namespace Iris.GBA
 
         internal void LoadState(BinaryReader reader)
         {
-            byte[] paletteRamData = reader.ReadBytes(PaletteRAM_Size);
-            byte[] vramData = reader.ReadBytes(VRAM_Size);
-            byte[] oamData = reader.ReadBytes(OAM_Size);
-
-            Marshal.Copy(paletteRamData, 0, _paletteRAM, PaletteRAM_Size);
-            Marshal.Copy(vramData, 0, _vram, VRAM_Size);
-            Marshal.Copy(oamData, 0, _oam, OAM_Size);
+            reader.ReadData(_paletteRAM, PaletteRAM_Size);
+            reader.ReadData(_vram, VRAM_Size);
+            reader.ReadData(_oam, OAM_Size);
 
             _DISPCNT = reader.ReadUInt16();
             _DISPSTAT = reader.ReadUInt16();
@@ -370,17 +367,9 @@ namespace Iris.GBA
 
         internal void SaveState(BinaryWriter writer)
         {
-            byte[] paletteRamData = new byte[PaletteRAM_Size];
-            byte[] vramData = new byte[VRAM_Size];
-            byte[] oamData = new byte[OAM_Size];
-
-            Marshal.Copy(_paletteRAM, paletteRamData, 0, PaletteRAM_Size);
-            Marshal.Copy(_vram, vramData, 0, VRAM_Size);
-            Marshal.Copy(_oam, oamData, 0, OAM_Size);
-
-            writer.Write(paletteRamData);
-            writer.Write(vramData);
-            writer.Write(oamData);
+            writer.WriteData(_paletteRAM, PaletteRAM_Size);
+            writer.WriteData(_vram, VRAM_Size);
+            writer.WriteData(_oam, OAM_Size);
 
             writer.Write(_DISPCNT);
             writer.Write(_DISPSTAT);
