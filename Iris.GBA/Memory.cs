@@ -127,7 +127,10 @@ namespace Iris.GBA
                 throw new Exception("Iris.GBA.Memory: Wrong BIOS hash");
 
             Marshal.Copy(data, 0, _bios, BIOS_Size);
+
             Map(_bios, BIOS_Size, BIOS_StartAddress, BIOS_EndAddress, Flag.AllRead);
+            Map(_ewram, EWRAM_Size, EWRAM_StartAddress, EWRAM_EndAddress, Flag.All);
+            Map(_iwram, IWRAM_Size, IWRAM_StartAddress, IWRAM_EndAddress, Flag.All);
         }
 
         ~Memory()
@@ -168,9 +171,6 @@ namespace Iris.GBA
             _systemControl = systemControl;
             _interruptControl = interruptControl;
             _video = video;
-
-            Map(_ewram, EWRAM_Size, EWRAM_StartAddress, EWRAM_EndAddress, Flag.All);
-            Map(_iwram, IWRAM_Size, IWRAM_StartAddress, IWRAM_EndAddress, Flag.All);
         }
 
         internal void ResetState()

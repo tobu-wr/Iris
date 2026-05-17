@@ -153,10 +153,9 @@ namespace Iris.GBA
         private const UInt64 HDrawCycleCount = 1006;
         private const UInt64 HBlankCycleCount = 226;
 
-        private readonly Common.Scheduler _scheduler;
+        private readonly Scheduler _scheduler;
         private readonly Common.System.PresentFrame_Delegate _presentFrameCallback;
 
-        private DMA _dma;
         private InterruptControl _interruptControl;
 
         private bool _disposed;
@@ -169,7 +168,7 @@ namespace Iris.GBA
         private Int32 _currentBG3X;
         private Int32 _currentBG3Y;
 
-        internal Video(Common.Scheduler scheduler, Common.System.PresentFrame_Delegate presentFrameCallback)
+        internal Video(Scheduler scheduler, Common.System.PresentFrame_Delegate presentFrameCallback)
         {
             _scheduler = scheduler;
             _presentFrameCallback = presentFrameCallback;
@@ -196,9 +195,8 @@ namespace Iris.GBA
             _disposed = true;
         }
 
-        internal void Initialize(DMA dma, InterruptControl interruptControl, Memory memory)
+        internal void Initialize(InterruptControl interruptControl, Memory memory)
         {
-            _dma = dma;
             _interruptControl = interruptControl;
 
             const Memory.Flag flags = Memory.Flag.All & ~Memory.Flag.Write8;
