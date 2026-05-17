@@ -83,7 +83,7 @@ namespace Iris.GBA
                     break;
 
                 case Register.IF:
-                    _IF &= (mode) switch
+                    _IF &= mode switch
                     {
                         Memory.RegisterWriteMode.LowByte => (UInt16)~value,
                         Memory.RegisterWriteMode.HighByte => (UInt16)~(value << 8),

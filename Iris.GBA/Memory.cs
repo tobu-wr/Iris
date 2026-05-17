@@ -9,45 +9,37 @@ namespace Iris.GBA
 {
     internal sealed partial class Memory : IDisposable
     {
-        private Communication _communication;
-        private Timer _timer;
-        private Sound _sound;
-        private DMA _dma;
-        private KeyInput _keyInput;
-        private SystemControl _systemControl;
-        private InterruptControl _interruptControl;
-        private Video _video;
-
-        [Flags]
-        internal enum Flag
-        {
-            Read8 = 1 << 0,
-            Read16 = 1 << 1,
-            Read32 = 1 << 2,
-            Write8 = 1 << 3,
-            Write16 = 1 << 4,
-            Write32 = 1 << 5,
-            Mirrored = 1 << 6,
-
-            None = 0,
-            AllRead = Read8 | Read16 | Read32,
-            AllWrite = Write8 | Write16 | Write32,
-            All = AllRead | AllWrite | Mirrored,
-        }
-
         private const int KB = 1024;
 
         private const int BIOS_Size = 16 * KB;
-        private readonly IntPtr _bios = Marshal.AllocHGlobal(BIOS_Size);
-
         private const int EWRAM_Size = 256 * KB;
-        private readonly IntPtr _ewram = Marshal.AllocHGlobal(EWRAM_Size);
-
         private const int IWRAM_Size = 32 * KB;
+
+        private readonly IntPtr _bios = Marshal.AllocHGlobal(BIOS_Size);
+        private readonly IntPtr _ewram = Marshal.AllocHGlobal(EWRAM_Size);
         private readonly IntPtr _iwram = Marshal.AllocHGlobal(IWRAM_Size);
 
         private int _romSize;
         private IntPtr _rom;
+
+        private abstract class BackupMemory : IDisposable
+        {
+            public abstract void Dispose();
+
+            internal abstract void ResetState();
+            internal abstract void LoadState(BinaryReader reader);
+            internal abstract void SaveState(BinaryWriter writer);
+
+            internal abstract Byte Read8(UInt32 address);
+            internal abstract UInt16 Read16(UInt32 address);
+            internal abstract UInt32 Read32(UInt32 address);
+
+            internal abstract void Write8(UInt32 address, Byte value);
+            internal abstract void Write16(UInt32 address, UInt16 value);
+            internal abstract void Write32(UInt32 address, UInt32 value);
+        }
+
+        private BackupMemory _backupMemory;
 
         //private const int EEPROM_Size = 8 * KB;
         //private IntPtr _eeprom;
@@ -72,24 +64,22 @@ namespace Iris.GBA
         private const UInt32 ROM_WaitState2_StartAddress = 0x0c00_0000;
         private const UInt32 ROM_WaitState2_EndAddress = 0x0e00_0000;
 
-        private abstract class BackupMemory : IDisposable
+        [Flags]
+        internal enum Flag
         {
-            public abstract void Dispose();
+            Read8 = 1 << 0,
+            Read16 = 1 << 1,
+            Read32 = 1 << 2,
+            Write8 = 1 << 3,
+            Write16 = 1 << 4,
+            Write32 = 1 << 5,
+            Mirrored = 1 << 6,
 
-            internal abstract void ResetState();
-            internal abstract void LoadState(BinaryReader reader);
-            internal abstract void SaveState(BinaryWriter writer);
-
-            internal abstract Byte Read8(UInt32 address);
-            internal abstract UInt16 Read16(UInt32 address);
-            internal abstract UInt32 Read32(UInt32 address);
-
-            internal abstract void Write8(UInt32 address, Byte value);
-            internal abstract void Write16(UInt32 address, UInt16 value);
-            internal abstract void Write32(UInt32 address, UInt32 value);
+            None = 0,
+            AllRead = Read8 | Read16 | Read32,
+            AllWrite = Write8 | Write16 | Write32,
+            All = AllRead | AllWrite | Mirrored,
         }
-
-        private BackupMemory _backupMemory;
 
         private const int PageSize = 1 * KB;
         private const int PageTableSize = 1 << 18;
@@ -101,32 +91,21 @@ namespace Iris.GBA
         private readonly IntPtr[] _write16PageTable = new IntPtr[PageTableSize];
         private readonly IntPtr[] _write32PageTable = new IntPtr[PageTableSize];
 
+        private Communication _communication;
+        private Timer _timer;
+        private Sound _sound;
+        private DMA _dma;
+        private KeyInput _keyInput;
+        private SystemControl _systemControl;
+        private InterruptControl _interruptControl;
+        private Video _video;
+
         private bool _disposed;
 
         internal Memory()
         {
-            Byte[] data;
-
-            try
-            {
-                data = File.ReadAllBytes("gba_bios.bin");
-            }
-            catch (FileNotFoundException)
-            {
-                throw new Exception("Iris.GBA.Memory: Could not find BIOS dump file");
-            }
-            catch
-            {
-                throw new Exception("Iris.GBA.Memory: Could not read BIOS dump file");
-            }
-
-            if (data.Length != BIOS_Size)
-                throw new Exception("Iris.GBA.Memory: Wrong BIOS size");
-
-            if (Convert.ToHexString(MD5.HashData(data)) != "A860E8C0B6D573D191E4EC7DB1B1E4F6")
-                throw new Exception("Iris.GBA.Memory: Wrong BIOS hash");
-
-            Marshal.Copy(data, 0, _bios, BIOS_Size);
+            LoadBIOS();
+            // TODO : LoadROM();
 
             Map(_bios, BIOS_Size, BIOS_StartAddress, BIOS_EndAddress, Flag.AllRead);
             Map(_ewram, EWRAM_Size, EWRAM_StartAddress, EWRAM_EndAddress, Flag.All);
@@ -251,6 +230,32 @@ namespace Iris.GBA
                     _write32PageTable[pageTableIndex] = IntPtr.Zero;
                 }
             }
+        }
+
+        private void LoadBIOS()
+        {
+            Byte[] data;
+
+            try
+            {
+                data = File.ReadAllBytes("gba_bios.bin");
+            }
+            catch (FileNotFoundException)
+            {
+                throw new Exception("Iris.GBA.Memory: Could not find BIOS dump file");
+            }
+            catch
+            {
+                throw new Exception("Iris.GBA.Memory: Could not read BIOS dump file");
+            }
+
+            if (data.Length != BIOS_Size)
+                throw new Exception("Iris.GBA.Memory: Wrong BIOS size");
+
+            if (Convert.ToHexString(MD5.HashData(data)) != "A860E8C0B6D573D191E4EC7DB1B1E4F6")
+                throw new Exception("Iris.GBA.Memory: Wrong BIOS hash");
+
+            Marshal.Copy(data, 0, _bios, BIOS_Size);
         }
 
         internal void LoadROM(byte[] data)
