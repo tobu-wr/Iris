@@ -1,7 +1,5 @@
-﻿using Iris.Common;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace Iris.GBA
 {
@@ -12,7 +10,7 @@ namespace Iris.GBA
             private const int KB = 1024;
             private const int BankSize = 64 * KB;
 
-            private readonly IntPtr _data = Marshal.AllocHGlobal((int)size);
+            private readonly Common.MemoryBlock _memoryBlock = new((int)size);
 
             private const UInt32 StartAddress = 0x0e00_0000;
 
@@ -36,30 +34,14 @@ namespace Iris.GBA
             private bool _eraseCommand;
             private Byte _bank;
 
-            private bool _disposed;
-
-            ~FLASH()
-            {
-                Dispose();
-            }
-
             public override void Dispose()
             {
-                if (_disposed)
-                    return;
-
-                Marshal.FreeHGlobal(_data);
-
-                GC.SuppressFinalize(this);
-                _disposed = true;
+                _memoryBlock.Dispose();
             }
 
             internal override void ResetState()
             {
-                unsafe
-                {
-                    NativeMemory.Fill((Byte*)_data, (nuint)size, 0xff);
-                }
+                _memoryBlock.Fill(0xff);
 
                 _state = State.Idle;
                 _idMode = false;
@@ -69,7 +51,7 @@ namespace Iris.GBA
 
             internal override void LoadState(BinaryReader reader)
             {
-                reader.ReadData(_data, (int)size);
+                _memoryBlock.LoadState(reader);
 
                 _state = (State)reader.ReadInt32();
                 _idMode = reader.ReadBoolean();
@@ -79,7 +61,7 @@ namespace Iris.GBA
 
             internal override void SaveState(BinaryWriter writer)
             {
-                writer.WriteData(_data, (int)size);
+                _memoryBlock.SaveState(writer);
 
                 writer.Write((int)_state);
                 writer.Write(_idMode);
@@ -114,7 +96,7 @@ namespace Iris.GBA
 
                 unsafe
                 {
-                    return Unsafe.Read<Byte>((Byte*)_data + (_bank * BankSize) + offset);
+                    return Unsafe.Read<Byte>((Byte*)_memoryBlock.Data + (_bank * BankSize) + offset);
                 }
             }
 
@@ -169,10 +151,7 @@ namespace Iris.GBA
                                 case 0x10:
                                     if (_eraseCommand)
                                     {
-                                        unsafe
-                                        {
-                                            NativeMemory.Fill((Byte*)_data, (nuint)size, 0xff);
-                                        }
+                                        _memoryBlock.Fill(0xff);
 
                                         _eraseCommand = false;
                                         _state = State.Idle;
@@ -190,10 +169,7 @@ namespace Iris.GBA
                         }
                         else if (((offset & 0xfff) == 0) && (value == 0x30) && _eraseCommand)
                         {
-                            unsafe
-                            {
-                                NativeMemory.Fill((Byte*)_data + (_bank * BankSize) + offset, 0x1000, 0xff);
-                            }
+                            _memoryBlock.Fill((UInt32)(_bank * BankSize) + offset, 0x1000, 0xff);
 
                             _eraseCommand = false;
                             _state = State.Idle;
@@ -203,7 +179,7 @@ namespace Iris.GBA
                     case State.WriteByte:
                         unsafe
                         {
-                            Unsafe.Write((Byte*)_data + (_bank * BankSize) + offset, value);
+                            Unsafe.Write((Byte*)_memoryBlock.Data + (_bank * BankSize) + offset, value);
                         }
 
                         _state = State.Idle;

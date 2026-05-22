@@ -1,6 +1,4 @@
-﻿using Iris.Common;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.CompilerServices;
 
 namespace Iris.GBA
 {
@@ -9,61 +7,44 @@ namespace Iris.GBA
         private sealed class SRAM : BackupMemory
         {
             private const int KB = 1024;
-            private const int Size = 64 * KB;
-            private readonly IntPtr _data = Marshal.AllocHGlobal(Size);
+            private readonly Common.MemoryBlock _memoryBlock = new(64 * KB);
 
             private const UInt32 StartAddress = 0x0e00_0000;
             private const UInt32 EndAddress = 0x1000_0000;
 
-            private bool _disposed;
-
             internal SRAM(Memory memory)
             {
                 const Flag flags = Flag.Read8 | Flag.Write8 | Flag.Mirrored;
-                memory.Map(_data, Size, StartAddress, EndAddress, flags);
-            }
-
-            ~SRAM()
-            {
-                Dispose();
+                memory.Map(_memoryBlock.Data, _memoryBlock.Size, StartAddress, EndAddress, flags);
             }
 
             public override void Dispose()
             {
-                if (_disposed)
-                    return;
-
-                Marshal.FreeHGlobal(_data);
-
-                GC.SuppressFinalize(this);
-                _disposed = true;
+                _memoryBlock.Dispose();
             }
 
             internal override void ResetState()
             {
-                unsafe
-                {
-                    NativeMemory.Fill((Byte*)_data, Size, 0xff);
-                }
+                _memoryBlock.Fill(0xff);
             }
 
             internal override void LoadState(BinaryReader reader)
             {
-                reader.ReadData(_data, Size);
+                _memoryBlock.LoadState(reader);
             }
 
             internal override void SaveState(BinaryWriter writer)
             {
-                writer.WriteData(_data, Size);
+                _memoryBlock.SaveState(writer);
             }
 
             internal override Byte Read8(UInt32 address)
             {
-                UInt32 offset = (address - StartAddress) % Size;
+                UInt32 offset = (address - StartAddress) % (UInt32)_memoryBlock.Size;
 
                 unsafe
                 {
-                    return Unsafe.Read<Byte>((Byte*)_data + offset);
+                    return Unsafe.Read<Byte>((Byte*)_memoryBlock.Data + offset);
                 }
             }
 
@@ -81,11 +62,11 @@ namespace Iris.GBA
 
             internal override void Write8(UInt32 address, Byte value)
             {
-                UInt32 offset = (address - StartAddress) % Size;
+                UInt32 offset = (address - StartAddress) % (UInt32)_memoryBlock.Size;
 
                 unsafe
                 {
-                    Unsafe.Write((Byte*)_data + offset, value);
+                    Unsafe.Write((Byte*)_memoryBlock.Data + offset, value);
                 }
             }
 

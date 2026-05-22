@@ -1,5 +1,4 @@
-﻿using Iris.Common;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -11,16 +10,11 @@ namespace Iris.GBA
     {
         private const int KB = 1024;
 
-        private const int BIOS_Size = 16 * KB;
-        private const int EWRAM_Size = 256 * KB;
-        private const int IWRAM_Size = 32 * KB;
+        private readonly Common.MemoryBlock _bios = new(16 * KB);
+        private readonly Common.MemoryBlock _ewram = new(256 * KB);
+        private readonly Common.MemoryBlock _iwram = new(32 * KB);
 
-        private readonly IntPtr _bios = Marshal.AllocHGlobal(BIOS_Size);
-        private readonly IntPtr _ewram = Marshal.AllocHGlobal(EWRAM_Size);
-        private readonly IntPtr _iwram = Marshal.AllocHGlobal(IWRAM_Size);
-
-        private int _romSize;
-        private IntPtr _rom;
+        private Common.MemoryBlock _rom;
 
         private abstract class BackupMemory : IDisposable
         {
@@ -41,8 +35,7 @@ namespace Iris.GBA
 
         private BackupMemory _backupMemory;
 
-        //private const int EEPROM_Size = 8 * KB;
-        //private IntPtr _eeprom;
+        //private Common.MemoryBlock _eeprom = new(8 * KB);
 
         private const UInt32 BIOS_StartAddress = 0x0000_0000;
         private const UInt32 BIOS_EndAddress = 0x0000_4000;
@@ -100,44 +93,25 @@ namespace Iris.GBA
         private InterruptControl _interruptControl;
         private Video _video;
 
-        private bool _disposed;
-
         internal Memory()
         {
             LoadBIOS();
             // TODO : LoadROM();
 
-            Map(_bios, BIOS_Size, BIOS_StartAddress, BIOS_EndAddress, Flag.AllRead);
-            Map(_ewram, EWRAM_Size, EWRAM_StartAddress, EWRAM_EndAddress, Flag.All);
-            Map(_iwram, IWRAM_Size, IWRAM_StartAddress, IWRAM_EndAddress, Flag.All);
-        }
-
-        ~Memory()
-        {
-            Dispose(false);
+            Map(_bios.Data, _bios.Size, BIOS_StartAddress, BIOS_EndAddress, Flag.AllRead);
+            Map(_ewram.Data, _ewram.Size, EWRAM_StartAddress, EWRAM_EndAddress, Flag.All);
+            Map(_iwram.Data, _iwram.Size, IWRAM_StartAddress, IWRAM_EndAddress, Flag.All);
         }
 
         public void Dispose()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
+            _bios.Dispose();
+            _ewram.Dispose();
+            _iwram.Dispose();
+            _rom.Dispose();
+            //_eeprom?.Dispose();
 
-        private void Dispose(bool disposing)
-        {
-            if (_disposed)
-                return;
-
-            Marshal.FreeHGlobal(_bios);
-            Marshal.FreeHGlobal(_ewram);
-            Marshal.FreeHGlobal(_iwram);
-            Marshal.FreeHGlobal(_rom);
-            //Marshal.FreeHGlobal(_eeprom);
-
-            if (disposing)
-                _backupMemory?.Dispose();
-
-            _disposed = true;
+            _backupMemory?.Dispose();
         }
 
         internal void Initialize(Communication communication, Timer timer, Sound sound, DMA dma, KeyInput keyInput, SystemControl systemControl, InterruptControl interruptControl, Video video)
@@ -154,32 +128,27 @@ namespace Iris.GBA
 
         internal void ResetState()
         {
-            unsafe
-            {
-                NativeMemory.Clear((Byte*)_ewram, EWRAM_Size);
-                NativeMemory.Clear((Byte*)_iwram, IWRAM_Size);
-
-                //if (_eeprom != IntPtr.Zero)
-                //    NativeMemory.Clear((Byte*)_eeprom, EEPROM_Size);
-            }
+            _ewram.Clear();
+            _iwram.Clear();
+            //_eeprom?.Clear();
 
             _backupMemory?.ResetState();
         }
 
         internal void LoadState(BinaryReader reader)
         {
-            reader.ReadData(_ewram, EWRAM_Size);
-            reader.ReadData(_iwram, IWRAM_Size);
-            //reader.ReadData(_eeprom, EEPROM_Size);
+            _ewram.LoadState(reader);
+            _iwram.LoadState(reader);
+            //_eeprom?.LoadState(reader);
 
             _backupMemory?.LoadState(reader);
         }
 
         internal void SaveState(BinaryWriter writer)
         {
-            writer.WriteData(_ewram, EWRAM_Size);
-            writer.WriteData(_iwram, IWRAM_Size);
-            //writer.WriteData(_eeprom, EEPROM_Size);
+            _ewram.SaveState(writer);
+            _iwram.SaveState(writer);
+            //_eeprom?.SaveState(writer);
 
             _backupMemory?.SaveState(writer);
         }
@@ -249,26 +218,25 @@ namespace Iris.GBA
                 throw new Exception("Iris.GBA.Memory: Could not read BIOS dump file");
             }
 
-            if (data.Length != BIOS_Size)
-                throw new Exception("Iris.GBA.Memory: Wrong BIOS size");
+            if (data.Length != _bios.Size)
+                throw new Exception("Iris.GBA.Memory: Wrong BIOS dump file size");
 
             if (Convert.ToHexString(MD5.HashData(data)) != "A860E8C0B6D573D191E4EC7DB1B1E4F6")
-                throw new Exception("Iris.GBA.Memory: Wrong BIOS hash");
+                throw new Exception("Iris.GBA.Memory: Wrong BIOS dump file hash");
 
-            Marshal.Copy(data, 0, _bios, BIOS_Size);
+            Marshal.Copy(data, 0, _bios.Data, _bios.Size);
         }
 
         internal void LoadROM(byte[] data)
         {
-            _romSize = data.Length;
-            _rom = Marshal.AllocHGlobal(_romSize);
-            Marshal.Copy(data, 0, _rom, _romSize);
+            _rom = new(data.Length);
+            Marshal.Copy(data, 0, _rom.Data, _rom.Size);
 
-            Map(_rom, _romSize, ROM_WaitState0_StartAddress, ROM_WaitState0_EndAddress, Flag.AllRead);
-            Map(_rom, _romSize, ROM_WaitState1_StartAddress, ROM_WaitState1_EndAddress, Flag.AllRead);
-            Map(_rom, _romSize, ROM_WaitState2_StartAddress, ROM_WaitState2_EndAddress, Flag.AllRead);
+            Map(_rom.Data, _rom.Size, ROM_WaitState0_StartAddress, ROM_WaitState0_EndAddress, Flag.AllRead);
+            Map(_rom.Data, _rom.Size, ROM_WaitState1_StartAddress, ROM_WaitState1_EndAddress, Flag.AllRead);
+            Map(_rom.Data, _rom.Size, ROM_WaitState2_StartAddress, ROM_WaitState2_EndAddress, Flag.AllRead);
 
-            string saveTypeString = Regex.Match(Encoding.ASCII.GetString(data, 0, _romSize), "EEPROM|SRAM|FLASH_|FLASH512|FLASH1M", RegexOptions.Compiled).ToString();
+            string saveTypeString = Regex.Match(Encoding.ASCII.GetString(data, 0, _rom.Size), "EEPROM|SRAM|FLASH_|FLASH512|FLASH1M", RegexOptions.Compiled).ToString();
 
             switch (saveTypeString)
             {
@@ -516,11 +484,11 @@ namespace Iris.GBA
                     {
                         UInt32 offset = address - ROM_WaitState0_StartAddress;
 
-                        if (offset < _romSize)
+                        if (offset < _rom.Size)
                         {
                             unsafe
                             {
-                                return Unsafe.Read<Byte>((Byte*)_rom + offset);
+                                return Unsafe.Read<Byte>((Byte*)_rom.Data + offset);
                             }
                         }
                     }
@@ -532,11 +500,11 @@ namespace Iris.GBA
                     {
                         UInt32 offset = address - ROM_WaitState1_StartAddress;
 
-                        if (offset < _romSize)
+                        if (offset < _rom.Size)
                         {
                             unsafe
                             {
-                                return Unsafe.Read<Byte>((Byte*)_rom + offset);
+                                return Unsafe.Read<Byte>((Byte*)_rom.Data + offset);
                             }
                         }
                     }
@@ -548,11 +516,11 @@ namespace Iris.GBA
                     {
                         UInt32 offset = address - ROM_WaitState2_StartAddress;
 
-                        if (offset < _romSize)
+                        if (offset < _rom.Size)
                         {
                             unsafe
                             {
-                                return Unsafe.Read<Byte>((Byte*)_rom + offset);
+                                return Unsafe.Read<Byte>((Byte*)_rom.Data + offset);
                             }
                         }
                     }
@@ -668,11 +636,11 @@ namespace Iris.GBA
                     {
                         UInt32 offset = alignedAddress - ROM_WaitState0_StartAddress;
 
-                        if (offset < _romSize)
+                        if (offset < _rom.Size)
                         {
                             unsafe
                             {
-                                return Unsafe.Read<UInt16>((Byte*)_rom + offset);
+                                return Unsafe.Read<UInt16>((Byte*)_rom.Data + offset);
                             }
                         }
                     }
@@ -684,11 +652,11 @@ namespace Iris.GBA
                     {
                         UInt32 offset = alignedAddress - ROM_WaitState1_StartAddress;
 
-                        if (offset < _romSize)
+                        if (offset < _rom.Size)
                         {
                             unsafe
                             {
-                                return Unsafe.Read<UInt16>((Byte*)_rom + offset);
+                                return Unsafe.Read<UInt16>((Byte*)_rom.Data + offset);
                             }
                         }
                     }
@@ -700,11 +668,11 @@ namespace Iris.GBA
                     {
                         UInt32 offset = alignedAddress - ROM_WaitState2_StartAddress;
 
-                        if (offset < _romSize)
+                        if (offset < _rom.Size)
                         {
                             unsafe
                             {
-                                return Unsafe.Read<UInt16>((Byte*)_rom + offset);
+                                return Unsafe.Read<UInt16>((Byte*)_rom.Data + offset);
                             }
                         }
                     }
@@ -772,11 +740,11 @@ namespace Iris.GBA
                     {
                         UInt32 offset = alignedAddress - ROM_WaitState0_StartAddress;
 
-                        if (offset < _romSize)
+                        if (offset < _rom.Size)
                         {
                             unsafe
                             {
-                                return Unsafe.Read<UInt32>((Byte*)_rom + offset);
+                                return Unsafe.Read<UInt32>((Byte*)_rom.Data + offset);
                             }
                         }
                     }
@@ -788,11 +756,11 @@ namespace Iris.GBA
                     {
                         UInt32 offset = alignedAddress - ROM_WaitState1_StartAddress;
 
-                        if (offset < _romSize)
+                        if (offset < _rom.Size)
                         {
                             unsafe
                             {
-                                return Unsafe.Read<UInt32>((Byte*)_rom + offset);
+                                return Unsafe.Read<UInt32>((Byte*)_rom.Data + offset);
                             }
                         }
                     }
@@ -804,11 +772,11 @@ namespace Iris.GBA
                     {
                         UInt32 offset = alignedAddress - ROM_WaitState2_StartAddress;
 
-                        if (offset < _romSize)
+                        if (offset < _rom.Size)
                         {
                             unsafe
                             {
-                                return Unsafe.Read<UInt32>((Byte*)_rom + offset);
+                                return Unsafe.Read<UInt32>((Byte*)_rom.Data + offset);
                             }
                         }
                     }
