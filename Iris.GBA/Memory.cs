@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+﻿using Iris.Common;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -10,11 +9,11 @@ namespace Iris.GBA
     {
         private const int KB = 1024;
 
-        private readonly Common.MemoryBlock _bios = new(16 * KB);
-        private readonly Common.MemoryBlock _ewram = new(256 * KB);
-        private readonly Common.MemoryBlock _iwram = new(32 * KB);
+        private readonly MemoryBlock _bios = new(16 * KB);
+        private readonly MemoryBlock _ewram = new(256 * KB);
+        private readonly MemoryBlock _iwram = new(32 * KB);
 
-        private Common.MemoryBlock _rom;
+        private MemoryBlock _rom;
 
         private abstract class BackupMemory : IDisposable
         {
@@ -35,7 +34,7 @@ namespace Iris.GBA
 
         private BackupMemory _backupMemory;
 
-        //private Common.MemoryBlock _eeprom = new(8 * KB);
+        //private MemoryBlock _eeprom = new(8 * KB);
 
         private const UInt32 BIOS_StartAddress = 0x0000_0000;
         private const UInt32 BIOS_EndAddress = 0x0000_4000;
@@ -218,19 +217,16 @@ namespace Iris.GBA
                 throw new Exception("Iris.GBA.Memory: Could not read BIOS dump file");
             }
 
-            if (data.Length != _bios.Size)
-                throw new Exception("Iris.GBA.Memory: Wrong BIOS dump file size");
-
             if (Convert.ToHexString(MD5.HashData(data)) != "A860E8C0B6D573D191E4EC7DB1B1E4F6")
-                throw new Exception("Iris.GBA.Memory: Wrong BIOS dump file hash");
+                throw new Exception("Iris.GBA.Memory: Wrong BIOS hash");
 
-            Marshal.Copy(data, 0, _bios.Data, _bios.Size);
+            _bios.CopyFrom(data);
         }
 
         internal void LoadROM(byte[] data)
         {
             _rom = new(data.Length);
-            Marshal.Copy(data, 0, _rom.Data, _rom.Size);
+            _rom.CopyFrom(data);
 
             Map(_rom.Data, _rom.Size, ROM_WaitState0_StartAddress, ROM_WaitState0_EndAddress, Flag.AllRead);
             Map(_rom.Data, _rom.Size, ROM_WaitState1_StartAddress, ROM_WaitState1_EndAddress, Flag.AllRead);
@@ -273,12 +269,7 @@ namespace Iris.GBA
             IntPtr page = _read8PageTable[GetPageIndex(address)];
 
             if (page != IntPtr.Zero)
-            {
-                unsafe
-                {
-                    return Unsafe.Read<Byte>((Byte*)page + GetPageOffset(address));
-                }
-            }
+                return Pointer.Read<Byte>(page, GetPageOffset(address));
 
             switch (address >> 24)
             {
@@ -485,12 +476,7 @@ namespace Iris.GBA
                         UInt32 offset = address - ROM_WaitState0_StartAddress;
 
                         if (offset < _rom.Size)
-                        {
-                            unsafe
-                            {
-                                return Unsafe.Read<Byte>((Byte*)_rom.Data + offset);
-                            }
-                        }
+                            return _rom.Read<Byte>(offset);
                     }
                     break;
 
@@ -501,12 +487,7 @@ namespace Iris.GBA
                         UInt32 offset = address - ROM_WaitState1_StartAddress;
 
                         if (offset < _rom.Size)
-                        {
-                            unsafe
-                            {
-                                return Unsafe.Read<Byte>((Byte*)_rom.Data + offset);
-                            }
-                        }
+                            return _rom.Read<Byte>(offset);
                     }
                     break;
 
@@ -517,12 +498,7 @@ namespace Iris.GBA
                         UInt32 offset = address - ROM_WaitState2_StartAddress;
 
                         if (offset < _rom.Size)
-                        {
-                            unsafe
-                            {
-                                return Unsafe.Read<Byte>((Byte*)_rom.Data + offset);
-                            }
-                        }
+                            return _rom.Read<Byte>(offset);
                     }
                     break;
 
@@ -544,12 +520,7 @@ namespace Iris.GBA
             IntPtr page = _read16PageTable[GetPageIndex(alignedAddress)];
 
             if (page != IntPtr.Zero)
-            {
-                unsafe
-                {
-                    return Unsafe.Read<UInt16>((Byte*)page + GetPageOffset(alignedAddress));
-                }
-            }
+                return Pointer.Read<UInt16>(page, GetPageOffset(alignedAddress));
 
             address &= 0x0fff_ffff;
 
@@ -637,12 +608,7 @@ namespace Iris.GBA
                         UInt32 offset = alignedAddress - ROM_WaitState0_StartAddress;
 
                         if (offset < _rom.Size)
-                        {
-                            unsafe
-                            {
-                                return Unsafe.Read<UInt16>((Byte*)_rom.Data + offset);
-                            }
-                        }
+                            return _rom.Read<UInt16>(offset);
                     }
                     break;
 
@@ -653,12 +619,7 @@ namespace Iris.GBA
                         UInt32 offset = alignedAddress - ROM_WaitState1_StartAddress;
 
                         if (offset < _rom.Size)
-                        {
-                            unsafe
-                            {
-                                return Unsafe.Read<UInt16>((Byte*)_rom.Data + offset);
-                            }
-                        }
+                            return _rom.Read<UInt16>(offset);
                     }
                     break;
 
@@ -669,12 +630,7 @@ namespace Iris.GBA
                         UInt32 offset = alignedAddress - ROM_WaitState2_StartAddress;
 
                         if (offset < _rom.Size)
-                        {
-                            unsafe
-                            {
-                                return Unsafe.Read<UInt16>((Byte*)_rom.Data + offset);
-                            }
-                        }
+                            return _rom.Read<UInt16>(offset);
                     }
                     break;
 
@@ -696,12 +652,7 @@ namespace Iris.GBA
             IntPtr page = _read32PageTable[GetPageIndex(alignedAddress)];
 
             if (page != IntPtr.Zero)
-            {
-                unsafe
-                {
-                    return Unsafe.Read<UInt32>((Byte*)page + GetPageOffset(alignedAddress));
-                }
-            }
+                return Pointer.Read<UInt32>(page, GetPageOffset(alignedAddress));
 
             address &= 0x0fff_ffff;
 
@@ -741,12 +692,7 @@ namespace Iris.GBA
                         UInt32 offset = alignedAddress - ROM_WaitState0_StartAddress;
 
                         if (offset < _rom.Size)
-                        {
-                            unsafe
-                            {
-                                return Unsafe.Read<UInt32>((Byte*)_rom.Data + offset);
-                            }
-                        }
+                            return _rom.Read<UInt32>(offset);
                     }
                     break;
 
@@ -757,12 +703,7 @@ namespace Iris.GBA
                         UInt32 offset = alignedAddress - ROM_WaitState1_StartAddress;
 
                         if (offset < _rom.Size)
-                        {
-                            unsafe
-                            {
-                                return Unsafe.Read<UInt32>((Byte*)_rom.Data + offset);
-                            }
-                        }
+                            return _rom.Read<UInt32>(offset);
                     }
                     break;
 
@@ -773,12 +714,7 @@ namespace Iris.GBA
                         UInt32 offset = alignedAddress - ROM_WaitState2_StartAddress;
 
                         if (offset < _rom.Size)
-                        {
-                            unsafe
-                            {
-                                return Unsafe.Read<UInt32>((Byte*)_rom.Data + offset);
-                            }
-                        }
+                            return _rom.Read<UInt32>(offset);
                     }
                     break;
 
@@ -825,10 +761,7 @@ namespace Iris.GBA
 
             if (page != IntPtr.Zero)
             {
-                unsafe
-                {
-                    Unsafe.Write((Byte*)page + GetPageOffset(address), value);
-                }
+                Pointer.Write(page, GetPageOffset(address), value);
                 return;
             }
 
@@ -1548,10 +1481,7 @@ namespace Iris.GBA
 
             if (page != IntPtr.Zero)
             {
-                unsafe
-                {
-                    Unsafe.Write((Byte*)page + GetPageOffset(alignedAddress), value);
-                }
+                Pointer.Write(page, GetPageOffset(alignedAddress), value);
                 return;
             }
 
@@ -1936,10 +1866,7 @@ namespace Iris.GBA
 
             if (page != IntPtr.Zero)
             {
-                unsafe
-                {
-                    Unsafe.Write((Byte*)page + GetPageOffset(alignedAddress), value);
-                }
+                Pointer.Write(page, GetPageOffset(alignedAddress), value);
                 return;
             }
 

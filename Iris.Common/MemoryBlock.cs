@@ -49,6 +49,11 @@ namespace Iris.Common
             }
         }
 
+        public void CopyFrom(byte[] data)
+        {
+            Marshal.Copy(data, 0, Data, Size);
+        }
+
         public void LoadState(BinaryReader reader)
         {
             byte[] buffer = reader.ReadBytes(Size);
@@ -62,14 +67,14 @@ namespace Iris.Common
             writer.Write(buffer);
         }
 
-        //public T Read<T>(UInt32 offset)
-        //{
-        //    return DataHelper.Read<T>(Data, offset);
-        //}
+        public T Read<T>(UInt32 offset)
+        {
+            return Pointer.Read<T>(Data, offset);
+        }
 
-        //public void Write<T>(UInt32 offset, T value)
-        //{
-        //    DataHelper.Write(Data, offset, value);
-        //}
+        public void Write<T>(UInt32 offset, T value)
+        {
+            Pointer.Write(Data, offset, value);
+        }
     }
 }

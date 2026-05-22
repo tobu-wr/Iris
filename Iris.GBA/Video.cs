@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Runtime.CompilerServices;
 
 namespace Iris.GBA
 {
@@ -629,12 +628,8 @@ namespace Iris.GBA
         internal void Write8_PaletteRAM(UInt32 address, Byte value)
         {
             UInt32 offset = ((UInt32)(address & ~1) - PaletteRAM_StartAddress) % (UInt32)_paletteRAM.Size;
-
-            unsafe
-            {
-                Unsafe.Write((Byte*)_paletteRAM.Data + offset, value);
-                Unsafe.Write((Byte*)_paletteRAM.Data + offset + 1, value);
-            }
+            _paletteRAM.Write(offset, value);
+            _paletteRAM.Write(offset + 1, value);
         }
 
         internal void Write8_VRAM(UInt32 address, Byte value)
@@ -655,11 +650,8 @@ namespace Iris.GBA
             if (offset >= objectCharacterDataOffset)
                 return;
 
-            unsafe
-            {
-                Unsafe.Write((Byte*)_vram.Data + offset, value);
-                Unsafe.Write((Byte*)_vram.Data + offset + 1, value);
-            }
+            _vram.Write(offset, value);
+            _vram.Write(offset + 1, value);
         }
 
         private void StartHBlank(UInt64 cycleCountDelay)
@@ -897,11 +889,8 @@ namespace Iris.GBA
 
                 for (int pixelNumber = pixelNumberBegin; pixelNumber < pixelNumberEnd; ++pixelNumber)
                 {
-                    unsafe
-                    {
-                        UInt16 color = Unsafe.Read<UInt16>((UInt16*)_vram.Data + pixelNumber);
-                        _displayFrameBuffer[pixelNumber] = color;
-                    }
+                    UInt16 color = _vram.Read<UInt16>((UInt32)(pixelNumber * 2));
+                    _displayFrameBuffer[pixelNumber] = color;
                 }
             }
 
@@ -923,12 +912,9 @@ namespace Iris.GBA
 
                 for (int pixelNumber = pixelNumberBegin; pixelNumber < pixelNumberEnd; ++pixelNumber)
                 {
-                    unsafe
-                    {
-                        Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram.Data + vramFrameBufferOffset + pixelNumber);
-                        UInt16 color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM.Data + colorNumber);
-                        _displayFrameBuffer[pixelNumber] = color;
-                    }
+                    Byte colorNumber = _vram.Read<Byte>((UInt32)(vramFrameBufferOffset + pixelNumber));
+                    UInt16 color = _paletteRAM.Read<UInt16>((UInt32)(colorNumber * 2));
+                    _displayFrameBuffer[pixelNumber] = color;
                 }
             }
 
@@ -957,11 +943,8 @@ namespace Iris.GBA
 
                     for (int vramPixelNumber = vramPixelNumberBegin, displayPixelNumber = displayPixelNumberBegin; vramPixelNumber < vramPixelNumberEnd; ++vramPixelNumber, ++displayPixelNumber)
                     {
-                        unsafe
-                        {
-                            UInt16 color = Unsafe.Read<UInt16>((Byte*)_vram.Data + vramFrameBufferOffset + (vramPixelNumber * 2));
-                            _displayFrameBuffer[displayPixelNumber] = color;
-                        }
+                        UInt16 color = _vram.Read<UInt16>((UInt32)(vramFrameBufferOffset + (vramPixelNumber * 2)));
+                        _displayFrameBuffer[displayPixelNumber] = color;
                     }
                 }
             }
@@ -1019,73 +1002,70 @@ namespace Iris.GBA
                 int scNumber = scNumberBegin + scH;
                 int characterNumber = characterNumberBegin + scCharacterH;
 
-                unsafe
+                UInt16 screenData = _vram.Read<UInt16>((UInt32)(screenBaseBlockOffset + (scNumber * SC_CharacterCount * 2) + (characterNumber * 2)));
+
+                UInt16 colorPalette = (UInt16)((screenData >> 12) & 0b1111);
+                UInt16 verticalFlipFlag = (UInt16)((screenData >> 11) & 1);
+                UInt16 horizontalFlipFlag = (UInt16)((screenData >> 10) & 1);
+                UInt16 characterName = (UInt16)(screenData & 0x3ff);
+
+                int characterPixelNumber;
+
+                if (verticalFlipFlag == 0)
+                    characterPixelNumber = characterPixelNumberBegin;
+                else
+                    characterPixelNumber = characterPixelNumberBegin_VerticalFlip;
+
+                if (horizontalFlipFlag == 0)
+                    characterPixelNumber += characterPixelH;
+                else
+                    characterPixelNumber += CharacterWidth - 1 - characterPixelH;
+
+                const UInt32 ObjectCharacterDataOffset = 0x1_0000;
+
+                UInt16 color;
+
+                // 16 colors x 16 palettes
+                if (colorMode == 0)
                 {
-                    UInt16 screenData = Unsafe.Read<UInt16>((Byte*)_vram.Data + screenBaseBlockOffset + (scNumber * SC_CharacterCount * 2) + (characterNumber * 2));
+                    const int CharacterSize = 32;
+                    UInt32 characterOffset = (UInt32)(characterBaseBlockOffset + (characterName * CharacterSize));
 
-                    UInt16 colorPalette = (UInt16)((screenData >> 12) & 0b1111);
-                    UInt16 verticalFlipFlag = (UInt16)((screenData >> 11) & 1);
-                    UInt16 horizontalFlipFlag = (UInt16)((screenData >> 10) & 1);
-                    UInt16 characterName = (UInt16)(screenData & 0x3ff);
+                    if (characterOffset >= ObjectCharacterDataOffset)
+                        continue;
 
-                    int characterPixelNumber;
+                    Byte colorNumber = _vram.Read<Byte>((UInt32)(characterOffset + (characterPixelNumber / 2)));
 
-                    if (verticalFlipFlag == 0)
-                        characterPixelNumber = characterPixelNumberBegin;
+                    if ((characterPixelNumber % 2) == 0)
+                        colorNumber &= 0b1111;
                     else
-                        characterPixelNumber = characterPixelNumberBegin_VerticalFlip;
+                        colorNumber >>= 4;
 
-                    if (horizontalFlipFlag == 0)
-                        characterPixelNumber += characterPixelH;
-                    else
-                        characterPixelNumber += CharacterWidth - 1 - characterPixelH;
+                    if (!isFirst && (colorNumber == 0))
+                        continue;
 
-                    const UInt32 ObjectCharacterDataOffset = 0x1_0000;
-
-                    UInt16 color;
-
-                    // 16 colors x 16 palettes
-                    if (colorMode == 0)
-                    {
-                        const int CharacterSize = 32;
-                        UInt32 characterOffset = (UInt32)(characterBaseBlockOffset + (characterName * CharacterSize));
-
-                        if (characterOffset >= ObjectCharacterDataOffset)
-                            continue;
-
-                        Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram.Data + characterOffset + (characterPixelNumber / 2));
-
-                        if ((characterPixelNumber % 2) == 0)
-                            colorNumber &= 0b1111;
-                        else
-                            colorNumber >>= 4;
-
-                        if (!isFirst && (colorNumber == 0))
-                            continue;
-
-                        color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM.Data + (colorPalette * 16) + colorNumber);
-                    }
-
-                    // 256 colors x 1 palette
-                    else
-                    {
-                        const int CharacterSize = 64;
-                        UInt32 characterOffset = (UInt32)(characterBaseBlockOffset + (characterName * CharacterSize));
-
-                        if (characterOffset >= ObjectCharacterDataOffset)
-                            continue;
-
-                        Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram.Data + characterOffset + characterPixelNumber);
-
-                        if (!isFirst && (colorNumber == 0))
-                            continue;
-
-                        color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM.Data + colorNumber);
-                    }
-
-                    int displayPixelNumber = displayPixelNumberBegin + hcount;
-                    _displayFrameBuffer[displayPixelNumber] = color;
+                    color = _paletteRAM.Read<UInt16>((UInt32)((colorPalette * 16 * 2) + (colorNumber * 2)));
                 }
+
+                // 256 colors x 1 palette
+                else
+                {
+                    const int CharacterSize = 64;
+                    UInt32 characterOffset = (UInt32)(characterBaseBlockOffset + (characterName * CharacterSize));
+
+                    if (characterOffset >= ObjectCharacterDataOffset)
+                        continue;
+
+                    Byte colorNumber = _vram.Read<Byte>((UInt32)(characterOffset + characterPixelNumber));
+
+                    if (!isFirst && (colorNumber == 0))
+                        continue;
+
+                    color = _paletteRAM.Read<UInt16>((UInt32)(colorNumber * 2));
+                }
+
+                int displayPixelNumber = displayPixelNumberBegin + hcount;
+                _displayFrameBuffer[displayPixelNumber] = color;
             }
         }
 
@@ -1138,28 +1118,25 @@ namespace Iris.GBA
                 int characterNumber = (characterV * (virtualScreenWidth / CharacterWidth)) + characterH;
                 int characterPixelNumber = (characterPixelV * CharacterWidth) + characterPixelH;
 
-                unsafe
-                {
-                    Byte characterName = Unsafe.Read<Byte>((Byte*)_vram.Data + screenBaseBlockOffset + characterNumber);
+                Byte characterName = _vram.Read<Byte>((UInt32)(screenBaseBlockOffset + characterNumber));
 
-                    const int CharacterSize = 64;
-                    UInt32 characterOffset = (UInt32)(characterBaseBlockOffset + (characterName * CharacterSize));
+                const int CharacterSize = 64;
+                UInt32 characterOffset = (UInt32)(characterBaseBlockOffset + (characterName * CharacterSize));
 
-                    const UInt32 ObjectCharacterDataOffset = 0x1_0000;
+                const UInt32 ObjectCharacterDataOffset = 0x1_0000;
 
-                    if (characterOffset >= ObjectCharacterDataOffset)
-                        continue;
+                if (characterOffset >= ObjectCharacterDataOffset)
+                    continue;
 
-                    Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram.Data + characterOffset + characterPixelNumber);
+                Byte colorNumber = _vram.Read<Byte>((UInt32)(characterOffset + characterPixelNumber));
 
-                    if (!isFirst && (colorNumber == 0))
-                        continue;
+                if (!isFirst && (colorNumber == 0))
+                    continue;
 
-                    UInt16 color = Unsafe.Read<UInt16>((UInt16*)_paletteRAM.Data + colorNumber);
+                UInt16 color = _paletteRAM.Read<UInt16>((UInt32)(colorNumber * 2));
 
-                    int displayPixelNumber = displayPixelNumberBegin + hcount;
-                    _displayFrameBuffer[displayPixelNumber] = color;
-                }
+                int displayPixelNumber = displayPixelNumberBegin + hcount;
+                _displayFrameBuffer[displayPixelNumber] = color;
             }
         }
 
@@ -1171,193 +1148,190 @@ namespace Iris.GBA
 
             for (int objNumber = 127; objNumber >= 0; --objNumber)
             {
-                unsafe
+                UInt16 attribute0 = _oam.Read<UInt16>((UInt32)(objNumber * 4 * 2));
+                UInt16 attribute1 = _oam.Read<UInt16>((UInt32)((objNumber * 4 * 2) + 2));
+                UInt16 attribute2 = _oam.Read<UInt16>((UInt32)((objNumber * 4 * 2) + 4));
+
+                UInt16 shape = (UInt16)((attribute0 >> 14) & 0b11);
+                UInt16 colorMode = (UInt16)((attribute0 >> 13) & 1);
+                UInt16 rotationScalingFlag = (UInt16)((attribute0 >> 8) & 1);
+                UInt16 yCoordinate = (UInt16)(attribute0 & 0xff);
+
+                UInt16 objSize = (UInt16)((attribute1 >> 14) & 0b11);
+                UInt16 verticalFlipFlag = (UInt16)((attribute1 >> 13) & 1);
+                UInt16 horizontalFlipFlag = (UInt16)((attribute1 >> 12) & 1);
+                UInt16 xCoordinate = (UInt16)(attribute1 & 0x1ff);
+
+                UInt16 colorPalette = (UInt16)((attribute2 >> 12) & 0b1111);
+                UInt16 objPriority = (UInt16)((attribute2 >> 10) & 0b11);
+                UInt16 characterName = (UInt16)(attribute2 & 0x3ff);
+
+                if (objPriority != bgPriority)
+                    continue;
+
+                (int objWidth, int objHeight) = (shape, objSize) switch
                 {
-                    UInt16 attribute0 = Unsafe.Read<UInt16>((UInt16*)_oam.Data + (objNumber * 4));
-                    UInt16 attribute1 = Unsafe.Read<UInt16>((UInt16*)_oam.Data + (objNumber * 4) + 1);
-                    UInt16 attribute2 = Unsafe.Read<UInt16>((UInt16*)_oam.Data + (objNumber * 4) + 2);
+                    // square
+                    (0b00, 0b00) => (8, 8),
+                    (0b00, 0b01) => (16, 16),
+                    (0b00, 0b10) => (32, 32),
+                    (0b00, 0b11) => (64, 64),
 
-                    UInt16 shape = (UInt16)((attribute0 >> 14) & 0b11);
-                    UInt16 colorMode = (UInt16)((attribute0 >> 13) & 1);
-                    UInt16 rotationScalingFlag = (UInt16)((attribute0 >> 8) & 1);
-                    UInt16 yCoordinate = (UInt16)(attribute0 & 0xff);
+                    // horizontal rectangle
+                    (0b01, 0b00) => (16, 8),
+                    (0b01, 0b01) => (32, 8),
+                    (0b01, 0b10) => (32, 16),
+                    (0b01, 0b11) => (64, 32),
 
-                    UInt16 objSize = (UInt16)((attribute1 >> 14) & 0b11);
-                    UInt16 verticalFlipFlag = (UInt16)((attribute1 >> 13) & 1);
-                    UInt16 horizontalFlipFlag = (UInt16)((attribute1 >> 12) & 1);
-                    UInt16 xCoordinate = (UInt16)(attribute1 & 0x1ff);
+                    // vertical rectangle
+                    (0b10, 0b00) => (8, 16),
+                    (0b10, 0b01) => (8, 32),
+                    (0b10, 0b10) => (16, 32),
+                    (0b10, 0b11) => (32, 64),
 
-                    UInt16 colorPalette = (UInt16)((attribute2 >> 12) & 0b1111);
-                    UInt16 objPriority = (UInt16)((attribute2 >> 10) & 0b11);
-                    UInt16 characterName = (UInt16)(attribute2 & 0x3ff);
+                    // prohibited
+                    // TODO: verify
+                    _ => (0, 0)
+                };
 
-                    if (objPriority != bgPriority)
-                        continue;
+                const int VirtualScreenWidth = 512;
+                const int VirtualScreenHeight = 256;
 
-                    (int objWidth, int objHeight) = (shape, objSize) switch
+                int left = xCoordinate;
+                int right = (xCoordinate + objWidth) % VirtualScreenWidth;
+
+                int top = yCoordinate;
+                int bottom = (yCoordinate + objHeight) % VirtualScreenHeight;
+
+                bool leftHidden = left >= DisplayScreenWidth;
+                bool rightHidden = right >= DisplayScreenWidth;
+
+                bool topHidden = top >= DisplayScreenHeight;
+                bool bottomHidden = bottom >= DisplayScreenHeight;
+
+                if ((leftHidden && rightHidden) || (topHidden && bottomHidden))
+                    continue;
+
+                int hBegin;
+                int vBegin;
+
+                if (leftHidden)
+                {
+                    hBegin = VirtualScreenWidth - left;
+                    left = 0;
+                }
+                else if (rightHidden)
+                {
+                    hBegin = 0;
+                    right = DisplayScreenWidth;
+                }
+                else
+                {
+                    hBegin = 0;
+                }
+
+                if (topHidden)
+                {
+                    vBegin = VirtualScreenHeight - top;
+                    top = 0;
+                }
+                else if (bottomHidden)
+                {
+                    vBegin = 0;
+                    bottom = DisplayScreenHeight;
+                }
+                else
+                {
+                    vBegin = 0;
+                }
+
+                if ((top > _VCOUNT) || (bottom <= _VCOUNT))
+                    continue;
+
+                int v = _VCOUNT - top + vBegin;
+
+                int characterV = v / CharacterHeight;
+                int characterPixelV = v % CharacterHeight;
+
+                int characterNumberBegin;
+                int characterPixelNumberBegin = CharacterWidth;
+
+                if (verticalFlipFlag == 0)
+                {
+                    characterNumberBegin = characterV;
+                    characterPixelNumberBegin *= characterPixelV;
+                }
+                else
+                {
+                    characterNumberBegin = (objHeight / CharacterHeight) - 1 - characterV;
+                    characterPixelNumberBegin *= CharacterHeight - 1 - characterPixelV;
+                }
+
+                // 2D mapping
+                if (mappingFormat == 0)
+                    characterNumberBegin *= (colorMode == 0) ? 32 : 16;
+
+                // 1D mapping
+                else
+                    characterNumberBegin *= objWidth / CharacterWidth;
+
+                for (int hcount = left; hcount < right; ++hcount)
+                {
+                    int h = hcount - left + hBegin;
+
+                    int characterH = h / CharacterWidth;
+                    int characterPixelH = h % CharacterWidth;
+
+                    int characterNumber = characterNumberBegin;
+                    int characterPixelNumber = characterPixelNumberBegin;
+
+                    if (horizontalFlipFlag == 0)
                     {
-                        // square
-                        (0b00, 0b00) => (8, 8),
-                        (0b00, 0b01) => (16, 16),
-                        (0b00, 0b10) => (32, 32),
-                        (0b00, 0b11) => (64, 64),
-
-                        // horizontal rectangle
-                        (0b01, 0b00) => (16, 8),
-                        (0b01, 0b01) => (32, 8),
-                        (0b01, 0b10) => (32, 16),
-                        (0b01, 0b11) => (64, 32),
-
-                        // vertical rectangle
-                        (0b10, 0b00) => (8, 16),
-                        (0b10, 0b01) => (8, 32),
-                        (0b10, 0b10) => (16, 32),
-                        (0b10, 0b11) => (32, 64),
-
-                        // prohibited
-                        // TODO: verify
-                        _ => (0, 0)
-                    };
-
-                    const int VirtualScreenWidth = 512;
-                    const int VirtualScreenHeight = 256;
-
-                    int left = xCoordinate;
-                    int right = (xCoordinate + objWidth) % VirtualScreenWidth;
-
-                    int top = yCoordinate;
-                    int bottom = (yCoordinate + objHeight) % VirtualScreenHeight;
-
-                    bool leftHidden = left >= DisplayScreenWidth;
-                    bool rightHidden = right >= DisplayScreenWidth;
-
-                    bool topHidden = top >= DisplayScreenHeight;
-                    bool bottomHidden = bottom >= DisplayScreenHeight;
-
-                    if ((leftHidden && rightHidden) || (topHidden && bottomHidden))
-                        continue;
-
-                    int hBegin;
-                    int vBegin;
-
-                    if (leftHidden)
-                    {
-                        hBegin = VirtualScreenWidth - left;
-                        left = 0;
-                    }
-                    else if (rightHidden)
-                    {
-                        hBegin = 0;
-                        right = DisplayScreenWidth;
+                        characterNumber += characterH;
+                        characterPixelNumber += characterPixelH;
                     }
                     else
                     {
-                        hBegin = 0;
+                        characterNumber += (objWidth / CharacterWidth) - 1 - characterH;
+                        characterPixelNumber += CharacterWidth - 1 - characterPixelH;
                     }
 
-                    if (topHidden)
+                    const UInt32 CharacterDataOffset = 0x1_0000;
+                    const UInt32 PaletteOffset = 0x200;
+
+                    UInt16 color;
+
+                    // 16 colors x 16 palettes
+                    if (colorMode == 0)
                     {
-                        vBegin = VirtualScreenHeight - top;
-                        top = 0;
-                    }
-                    else if (bottomHidden)
-                    {
-                        vBegin = 0;
-                        bottom = DisplayScreenHeight;
-                    }
-                    else
-                    {
-                        vBegin = 0;
-                    }
+                        const int CharacterSize = 32;
+                        Byte colorNumber = _vram.Read<Byte>((UInt32)(CharacterDataOffset + (characterName * 32) + (characterNumber * CharacterSize) + (characterPixelNumber / 2)));
 
-                    if ((top > _VCOUNT) || (bottom <= _VCOUNT))
-                        continue;
-
-                    int v = _VCOUNT - top + vBegin;
-
-                    int characterV = v / CharacterHeight;
-                    int characterPixelV = v % CharacterHeight;
-
-                    int characterNumberBegin;
-                    int characterPixelNumberBegin = CharacterWidth;
-
-                    if (verticalFlipFlag == 0)
-                    {
-                        characterNumberBegin = characterV;
-                        characterPixelNumberBegin *= characterPixelV;
-                    }
-                    else
-                    {
-                        characterNumberBegin = (objHeight / CharacterHeight) - 1 - characterV;
-                        characterPixelNumberBegin *= CharacterHeight - 1 - characterPixelV;
-                    }
-
-                    // 2D mapping
-                    if (mappingFormat == 0)
-                        characterNumberBegin *= (colorMode == 0) ? 32 : 16;
-
-                    // 1D mapping
-                    else
-                        characterNumberBegin *= objWidth / CharacterWidth;
-
-                    for (int hcount = left; hcount < right; ++hcount)
-                    {
-                        int h = hcount - left + hBegin;
-
-                        int characterH = h / CharacterWidth;
-                        int characterPixelH = h % CharacterWidth;
-
-                        int characterNumber = characterNumberBegin;
-                        int characterPixelNumber = characterPixelNumberBegin;
-
-                        if (horizontalFlipFlag == 0)
-                        {
-                            characterNumber += characterH;
-                            characterPixelNumber += characterPixelH;
-                        }
+                        if ((characterPixelNumber % 2) == 0)
+                            colorNumber &= 0b1111;
                         else
-                        {
-                            characterNumber += (objWidth / CharacterWidth) - 1 - characterH;
-                            characterPixelNumber += CharacterWidth - 1 - characterPixelH;
-                        }
+                            colorNumber >>= 4;
 
-                        const UInt32 CharacterDataOffset = 0x1_0000;
-                        const UInt32 PaletteOffset = 0x200;
+                        if (colorNumber == 0)
+                            continue;
 
-                        UInt16 color;
-
-                        // 16 colors x 16 palettes
-                        if (colorMode == 0)
-                        {
-                            const int CharacterSize = 32;
-                            Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram.Data + CharacterDataOffset + (characterName * 32) + (characterNumber * CharacterSize) + (characterPixelNumber / 2));
-
-                            if ((characterPixelNumber % 2) == 0)
-                                colorNumber &= 0b1111;
-                            else
-                                colorNumber >>= 4;
-
-                            if (colorNumber == 0)
-                                continue;
-
-                            color = Unsafe.Read<UInt16>((Byte*)_paletteRAM.Data + PaletteOffset + (colorPalette * 16 * 2) + (colorNumber * 2));
-                        }
-
-                        // 256 colors x 1 palette
-                        else
-                        {
-                            const int CharacterSize = 64;
-                            Byte colorNumber = Unsafe.Read<Byte>((Byte*)_vram.Data + CharacterDataOffset + (characterName * 32) + (characterNumber * CharacterSize) + characterPixelNumber);
-
-                            if (colorNumber == 0)
-                                continue;
-
-                            color = Unsafe.Read<UInt16>((Byte*)_paletteRAM.Data + PaletteOffset + (colorNumber * 2));
-                        }
-
-                        int displayPixelNumber = displayPixelNumberBegin + hcount;
-                        _displayFrameBuffer[displayPixelNumber] = color;
+                        color = _paletteRAM.Read<UInt16>((UInt32)(PaletteOffset + (colorPalette * 16 * 2) + (colorNumber * 2)));
                     }
+
+                    // 256 colors x 1 palette
+                    else
+                    {
+                        const int CharacterSize = 64;
+                        Byte colorNumber = _vram.Read<Byte>((UInt32)(CharacterDataOffset + (characterName * 32) + (characterNumber * CharacterSize) + characterPixelNumber));
+
+                        if (colorNumber == 0)
+                            continue;
+
+                        color = _paletteRAM.Read<UInt16>((UInt32)(PaletteOffset + (colorNumber * 2)));
+                    }
+
+                    int displayPixelNumber = displayPixelNumberBegin + hcount;
+                    _displayFrameBuffer[displayPixelNumber] = color;
                 }
             }
         }

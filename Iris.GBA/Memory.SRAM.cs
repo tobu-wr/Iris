@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace Iris.GBA
+﻿namespace Iris.GBA
 {
     internal sealed partial class Memory
     {
@@ -41,11 +39,7 @@ namespace Iris.GBA
             internal override Byte Read8(UInt32 address)
             {
                 UInt32 offset = (address - StartAddress) % (UInt32)_memoryBlock.Size;
-
-                unsafe
-                {
-                    return Unsafe.Read<Byte>((Byte*)_memoryBlock.Data + offset);
-                }
+                return _memoryBlock.Read<Byte>(offset);
             }
 
             internal override UInt16 Read16(UInt32 address)
@@ -63,11 +57,7 @@ namespace Iris.GBA
             internal override void Write8(UInt32 address, Byte value)
             {
                 UInt32 offset = (address - StartAddress) % (UInt32)_memoryBlock.Size;
-
-                unsafe
-                {
-                    Unsafe.Write((Byte*)_memoryBlock.Data + offset, value);
-                }
+                _memoryBlock.Write(offset, value);
             }
 
             internal override void Write16(UInt32 address, UInt16 value)

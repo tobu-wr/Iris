@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Runtime.CompilerServices;
 
 namespace Iris.GBA
 {
@@ -94,10 +93,7 @@ namespace Iris.GBA
                     }
                 }
 
-                unsafe
-                {
-                    return Unsafe.Read<Byte>((Byte*)_memoryBlock.Data + (_bank * BankSize) + offset);
-                }
+                return _memoryBlock.Read<Byte>((UInt32)(_bank * BankSize) + offset);
             }
 
             internal override UInt16 Read16(UInt32 address)
@@ -177,10 +173,7 @@ namespace Iris.GBA
                         break;
 
                     case State.WriteByte:
-                        unsafe
-                        {
-                            Unsafe.Write((Byte*)_memoryBlock.Data + (_bank * BankSize) + offset, value);
-                        }
+                        _memoryBlock.Write((UInt32)(_bank * BankSize) + offset, value);
 
                         _state = State.Idle;
                         break;
